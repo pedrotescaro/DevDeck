@@ -1,26 +1,523 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-dd-accent: var(--color-dd-accent);
+  --color-dd-bg: var(--color-dd-bg);
+  --color-dd-surface: var(--color-dd-surface);
+  --color-dd-card: var(--color-dd-card);
+  --color-dd-border: var(--color-dd-border);
+  --color-dd-text: var(--color-dd-text);
+  --color-dd-muted: var(--color-dd-muted);
+  --color-dd-purple: var(--color-dd-purple);
+  --color-dd-green: var(--color-dd-green);
+  --color-dd-amber: var(--color-dd-amber);
+  --color-dd-blue: var(--color-dd-blue);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --color-dd-accent: #f97316;
+  --color-dd-purple: #7c6ff7;
+  --color-dd-green: #22d48a;
+  --color-dd-amber: #f5a623;
+  --color-dd-blue: #5ba3f5;
+
+  --color-dd-bg: #ffffff;
+  --color-dd-surface: #f4f4f5;
+  --color-dd-card: #ffffff;
+  --color-dd-border: #e4e4e7;
+  --color-dd-text: #09090b;
+  --color-dd-muted: #71717a;
+}
+
+:root.dark {
+  --color-dd-accent: #f97316;
+  --color-dd-purple: #7c6ff7;
+  --color-dd-green: #22d48a;
+  --color-dd-amber: #f5a623;
+  --color-dd-blue: #5ba3f5;
+
+  --color-dd-bg: #09090b;       /* Zinc 900 - true dark mode black */
+  --color-dd-surface: #18181b;  /* Zinc 850 */
+  --color-dd-card: #18181b;     /* Zinc 850 */
+  --color-dd-border: #27272a;   /* Zinc 800 */
+  --color-dd-text: #f4f4f5;     /* Zinc 100 */
+  --color-dd-muted: #a1a1aa;    /* Zinc 400 */
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-dd-bg);
+  color: var(--color-dd-text);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #1a1a1f;
+}
+::-webkit-scrollbar-thumb {
+  background: #2e2e3a;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #888899;
+}
+
+/* CodeMirror overrides for DevDeck */
+.cm-editor {
+  border-radius: 10px;
+  overflow: hidden;
+}
+.cm-editor .cm-scroller {
+  font-family: var(--font-mono, ui-monospace, monospace);
+}
+
+/* Keyframes */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes slide-out-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* ── DevDeck interaction system ── */
+:root {
+  --motion-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --motion-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.dd-focus-ring {
+  outline: none;
+}
+.dd-focus-ring:focus-visible {
+  outline: 2px solid var(--color-dd-accent);
+  outline-offset: 2px;
+}
+
+.dd-touch {
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+}
+
+@keyframes dd-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.dd-skeleton {
+  border-radius: 0.5rem;
+  background: linear-gradient(
+    90deg,
+    var(--color-dd-surface) 0%,
+    color-mix(in srgb, var(--color-dd-border) 60%, transparent) 50%,
+    var(--color-dd-surface) 100%
+  );
+  background-size: 200% 100%;
+  animation: dd-shimmer 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dd-skeleton {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+@keyframes dd-counter-out {
+  to { transform: translateY(-100%); opacity: 0; }
+}
+
+@keyframes dd-counter-in {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes dd-bell-shake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-2deg); }
+  75% { transform: rotate(2deg); }
+}
+
+.dd-bell-shake {
+  animation: dd-bell-shake 400ms ease-in-out 2;
+}
+
+@keyframes dd-dot-ripple {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+.dd-dot-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background-color: var(--color-dd-amber);
+  animation: dd-dot-ripple 1.2s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dd-dot-pulse::after {
+    animation: none;
+  }
+}
+
+@keyframes dd-xp-float {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-48px) scale(0.92); opacity: 0; }
+}
+
+.dd-xp-float {
+  animation: dd-xp-float 800ms var(--motion-ease-out) forwards;
+}
+
+@keyframes dd-level-flash {
+  0% { opacity: 0.08; }
+  100% { opacity: 0; }
+}
+
+.dd-level-flash {
+  position: fixed;
+  inset: 0;
+  background: white;
+  pointer-events: none;
+  z-index: 200;
+  animation: dd-level-flash 200ms ease-out forwards;
+}
+
+@keyframes dd-particle {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+}
+
+@keyframes dd-border-slide {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+.dd-card-hover {
+  position: relative;
+}
+
+.dd-card-hover::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  background-color: var(--color-dd-accent);
+  border-radius: 0.75rem 0 0 0.75rem;
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 200ms var(--motion-ease-out);
+}
+
+.dd-card-hover:hover::before {
+  transform: scaleY(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dd-card-hover::before {
+    transform: scaleY(1);
+    opacity: 0;
+  }
+  .dd-card-hover:hover::before {
+    opacity: 1;
+    transition: opacity 150ms;
+  }
+}
+
+/* ── Optimistic UI pulse ── */
+@keyframes dd-optimistic-pulse {
+  0%, 100% { border-color: var(--color-dd-accent); opacity: 0.85; }
+  50% { border-color: color-mix(in srgb, var(--color-dd-accent) 75%, white); opacity: 1; }
+}
+
+.dd-optimistic-post {
+  border-left: 2px solid var(--color-dd-accent);
+  opacity: 0.85;
+  animation: dd-optimistic-pulse 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dd-optimistic-post {
+    animation: none;
+    border-left: 2px solid var(--color-dd-accent);
+    opacity: 0.85;
+  }
+}
+
+/* ── Error shake ── */
+@keyframes dd-shake-error {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+.dd-shake-error {
+  animation: dd-shake-error 300ms ease-in-out;
+}
+
+/* ── Char counter warning shake ── */
+@keyframes dd-char-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+.dd-char-shake {
+  animation: dd-char-shake 200ms ease-in-out 2;
+}
+
+/* ── Quiz daily glow ring ── */
+@keyframes dd-glow-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); }
+  50% { box-shadow: 0 0 12px 4px rgba(249, 115, 22, 0.15); }
+}
+
+.dd-glow-ring {
+  animation: dd-glow-ring 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dd-glow-ring {
+    animation: none;
+    box-shadow: 0 0 8px 2px rgba(249, 115, 22, 0.15);
+  }
+}
+
+/* ── Typing indicator dots ── */
+@keyframes dd-typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-4px); }
+}
+
+.dd-typing-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--color-dd-muted);
+  animation: dd-typing-bounce 1.2s ease-in-out infinite;
+}
+.dd-typing-dot:nth-child(2) { animation-delay: 200ms; }
+.dd-typing-dot:nth-child(3) { animation-delay: 400ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dd-typing-dot { animation: none; opacity: 0.6; }
+  .dd-typing-dot:nth-child(2) { opacity: 0.4; }
+  .dd-typing-dot:nth-child(3) { opacity: 0.2; }
+}
+
+/* ── Quiz correct flash ── */
+@keyframes dd-correct-flash {
+  0% { background-color: rgba(34, 212, 138, 0.15); }
+  100% { background-color: transparent; }
+}
+
+.dd-correct-flash {
+  animation: dd-correct-flash 600ms ease-out;
+}
+
+/* ── Level up toast badge ── */
+@keyframes dd-badge-entrance {
+  0% { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+  60% { transform: scale(1.1) rotate(2deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.dd-badge-entrance {
+  animation: dd-badge-entrance 400ms var(--motion-ease-out) forwards;
+}
+
+/* ── Level up screen flash ── */
+@keyframes dd-level-flash {
+  0% { opacity: 0; }
+  20% { opacity: 0.08; }
+  100% { opacity: 0; }
+}
+
+.dd-level-flash {
+  position: absolute;
+  inset: 0;
+  background: white;
+  animation: dd-level-flash 600ms ease-out forwards;
+  pointer-events: none;
+}
+
+/* ── Follow button destructive hover ── */
+.dd-follow-btn[data-following="true"]:hover {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+  color: #ef4444 !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+/* ── Search highlight ── */
+.dd-search-highlight {
+  background-color: rgba(245, 166, 35, 0.2);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+/* ── Bookmark fill ── */
+@keyframes dd-bookmark-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.dd-bookmark-pop {
+  animation: dd-bookmark-pop 300ms var(--motion-spring);
+}
+
+@keyframes dd-soft-bounce {
+  0% { transform: translateY(-8px) scale(0.96); opacity: 0; }
+  60% { transform: translateY(2px) scale(1.02); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.dd-soft-bounce {
+  animation: dd-soft-bounce 280ms var(--motion-spring);
+}
+
+@keyframes dd-fade-in-up {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.dd-fade-in-up {
+  animation: dd-fade-in-up 220ms var(--motion-ease-out);
+}
+
+@keyframes dd-quote-enter {
+  from { transform: translateY(8px) scale(0.98); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.dd-quote-card {
+  animation: dd-quote-enter 180ms var(--motion-ease-out);
+}
+
+@keyframes dd-pill-glide {
+  from { transform: translateY(4px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.dd-pill-glide {
+  animation: dd-pill-glide 160ms var(--motion-ease-out);
+}
+
+@keyframes dd-search-pulse {
+  0% { background-color: rgba(245, 166, 35, 0.12); }
+  100% { background-color: rgba(245, 166, 35, 0.24); }
+}
+
+/* ── Notification type colors ── */
+.dd-notif-like { color: var(--color-dd-amber); }
+.dd-notif-comment { color: var(--color-dd-blue); }
+.dd-notif-mention { color: var(--color-dd-purple); }
+.dd-notif-xp { color: var(--color-dd-green); }
+.dd-notif-follow { color: #14b8a6; }
+
+/* ── Leaderboard position change ── */
+@keyframes dd-rank-up {
+  from { transform: translateY(8px); opacity: 0.5; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes dd-rank-down {
+  from { transform: translateY(-8px); opacity: 0.5; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ── Touch targets (44x44 mobile) ── */
+@media (pointer: coarse) {
+  .dd-touch {
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+  }
+}
+
+.dd-liquid-track {
+  overflow: hidden;
+  position: relative;
+}
+
+.dd-liquid-track::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 45%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: dd-shimmer 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.dd-liquid-fill {
+  transform-origin: left center;
+  will-change: transform, opacity;
+}
+
+.dd-tab-crossfade {
+  will-change: opacity;
+}
+
+.dd-search-highlight {
+  background-color: rgba(245, 166, 35, 0.18);
+  animation: dd-search-pulse 220ms ease-out;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+/* ── GPU-composited only ── */
+.dd-gpu {
+  will-change: transform, opacity;
+  transform: translateZ(0);
 }

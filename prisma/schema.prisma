@@ -1,0 +1,293 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Language {
+  PYTHON
+  JS
+  TS
+  JAVA
+  RUST
+  GO
+  KOTLIN
+  SWIFT
+  CPP
+}
+
+enum DuelStatus {
+  PENDING
+  ACTIVE
+  CLOSED
+}
+
+model User {
+  id          String   @id @default(uuid())
+  username    String   @unique
+  email       String   @unique
+  avatar_url  String?
+  bio         String?
+  institution String?
+  github_username String?
+  total_xp    Int      @default(0)
+  created_at  DateTime @default(now())
+
+  trails              LanguageTrail[]
+  posts               Post[]
+  answers             Answer[]
+  quiz_attempts       QuizAttempt[]
+  badges              UserBadge[]
+  duels_as_challenger Duel[]         @relation("challenger")
+  duels_as_opponent   Duel[]         @relation("opponent")
+  duel_solutions      DuelSolution[]
+  duel_votes          DuelVote[]
+  post_votes          PostVote[]
+  answer_votes        AnswerVote[]
+  sent_messages       Message[]      @relation("sent_messages")
+  received_messages   Message[]      @relation("received_messages")
+  bookmarks           Bookmark[]
+  notifications       Notification[]
+  reports             Report[]
+  followers           Follow[]       @relation("followers")
+  following           Follow[]       @relation("following")
+}
+
+model LanguageTrail {
+  id               String    @id @default(uuid())
+  user_id          String
+  language         Language
+  xp               Int       @default(0)
+  level            Int       @default(1)
+  streak           Int       @default(0)
+  last_activity_at DateTime?
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, language])
+}
+
+model Post {
+  id           String   @id @default(uuid())
+  author_id    String
+  title        String
+  body         String
+  language     Language?
+  code_snippet String?
+  image_url    String?
+  created_at   DateTime @default(now())
+  view_count   Int      @default(0)
+  upvotes      Int      @default(0)
+
+  author  User     @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  answers Answer[]
+  quizzes Quiz[]
+  votes   PostVote[]
+  bookmarks Bookmark[]
+  reports  Report[]
+
+  @@index([created_at])
+}
+
+model Answer {
+  id           String   @id @default(uuid())
+  post_id      String
+  author_id    String
+  body         String
+  code_snippet String?
+  is_accepted  Boolean  @default(false)
+  upvotes      Int      @default(0)
+  created_at   DateTime @default(now())
+
+  post   Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  author User @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  votes  AnswerVote[]
+}
+
+model Quiz {
+  id            String   @id @default(uuid())
+  post_id       String?
+  question      String
+  options       Json
+  correct_index Int
+  is_daily      Boolean  @default(false)
+  created_at    DateTime @default(now())
+
+  post     Post?         @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  attempts QuizAttempt[]
+
+  @@index([is_daily, created_at])
+}
+
+model QuizAttempt {
+  id             String   @id @default(uuid())
+  user_id        String
+  quiz_id        String
+  selected_index Int
+  is_correct     Boolean
+  xp_earned      Int      @default(0)
+  created_at     DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  quiz Quiz @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, quiz_id])
+}
+
+model Duel {
+  id            String     @id @default(uuid())
+  challenger_id String
+  opponent_id   String?
+  problem_title String
+  problem_body  String
+  language      Language
+  status        DuelStatus @default(PENDING)
+  created_at    DateTime   @default(now())
+
+  challenger User           @relation("challenger", fields: [challenger_id], references: [id], onDelete: Cascade)
+  opponent   User?          @relation("opponent", fields: [opponent_id], references: [id], onDelete: SetNull)
+  solutions  DuelSolution[]
+  votes      DuelVote[]
+}
+
+model DuelSolution {
+  id         String @id @default(uuid())
+  duel_id    String
+  user_id    String
+  code       String
+  vote_count Int    @default(0)
+
+  duel Duel @relation(fields: [duel_id], references: [id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([duel_id, user_id])
+}
+
+model DuelVote {
+  id          String   @id @default(uuid())
+  duel_id     String
+  user_id     String
+  solution_id String
+  created_at  DateTime @default(now())
+
+  duel Duel @relation(fields: [duel_id], references: [id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([duel_id, user_id])
+}
+
+model Badge {
+  id          String @id @default(uuid())
+  slug        String @unique
+  label       String
+  description String
+  icon        String
+  color       String
+
+  users UserBadge[]
+}
+
+model UserBadge {
+  id        String   @id @default(uuid())
+  user_id   String
+  badge_id  String
+  earned_at DateTime @default(now())
+
+  user  User  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badge_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, badge_id])
+}
+
+model PostVote {
+  id         String   @id @default(uuid())
+  post_id    String
+  user_id    String
+  value      Int      // 1 for upvote, -1 for downvote
+  created_at DateTime @default(now())
+
+  post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([post_id, user_id])
+}
+
+model AnswerVote {
+  id         String   @id @default(uuid())
+  answer_id  String
+  user_id    String
+  value      Int      // 1 for upvote, -1 for downvote
+  created_at DateTime @default(now())
+
+  answer Answer @relation(fields: [answer_id], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([answer_id, user_id])
+}
+
+model Message {
+  id          String   @id @default(uuid())
+  sender_id   String
+  receiver_id String
+  content     String
+  created_at  DateTime @default(now())
+
+  sender   User @relation("sent_messages", fields: [sender_id], references: [id], onDelete: Cascade)
+  receiver User @relation("received_messages", fields: [receiver_id], references: [id], onDelete: Cascade)
+
+  @@index([created_at])
+}
+
+model Bookmark {
+  id         String   @id @default(uuid())
+  user_id    String
+  post_id    String
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, post_id])
+  @@index([created_at])
+}
+
+model Notification {
+  id         String   @id @default(uuid())
+  user_id    String
+  type       String   // 'ANSWER', 'XP', 'DUEL', 'SYSTEM'
+  title      String
+  content    String
+  link       String?
+  is_read    Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, created_at])
+}
+
+model Report {
+  id         String   @id @default(uuid())
+  user_id    String
+  post_id    String
+  reason     String
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, post_id])
+  @@index([created_at])
+}
+
+model Follow {
+  follower_id  String
+  following_id String
+
+  follower  User @relation("following", fields: [follower_id], references: [id], onDelete: Cascade)
+  following User @relation("followers", fields: [following_id], references: [id], onDelete: Cascade)
+
+  @@id([follower_id, following_id])
+}

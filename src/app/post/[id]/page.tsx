@@ -1,0 +1,95 @@
+import { redirect, notFound } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import { getAuthUser } from "@/lib/auth";
+import { PostDetailContent } from "./PostDetailContent";
+
+export const revalidate = 0; // Desabilitar cache para dados dinâmicos de comentários/respostas
+
+export default async function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const user = await getAuthUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { id } = await params;
+
+  // Incrementar visualizações do post no lado do servidor
+  await prisma.post.update({
+    where: { id },
+    data: {
+      view_count: {
+        increment: 1,
+      },
+    },
+  }).catch(() => {
+    // Silenciar erro se o ID for inválido
+  });
+
+  const post = await prisma.post.findUnique({
+    where: { id },
+    include: {
+      author: {
+        select: {
+          username: true,
+          avatar_url: true,
+          total_xp: true,
+        },
+      },
+      answers: {
+        orderBy: { created_at: "asc" },
+        include: {
+          author: {
+            select: {
+              username: true,
+              avatar_url: true,
+            },
+          },
+          votes: {
+            where: { user_id: user.id },
+          },
+        },
+      },
+      quizzes: {
+        include: {
+          attempts: {
+            where: { user_id: user.id },
+          },
+        },
+      },
+      votes: {
+        where: { user_id: user.id },
+      },
+    },
+  });
+
+  if (!post) {
+    notFound();
+  }
+
+  // Serializar datas
+  const serializedPost = {
+    ...post,
+    created_at: post.created_at.toISOString(),
+    answers: post.answers.map((answer) => ({
+      ...answer,
+      created_at: answer.created_at.toISOString(),
+    })),
+    quizzes: post.quizzes.map((quiz) => ({
+      ...quiz,
+      created_at: quiz.created_at.toISOString(),
+    })),
+  };
+
+  return (
+    <PostDetailContent
+      user={{
+        id: user.id,
+        username: user.username,
+        avatar_url: user.avatar_url,
+        total_xp: user.total_xp,
+      }}
+      post={serializedPost}
+    />
+  );
+}
