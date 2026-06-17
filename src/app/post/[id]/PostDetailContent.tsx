@@ -20,8 +20,12 @@ import {
   Send,
   ArrowBigUp,
   ArrowBigDown,
-  AlertTriangle
+  AlertTriangle,
+  Flag
 } from "lucide-react";
+import { AnimatedCounter } from "@/components/motion/AnimatedCounter";
+import { RepostMenu } from "@/components/motion/RepostMenu";
+import { BookmarkButton } from "@/components/motion/BookmarkButton";
 
 interface PostDetailContentProps {
   user: {
@@ -40,6 +44,53 @@ export function PostDetailContent({ user, post: initialPost }: PostDetailContent
   const [answerCode, setAnswerCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [toastXp, setToastXp] = useState<{ amount: number; language: string } | null>(null);
+
+  const [isSaved, setIsSaved] = useState(false);
+  const [repostState, setRepostState] = useState({ count: post.reposts_count ?? 0, reposted: false });
+
+  // Report post state
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reporting, setReporting] = useState(false);
+  const [reported, setReported] = useState(false);
+
+  const handleReportSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reportReason.trim()) return;
+    setReporting(true);
+    try {
+      const res = await fetch(`/api/posts/${post.id}/report`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: reportReason.trim() }),
+      });
+      if (res.ok) {
+        setReported(true);
+        setTimeout(() => {
+          setReportModalOpen(false);
+          setReported(false);
+          setReportReason("");
+        }, 1500);
+      } else {
+        alert("Falha ao enviar denúncia.");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setReporting(false);
+    }
+  };
+
+  const handleRepost = () => {
+    setRepostState((prev) => ({
+      count: prev.reposted ? Math.max(0, prev.count - 1) : prev.count + 1,
+      reposted: !prev.reposted,
+    }));
+  };
+
+  const handleQuotePost = () => {
+    alert("Citação mockada no detalhe do post!");
+  };
 
   const postUserVote = post.votes?.[0]?.value === 1 ? 'up' : post.votes?.[0]?.value === -1 ? 'down' : null;
   const postVotesCount = post.upvotes;
@@ -274,7 +325,7 @@ export function PostDetailContent({ user, post: initialPost }: PostDetailContent
 
         {/* Post Detail Card */}
         <article className="bg-dd-surface border border-dd-border rounded-xl p-6 space-y-6 backdrop-blur-sm shadow-sm">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dd-border/50 pb-3">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-slate-800 text-dd-text flex items-center justify-center font-bold text-xs select-none">
                 {post.author.username.slice(0, 2).toUpperCase()}
@@ -288,7 +339,29 @@ export function PostDetailContent({ user, post: initialPost }: PostDetailContent
               </div>
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-1 bg-dd-bg/60 rounded-lg p-0.5 border border-dd-border w-fit">
+                <button
+                  onClick={() => handlePostVote('up')}
+                  className={`p-1.5 rounded-md transition-colors cursor-pointer hover:bg-dd-surface ${
+                    postUserVote === 'up' ? "text-orange-500" : "text-dd-muted hover:text-dd-text"
+                  }`}
+                  title="Gostei da Pergunta"
+                >
+                  <ArrowBigUp className="w-4 h-4 fill-current" />
+                </button>
+                <AnimatedCounter value={postVotesCount} className="px-1 font-semibold text-[10px] text-dd-text" />
+                <button
+                  onClick={() => handlePostVote('down')}
+                  className={`p-1.5 rounded-md transition-colors cursor-pointer hover:bg-dd-surface ${
+                    postUserVote === 'down' ? "text-red-500" : "text-dd-muted hover:text-dd-text"
+                  }`}
+                  title="Downvote exige justificativa"
+                >
+                  <ArrowBigDown className="w-4 h-4 fill-current" />
+                </button>
+              </div>
+
               <span className="text-[9px] bg-slate-800 border border-slate-700/80 px-2 py-0.5 rounded text-dd-muted font-mono font-semibold">
                 Lvl {Math.max(1, Math.floor(post.author.total_xp / 1000) + 1)}
               </span>
@@ -306,32 +379,27 @@ export function PostDetailContent({ user, post: initialPost }: PostDetailContent
             </div>
           )}
 
-          {/* Post voting section */}
-          <div className="flex items-center gap-3 pt-3 border-t border-slate-900/60 text-xs font-sans">
-            <div className="flex items-center gap-1 bg-dd-bg/60 rounded-lg p-0.5 border border-slate-900 w-fit">
-              <button
-                onClick={() => handlePostVote('up')}
-                className={`p-1.5 rounded-md transition-colors cursor-pointer hover:bg-dd-surface ${
-                  postUserVote === 'up' ? "text-orange-500" : "text-dd-muted hover:text-dd-text"
-                }`}
-                title="Gostei da Pergunta"
-              >
-                <ArrowBigUp className="w-4 h-4 fill-current" />
-              </button>
-              <span className="px-1 font-mono font-semibold text-[10px] text-dd-text">{postVotesCount}</span>
-              <button
-                onClick={() => handlePostVote('down')}
-                className={`p-1.5 rounded-md transition-colors cursor-pointer hover:bg-dd-surface ${
-                  postUserVote === 'down' ? "text-red-500" : "text-dd-muted hover:text-dd-text"
-                }`}
-                title="Downvote exige justificativa"
-              >
-                <ArrowBigDown className="w-4 h-4 fill-current" />
-              </button>
-              <span className="p-1 text-[9px] text-slate-650 flex items-center justify-center" title="Feedback negativo exige justificativa construtiva">
-                <AlertTriangle className="w-3.5 h-3.5 text-dd-muted" />
-              </span>
-            </div>
+          {/* Post bottom actions section */}
+          <div className="flex items-center gap-3 pt-3 border-t border-dd-border text-xs font-sans">
+            <RepostMenu
+              count={repostState.count}
+              isReposted={repostState.reposted}
+              onRepost={handleRepost}
+              onQuote={handleQuotePost}
+            />
+
+            <BookmarkButton
+              isSaved={isSaved}
+              onToggle={() => setIsSaved(!isSaved)}
+            />
+
+            <button
+              onClick={() => setReportModalOpen(true)}
+              className="p-1.5 rounded-md text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer flex items-center justify-center"
+              title="Denunciar postagem"
+            >
+              <Flag className="w-4 h-4" />
+            </button>
           </div>
         </article>
 
@@ -416,6 +484,74 @@ export function PostDetailContent({ user, post: initialPost }: PostDetailContent
         </main>
         <Footer />
       </div>
+
+      {reportModalOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            setReportModalOpen(false);
+          }}
+        >
+          <div 
+            className="w-full max-w-md bg-dd-surface border border-dd-border rounded-2xl p-5 space-y-4 text-left relative z-10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-sm font-black text-dd-text">Denunciar Postagem</h3>
+            <p className="text-xs text-dd-muted font-semibold leading-relaxed">
+              Ajude-nos a entender o que há de errado com esta postagem. Ela viola alguma de nossas diretrizes de comunidade?
+            </p>
+            
+            {reported ? (
+              <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold p-3 rounded-lg text-center animate-pulse">
+                Denúncia enviada com sucesso. Obrigado por ajudar!
+              </div>
+            ) : (
+              <form onSubmit={handleReportSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] text-dd-muted font-bold uppercase tracking-wider block">Motivo da denúncia</label>
+                  <select
+                    value={reportReason}
+                    onChange={(e) => setReportReason(e.target.value)}
+                    required
+                    className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg px-3 py-2.5 text-dd-text focus:border-red-500/50 focus:outline-none"
+                  >
+                    <option value="">Selecione um motivo...</option>
+                    <option value="Spam / Propaganda enganosa">Spam / Propaganda enganosa</option>
+                    <option value="Discurso de ódio / Ofensa">Discurso de ódio / Ofensa</option>
+                    <option value="Assédio / Bullying">Assédio / Bullying</option>
+                    <option value="Código / Conteúdo malicioso ou perigoso">Código / Conteúdo malicioso ou perigoso</option>
+                    <option value="Outro motivo">Outro motivo</option>
+                  </select>
+                </div>
+                
+                <div className="flex justify-end gap-2 pt-2 border-t border-dd-border">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      setReportModalOpen(false);
+                    }}
+                    className="text-xs font-bold text-dd-muted hover:text-dd-text py-2 px-4 rounded-lg hover:bg-dd-surface transition-all cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    onClick={(e) => e.stopPropagation()}
+                    disabled={reporting || !reportReason}
+                    className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2 px-5 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+                  >
+                    {reporting ? "Enviando..." : "Denunciar"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

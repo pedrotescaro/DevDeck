@@ -19,6 +19,7 @@ import { XPProgressBar } from "@/components/motion/XPProgressBar";
 import { CharCounter } from "@/components/motion/CharCounter";
 import { MentionDropdown } from "@/components/motion/MentionDropdown";
 import { ExpandedReactionButton } from "@/components/motion/ExpandedReactions";
+import { AnimatedCounter } from "@/components/motion/AnimatedCounter";
 import { BookmarkButton } from "@/components/motion/BookmarkButton";
 import { RepostMenu } from "@/components/motion/RepostMenu";
 import { EmptyState } from "@/components/motion/EmptyState";
@@ -45,7 +46,8 @@ import {
   Calendar,
   TrendingUp,
   X,
-  Search
+  Search,
+  Flag
 } from "lucide-react";
 
 interface LanguageTrail {
@@ -170,6 +172,41 @@ export function FeedContent({ initialUser, initialPosts, initialDuels }: FeedCon
   const [scheduledAt, setScheduledAt] = useState<string | null>(null);
   const [postLocation, setPostLocation] = useState("");
   const [isSensitive, setIsSensitive] = useState(false);
+
+  // Report post state
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reporting, setReporting] = useState(false);
+  const [reported, setReported] = useState(false);
+  const [selectedReportPostId, setSelectedReportPostId] = useState<string | null>(null);
+
+  const handleReportSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reportReason.trim() || !selectedReportPostId) return;
+    setReporting(true);
+    try {
+      const res = await fetch(`/api/posts/${selectedReportPostId}/report`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: reportReason.trim() }),
+      });
+      if (res.ok) {
+        setReported(true);
+        setTimeout(() => {
+          setReportModalOpen(false);
+          setReported(false);
+          setReportReason("");
+          setSelectedReportPostId(null);
+        }, 1500);
+      } else {
+        alert("Falha ao enviar denúncia.");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setReporting(false);
+    }
+  };
 
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -1139,7 +1176,7 @@ export function FeedContent({ initialUser, initialPosts, initialDuels }: FeedCon
                               post._pending && "dd-optimistic-post"
                             )}
                           >
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dd-border/50 pb-3">
                               <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-full bg-slate-800 text-dd-text flex items-center justify-center font-bold text-xs select-none">
                                   {post.author.username.slice(0, 2).toUpperCase()}
@@ -1159,7 +1196,31 @@ export function FeedContent({ initialUser, initialPosts, initialDuels }: FeedCon
                                 </div>
                               </div>
 
-                              {post.language && <LanguageTag language={post.language} size="sm" />}
+                              <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.preventDefault()}>
+                                <div className="flex items-center gap-1 bg-dd-bg/60 rounded-lg p-0.5 border border-dd-border">
+                                  <ExpandedReactionButton
+                                    isActive={vote.userVote === "up"}
+                                    activeReaction={activeReactions[post.id] as any}
+                                    onReact={(reaction) => void handleReactionSelect(post.id, reaction)}
+                                    title="Reagir ao post"
+                                  />
+                                  <AnimatedCounter
+                                    value={vote.up}
+                                    className="px-1 font-semibold text-[10px] text-dd-text"
+                                  />
+                                  <button
+                                    onClick={() => handleVote(post.id, "down")}
+                                    className={`dd-touch dd-focus-ring p-1.5 rounded-md transition-colors cursor-pointer hover:bg-dd-surface hover:scale-[1.03] ${
+                                      vote.userVote === "down" ? "text-red-500" : "text-dd-muted hover:text-dd-text"
+                                    }`}
+                                    title="Downvote exige justificativa"
+                                  >
+                                    <ArrowBigDown className="w-4 h-4 fill-current" />
+                                  </button>
+                                </div>
+
+                                {post.language && <LanguageTag language={post.language} size="sm" />}
+                              </div>
                             </div>
 
                             <div className="space-y-3">
@@ -1204,27 +1265,13 @@ export function FeedContent({ initialUser, initialPosts, initialDuels }: FeedCon
 
                             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-dd-border pt-3 text-xs">
                               <div className="flex items-center gap-2">
-                                <div className="flex items-center gap-1.5 bg-dd-bg/60 rounded-lg p-0.5 border border-dd-border">
-                                  <ExpandedReactionButton
-                                    count={vote.up}
-                                    isActive={vote.userVote === "up"}
-                                    activeReaction={activeReactions[post.id] as any}
-                                    onReact={(reaction) => void handleReactionSelect(post.id, reaction)}
-                                    title="Reagir ao post"
-                                  />
-                                  <button
-                                    onClick={() => handleVote(post.id, "down")}
-                                    className={`dd-touch dd-focus-ring p-1.5 rounded-md transition-colors cursor-pointer hover:bg-dd-surface hover:scale-[1.03] ${
-                                      vote.userVote === "down" ? "text-red-500" : "text-dd-muted hover:text-dd-text"
-                                    }`}
-                                    title="Downvote exige justificativa"
-                                  >
-                                    <ArrowBigDown className="w-4 h-4 fill-current" />
-                                  </button>
-                                  <span className="p-1 text-[9px] flex items-center justify-center" title="Feedback negativo deve ser construtivo">
-                                    <AlertTriangle className="w-3.5 h-3.5 text-dd-muted" />
-                                  </span>
-                                </div>
+                                <Link
+                                  href={`/post/${post.id}`}
+                                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-dd-muted transition-colors hover:bg-dd-surface hover:text-dd-text"
+                                >
+                                  <MessageSquare className="w-3.5 h-3.5 text-dd-muted" />
+                                  <span>{post._count?.answers || 0} respostas</span>
+                                </Link>
 
                                 <RepostMenu
                                   count={repostMeta.count}
@@ -1237,25 +1284,28 @@ export function FeedContent({ initialUser, initialPosts, initialDuels }: FeedCon
                                   isSaved={!!bookmarkedPostIds[post.id]}
                                   onToggle={() => handleBookmarkToggle(post.id)}
                                 />
+
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    setSelectedReportPostId(post.id);
+                                    setReportModalOpen(true);
+                                  }}
+                                  className="p-1.5 rounded-md text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer flex items-center justify-center"
+                                  title="Denunciar postagem"
+                                >
+                                  <Flag className="w-4 h-4" />
+                                </button>
                               </div>
 
-                              <div className="flex items-center gap-2">
-                                <Link
-                                  href={`/post/${post.id}`}
-                                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-dd-muted transition-colors hover:bg-dd-surface hover:text-dd-text"
-                                >
-                                  <MessageSquare className="w-3.5 h-3.5 text-dd-muted" />
-                                  <span>{post._count?.answers || 0} respostas</span>
-                                </Link>
-
-                                <Link
-                                  href={`/post/${post.id}`}
-                                  className="flex items-center gap-1.5 rounded-lg bg-orange-500 px-3.5 py-1.5 font-bold text-white transition-colors hover:bg-orange-600 shadow-sm cursor-pointer"
-                                >
-                                  <Sparkles className="w-3.5 h-3.5" />
-                                  <span>Resolver como Quiz</span>
-                                </Link>
-                              </div>
+                              <Link
+                                href={`/post/${post.id}`}
+                                className="flex items-center gap-1.5 rounded-lg bg-orange-500 px-3.5 py-1.5 font-bold text-white transition-colors hover:bg-orange-600 shadow-sm cursor-pointer"
+                              >
+                                <Sparkles className="w-3.5 h-3.5" />
+                                <span>Resolver como Quiz</span>
+                              </Link>
                             </div>
                           </motion.article>
                         );
@@ -1748,6 +1798,74 @@ export function FeedContent({ initialUser, initialPosts, initialDuels }: FeedCon
       </div>
       <Footer />
       </div>
+
+      {reportModalOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            setReportModalOpen(false);
+          }}
+        >
+          <div 
+            className="w-full max-w-md bg-dd-surface border border-dd-border rounded-2xl p-5 space-y-4 text-left relative z-10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-sm font-black text-dd-text">Denunciar Postagem</h3>
+            <p className="text-xs text-dd-muted font-semibold leading-relaxed">
+              Ajude-nos a entender o que há de errado com esta postagem. Ela viola alguma de nossas diretrizes de comunidade?
+            </p>
+            
+            {reported ? (
+              <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold p-3 rounded-lg text-center animate-pulse">
+                Denúncia enviada com sucesso. Obrigado por ajudar!
+              </div>
+            ) : (
+              <form onSubmit={handleReportSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] text-dd-muted font-bold uppercase tracking-wider block">Motivo da denúncia</label>
+                  <select
+                    value={reportReason}
+                    onChange={(e) => setReportReason(e.target.value)}
+                    required
+                    className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg px-3 py-2.5 text-dd-text focus:border-red-500/50 focus:outline-none"
+                  >
+                    <option value="">Selecione um motivo...</option>
+                    <option value="Spam / Propaganda enganosa">Spam / Propaganda enganosa</option>
+                    <option value="Discurso de ódio / Ofensa">Discurso de ódio / Ofensa</option>
+                    <option value="Assédio / Bullying">Assédio / Bullying</option>
+                    <option value="Código / Conteúdo malicioso ou perigoso">Código / Conteúdo malicioso ou perigoso</option>
+                    <option value="Outro motivo">Outro motivo</option>
+                  </select>
+                </div>
+                
+                <div className="flex justify-end gap-2 pt-2 border-t border-dd-border">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      setReportModalOpen(false);
+                    }}
+                    className="text-xs font-bold text-dd-muted hover:text-dd-text py-2 px-4 rounded-lg hover:bg-dd-surface transition-all cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    onClick={(e) => e.stopPropagation()}
+                    disabled={reporting || !reportReason}
+                    className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2 px-5 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+                  >
+                    {reporting ? "Enviando..." : "Denunciar"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

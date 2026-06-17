@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ArrowBigUp, ArrowBigDown, AlertTriangle } from 'lucide-react';
+import { AnimatedCounter } from '@/components/motion/AnimatedCounter';
 
 interface AnswerAuthor {
   username: string;
@@ -170,26 +171,23 @@ export function AnswerCard({ answer, isPostAuthor, onAccept }: AnswerCardProps) 
         <div className="flex items-center gap-1 bg-dd-bg rounded-lg p-0.5 border border-dd-border">
           <button
             onClick={() => handleVote('up')}
-            className={`p-1 rounded-md transition-colors cursor-pointer hover:bg-dd-surface/60 ${
+            className={`p-1.5 rounded-md transition-colors cursor-pointer hover:bg-dd-surface/60 ${
               userVote === 'up' ? 'text-orange-500' : 'text-dd-muted hover:text-dd-text'
             }`}
             title="Resposta útil"
           >
             <ArrowBigUp className="w-4 h-4 fill-current" />
           </button>
-          <span className="px-1 font-mono font-semibold text-[10px] text-dd-text">{voteCount}</span>
+          <AnimatedCounter value={voteCount} className="px-1 font-semibold text-[10px] text-dd-text" />
           <button
             onClick={() => handleVote('down')}
-            className={`p-1 rounded-md transition-colors cursor-pointer hover:bg-dd-surface/60 ${
+            className={`p-1.5 rounded-md transition-colors cursor-pointer hover:bg-dd-surface/60 ${
               userVote === 'down' ? 'text-red-500' : 'text-dd-muted hover:text-dd-text'
             }`}
             title="Downvote exige justificativa"
           >
             <ArrowBigDown className="w-4 h-4 fill-current" />
           </button>
-          <span className="p-1 text-[9px] text-slate-650 flex items-center justify-center" title="Feedback negativo exige justificativa construtiva">
-            <AlertTriangle className="w-3.5 h-3.5 text-dd-muted" />
-          </span>
         </div>
 
         {isPostAuthor && !answer.is_accepted && (

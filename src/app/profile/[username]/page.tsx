@@ -61,6 +61,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
 
   // Serializar
   const serializedProfileUser = {
+    id: profileUser.id,
     username: profileUser.username,
     avatar_url: profileUser.avatar_url,
     bio: profileUser.bio,
@@ -86,6 +87,16 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     color: b.color,
   }));
 
+  // Verificar se o usuário atual segue este perfil
+  const isFollowing = user ? await prisma.follow.findUnique({
+    where: {
+      follower_id_following_id: {
+        follower_id: user.id,
+        following_id: profileUser.id,
+      }
+    }
+  }) !== null : false;
+
   return (
     <ProfileContent
       user={{
@@ -102,6 +113,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
       }}
       trails={serializedTrails}
       allBadges={serializedAllBadges}
+      isFollowing={isFollowing}
     />
   );
 }

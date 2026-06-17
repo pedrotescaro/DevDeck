@@ -25,7 +25,6 @@ const REACTIONS = [
 type ReactionType = typeof REACTIONS[number]["emoji"] | null;
 
 interface ExpandedReactionButtonProps {
-  count: number;
   isActive: boolean;
   activeReaction?: ReactionType;
   onReact: (reaction?: ReactionType) => void;
@@ -33,7 +32,6 @@ interface ExpandedReactionButtonProps {
 }
 
 export function ExpandedReactionButton({
-  count,
   isActive,
   activeReaction,
   onReact,
@@ -76,13 +74,13 @@ export function ExpandedReactionButton({
     : null;
 
   return (
-    <div className="relative flex items-center gap-0.5">
+    <div className="relative flex items-center">
       <motion.button
         type="button"
         {...longPressHandlers}
         title={title}
         className={cn(
-          "dd-touch dd-focus-ring dd-gpu relative p-1.5 rounded-md transition-colors cursor-pointer select-none",
+          "dd-touch dd-focus-ring dd-gpu relative p-1.5 rounded-md transition-colors cursor-pointer select-none hover:bg-dd-surface",
           isActive ? "text-orange-500" : "text-dd-muted hover:text-dd-text"
         )}
         whileTap={reduced ? undefined : { scale: [1, 1.35, 1.1, 1] }}
@@ -108,11 +106,6 @@ export function ExpandedReactionButton({
             />
           ))}
       </motion.button>
-
-      <AnimatedCounter
-        value={count}
-        className="px-1 font-semibold text-[10px] text-dd-text"
-      />
 
       <AnimatePresence>
         {pickerOpen && (

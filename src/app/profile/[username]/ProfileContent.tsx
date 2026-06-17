@@ -16,6 +16,7 @@ interface ProfileContentProps {
     total_xp: number;
   };
   profileUser: {
+    id: string;
     username: string;
     avatar_url?: string | null;
     bio?: string | null;
@@ -30,6 +31,7 @@ interface ProfileContentProps {
   };
   trails: any[];
   allBadges: any[];
+  isFollowing: boolean;
 }
 
 export function ProfileContent({
@@ -38,11 +40,29 @@ export function ProfileContent({
   stats,
   trails,
   allBadges,
+  isFollowing,
 }: ProfileContentProps) {
   const [posts, setPosts] = useState<any[]>([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [following, setFollowing] = useState(isFollowing);
+
+  const handleFollowToggle = async () => {
+    try {
+      const res = await fetch(`/api/users/${profileUser.id}/follow`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        throw new Error("Erro ao seguir/deixar de seguir usuário");
+      }
+      const data = await res.json();
+      setFollowing(data.following);
+    } catch (err) {
+      console.error("Erro no follow/unfollow:", err);
+      throw err; // Permite que o FollowButton reverta seu estado otimista
+    }
+  };
 
   useEffect(() => {
     const fetchUserPosts = async () => {
@@ -110,7 +130,14 @@ export function ProfileContent({
       <div className="flex-grow flex flex-col min-w-0">
         <main className="flex-grow max-w-4xl w-full mx-auto px-4 py-8 pb-24 md:pb-8 flex flex-col min-w-0 space-y-8">
         {/* Cabeçalho do Perfil (Com estatísticas e trilhas de XP) */}
-        <ProfileHeader user={profileUser} stats={stats} trails={mappedTrails} />
+        <ProfileHeader
+          user={profileUser}
+          stats={stats}
+          trails={mappedTrails}
+          isFollowing={following}
+          onFollowToggle={handleFollowToggle}
+          showFollowButton={user.id !== profileUser.id}
+        />
 
         {/* Quadro de Badges/Conquistas */}
         <div className="space-y-4">

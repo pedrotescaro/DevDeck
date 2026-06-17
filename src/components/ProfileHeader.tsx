@@ -2,6 +2,7 @@
 
 import { LanguageTrailBar } from './LanguageTrailBar';
 import { Award, BookOpen, CheckCircle, GraduationCap } from 'lucide-react';
+import { FollowButton } from './motion/FollowButton';
 
 interface LanguageTrail {
   language: string;
@@ -29,9 +30,19 @@ interface ProfileHeaderProps {
   user: ProfileUser;
   stats: ProfileStats;
   trails: LanguageTrail[];
+  isFollowing?: boolean;
+  onFollowToggle?: () => Promise<void> | void;
+  showFollowButton?: boolean;
 }
 
-export function ProfileHeader({ user, stats, trails }: ProfileHeaderProps) {
+export function ProfileHeader({
+  user,
+  stats,
+  trails,
+  isFollowing = false,
+  onFollowToggle,
+  showFollowButton = false,
+}: ProfileHeaderProps) {
   const initials = user.username.slice(0, 2).toUpperCase();
 
   return (
@@ -53,14 +64,21 @@ export function ProfileHeader({ user, stats, trails }: ProfileHeaderProps) {
           )}
 
           {/* Info */}
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
-              <h1 className="text-dd-text text-xl font-extrabold tracking-tight">
-                {user.username}
-              </h1>
-              <span className="inline-flex w-fit mx-auto sm:mx-0 text-orange-400 text-xs bg-orange-500/10 border border-orange-500/20 px-2.5 py-0.5 rounded-full font-bold">
-                {user.total_xp.toLocaleString('pt-BR')} XP Total
-              </span>
+          <div className="flex-grow min-w-0 w-full">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <h1 className="text-dd-text text-xl font-extrabold tracking-tight">
+                  {user.username}
+                </h1>
+                <span className="inline-flex w-fit mx-auto sm:mx-0 text-orange-400 text-xs bg-orange-500/10 border border-orange-500/20 px-2.5 py-0.5 rounded-full font-bold">
+                  {user.total_xp.toLocaleString('pt-BR')} XP Total
+                </span>
+              </div>
+              {showFollowButton && onFollowToggle && (
+                <div className="flex shrink-0 justify-center sm:justify-end">
+                  <FollowButton isFollowing={isFollowing} onToggle={onFollowToggle} />
+                </div>
+              )}
             </div>
 
             {user.bio ? (

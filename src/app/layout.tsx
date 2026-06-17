@@ -22,6 +22,7 @@ export default function RootLayout({
     <html lang="pt-BR" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script
+          id="theme-script"
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
