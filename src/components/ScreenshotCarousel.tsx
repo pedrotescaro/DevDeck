@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Sun, Moon } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Screenshot {
   name: string;
@@ -13,6 +14,7 @@ interface Screenshot {
 export function ScreenshotCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [displayTheme, setDisplayTheme] = useState<'light' | 'dark'>('dark');
+  const [isHovered, setIsHovered] = useState(false);
 
   const screenshots: Screenshot[] = [
     {
@@ -53,6 +55,17 @@ export function ScreenshotCarousel() {
     }
   ];
 
+  // Auto-play effect: changes slide every 4.5 seconds, pauses on hover
+  useEffect(() => {
+    if (isHovered) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev === screenshots.length - 1 ? 0 : prev + 1));
+    }, 4500);
+
+    return () => clearInterval(interval);
+  }, [isHovered, screenshots.length]);
+
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev === 0 ? screenshots.length - 1 : prev - 1));
   };
@@ -65,26 +78,13 @@ export function ScreenshotCarousel() {
   const imagePath = `/screenshots/${current.name}_${displayTheme}.png`;
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-6 select-none">
-      {/* Tabs Selector */}
-      <div className="flex flex-wrap items-center justify-center gap-1.5 p-1 rounded-xl bg-dd-surface border border-dd-border max-w-4xl mx-auto">
-        {screenshots.map((item, idx) => (
-          <button
-            key={idx}
-            onClick={() => setCurrentIndex(idx)}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold tracking-tight transition-all duration-200 ${
-              currentIndex === idx
-                ? 'bg-orange-500 text-white shadow-sm'
-                : 'text-dd-muted hover:text-dd-text hover:bg-dd-surface-hover'
-            }`}
-          >
-            {item.title}
-          </button>
-        ))}
-      </div>
-
+    <div className="w-full max-w-5xl mx-auto space-y-4 select-none">
       {/* Browser Mockup Frame */}
-      <div className="relative rounded-2xl border border-dd-border bg-dd-bg shadow-[0_25px_60px_-15px_rgba(0,0,0,0.4)] overflow-hidden transition-all duration-300">
+      <div 
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className="relative rounded-2xl border border-dd-border bg-dd-bg shadow-[0_25px_60px_-15px_rgba(0,0,0,0.4)] overflow-hidden transition-all duration-300"
+      >
         {/* Top Browser Bar */}
         <div className="flex items-center justify-between px-4 py-3 bg-dd-surface/40 border-b border-dd-border">
           {/* Window controls */}
@@ -128,23 +128,28 @@ export function ScreenshotCarousel() {
         </div>
 
         {/* Screenshot Viewport Container */}
-        <div className="relative min-h-[300px] md:min-h-[500px] bg-dd-surface/20 flex items-center justify-center overflow-hidden">
-          {/* Slide image */}
-          <div className="w-full h-full relative aspect-[1440/900] overflow-hidden">
-            <img 
+        <div className="relative aspect-[1440/900] bg-dd-surface/20 flex items-center justify-center overflow-hidden">
+          {/* Motion image container using framer-motion AnimatePresence for smooth crossfades */}
+          <AnimatePresence initial={false}>
+            <motion.img 
+              key={imagePath}
               src={imagePath} 
               alt={current.title} 
-              className="w-full h-full object-cover transition-all duration-300 animate-fade-in"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5, ease: 'easeInOut' }}
+              className="w-full h-full object-cover absolute inset-0"
               onError={(e) => {
                 e.currentTarget.src = '/logo.png';
               }}
             />
-          </div>
+          </AnimatePresence>
 
           {/* Left Arrow */}
           <button
             onClick={handlePrev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border border-dd-border bg-dd-bg/80 hover:bg-dd-bg text-dd-text flex items-center justify-center hover:scale-105 active:scale-[0.95] transition-all z-10 shadow-lg backdrop-blur-sm"
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border border-dd-border bg-dd-bg/85 hover:bg-dd-bg text-dd-text flex items-center justify-center hover:scale-105 active:scale-[0.95] transition-all z-10 shadow-lg backdrop-blur-sm"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -152,15 +157,31 @@ export function ScreenshotCarousel() {
           {/* Right Arrow */}
           <button
             onClick={handleNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border border-dd-border bg-dd-bg/80 hover:bg-dd-bg text-dd-text flex items-center justify-center hover:scale-105 active:scale-[0.95] transition-all z-10 shadow-lg backdrop-blur-sm"
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border border-dd-border bg-dd-bg/85 hover:bg-dd-bg text-dd-text flex items-center justify-center hover:scale-105 active:scale-[0.95] transition-all z-10 shadow-lg backdrop-blur-sm"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
       </div>
 
+      {/* Slide dots indicator */}
+      <div className="flex items-center justify-center gap-2 py-1">
+        {screenshots.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => setCurrentIndex(idx)}
+            className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+              currentIndex === idx 
+                ? 'bg-orange-500 w-3.5' 
+                : 'bg-dd-border hover:bg-dd-muted'
+            }`}
+            title={`Slide ${idx + 1}`}
+          />
+        ))}
+      </div>
+
       {/* Screenshot Caption Description */}
-      <div className="text-center max-w-xl mx-auto space-y-1 py-2">
+      <div className="text-center max-w-xl mx-auto space-y-1 py-1">
         <h4 className="text-sm font-black text-dd-text uppercase tracking-wide">
           {current.title} ({displayTheme === 'light' ? 'Modo Claro' : 'Modo Escuro'})
         </h4>
@@ -168,17 +189,6 @@ export function ScreenshotCarousel() {
           {current.description}
         </p>
       </div>
-
-      {/* Embedded style tag for fade-in animations */}
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        .animate-fade-in {
-          animation: fadeIn 0.3s ease-in-out forwards;
-        }
-      `}</style>
     </div>
   );
 }
