@@ -7,19 +7,19 @@ import { TRAILS_DATA, TrailLevel, TrailQuestion } from "@/lib/trailsData";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  BookOpen, 
-  Lock, 
-  Star, 
-  Check, 
-  X, 
-  ChevronRight, 
-  Volume2, 
-  VolumeX, 
-  Trophy, 
+import {
+  BookOpen,
+  Lock,
+  Star,
+  Check,
+  X,
+  ChevronRight,
+  Volume2,
+  VolumeX,
+  Trophy,
   Sparkles,
   ArrowLeft,
-  ChevronDown
+  ChevronDown,
 } from "lucide-react";
 function getLevelFromXp(xp: number) {
   return Math.max(1, Math.floor(xp / 1000) + 1);
@@ -40,11 +40,7 @@ interface TrailsContentProps {
   initialAttempts: Record<string, boolean>;
 }
 
-export function TrailsContent({
-  user,
-  initialTrails,
-  initialAttempts,
-}: TrailsContentProps) {
+export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsContentProps) {
   const reduced = useReducedMotion();
   const [soundEnabled, setSoundEnabled] = useState(true);
   const { playSound } = useSoundEffects(soundEnabled);
@@ -62,7 +58,7 @@ export function TrailsContent({
       const completedCount = level.questions.filter((q) => initialAttempts[q.id] === true).length;
       return completedCount < 3;
     });
-    return firstIncompleteLevel ? firstIncompleteLevel.sectionName : (levels[0]?.sectionName || "");
+    return firstIncompleteLevel ? firstIncompleteLevel.sectionName : levels[0]?.sectionName || "";
   };
 
   const [activeSection, setActiveSection] = useState<string>(defaultSection);
@@ -115,9 +111,8 @@ export function TrailsContent({
   );
 
   // Fases da seção atual
-  const sectionLevels = TRAILS_DATA[activeLang]?.filter(
-    (level) => level.sectionName === activeSection
-  ) || [];
+  const sectionLevels =
+    TRAILS_DATA[activeLang]?.filter((level) => level.sectionName === activeSection) || [];
 
   // Verificar se o nível está desbloqueado (Duolingo-like progression)
   const isLevelUnlocked = (levelIndex: number) => {
@@ -129,22 +124,25 @@ export function TrailsContent({
 
   // Nível recomendado (primeira fase incompleta da linguagem atual que esteja desbloqueada)
   const recommendedLevel = TRAILS_DATA[activeLang]?.find((level, idx) => {
-    const globalIdx = TRAILS_DATA[activeLang].findIndex(l => l.levelNumber === level.levelNumber);
+    const globalIdx = TRAILS_DATA[activeLang].findIndex((l) => l.levelNumber === level.levelNumber);
     const unlocked = isLevelUnlocked(globalIdx);
     const completedCount = level.questions.filter((q) => attempts[q.id] === true).length;
     return unlocked && completedCount < 3;
   });
 
   // Unidade ativa com base no nível recomendado (ou primeiro da seção se todos concluídos)
-  const activeUnitLevel = sectionLevels.find((level) => {
-    const completedCount = level.questions.filter((q) => attempts[q.id] === true).length;
-    return completedCount < 3;
-  }) || sectionLevels[0];
+  const activeUnitLevel =
+    sectionLevels.find((level) => {
+      const completedCount = level.questions.filter((q) => attempts[q.id] === true).length;
+      return completedCount < 3;
+    }) || sectionLevels[0];
 
   const handleLevelClick = (level: TrailLevel, unlocked: boolean) => {
     if (!unlocked) {
       playSound("post"); // Som de aviso de bloqueado
-      alert("Esta fase está bloqueada! Complete pelo menos um exercício da fase anterior para liberá-la.");
+      alert(
+        "Esta fase está bloqueada! Complete pelo menos um exercício da fase anterior para liberá-la."
+      );
       return;
     }
     setActiveLevel(level);
@@ -187,7 +185,7 @@ export function TrailsContent({
 
       if (res.ok) {
         const data = await res.json();
-        
+
         // Atualizar tentativas localmente
         setAttempts((prev) => ({
           ...prev,
@@ -197,7 +195,7 @@ export function TrailsContent({
         // Se ganhou XP
         if (data.xpResult) {
           setUserXp(data.xpResult.newTotalXp);
-          
+
           // Atualizar trilhas de linguagem localmente (inserindo se não existir)
           setTrails((prev) => {
             const exists = prev.some((t) => t.language === activeLang);
@@ -276,7 +274,6 @@ export function TrailsContent({
 
       <div className="flex-grow flex flex-col min-w-0">
         <main className="flex-grow max-w-4xl w-full mx-auto px-4 py-8 pb-36 md:pb-48 flex flex-col min-w-0 space-y-8">
-          
           {/* Header & Sound Toggle */}
           <div className="flex items-center justify-between border-b border-dd-border pb-4">
             <div>
@@ -303,7 +300,7 @@ export function TrailsContent({
               const langCode = lang === "PYTHON" ? "PYTHON" : lang;
               const isSelected = activeLang === (lang === "PYTHON" ? "PYTHON" : lang);
               const label = lang.toUpperCase();
-              
+
               return (
                 <button
                   key={lang}
@@ -333,7 +330,7 @@ export function TrailsContent({
                 </p>
               </div>
             </div>
-            
+
             {/* XP progress bar */}
             <div className="flex-1 w-full max-w-lg">
               <div className="flex justify-between text-[10.5px] font-bold text-dd-muted mb-1.5 uppercase">
@@ -341,8 +338,8 @@ export function TrailsContent({
                 <span>{activeTrail.xp % 500} / 500 XP</span>
               </div>
               <div className="h-2.5 w-full bg-dd-border/40 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-orange-500 rounded-full transition-all duration-500" 
+                <div
+                  className="h-full bg-orange-500 rounded-full transition-all duration-500"
                   style={{ width: `${((activeTrail.xp % 500) / 500) * 100}%` }}
                 />
               </div>
@@ -358,15 +355,17 @@ export function TrailsContent({
                 className="flex items-center gap-2.5 px-4.5 py-2.5 bg-dd-surface border border-dd-border hover:border-orange-500/50 hover:bg-dd-border/30 rounded-xl transition-all cursor-pointer shadow-sm text-xs md:text-sm font-black text-dd-text uppercase tracking-wider"
               >
                 <span>Nível: {activeSection}</span>
-                <ChevronDown className={`w-4 h-4 text-orange-500 transition-transform ${sectionDropdownOpen ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  className={`w-4 h-4 text-orange-500 transition-transform ${sectionDropdownOpen ? "rotate-180" : ""}`}
+                />
               </button>
-              
+
               <AnimatePresence>
                 {sectionDropdownOpen && (
                   <>
-                    <div 
-                      className="fixed inset-0 z-10" 
-                      onClick={() => setSectionDropdownOpen(false)} 
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setSectionDropdownOpen(false)}
                     />
                     <motion.div
                       initial={{ opacity: 0, y: -8, scale: 0.95 }}
@@ -408,7 +407,8 @@ export function TrailsContent({
                   Unidade {activeUnitLevel.unitNumber}: {activeUnitLevel.unitTitle}
                 </h2>
                 <p className="text-xs md:text-sm text-dd-muted font-medium max-w-xl">
-                  Domine esta unidade completando os exercícios e quizzes abaixo para expandir seu conhecimento em {activeLang}.
+                  Domine esta unidade completando os exercícios e quizzes abaixo para expandir seu
+                  conhecimento em {activeLang}.
                 </p>
               </div>
             )}
@@ -419,16 +419,20 @@ export function TrailsContent({
             <div className="space-y-5 w-full max-w-sm flex flex-col items-center">
               {(() => {
                 let lastUnitNumber: number | null = null;
-                
+
                 return sectionLevels.map((level) => {
                   const showSeparator = level.unitNumber !== lastUnitNumber;
                   lastUnitNumber = level.unitNumber;
 
-                  const globalIdx = TRAILS_DATA[activeLang].findIndex(l => l.levelNumber === level.levelNumber);
+                  const globalIdx = TRAILS_DATA[activeLang].findIndex(
+                    (l) => l.levelNumber === level.levelNumber
+                  );
                   const unlocked = isLevelUnlocked(globalIdx);
-                  const completedCount = level.questions.filter((q) => attempts[q.id] === true).length;
+                  const completedCount = level.questions.filter(
+                    (q) => attempts[q.id] === true
+                  ).length;
                   const isCompleted = completedCount === 3;
-                  
+
                   return (
                     <div key={level.levelNumber} className="w-full flex flex-col items-center">
                       {showSeparator && (
@@ -450,15 +454,18 @@ export function TrailsContent({
                           {Array.from({ length: 3 }).map((_, starIdx) => {
                             const isStarEarned = attempts[level.questions[starIdx]?.id] === true;
                             const isMiddle = starIdx === 1;
-                            const starClass = isMiddle 
-                              ? "w-5.5 h-5.5 -translate-y-0.5 scale-110" 
-                              : "w-5 h-5 translate-y-0.5 " + (starIdx === 0 ? "rotate-[-12deg]" : "rotate-[12deg]");
+                            const starClass = isMiddle
+                              ? "w-5.5 h-5.5 -translate-y-0.5 scale-110"
+                              : "w-5 h-5 translate-y-0.5 " +
+                                (starIdx === 0 ? "rotate-[-12deg]" : "rotate-[12deg]");
 
                             return (
                               <Star
                                 key={starIdx}
                                 className={`transition-all ${starClass} ${
-                                  isStarEarned ? "text-yellow-500 fill-yellow-500" : "text-dd-border/70"
+                                  isStarEarned
+                                    ? "text-yellow-500 fill-yellow-500"
+                                    : "text-dd-border/70"
                                 }`}
                               />
                             );
@@ -499,41 +506,41 @@ export function TrailsContent({
               })()}
             </div>
           </div>
-        </main>
 
-        {/* Floating Recommended Level Bar */}
-        <AnimatePresence>
-          {recommendedLevel && (
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 30 }}
-              transition={{ type: "spring", stiffness: 350, damping: 25 }}
-              className="sticky bottom-6 left-0 right-0 z-30 flex justify-center px-4 pointer-events-none"
-            >
-              <div className="pointer-events-auto bg-dd-surface/90 backdrop-blur-md border border-orange-500/30 rounded-2xl px-6 py-5 shadow-xl max-w-lg w-full flex items-center justify-between gap-5">
-                <div className="min-w-0">
-                  <p className="text-[10px] font-extrabold uppercase text-orange-400 tracking-wider">
-                    Próxima Atividade Recomendada
-                  </p>
-                  <h4 className="text-sm font-black text-dd-text truncate mt-0.5">
-                    Fase {recommendedLevel.levelNumber}: {recommendedLevel.title}
-                  </h4>
-                  <p className="text-xs text-dd-muted truncate mt-0.5">
-                    {recommendedLevel.description}
-                  </p>
+          {/* Floating Recommended Level Bar */}
+          <AnimatePresence>
+            {recommendedLevel && (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 30 }}
+                transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                className="sticky bottom-6 left-0 right-0 z-30 flex justify-center px-4 pointer-events-none"
+              >
+                <div className="pointer-events-auto bg-dd-surface/90 backdrop-blur-md border border-orange-500/30 rounded-2xl px-6 py-5 shadow-xl max-w-lg w-full flex items-center justify-between gap-5">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-extrabold uppercase text-orange-400 tracking-wider">
+                      Próxima Atividade Recomendada
+                    </p>
+                    <h4 className="text-sm font-black text-dd-text truncate mt-0.5">
+                      Fase {recommendedLevel.levelNumber}: {recommendedLevel.title}
+                    </h4>
+                    <p className="text-xs text-dd-muted truncate mt-0.5">
+                      {recommendedLevel.description}
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => handleLevelClick(recommendedLevel, true)}
+                    className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-orange-500/20 whitespace-nowrap cursor-pointer active:scale-95"
+                  >
+                    Começar
+                  </button>
                 </div>
-                
-                <button
-                  onClick={() => handleLevelClick(recommendedLevel, true)}
-                  className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-orange-500/20 whitespace-nowrap cursor-pointer active:scale-95"
-                >
-                  Começar
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </main>
 
         <Footer />
       </div>
@@ -550,7 +557,9 @@ export function TrailsContent({
               className="fixed inset-0 bg-black/60 backdrop-blur-[8px]"
               onClick={() => {
                 if (currentQuestionIndex < activeLevel.questions.length && !submittingAttempt) {
-                  if (confirm("Quer realmente sair do quiz? Seu progresso nesta sessão será perdido.")) {
+                  if (
+                    confirm("Quer realmente sair do quiz? Seu progresso nesta sessão será perdido.")
+                  ) {
                     setQuizModalOpen(false);
                   }
                 } else {
@@ -595,13 +604,22 @@ export function TrailsContent({
                         {/* Progress Bar inside Wizard */}
                         <div className="space-y-1">
                           <div className="flex justify-between text-[9px] font-bold text-dd-muted">
-                            <span>Questão {currentQuestionIndex + 1} de {activeLevel.questions.length}</span>
-                            <span>{Math.round(((currentQuestionIndex) / activeLevel.questions.length) * 100)}% concluído</span>
+                            <span>
+                              Questão {currentQuestionIndex + 1} de {activeLevel.questions.length}
+                            </span>
+                            <span>
+                              {Math.round(
+                                (currentQuestionIndex / activeLevel.questions.length) * 100
+                              )}
+                              % concluído
+                            </span>
                           </div>
                           <div className="h-1.5 w-full bg-dd-border/40 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-orange-500 rounded-full transition-all" 
-                              style={{ width: `${((currentQuestionIndex) / activeLevel.questions.length) * 100}%` }}
+                            <div
+                              className="h-full bg-orange-500 rounded-full transition-all"
+                              style={{
+                                width: `${(currentQuestionIndex / activeLevel.questions.length) * 100}%`,
+                              }}
                             />
                           </div>
                         </div>
@@ -617,15 +635,18 @@ export function TrailsContent({
                             const isSelected = selectedOption === oIdx;
                             const isCorrectAnswer = oIdx === question.correctIndex;
 
-                            let btnClasses = "border border-dd-border bg-dd-surface text-dd-text hover:bg-dd-border/20";
-                            
+                            let btnClasses =
+                              "border border-dd-border bg-dd-surface text-dd-text hover:bg-dd-border/20";
+
                             if (answered) {
                               if (isCorrectAnswer) {
-                                btnClasses = "border-emerald-500 bg-emerald-500/10 text-emerald-400";
+                                btnClasses =
+                                  "border-emerald-500 bg-emerald-500/10 text-emerald-400";
                               } else if (isSelected) {
                                 btnClasses = "border-red-500 bg-red-500/10 text-red-400";
                               } else {
-                                btnClasses = "border-dd-border opacity-50 bg-dd-surface text-dd-muted";
+                                btnClasses =
+                                  "border-dd-border opacity-50 bg-dd-surface text-dd-muted";
                               }
                             } else if (isSelected) {
                               btnClasses = "border-orange-500 bg-orange-500/5 text-orange-400";
@@ -664,7 +685,7 @@ export function TrailsContent({
                     <div className="w-16 h-16 bg-orange-500/10 border border-orange-500/20 rounded-full flex items-center justify-center text-orange-400 mx-auto animate-bounce">
                       <Trophy className="w-8 h-8" />
                     </div>
-                    
+
                     <div className="space-y-2">
                       <h3 className="text-lg font-black text-dd-text uppercase">Fase Concluída!</h3>
                       <p className="text-xs text-dd-muted max-w-xs mx-auto">
@@ -679,7 +700,9 @@ export function TrailsContent({
                       </div>
                       <div className="bg-dd-surface border border-dd-border p-4 rounded-xl text-center">
                         <p className="text-[9px] font-bold text-dd-muted uppercase">XP Ganho</p>
-                        <p className="text-lg font-black text-orange-400 mt-1 font-mono">+{xpEarned} XP</p>
+                        <p className="text-lg font-black text-orange-400 mt-1 font-mono">
+                          +{xpEarned} XP
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -732,7 +755,7 @@ export function TrailsContent({
               className="fixed inset-0 bg-black/80 backdrop-blur-md"
               onClick={() => setLevelUpVisible(false)}
             />
-            
+
             {/* White screen flash */}
             <div className="dd-level-flash" />
 
@@ -746,17 +769,22 @@ export function TrailsContent({
               <div className="w-20 h-20 bg-orange-500/10 border border-orange-500/20 text-orange-400 rounded-full flex items-center justify-center text-4xl mx-auto shadow-lg shadow-orange-500/10">
                 ⭐
               </div>
-              
+
               <div className="space-y-2">
-                <p className="text-dd-accent font-extrabold uppercase text-xs tracking-widest">Parabéns!</p>
+                <p className="text-dd-accent font-extrabold uppercase text-xs tracking-widest">
+                  Parabéns!
+                </p>
                 <h2 className="text-2xl font-black text-dd-text">Subiu de Nível!</h2>
                 <p className="text-xs text-dd-muted">
-                  Você agora atingiu o nível <strong className="text-dd-text">{newLevelNumber}</strong> geral no DevDeck.
+                  Você agora atingiu o nível{" "}
+                  <strong className="text-dd-text">{newLevelNumber}</strong> geral no DevDeck.
                 </p>
               </div>
 
               <div className="bg-dd-border/20 border border-dd-border/50 py-3.5 px-5 rounded-xl">
-                <span className="text-[10px] font-bold text-dd-muted uppercase block">Título Conquistado</span>
+                <span className="text-[10px] font-bold text-dd-muted uppercase block">
+                  Título Conquistado
+                </span>
                 <span className="text-sm font-black text-orange-400 uppercase tracking-wide mt-1 block">
                   {unlockedTitle}
                 </span>
@@ -785,16 +813,16 @@ const fadeVariants = {
 
 const modalContentVariants = {
   hidden: { opacity: 0, scale: 0.92, y: 16 },
-  visible: { 
-    opacity: 1, 
-    scale: 1, 
+  visible: {
+    opacity: 1,
+    scale: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 450, damping: 26 }
+    transition: { type: "spring", stiffness: 450, damping: 26 },
   },
-  exit: { 
-    opacity: 0, 
-    scale: 0.92, 
+  exit: {
+    opacity: 0,
+    scale: 0.92,
     y: 12,
-    transition: { duration: 0.15 } 
+    transition: { duration: 0.15 },
   },
 };
