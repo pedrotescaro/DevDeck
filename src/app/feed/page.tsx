@@ -59,6 +59,16 @@ export default async function FeedPage() {
     },
   });
 
+  // Fetch bookmarks
+  const dbBookmarks = await prisma.bookmark.findMany({
+    where: { user_id: user.id },
+    select: { post_id: true }
+  });
+  const bookmarksMap: Record<string, boolean> = {};
+  dbBookmarks.forEach((b) => {
+    bookmarksMap[b.post_id] = true;
+  });
+
   // Fetch trails and badges
   const trails = await prisma.languageTrail.findMany({
     where: { user_id: user.id },
@@ -88,6 +98,7 @@ export default async function FeedPage() {
       }}
       initialPosts={serializedPosts}
       initialDuels={serializedDuels}
+      initialBookmarks={bookmarksMap}
     />
   );
 }

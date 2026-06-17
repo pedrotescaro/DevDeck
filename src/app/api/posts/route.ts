@@ -16,8 +16,18 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get("limit") || "10");
     const skip = (page - 1) * limit;
     const user = await getAuthUser();
+    const filter = searchParams.get("filter");
 
     const whereClause: any = {};
+    if (filter === "following" && user) {
+      const followingRelations = await prisma.follow.findMany({
+        where: { follower_id: user.id },
+        select: { following_id: true },
+      });
+      const followingIds = followingRelations.map((r) => r.following_id);
+      whereClause.author_id = { in: followingIds };
+    }
+
     if (language) {
       whereClause.language = language as Language;
     }

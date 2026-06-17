@@ -402,6 +402,12 @@ export function Sidebar({ user }: SidebarProps) {
       active: pathname === '/explore'
     },
     {
+      label: 'Trilhas',
+      href: '/trails',
+      icon: BookOpen,
+      active: pathname.startsWith('/trails')
+    },
+    {
       label: 'Notificações',
       href: '/notifications',
       icon: Bell,
@@ -415,13 +421,15 @@ export function Sidebar({ user }: SidebarProps) {
     },
     {
       label: 'Ducky',
-      onClick: () => showToast("Ducky está analisando seus posts para tirar dúvidas com patinho de borracha!"),
-      icon: DuckyIcon
+      href: '/ducky',
+      icon: DuckyIcon,
+      active: pathname === '/ducky'
     },
     {
       label: 'Itens salvos',
-      onClick: () => showToast("Em breve: Itens salvos (bookmarks)."),
-      icon: Bookmark
+      href: '/bookmarks',
+      icon: Bookmark,
+      active: pathname === '/bookmarks'
     },
     {
       label: 'Premium',
@@ -714,9 +722,8 @@ export function Sidebar({ user }: SidebarProps) {
           </div>
         </header>
 
-        {/* Bottom Nav Bar */}
         <nav className="fixed bottom-0 left-0 right-0 z-40 bg-dd-bg/90 backdrop-blur-md border-t border-dd-border px-6 py-2.5 flex items-center justify-around">
-          {navItems.filter(item => item.label === 'Página Inicial' || item.label === 'Explorar' || item.label === 'Notificações' || item.label === 'Perfil').map((item) => {
+          {navItems.filter(item => item.label === 'Página Inicial' || item.label === 'Explorar' || item.label === 'Trilhas' || item.label === 'Notificações' || item.label === 'Perfil').map((item) => {
             const Icon = item.icon;
             
             const iconEl = (

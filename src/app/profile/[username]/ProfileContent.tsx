@@ -6,6 +6,7 @@ import { ProfileHeader } from "@/components/ProfileHeader";
 import { BadgeGrid } from "@/components/BadgeGrid";
 import { PostCard } from "@/components/PostCard";
 import { Footer } from "@/components/Footer";
+import { FollowersModal } from "@/components/motion/FollowersModal";
 import { Award, Sparkles } from "lucide-react";
 
 interface ProfileContentProps {
@@ -32,6 +33,8 @@ interface ProfileContentProps {
   trails: any[];
   allBadges: any[];
   isFollowing: boolean;
+  followersCount: number;
+  followingCount: number;
 }
 
 export function ProfileContent({
@@ -41,14 +44,36 @@ export function ProfileContent({
   trails,
   allBadges,
   isFollowing,
+  followersCount,
+  followingCount,
 }: ProfileContentProps) {
   const [posts, setPosts] = useState<any[]>([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [following, setFollowing] = useState(isFollowing);
+  const [followers, setFollowers] = useState(followersCount);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<"followers" | "following">("followers");
+
+  const showFollowersModal = () => {
+    setModalType("followers");
+    setModalOpen(true);
+  };
+
+  const showFollowingModal = () => {
+    setModalType("following");
+    setModalOpen(true);
+  };
 
   const handleFollowToggle = async () => {
+    const previousFollowing = following;
+    const newFollowing = !previousFollowing;
+
+    // Atualização otimista do estado de seguindo e do número de seguidores
+    setFollowing(newFollowing);
+    setFollowers((prev) => (newFollowing ? prev + 1 : prev - 1));
+
     try {
       const res = await fetch(`/api/users/${profileUser.id}/follow`, {
         method: "POST",
@@ -58,8 +83,16 @@ export function ProfileContent({
       }
       const data = await res.json();
       setFollowing(data.following);
+      
+      // Sincroniza caso o resultado do servidor seja diferente do otimista
+      if (data.following !== newFollowing) {
+        setFollowers((prev) => (data.following ? prev + 1 : prev - 1));
+      }
     } catch (err) {
       console.error("Erro no follow/unfollow:", err);
+      // Reverte o estado em caso de erro
+      setFollowing(previousFollowing);
+      setFollowers(followersCount);
       throw err; // Permite que o FollowButton reverta seu estado otimista
     }
   };
@@ -137,6 +170,10 @@ export function ProfileContent({
           isFollowing={following}
           onFollowToggle={handleFollowToggle}
           showFollowButton={user.id !== profileUser.id}
+          followersCount={followers}
+          followingCount={followingCount}
+          onShowFollowers={showFollowersModal}
+          onShowFollowing={showFollowingModal}
         />
 
         {/* Quadro de Badges/Conquistas */}
@@ -224,6 +261,15 @@ export function ProfileContent({
         </main>
         <Footer />
       </div>
+
+      <FollowersModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        userId={profileUser.id}
+        currentUserId={user.id}
+        type={modalType}
+        title={modalType === "followers" ? "Seguidores" : "Seguindo"}
+      />
     </div>
   );
 }

@@ -33,6 +33,10 @@ interface ProfileHeaderProps {
   isFollowing?: boolean;
   onFollowToggle?: () => Promise<void> | void;
   showFollowButton?: boolean;
+  followersCount?: number;
+  followingCount?: number;
+  onShowFollowers?: () => void;
+  onShowFollowing?: () => void;
 }
 
 export function ProfileHeader({
@@ -42,6 +46,10 @@ export function ProfileHeader({
   isFollowing = false,
   onFollowToggle,
   showFollowButton = false,
+  followersCount = 0,
+  followingCount = 0,
+  onShowFollowers,
+  onShowFollowing,
 }: ProfileHeaderProps) {
   const initials = user.username.slice(0, 2).toUpperCase();
 
@@ -88,6 +96,16 @@ export function ProfileHeader({
             ) : (
               <p className="text-dd-muted text-xs italic mb-3">Sem biografia fornecida.</p>
             )}
+
+            {/* Seguidores e Seguindo (Estilo Twitter/X) */}
+            <div className="flex items-center justify-center sm:justify-start gap-4 text-xs mb-4">
+              <span onClick={onShowFollowing} className="hover:underline cursor-pointer">
+                <strong className="text-dd-text font-bold">{followingCount}</strong> <span className="text-dd-muted">seguindo</span>
+              </span>
+              <span onClick={onShowFollowers} className="hover:underline cursor-pointer">
+                <strong className="text-dd-text font-bold">{followersCount}</strong> <span className="text-dd-muted">seguidores</span>
+              </span>
+            </div>
 
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1.5 mt-2">
               {user.institution && (

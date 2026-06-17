@@ -97,6 +97,15 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     }
   }) !== null : false;
 
+  // Calcular contagem de seguidores e seguindo
+  const followersCount = await prisma.follow.count({
+    where: { following_id: profileUser.id },
+  });
+
+  const followingCount = await prisma.follow.count({
+    where: { follower_id: profileUser.id },
+  });
+
   return (
     <ProfileContent
       user={{
@@ -114,6 +123,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
       trails={serializedTrails}
       allBadges={serializedAllBadges}
       isFollowing={isFollowing}
+      followersCount={followersCount}
+      followingCount={followingCount}
     />
   );
 }

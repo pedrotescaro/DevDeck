@@ -67,6 +67,17 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
     notFound();
   }
 
+  // Verificar se o post está salvo nos bookmarks do usuário
+  const bookmark = await prisma.bookmark.findUnique({
+    where: {
+      user_id_post_id: {
+        user_id: user.id,
+        post_id: id,
+      },
+    },
+  });
+  const initialIsSaved = !!bookmark;
+
   // Serializar datas
   const serializedPost = {
     ...post,
@@ -90,6 +101,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
         total_xp: user.total_xp,
       }}
       post={serializedPost}
+      initialIsSaved={initialIsSaved}
     />
   );
 }

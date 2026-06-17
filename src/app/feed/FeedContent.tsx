@@ -121,11 +121,13 @@ interface FeedContentProps {
   };
   initialPosts: any[];
   initialDuels: any[];
+  initialBookmarks?: Record<string, boolean>;
 }
 
-export function FeedContent({ initialUser, initialPosts, initialDuels }: FeedContentProps) {
+export function FeedContent({ initialUser, initialPosts, initialDuels, initialBookmarks = {} }: FeedContentProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"feed" | "quizzes" | "duels" | "ranking">("feed");
+  const [feedFilter, setFeedFilter] = useState<"for-you" | "following">("for-you");
   const [posts, setPosts] = useState<any[]>(initialPosts);
   const [duels, setDuels] = useState<any[]>(initialDuels);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
@@ -150,7 +152,7 @@ export function FeedContent({ initialUser, initialPosts, initialDuels }: FeedCon
   const [uploadingImage, setUploadingImage] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [quotePost, setQuotePost] = useState<any | null>(null);
-  const [bookmarkedPostIds, setBookmarkedPostIds] = useState<Record<string, boolean>>({});
+  const [bookmarkedPostIds, setBookmarkedPostIds] = useState<Record<string, boolean>>(initialBookmarks);
   const [repostState, setRepostState] = useState<Record<string, { count: number; reposted: boolean }>>({});
   const [activeReactions, setActiveReactions] = useState<Record<string, string | null>>({});
   const [currentXp, setCurrentXp] = useState(initialUser.total_xp);
@@ -234,12 +236,43 @@ export function FeedContent({ initialUser, initialPosts, initialDuels }: FeedCon
     return () => clearTimeout(delayDebounce);
   }, [searchQuery]);
 
+  // Carregar posts quando o filtro (Para você / Seguindo) muda
+  useEffect(() => {
+    const fetchFilteredPosts = async () => {
+      setPage(1);
+      setLoadingSearch(true);
+      try {
+        const url = feedFilter === "following"
+          ? `/api/posts?filter=following&limit=${FEED_PAGE_SIZE}`
+          : `/api/posts?limit=${FEED_PAGE_SIZE}`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          setPosts(data);
+          setHasMore(data.length >= FEED_PAGE_SIZE);
+        }
+      } catch (err) {
+        console.error("Error fetching filtered posts:", err);
+      } finally {
+        setLoadingSearch(false);
+      }
+    };
+
+    // Evita carregar duas vezes no mount inicial
+    if (feedFilter === "following" || (feedFilter === "for-you" && posts !== initialPosts)) {
+      fetchFilteredPosts();
+    }
+  }, [feedFilter]);
+
   const loadMorePosts = useCallback(async () => {
     if (loadingMore || !hasMore || searchQuery.trim()) return;
     setLoadingMore(true);
     try {
       const nextPage = page + 1;
-      const res = await fetch(`/api/posts?page=${nextPage}&limit=${FEED_PAGE_SIZE}`);
+      const url = feedFilter === "following"
+        ? `/api/posts?filter=following&page=${nextPage}&limit=${FEED_PAGE_SIZE}`
+        : `/api/posts?page=${nextPage}&limit=${FEED_PAGE_SIZE}`;
+      const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
         setPosts((prev) => {
@@ -255,7 +288,7 @@ export function FeedContent({ initialUser, initialPosts, initialDuels }: FeedCon
     } finally {
       setLoadingMore(false);
     }
-  }, [loadingMore, hasMore, searchQuery, page]);
+  }, [loadingMore, hasMore, searchQuery, page, feedFilter]);
 
   const scrollSentinelRef = useInfiniteScroll({
     onLoadMore: loadMorePosts,
@@ -720,11 +753,29 @@ export function FeedContent({ initialUser, initialPosts, initialDuels }: FeedCon
     await handleVote(postId, "up");
   };
 
-  const handleBookmarkToggle = (postId: string) => {
+  const handleBookmarkToggle = async (postId: string) => {
+    const isCurrentlySaved = !!bookmarkedPostIds[postId];
     setBookmarkedPostIds((prev) => ({
       ...prev,
-      [postId]: !prev[postId],
+      [postId]: !isCurrentlySaved,
     }));
+    try {
+      const res = await fetch(`/api/posts/${postId}/bookmark`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        setBookmarkedPostIds((prev) => ({
+          ...prev,
+          [postId]: isCurrentlySaved,
+        }));
+      }
+    } catch (err) {
+      console.error("Failed to toggle bookmark:", err);
+      setBookmarkedPostIds((prev) => ({
+        ...prev,
+        [postId]: isCurrentlySaved,
+      }));
+    }
   };
 
   const handleRepost = (post: any) => {
@@ -904,15 +955,15 @@ export function FeedContent({ initialUser, initialPosts, initialDuels }: FeedCon
             {/* Seletor de Abas Feed / Quizzes */}
             <div className="flex border-b border-dd-border select-none">
               <button
-                onClick={() => setActiveTab("feed")}
+                onClick={() => setFeedFilter("for-you")}
                 className={`relative flex-1 py-3 text-xs font-bold transition-colors cursor-pointer ${
-                  activeTab === "feed"
+                  feedFilter === "for-you"
                     ? "text-dd-text"
                     : "text-dd-muted hover:text-dd-text hover:bg-dd-surface/30"
                 }`}
               >
-                Duvidas & Discussoes
-                {activeTab === "feed" && (
+                Para você
+                {feedFilter === "for-you" && (
                   <motion.div
                     layoutId="feedTabIndicator"
                     className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full"
@@ -921,15 +972,15 @@ export function FeedContent({ initialUser, initialPosts, initialDuels }: FeedCon
                 )}
               </button>
               <button
-                onClick={() => setActiveTab("quizzes")}
+                onClick={() => setFeedFilter("following")}
                 className={`relative flex-1 py-3 text-xs font-bold transition-colors cursor-pointer ${
-                  activeTab === "quizzes"
+                  feedFilter === "following"
                     ? "text-dd-text"
                     : "text-dd-muted hover:text-dd-text hover:bg-dd-surface/30"
                 }`}
               >
-                Quiz Diario & Community Quizzes
-                {activeTab === "quizzes" && (
+                Seguindo
+                {feedFilter === "following" && (
                   <motion.div
                     layoutId="feedTabIndicator"
                     className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full"

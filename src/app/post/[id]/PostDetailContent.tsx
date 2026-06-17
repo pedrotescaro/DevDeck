@@ -36,17 +36,34 @@ interface PostDetailContentProps {
     streak?: number;
   };
   post: any;
+  initialIsSaved?: boolean;
 }
 
-export function PostDetailContent({ user, post: initialPost }: PostDetailContentProps) {
+export function PostDetailContent({ user, post: initialPost, initialIsSaved = false }: PostDetailContentProps) {
   const [post, setPost] = useState<any>(initialPost);
   const [answerBody, setAnswerBody] = useState("");
   const [answerCode, setAnswerCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [toastXp, setToastXp] = useState<{ amount: number; language: string } | null>(null);
 
-  const [isSaved, setIsSaved] = useState(false);
+  const [isSaved, setIsSaved] = useState(initialIsSaved);
   const [repostState, setRepostState] = useState({ count: post.reposts_count ?? 0, reposted: false });
+
+  const handleBookmarkToggle = async () => {
+    const nextSaved = !isSaved;
+    setIsSaved(nextSaved);
+    try {
+      const res = await fetch(`/api/posts/${post.id}/bookmark`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        setIsSaved(!nextSaved);
+      }
+    } catch (err) {
+      console.error("Failed to toggle bookmark:", err);
+      setIsSaved(!nextSaved);
+    }
+  };
 
   // Report post state
   const [reportModalOpen, setReportModalOpen] = useState(false);
@@ -390,7 +407,7 @@ export function PostDetailContent({ user, post: initialPost }: PostDetailContent
 
             <BookmarkButton
               isSaved={isSaved}
-              onToggle={() => setIsSaved(!isSaved)}
+              onToggle={handleBookmarkToggle}
             />
 
             <button

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
 import { quizAttemptSchema } from "@/lib/validators";
 import { awardXP } from "@/lib/xp";
+import { findTrailQuestionById } from "@/lib/trailsData";
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -14,15 +15,42 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const { id: quizId } = await params;
 
     // Buscar o quiz e o post para pegar o idioma
-    const quiz = await prisma.quiz.findUnique({
+    let quiz = await prisma.quiz.findUnique({
       where: { id: quizId },
       include: {
         post: true,
       },
     });
 
+    let correctIndex = 0;
+    let language: string | null = null;
+
     if (!quiz) {
-      return NextResponse.json({ error: "Quiz não encontrado" }, { status: 404 });
+      // Verificar se é um quiz de trilha (duolingo-like)
+      const trailInfo = findTrailQuestionById(quizId);
+      if (!trailInfo) {
+        return NextResponse.json({ error: "Quiz não encontrado" }, { status: 404 });
+      }
+
+      // Registrar dinamicamente no banco para respeitar a integridade referencial
+      quiz = await prisma.quiz.create({
+        data: {
+          id: quizId,
+          question: trailInfo.question.question,
+          options: trailInfo.question.options,
+          correct_index: trailInfo.question.correctIndex,
+          is_daily: false,
+        },
+        include: {
+          post: true,
+        },
+      });
+
+      correctIndex = trailInfo.question.correctIndex;
+      language = trailInfo.language;
+    } else {
+      correctIndex = quiz.correct_index;
+      language = quiz.post ? quiz.post.language : null;
     }
 
     // Verificar se o usuário já tentou responder a esse quiz
@@ -30,7 +58,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       where: {
         user_id_quiz_id: {
           user_id: user.id,
-          quiz_id: quizId,
+          quiz_id: quiz.id,
         },
       },
     });
@@ -46,14 +74,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
 
     const { selected_index } = result.data;
-    const isCorrect = selected_index === quiz.correct_index;
+    const isCorrect = selected_index === correctIndex;
     const xpAmount = isCorrect ? 15 : 0;
 
     // Registrar tentativa de quiz
     const attempt = await prisma.quizAttempt.create({
       data: {
         user_id: user.id,
-        quiz_id: quizId,
+        quiz_id: quiz.id,
         selected_index,
         is_correct: isCorrect,
         xp_earned: xpAmount,
@@ -63,8 +91,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     // Se estiver correto, conceder XP (+15 XP por acerto)
     let xpResult = null;
     if (isCorrect) {
-      const language = quiz.post ? quiz.post.language : null;
-      xpResult = await awardXP(user.id, language, xpAmount);
+      xpResult = await awardXP(user.id, language as any, xpAmount);
     }
 
     return NextResponse.json({
