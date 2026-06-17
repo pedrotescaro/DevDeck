@@ -18,6 +18,7 @@ import { PublishButton, PublishState } from "@/components/motion/PublishButton";
 import { XPProgressBar } from "@/components/motion/XPProgressBar";
 import { CharCounter } from "@/components/motion/CharCounter";
 import { MentionDropdown } from "@/components/motion/MentionDropdown";
+import { LikeButton } from "@/components/motion/LikeButton";
 import { ExpandedReactionButton } from "@/components/motion/ExpandedReactions";
 import { AnimatedCounter } from "@/components/motion/AnimatedCounter";
 import { BookmarkButton } from "@/components/motion/BookmarkButton";
@@ -29,6 +30,7 @@ import { POST_CHAR_LIMIT, crossfadeVariants, springGentle } from "@/lib/motion";
 import { cn } from "@/lib/cn";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { useSearchWithDebounce } from "@/hooks/useSearchWithDebounce";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { Language } from "@prisma/client";
 import { 
   Flame, 
@@ -162,6 +164,12 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
   const [levelUpVisible, setLevelUpVisible] = useState(false);
   const [firstPostToastVisible, setFirstPostToastVisible] = useState(false);
   const [feedError, setFeedError] = useState<string | null>(null);
+
+  const [soundEnabled, setSoundEnabled] = useState(false);
+  useEffect(() => {
+    setSoundEnabled(localStorage.getItem("devdeck-sound") === "true");
+  }, []);
+  const { playSound } = useSoundEffects(soundEnabled);
 
   // Daily Quiz state
   const [dailyQuiz, setDailyQuiz] = useState<any>(null);
@@ -657,6 +665,7 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
         setPostLocation(resetExtras.location);
         setIsSensitive(resetExtras.isSensitive);
         setPublishState("success");
+        playSound('post');
         setTimeout(() => setPublishState("idle"), 1500);
 
         if (data.xpResult?.xpEarned) {
@@ -1335,57 +1344,57 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
                                 )}
                               </div>
 
-                              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-dd-border pt-3 text-xs">
-                                <div className="flex items-center gap-4" onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}>
-                                  {/* 1. Comment bubble */}
-                                  <Link
-                                    href={`/post/${post.id}`}
-                                    className="flex items-center gap-1.5 text-dd-muted hover:text-dd-text transition-colors"
-                                  >
-                                    <MessageSquare className="w-3.5 h-3.5 text-dd-muted" />
-                                    <span>{post._count?.answers || 0}</span>
-                                  </Link>
+                              <div 
+                                className="flex items-center justify-between pt-3 border-t border-dd-border text-xs w-full select-none"
+                                onClick={(e) => { 
+                                  e.stopPropagation(); 
+                                  e.preventDefault(); 
+                                }}
+                              >
+                                {/* 1. Comment bubble */}
+                                <Link
+                                  href={`/post/${post.id}`}
+                                  className="flex items-center gap-1.5 text-dd-muted hover:text-dd-text transition-colors"
+                                >
+                                  <MessageSquare className="w-3.5 h-3.5 text-dd-muted" />
+                                  <span className="text-[10px] font-semibold text-dd-muted">{post._count?.answers || 0}</span>
+                                </Link>
 
-                                  {/* 2. Heart/Like button */}
-                                  <button
-                                    onClick={() => handleVote(post.id, "up")}
-                                    className="flex items-center gap-1 text-dd-muted hover:text-orange-500 transition-colors"
-                                    title="Curtir post"
-                                  >
-                                    <Heart className={cn("w-4 h-4 transition-colors", vote.userVote === "up" ? "fill-orange-500 text-orange-500" : "text-dd-muted")} />
-                                    <AnimatedCounter
-                                      value={vote.up}
-                                      className="px-1 font-semibold text-[10px] text-dd-text"
-                                    />
-                                  </button>
+                                {/* 2. Repost Menu */}
+                                <RepostMenu
+                                  count={repostMeta.count}
+                                  isReposted={repostMeta.reposted}
+                                  onRepost={() => handleRepost(post)}
+                                  onQuote={() => handleQuotePost(post)}
+                                />
 
-                                  {/* 3. Repost Menu */}
-                                  <RepostMenu
-                                    count={repostMeta.count}
-                                    isReposted={repostMeta.reposted}
-                                    onRepost={() => handleRepost(post)}
-                                    onQuote={() => handleQuotePost(post)}
-                                  />
+                                {/* 3. Heart/Like button */}
+                                <LikeButton
+                                  count={vote.up}
+                                  isActive={vote.userVote === "up"}
+                                  onToggle={() => handleVote(post.id, "up")}
+                                  title="Curtir post"
+                                />
 
-                                  {/* 4. Views BarChart */}
-                                  <div className="flex items-center gap-1.5 text-dd-muted select-none">
-                                    <BarChart2 className="w-4 h-4 text-dd-muted" />
-                                    <span className="text-[10px] font-semibold text-dd-text">{post.view_count >= 1000 ? `${(post.view_count / 1000).toFixed(0)}mil` : post.view_count}</span>
-                                  </div>
-
-                                  {/* 5. Report button */}
-                                  <button
-                                    onClick={() => {
-                                      setSelectedReportPostId(post.id);
-                                      setReportModalOpen(true);
-                                    }}
-                                    className="p-1 rounded-md text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer flex items-center justify-center"
-                                    title="Denunciar postagem"
-                                  >
-                                    <Flag className="w-3.5 h-3.5" />
-                                  </button>
+                                {/* 4. Views BarChart */}
+                                <div className="flex items-center gap-1.5 text-dd-muted select-none">
+                                  <BarChart2 className="w-4 h-4 text-dd-muted" />
+                                  <span className="text-[10px] font-semibold text-dd-muted">{post.view_count >= 1000 ? `${(post.view_count / 1000).toFixed(0)}mil` : post.view_count}</span>
                                 </div>
 
+                                {/* 5. Report button */}
+                                <button
+                                  onClick={() => {
+                                    setSelectedReportPostId(post.id);
+                                    setReportModalOpen(true);
+                                  }}
+                                  className="p-1 rounded-md text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer flex items-center justify-center"
+                                  title="Denunciar postagem"
+                                >
+                                  <Flag className="w-3.5 h-3.5" />
+                                </button>
+
+                                {/* 6. BookmarkButton */}
                                 <BookmarkButton
                                   isSaved={!!bookmarkedPostIds[post.id]}
                                   onToggle={() => handleBookmarkToggle(post.id)}
@@ -1492,6 +1501,35 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
                                 postId={post.id}
                                 attempted={!!attempt}
                                 userAnswer={attempt?.selected_index}
+                                onAttemptSuccess={(selectedIndex: number, isCorrect: boolean) => {
+                                  setPosts((prev) =>
+                                    prev.map((p) => {
+                                      if (p.quizzes && p.quizzes[0]?.id === quiz.id) {
+                                        const updatedAttempts = [
+                                          ...(p.quizzes[0].attempts || []),
+                                          {
+                                            user_id: initialUser.id,
+                                            quiz_id: quiz.id,
+                                            selected_index: selectedIndex,
+                                            is_correct: isCorrect,
+                                            xp_earned: isCorrect ? 15 : 0,
+                                          },
+                                        ];
+                                        const updatedQuizzes = [
+                                          {
+                                            ...p.quizzes[0],
+                                            attempts: updatedAttempts,
+                                          },
+                                        ];
+                                        return { ...p, quizzes: updatedQuizzes };
+                                      }
+                                      return p;
+                                    })
+                                  );
+                                  if (isCorrect) {
+                                    showXPToast(15, post.language || "Global");
+                                  }
+                                }}
                               />
                             </div>
                           );
@@ -1677,6 +1715,41 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
           {/* ========================================================================= */}
           <aside className="lg:col-span-4 lg:sticky lg:top-6 space-y-6">
             
+            {/* Controle de Som de Gamefeel */}
+            <div className="flex justify-between items-center bg-dd-surface border border-dd-border rounded-xl p-3 text-xs backdrop-blur-sm shadow-sm select-none">
+              <span className="text-dd-muted font-bold tracking-wide flex items-center gap-2">
+                {soundEnabled ? (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-orange-500 animate-pulse">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  </svg>
+                ) : (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-dd-muted">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                    <line x1="23" y1="9" x2="17" y2="15" />
+                    <line x1="17" y1="9" x2="23" y2="15" />
+                  </svg>
+                )}
+                Efeitos Sonoros
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  const newVal = !soundEnabled;
+                  setSoundEnabled(newVal);
+                  localStorage.setItem("devdeck-sound", String(newVal));
+                }}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg border text-[10px] font-extrabold uppercase tracking-wider transition-all duration-200 active:scale-[0.97] cursor-pointer",
+                  soundEnabled
+                    ? "bg-orange-500 border-orange-600 text-white shadow-md shadow-orange-500/10 hover:bg-orange-600"
+                    : "bg-dd-surface border-dd-border text-dd-muted hover:text-dd-text hover:bg-dd-border/30"
+                )}
+              >
+                {soundEnabled ? "LIGADO" : "DESLIGADO"}
+              </button>
+            </div>
+
             {/* Search Bar */}
             <div className="relative w-full">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -1730,7 +1803,15 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
                   <span>Progresso do nivel</span>
                   <span>Lvl {currentLevel}</span>
                 </div>
-                <XPProgressBar percent={currentLevelPercent} colorClass="bg-dd-accent" level={currentLevel} />
+                <XPProgressBar
+                  percent={currentLevelPercent}
+                  colorClass="bg-dd-accent"
+                  level={currentLevel}
+                  onLevelUp={() => {
+                    setLevelUpVisible(true);
+                    playSound('levelup');
+                  }}
+                />
               </div>
             </div>
 

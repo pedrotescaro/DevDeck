@@ -159,11 +159,21 @@ async function main() {
     }
   }
 
+  const seedPassword = process.env.SEED_DEFAULT_PASSWORD;
+  if (!seedPassword) {
+    throw new Error(
+      "SEED_DEFAULT_PASSWORD não definida. Configure-a no seu .env.local antes de rodar `npx prisma db seed`. Veja .env.example."
+    );
+  }
+  if (seedPassword.length < 6) {
+    throw new Error("SEED_DEFAULT_PASSWORD deve ter pelo menos 6 caracteres.");
+  }
+
   const usersToCreate = [
     {
       email: "pedro@devdeck.dev",
       username: "pedrodev",
-      password: "pedroa080705!",
+      password: seedPassword,
       bio: "Fullstack dev apaixonado por TypeScript e sistemas distribuídos. Criador do DevDeck.",
       institution: "UFMG",
       total_xp: 4250,
@@ -171,7 +181,7 @@ async function main() {
     {
       email: "ana@devdeck.dev",
       username: "anak",
-      password: "pedroa080705!",
+      password: seedPassword,
       bio: "Pythonista e entusiasta de ML. Sempre buscando o próximo desafio.",
       institution: "USP",
       total_xp: 3100,
@@ -179,7 +189,7 @@ async function main() {
     {
       email: "carlos@devdeck.dev",
       username: "carlosm",
-      password: "pedroa080705!",
+      password: seedPassword,
       bio: "Rustacean 🦀 e competidor de maratona de programação.",
       institution: "UNICAMP",
       total_xp: 2800,

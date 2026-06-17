@@ -64,6 +64,7 @@ export async function GET(request: Request) {
           },
         },
         votes: user ? { where: { user_id: user.id } } : { where: { id: "none" } },
+        bookmarks: user ? { where: { user_id: user.id } } : { where: { id: "none" } },
       },
     });
 

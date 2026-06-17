@@ -131,16 +131,18 @@ Abra seu navegador em [http://localhost:3000](http://localhost:3000).
 
 ## 👥 Contas para Testes Rápidos
 
-O seed do banco cria três desenvolvedores com diferentes níveis de XP e trilhas de tecnologia. Acesse `/login` e utilize qualquer um deles:
+O seed cria três desenvolvedores com diferentes níveis de XP e trilhas de tecnologia. **A senha dessas contas é definida por você** no momento do seed — nunca é fixa no repositório.
 
-> [!NOTE]
-> A senha padrão para todas as contas abaixo é: **`pedroa080705!`**
+> [!IMPORTANT]
+> Defina `SEED_DEFAULT_PASSWORD` no seu `.env.local` **antes** de rodar `npx prisma db seed`. Consulte `.env.example` para a lista completa de variáveis.
 
 | Nome | E-mail | Especialidade Principal |
 | :--- | :--- | :--- |
 | **Pedro** | `pedro@devdeck.dev` | TypeScript & JavaScript |
 | **Ana** | `ana@devdeck.dev` | Python & Django |
 | **Carlos** | `carlos@devdeck.dev` | Rust & C++ |
+
+Acesse `/login` e utilize qualquer uma das contas acima com a senha que você definiu em `SEED_DEFAULT_PASSWORD`.
 
 ---
 

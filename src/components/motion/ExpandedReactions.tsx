@@ -80,8 +80,8 @@ export function ExpandedReactionButton({
         {...longPressHandlers}
         title={title}
         className={cn(
-          "dd-touch dd-focus-ring dd-gpu relative p-1.5 rounded-md transition-colors cursor-pointer select-none hover:bg-dd-surface",
-          isActive ? "text-orange-500" : "text-dd-muted hover:text-dd-text"
+          "dd-touch dd-focus-ring dd-gpu relative p-1.5 rounded-md transition-colors cursor-pointer select-none",
+          isActive ? "text-orange-500 hover:bg-orange-500/10" : "text-dd-muted hover:text-dd-text hover:bg-orange-500/10"
         )}
         whileTap={reduced ? undefined : { scale: [1, 1.35, 1.1, 1] }}
         transition={{ duration: 0.3, times: [0, 0.35, 0.7, 1] }}
@@ -127,7 +127,7 @@ export function ExpandedReactionButton({
                   type="button"
                   variants={reactionItemVariants}
                   onClick={() => handlePickerReact(reaction)}
-                  className="dd-touch w-8 h-8 flex items-center justify-center rounded-full hover:bg-dd-border/50 transition-colors cursor-pointer"
+                  className="dd-touch w-8 h-8 flex items-center justify-center rounded-full hover:bg-orange-500/10 transition-colors cursor-pointer"
                   whileHover={{ scale: 1.3 }}
                   title={reaction.label}
                 >

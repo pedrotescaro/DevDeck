@@ -45,6 +45,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
           },
         },
         votes: user ? { where: { user_id: user.id } } : { where: { id: "none" } },
+        bookmarks: user ? { where: { user_id: user.id } } : { where: { id: "none" } },
       },
     });
 

@@ -9,6 +9,7 @@ import { Footer } from "@/components/Footer";
 import { LanguageTag } from "@/components/LanguageTag";
 import { BookmarkButton } from "@/components/motion/BookmarkButton";
 import { RepostMenu } from "@/components/motion/RepostMenu";
+import { LikeButton } from "@/components/motion/LikeButton";
 import { ExpandedReactionButton } from "@/components/motion/ExpandedReactions";
 import { AnimatedCounter } from "@/components/motion/AnimatedCounter";
 import { EmptyState } from "@/components/motion/EmptyState";
@@ -384,43 +385,42 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
                             )}
                           </div>
 
-                          {/* Actions section */}
-                          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-dd-border pt-3 text-xs">
-                            <div className="flex items-center gap-4" onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}>
+                            <div 
+                              className="flex items-center justify-between pt-3 border-t border-dd-border text-xs w-full select-none"
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                e.preventDefault(); 
+                              }}
+                            >
                               {/* 1. Comment bubble */}
                               <Link
                                 href={`/post/${post.id}`}
                                 className="flex items-center gap-1.5 text-dd-muted hover:text-dd-text transition-colors"
                               >
                                 <MessageSquare className="w-3.5 h-3.5 text-dd-muted" />
-                                <span>{post._count?.answers || 0}</span>
+                                <span className="text-[10px] font-semibold text-dd-muted">{post._count?.answers || 0}</span>
                               </Link>
 
-                              {/* 2. Heart/Like button */}
-                              <button
-                                onClick={() => handleVote(post.id, "up")}
-                                className="flex items-center gap-1 text-dd-muted hover:text-orange-500 transition-colors"
-                                title="Curtir post"
-                              >
-                                <Heart className={cn("w-4 h-4 transition-colors", vote.userVote === "up" ? "fill-orange-500 text-orange-500" : "text-dd-muted")} />
-                                <AnimatedCounter
-                                  value={vote.up}
-                                  className="px-1 font-semibold text-[10px] text-dd-text"
-                                />
-                              </button>
-
-                              {/* 3. Repost Menu */}
+                              {/* 2. Repost Menu */}
                               <RepostMenu
                                 count={repostMeta.count}
                                 isReposted={repostMeta.reposted}
-                                  onRepost={() => handleRepost(post.id)}
+                                onRepost={() => handleRepost(post.id)}
                                 onQuote={() => handleQuotePost(post)}
+                              />
+
+                              {/* 3. Heart/Like button */}
+                              <LikeButton
+                                count={vote.up}
+                                isActive={vote.userVote === "up"}
+                                onToggle={() => handleVote(post.id, "up")}
+                                title="Curtir post"
                               />
 
                               {/* 4. Views BarChart */}
                               <div className="flex items-center gap-1.5 text-dd-muted select-none">
                                 <BarChart2 className="w-4 h-4 text-dd-muted" />
-                                <span className="text-[10px] font-semibold text-dd-text">{post.view_count >= 1000 ? `${(post.view_count / 1000).toFixed(0)}mil` : post.view_count}</span>
+                                <span className="text-[10px] font-semibold text-dd-muted">{post.view_count >= 1000 ? `${(post.view_count / 1000).toFixed(0)}mil` : post.view_count}</span>
                               </div>
 
                               {/* 5. Report button */}
@@ -431,15 +431,14 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
                               >
                                 <Flag className="w-3.5 h-3.5" />
                               </button>
-                            </div>
 
-                            {/* Saved is true by default since they are on the Bookmarks page */}
-                            <BookmarkButton
-                              isSaved={true}
-                              onToggle={() => handleBookmarkToggle(post.id)}
-                            />
-                          </div>
-                        </motion.article>
+                              {/* 6. BookmarkButton (Saved is true by default in Bookmarks page) */}
+                              <BookmarkButton
+                                isSaved={true}
+                                onToggle={() => handleBookmarkToggle(post.id)}
+                              />
+                            </div>
+                          </motion.article>
 
                         {/* Resolver como Quiz outside/below the post box */}
                         {post.quizzes && post.quizzes.length > 0 && (

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "Suporte e Segurança"
+    url: "mailto:pedro@devdeck.dev"
+    about: "Para dúvidas confidenciais ou reportar falhas de segurança críticas."

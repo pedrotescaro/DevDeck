@@ -3,11 +3,16 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { LanguageTag } from './LanguageTag';
-import { Flag } from 'lucide-react';
+import { Flag, Heart, MessageSquare, BarChart2, Trash2 } from 'lucide-react';
+import { LikeButton } from './motion/LikeButton';
+import { BookmarkButton } from './motion/BookmarkButton';
+import { RepostMenu } from './motion/RepostMenu';
+import { cn } from '@/lib/cn';
 
 interface PostAuthor {
   username: string;
   avatar_url?: string | null;
+  total_xp?: number;
 }
 
 interface Post {
@@ -23,6 +28,9 @@ interface Post {
   _count: {
     answers: number;
   };
+  votes?: Array<{ value: number }>;
+  bookmarks?: Array<{ id: string }>;
+  upvotes?: number;
 }
 
 interface PostCardProps {
@@ -39,13 +47,13 @@ function AuthorAvatar({ author }: { author: PostAuthor }) {
       <img
         src={author.avatar_url}
         alt={author.username}
-        className="w-8 h-8 rounded-full object-cover"
+        className="w-8 h-8 rounded-full object-cover border border-dd-border"
       />
     );
   }
 
   return (
-    <div className="w-8 h-8 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-semibold">
+    <div className="w-8 h-8 rounded-full bg-dd-surface text-dd-text border border-dd-border flex items-center justify-center font-bold text-xs select-none">
       {initials}
     </div>
   );
@@ -95,6 +103,68 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
   const [reported, setReported] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // Estados interativos locais
+  const [liked, setLiked] = useState<boolean>(
+    !!(post.votes && post.votes.length > 0 && post.votes[0].value === 1)
+  );
+  const [likesCount, setLikesCount] = useState(post.upvotes ?? 0);
+  const [bookmarked, setBookmarked] = useState<boolean>(
+    !!(post.bookmarks && post.bookmarks.length > 0)
+  );
+  const [repostsCount, setRepostsCount] = useState(0);
+  const [reposted, setReposted] = useState(false);
+
+  const handleVoteToggle = async () => {
+    const newLiked = !liked;
+    const newCount = newLiked ? likesCount + 1 : Math.max(0, likesCount - 1);
+    setLiked(newLiked);
+    setLikesCount(newCount);
+
+    try {
+      const res = await fetch(`/api/posts/${post.id}/vote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: newLiked ? 1 : 0 }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Falha ao votar");
+      }
+
+      const data = await res.json();
+      setLikesCount(data.upvotes);
+    } catch (err) {
+      console.error(err);
+      // Reverter estado se falhar
+      setLiked(!newLiked);
+      setLikesCount(likesCount);
+    }
+  };
+
+  const handleBookmarkToggle = async () => {
+    const newBookmarked = !bookmarked;
+    setBookmarked(newBookmarked);
+
+    try {
+      const res = await fetch(`/api/posts/${post.id}/bookmark`, {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        throw new Error("Falha ao salvar bookmark");
+      }
+    } catch (err) {
+      console.error(err);
+      setBookmarked(!newBookmarked);
+    }
+  };
+
+  const handleRepostToggle = () => {
+    const newReposted = !reposted;
+    setReposted(newReposted);
+    setRepostsCount((prev) => (newReposted ? prev + 1 : Math.max(0, prev - 1)));
+  };
+
   const handleReportSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!reportReason.trim()) return;
@@ -142,6 +212,47 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
     }
   };
 
+  const highlightCode = (code: string) => {
+    if (!code) return null;
+    const lines = code.split("\n");
+    return (
+      <pre className="font-mono text-[11px] leading-relaxed text-dd-text">
+        <code>
+          {lines.map((line, idx) => {
+            let html = line
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;");
+            
+            // Highlight keywords
+            const keywords = /\b(const|let|var|function|return|fn|impl|pub|use|import|from|def|class|async|await|struct|enum|if|else|for|while|match)\b/g;
+            html = html.replace(keywords, '<span class="text-orange-400 font-semibold">$1</span>');
+
+            // Highlight types
+            const types = /\b(string|number|boolean|any|void|User|Post|Language|int|float|str|char)\b/g;
+            html = html.replace(types, '<span class="text-cyan-400 font-medium">$1</span>');
+
+            // Highlight comments
+            if (html.includes("//")) {
+               const parts = html.split("//");
+               html = parts[0] + '<span class="text-dd-muted italic">//' + parts.slice(1).join("//") + '</span>';
+            } else if (html.startsWith("#") || html.includes(" #")) {
+               const parts = html.split("#");
+               html = parts[0] + '<span class="text-dd-muted italic">#' + parts.slice(1).join("#") + '</span>';
+            }
+
+            return (
+              <div key={idx} className="table-row">
+                <span className="table-cell text-right pr-4 select-none opacity-20 text-[9px] w-6">{idx + 1}</span>
+                <span className="table-cell" dangerouslySetInnerHTML={{ __html: html }} />
+              </div>
+            );
+          })}
+        </code>
+      </pre>
+    );
+  };
+
   return (
     <Link href={`/post/${post.id}`} className="block group">
       <article className="bg-dd-card border border-dd-border rounded-xl p-5 hover:border-orange-500/30 transition-colors relative">
@@ -150,63 +261,29 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
           <AuthorAvatar author={post.author} />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-dd-text text-sm font-medium truncate">
-                {post.author.username}
+              <span className="text-dd-text text-xs font-bold truncate">
+                @{post.author.username}
               </span>
-              <span className="text-dd-muted text-xs">
-                {formatRelativeTime(post.created_at)}
+              <span className="text-[9px] bg-dd-surface border border-dd-border px-1.5 py-0.5 rounded text-dd-muted font-mono font-semibold">
+                Lvl {Math.max(1, Math.floor((post.author.total_xp ?? 0) / 1000) + 1)}
               </span>
             </div>
+            <span className="text-dd-muted text-[10px] block mt-0.5 font-medium">
+              {formatRelativeTime(post.created_at) === 'agora' ? 'Postado há pouco' : `Postado ${formatRelativeTime(post.created_at)}`}
+            </span>
           </div>
           <div className="flex items-center gap-1.5" onClick={(e) => e.preventDefault()}>
             {post.language && <LanguageTag language={post.language} size="sm" />}
-            {isOwner && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  setDeleteModalOpen(true);
-                }}
-                className="p-1.5 rounded-lg text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
-                title="Deletar postagem"
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M3 6h18" />
-                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                </svg>
-              </button>
-            )}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                setReportModalOpen(true);
-              }}
-              className="p-1.5 rounded-lg text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
-              title="Denunciar postagem"
-            >
-              <Flag className="w-3.5 h-3.5" />
-            </button>
           </div>
         </div>
 
         {/* Title */}
-        <h3 className="text-dd-text font-semibold text-base mb-2 group-hover:text-orange-400 transition-colors">
+        <h3 className="text-dd-text font-bold text-sm mb-2 group-hover:text-orange-400 transition-colors leading-snug">
           {post.title}
         </h3>
 
         {/* Body preview */}
-        <p className="text-dd-muted text-sm leading-relaxed line-clamp-2 mb-3">
+        <p className="text-dd-muted text-xs leading-relaxed line-clamp-2 mb-3 font-medium">
           {parseMentions(post.body)}
         </p>
 
@@ -226,51 +303,81 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
 
         {/* Code snippet preview */}
         {post.code_snippet && (
-          <div className="bg-dd-bg rounded-lg p-3 mb-3 overflow-hidden">
-            <pre className="text-dd-muted text-xs font-mono line-clamp-3 whitespace-pre-wrap">
-              {post.code_snippet}
-            </pre>
+          <div className="rounded-lg border border-dd-border bg-dd-bg p-4 mb-3 overflow-x-auto max-h-60 shadow-inner">
+            {highlightCode(post.code_snippet)}
           </div>
         )}
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-3 border-t border-dd-border">
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5 text-dd-muted text-xs">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-              </svg>
-              {post._count.answers} {post._count.answers === 1 ? 'resposta' : 'respostas'}
-            </span>
-            <span className="flex items-center gap-1.5 text-dd-muted text-xs">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-              {post.view_count}
+        <div 
+          className="flex items-center justify-between pt-3 border-t border-dd-border text-xs w-full select-none"
+          onClick={(e) => { 
+            e.stopPropagation(); 
+            e.preventDefault(); 
+          }}
+        >
+          {/* 1. Comment bubble */}
+          <Link
+            href={`/post/${post.id}`}
+            className="flex items-center gap-0.5 text-dd-muted hover:text-orange-400 transition-colors group/comment"
+          >
+            <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-500/10 transition-colors">
+              <MessageSquare className="w-3.5 h-3.5 text-dd-muted group-hover/comment:text-orange-400" />
+            </div>
+            <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/comment:text-orange-400">{post._count.answers}</span>
+          </Link>
+
+          {/* 2. Repost Menu */}
+          <RepostMenu
+            count={repostsCount}
+            isReposted={reposted}
+            onRepost={handleRepostToggle}
+            onQuote={() => {}}
+          />
+
+          {/* 3. Heart/Like button */}
+          <LikeButton 
+            count={likesCount} 
+            isActive={liked} 
+            onToggle={handleVoteToggle} 
+            title="Curtir post"
+          />
+
+          {/* 4. Views BarChart */}
+          <div className="flex items-center gap-0.5 text-dd-muted select-none group/views">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-500/10 hover:text-orange-400 transition-colors">
+              <BarChart2 className="w-4 h-4 text-dd-muted group-hover/views:text-orange-400" />
+            </div>
+            <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/views:text-orange-400">
+              {post.view_count >= 1000 ? `${(post.view_count / 1000).toFixed(0)}mil` : post.view_count}
             </span>
           </div>
-          <span className="text-xs text-dd-green bg-dd-green/10 px-2 py-0.5 rounded-full font-medium">
-            +15 xp ao responder
-          </span>
+
+          {/* 5. Report button */}
+          <button
+            onClick={() => setReportModalOpen(true)}
+            className="w-8 h-8 rounded-full flex items-center justify-center text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer shrink-0"
+            title="Denunciar postagem"
+          >
+            <Flag className="w-3.5 h-3.5" />
+          </button>
+
+          {/* 6. Delete button (if Owner) */}
+          {isOwner && (
+            <button
+              onClick={() => setDeleteModalOpen(true)}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer shrink-0"
+              title="Deletar postagem"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          {/* 7. BookmarkButton */}
+          <BookmarkButton
+            isSaved={bookmarked}
+            onToggle={handleBookmarkToggle}
+          />
         </div>
       </article>
 

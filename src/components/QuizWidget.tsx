@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
 
 interface Quiz {
   id: string;
@@ -33,6 +34,14 @@ export function QuizWidget({
         : 'incorrect'
       : 'unanswered'
   );
+  const [soundEnabled, setSoundEnabled] = useState(false);
+
+  useEffect(() => {
+    setSoundEnabled(localStorage.getItem('devdeck-sound') === 'true');
+  }, []);
+
+  const { playSound } = useSoundEffects(soundEnabled);
+
   const [selectedIndex, setSelectedIndex] = useState<number | null>(
     userAnswer ?? null
   );
@@ -60,6 +69,7 @@ export function QuizWidget({
       const data = await res.json();
       const isCorrect = index === quiz.correct_index;
       setState(isCorrect ? 'correct' : 'incorrect');
+      playSound(isCorrect ? 'quiz_correct' : 'quiz_incorrect');
       if (onAttemptSuccess) {
         onAttemptSuccess(index, isCorrect, data.xpResult);
       }
@@ -201,7 +211,7 @@ export function QuizWidget({
           >
             <path d="M20 6L9 17l-5-5" />
           </svg>
-          Correto! +10 XP
+          Correto! +15 XP
         </div>
       )}
       {state === 'incorrect' && (

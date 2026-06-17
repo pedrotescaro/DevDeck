@@ -1,15 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowBigUp, ArrowBigDown, AlertTriangle } from 'lucide-react';
-import { AnimatedCounter } from '@/components/motion/AnimatedCounter';
+import { AlertTriangle, MessageSquare, BarChart2, Share } from 'lucide-react';
+import { LikeButton } from '@/components/motion/LikeButton';
+import { BookmarkButton } from '@/components/motion/BookmarkButton';
+import { RepostMenu } from '@/components/motion/RepostMenu';
 
 interface AnswerAuthor {
   username: string;
+  total_xp?: number;
 }
 
 interface Answer {
   id: string;
+  post_id?: string;
   body: string;
   code_snippet?: string | null;
   is_accepted: boolean;
@@ -23,12 +27,69 @@ interface AnswerCardProps {
   answer: Answer;
   isPostAuthor: boolean;
   onAccept?: (id: string) => void;
+  currentUser?: { username: string; avatar_url?: string | null };
+  onAnswerAdded?: (newAnswer: any) => void;
+  postId?: string;
 }
 
-export function AnswerCard({ answer, isPostAuthor, onAccept }: AnswerCardProps) {
+export function AnswerCard({
+  answer,
+  isPostAuthor,
+  onAccept,
+  currentUser,
+  onAnswerAdded,
+  postId,
+}: AnswerCardProps) {
   const initialUserVote = answer.votes?.[0]?.value === 1 ? 'up' : answer.votes?.[0]?.value === -1 ? 'down' : null;
   const [voteCount, setVoteCount] = useState(answer.upvotes);
   const [userVote, setUserVote] = useState<'up' | 'down' | null>(initialUserVote);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [reposted, setReposted] = useState(false);
+  const [repostCount, setRepostCount] = useState(0);
+
+  const [showReplyBox, setShowReplyBox] = useState(false);
+  const [replyText, setReplyText] = useState(`@${answer.author.username} `);
+  const [replySubmitting, setReplySubmitting] = useState(false);
+
+  const handleReplySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const targetPostId = answer.post_id || postId;
+    if (replySubmitting || !replyText.trim() || !targetPostId) return;
+
+    setReplySubmitting(true);
+
+    try {
+      const res = await fetch(`/api/posts/${targetPostId}/answer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body: replyText }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Erro ao responder comentário");
+      }
+
+      const data = await res.json();
+      if (onAnswerAdded) {
+        onAnswerAdded(data.answer);
+      }
+
+      setReplyText(`@${answer.author.username} `);
+      setShowReplyBox(false);
+    } catch (err) {
+      console.error(err);
+      alert("Não foi possível enviar sua resposta agora.");
+    } finally {
+      setReplySubmitting(false);
+    }
+  };
+
+  const handleShare = () => {
+    const link = `${window.location.origin}/post/${answer.post_id || ''}#answer-${answer.id}`;
+    navigator.clipboard.writeText(link);
+    alert("Link da resposta copiado para a área de transferência!");
+  };
+
   const [accepting, setAccepting] = useState(false);
 
   const handleVote = async (type: 'up' | 'down') => {
@@ -167,51 +228,141 @@ export function AnswerCard({ answer, isPostAuthor, onAccept }: AnswerCardProps) 
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-3 border-t border-dd-border">
-        <div className="flex items-center gap-1 bg-dd-bg rounded-lg p-0.5 border border-dd-border">
+      <div className="flex items-center justify-between pt-3 border-t border-dd-border w-full select-none text-xs gap-3">
+        <div className="flex items-center justify-between flex-grow max-w-xl">
+          {/* 1. Comment bubble */}
           <button
-            onClick={() => handleVote('up')}
-            className={`p-1.5 rounded-md transition-colors cursor-pointer hover:bg-dd-surface/60 ${
-              userVote === 'up' ? 'text-orange-500' : 'text-dd-muted hover:text-dd-text'
-            }`}
-            title="Resposta útil"
+            type="button"
+            onClick={() => {
+              setShowReplyBox(!showReplyBox);
+              if (!showReplyBox) {
+                setReplyText(`@${answer.author.username} `);
+              }
+            }}
+            className="flex items-center gap-0.5 text-dd-muted select-none hover:text-orange-400 cursor-pointer group/comment border-none bg-transparent active:scale-[0.95] transition-transform"
+            title="Responder a este comentário"
           >
-            <ArrowBigUp className="w-4 h-4 fill-current" />
+            <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-500/10 transition-colors animate-none">
+              <MessageSquare className="w-3.5 h-3.5 text-dd-muted group-hover/comment:text-orange-400" />
+            </div>
           </button>
-          <AnimatedCounter value={voteCount} className="px-1 font-semibold text-[10px] text-dd-text" />
+
+          {/* 2. Repost Menu */}
+          <RepostMenu
+            count={repostCount}
+            isReposted={reposted}
+            onRepost={() => {
+              setReposted(!reposted);
+              setRepostCount(prev => reposted ? prev - 1 : prev + 1);
+            }}
+            onQuote={() => alert("Citação de resposta mockada!")}
+          />
+
+          {/* 3. Heart/Like button */}
+          <LikeButton
+            count={voteCount}
+            isActive={userVote === 'up'}
+            onToggle={() => handleVote('up')}
+            title="Curtir resposta"
+          />
+
+          {/* 4. Views BarChart */}
+          <div className="flex items-center gap-0.5 text-dd-muted select-none group/views">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-500/10 hover:text-orange-400 transition-colors animate-none">
+              <BarChart2 className="w-4 h-4 text-dd-muted group-hover/views:text-orange-400" />
+            </div>
+            <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/views:text-orange-400">
+              {(Math.abs(voteCount) * 4) + 12}
+            </span>
+          </div>
+
+          {/* 5. BookmarkButton */}
+          <BookmarkButton
+            isSaved={isBookmarked}
+            onToggle={() => setIsBookmarked(!isBookmarked)}
+          />
+
+          {/* 6. Share button */}
           <button
-            onClick={() => handleVote('down')}
-            className={`p-1.5 rounded-md transition-colors cursor-pointer hover:bg-dd-surface/60 ${
-              userVote === 'down' ? 'text-red-500' : 'text-dd-muted hover:text-dd-text'
-            }`}
-            title="Downvote exige justificativa"
+            type="button"
+            onClick={handleShare}
+            className="w-8 h-8 rounded-full flex items-center justify-center text-dd-muted hover:text-orange-500 hover:bg-orange-500/10 transition-colors cursor-pointer shrink-0"
+            title="Compartilhar"
           >
-            <ArrowBigDown className="w-4 h-4 fill-current" />
+            <Share className="w-3.5 h-3.5" />
           </button>
         </div>
 
+        {/* 7. Accept Button */}
         {isPostAuthor && !answer.is_accepted && (
           <button
             onClick={handleAccept}
             disabled={accepting}
-            className="flex items-center gap-1.5 text-xs text-dd-green bg-dd-green/10 hover:bg-dd-green/20 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+            className="flex items-center gap-1 text-[10px] font-bold text-dd-green bg-dd-green/10 hover:bg-dd-green/20 px-2.5 py-1.5 rounded-full transition-colors disabled:opacity-50 shrink-0"
           >
             <svg
-              width="14"
-              height="14"
+              width="12"
+              height="12"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="2"
+              strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
             >
               <path d="M20 6L9 17l-5-5" />
             </svg>
-            Aceitar resposta
+            Aceitar
           </button>
         )}
       </div>
+      {showReplyBox && (
+        <form onSubmit={handleReplySubmit} className="mt-4 pt-4 border-t border-dd-border/60 flex gap-3">
+          <div className="shrink-0">
+            {currentUser?.avatar_url ? (
+              <img
+                src={currentUser.avatar_url}
+                alt={currentUser.username}
+                className="w-8 h-8 rounded-full object-cover border border-dd-border"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold border border-orange-500/10">
+                {currentUser?.username?.slice(0, 2).toUpperCase() || "ME"}
+              </div>
+            )}
+          </div>
+          <div className="flex-grow space-y-2">
+            <textarea
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              placeholder={`Responder a @${answer.author.username}...`}
+              className="w-full bg-dd-surface border border-dd-border focus:border-orange-500/50 text-sm rounded-lg p-2.5 text-dd-text placeholder-dd-muted focus:outline-none focus:ring-1 focus:ring-orange-500/30 resize-none h-20"
+              maxLength={280}
+              required
+              autoFocus
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowReplyBox(false);
+                  setReplyText(`@${answer.author.username} `);
+                }}
+                className="px-3 py-1.5 rounded-lg border border-dd-border text-xs font-bold text-dd-muted hover:text-dd-text hover:bg-dd-border/30 transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={replySubmitting || !replyText.trim() || replyText.trim() === `@${answer.author.username}`}
+                className="px-3 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-xs font-bold text-white transition-all duration-200 active:scale-[0.97] cursor-pointer disabled:opacity-50"
+              >
+                {replySubmitting ? "Enviando..." : "Responder"}
+              </button>
+            </div>
+          </div>
+        </form>
+      )}
     </article>
   );
 }

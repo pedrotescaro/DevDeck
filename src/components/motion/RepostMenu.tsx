@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Repeat2, MessageSquareQuote } from "lucide-react";
+import { Repeat2, Pencil } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { popoverMenuVariants } from "@/lib/motion";
 
@@ -36,23 +36,23 @@ export function RepostMenu({
   }, [open]);
 
   return (
-    <div className={cn("relative", className)} ref={ref}>
+    <div className={cn("relative flex items-center gap-0.5", className)} ref={ref}>
       <button
         type="button"
         onClick={() => setOpen(!open)}
         className={cn(
-          "dd-touch dd-focus-ring p-1.5 rounded-md transition-colors cursor-pointer flex items-center gap-1",
+          "dd-touch dd-focus-ring w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer shrink-0",
           isReposted
-            ? "text-dd-green"
-            : "text-dd-muted hover:text-dd-green"
+            ? "text-dd-green hover:bg-dd-green/10"
+            : "text-dd-muted hover:text-dd-green hover:bg-dd-green/10"
         )}
         title="Repostar"
       >
         <Repeat2 className="w-4 h-4" />
-        {count > 0 && (
-          <span className="text-[10px] font-semibold">{count}</span>
-        )}
       </button>
+      {count > 0 && (
+        <span className="px-1 font-semibold text-[10px] text-dd-muted">{count}</span>
+      )}
 
       <AnimatePresence>
         {open && (
@@ -69,7 +69,7 @@ export function RepostMenu({
                 setOpen(false);
                 onRepost();
               }}
-              className="flex items-center gap-2.5 w-full px-4 py-3 text-xs font-bold text-dd-text hover:bg-dd-border/30 transition-colors cursor-pointer"
+              className="flex items-center gap-2.5 w-full px-4 py-3 text-xs font-bold text-dd-text hover:bg-orange-500/10 hover:text-orange-400 transition-colors cursor-pointer"
             >
               <Repeat2 className="w-4 h-4" />
               Repostar
@@ -80,10 +80,10 @@ export function RepostMenu({
                 setOpen(false);
                 onQuote();
               }}
-              className="flex items-center gap-2.5 w-full px-4 py-3 text-xs font-bold text-dd-text hover:bg-dd-border/30 transition-colors cursor-pointer"
+              className="flex items-center gap-2.5 w-full px-4 py-3 text-xs font-bold text-dd-text hover:bg-orange-500/10 hover:text-orange-400 transition-colors cursor-pointer"
             >
-              <MessageSquareQuote className="w-4 h-4" />
-              Citar com comentario
+              <Pencil className="w-4 h-4" />
+              Comentar
             </button>
           </motion.div>
         )}

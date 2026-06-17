@@ -15,7 +15,7 @@ export function useSoundEffects(enabled: boolean = false) {
     };
   }, [enabled]);
 
-  const playSound = useCallback((type: 'post' | 'like' | 'levelup') => {
+  const playSound = useCallback((type: 'post' | 'like' | 'levelup' | 'quiz_correct' | 'quiz_incorrect') => {
     if (!enabled || !audioContextRef.current) return;
 
     const ctx = audioContextRef.current;
@@ -58,6 +58,31 @@ export function useSoundEffects(enabled: boolean = false) {
           osc.start(ctx.currentTime + i * 0.15);
           osc.stop(ctx.currentTime + 0.3 + i * 0.15);
         });
+        break;
+      case 'quiz_correct':
+        // 2 ascending bright notes (C5 -> E5)
+        [523.25, 659.25].forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          gain.gain.value = 0.2;
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.2, ctx.currentTime + i * 0.1);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25 + i * 0.1);
+          osc.start(ctx.currentTime + i * 0.1);
+          osc.stop(ctx.currentTime + 0.25 + i * 0.1);
+        });
+        break;
+      case 'quiz_incorrect':
+        // Slur downward low sound (triangle wave)
+        oscillator.type = 'triangle';
+        oscillator.frequency.setValueAtTime(220, ctx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.3);
+        gainNode.gain.setValueAtTime(0.25, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.3);
         break;
     }
   }, [enabled]);

@@ -1,0 +1,57 @@
+name: "bug_report"
+description: "Relate um bug ou problema de funcionamento."
+title: "[BUG]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por nos ajudar a melhorar o DevDeck! Por favor, preencha este formulário da forma mais completa possível.
+  - type: textarea
+    id: description
+    attributes:
+      label: "Descrição do Bug"
+      description: "Uma descrição clara e concisa do que é o bug."
+      placeholder: "Explique o que aconteceu de errado..."
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: "Passos para Reproduzir"
+      description: "Descreva detalhadamente como podemos reproduzir este comportamento."
+      placeholder: |
+        1. Vá para '/feed'
+        2. Clique em '...'
+        3. Veja o erro...
+    validations:
+      required: true
+  - type: textarea
+    id: expected_vs_actual
+    attributes:
+      label: "Comportamento Esperado vs Comportamento Atual"
+      description: "O que você esperava que acontecesse e o que realmente aconteceu."
+      placeholder: |
+        Esperava que o contador incrementasse, mas o app exibiu um erro 500 no console.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: "Ambiente do Sistema"
+      description: "Forneça detalhes do seu ambiente."
+      placeholder: |
+        - OS: Windows 11
+        - Versão do Node.js: v20.9.0
+        - Navegador (se aplicável): Chrome 122
+        - Banco de Dados / Prisma: Prisma 7.8
+    validations:
+      required: true
+  - type: textarea
+    id: additional_info
+    attributes:
+      label: "Informações Adicionais ou Logs"
+      description: "Adicione logs de terminal, prints ou outras informações relevantes."
+      placeholder: "Cole logs ou descreva aqui..."
+    validations:
+      required: false
