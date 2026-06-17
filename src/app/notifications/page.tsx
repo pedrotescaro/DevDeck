@@ -174,10 +174,10 @@ export default function NotificationsPage() {
       <Sidebar user={user} />
 
       <div className="flex-grow flex flex-col md:flex-row min-w-0">
-        <main className="flex-grow max-w-2xl w-full border-r border-dd-border/80 min-h-screen bg-black pb-24 md:pb-8">
+        <main className="flex-grow max-w-2xl w-full border-r border-dd-border/80 min-h-screen bg-dd-bg pb-24 md:pb-8">
           
           {/* Header (Matching image 3 style) */}
-          <div className="sticky top-0 z-30 bg-black/95 backdrop-blur-md border-b border-dd-border/60">
+          <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60">
             <div className="flex items-center justify-between px-4 py-3">
               <h1 className="text-lg font-black tracking-tight text-dd-text">Notificações</h1>
               <button className="p-2 text-dd-text hover:bg-dd-surface/60 rounded-full transition-colors">

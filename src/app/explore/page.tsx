@@ -27,7 +27,7 @@ export default function ExplorePage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [suggestions, setSuggestions] = useState<SuggestedUser[]>([]);
-  const [activeTab, setActiveTab] = useState<'para_voce' | 'assuntos' | 'noticias' | 'esportes' | 'entretenimento'>('para_voce');
+  const [activeTab, setActiveTab] = useState<'para_voce' | 'assuntos' | 'noticias' | 'open_source' | 'carreira'>('para_voce');
   
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
@@ -191,10 +191,10 @@ export default function ExplorePage() {
       <div className="flex-grow flex flex-col md:flex-row min-w-0">
         
         {/* Left Side: Search Feed & Trends (Matching image 2) */}
-        <main className="flex-grow max-w-2xl w-full border-r border-dd-border/80 min-h-screen bg-black pb-24 md:pb-8">
+        <main className="flex-grow max-w-2xl w-full border-r border-dd-border/80 min-h-screen bg-dd-bg pb-24 md:pb-8">
           
           {/* Header Search Bar */}
-          <div className="sticky top-0 z-30 bg-black/95 backdrop-blur-md border-b border-dd-border/60 p-3 flex items-center gap-3">
+          <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60 p-3 flex items-center gap-3">
             {hasSearched && (
               <button 
                 onClick={handleClearSearch}
@@ -211,7 +211,7 @@ export default function ExplorePage() {
                 placeholder="Buscar"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-full bg-dd-surface/85 border border-transparent focus:border-orange-500/50 focus:bg-black py-2.5 pl-12 pr-4 text-xs font-semibold text-dd-text placeholder-dd-muted/70 focus:outline-none transition-colors"
+                className="w-full rounded-full bg-dd-surface/85 border border-transparent focus:border-orange-500/50 focus:bg-dd-bg py-2.5 pl-12 pr-4 text-xs font-semibold text-dd-text placeholder-dd-muted/70 focus:outline-none transition-colors"
               />
             </form>
             
@@ -263,15 +263,15 @@ export default function ExplorePage() {
             // Standard Trends Feed
             <>
               {/* Navigation Tabs */}
-              <div className="flex border-b border-dd-border/40 bg-black overflow-x-auto scrollbar-none">
-                {(['para_voce', 'assuntos', 'noticias', 'esportes', 'entretenimento'] as const).map((tab) => (
+              <div className="flex border-b border-dd-border/40 bg-dd-bg overflow-x-auto scrollbar-none">
+                {(['para_voce', 'assuntos', 'noticias', 'open_source', 'carreira'] as const).map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
                     className="py-3.5 px-4 text-xs font-bold whitespace-nowrap relative hover:bg-dd-surface/30 transition-colors"
                   >
                     <span className={activeTab === tab ? 'text-dd-text font-black' : 'text-dd-muted font-bold'}>
-                      {tab === 'para_voce' ? 'Para você' : tab === 'assuntos' ? 'Assuntos do Momento' : tab === 'noticias' ? 'Notícias' : tab === 'esportes' ? 'Esportes' : 'Entretenimento'}
+                      {tab === 'para_voce' ? 'Para você' : tab === 'assuntos' ? 'Assuntos do Momento' : tab === 'noticias' ? 'Notícias' : tab === 'open_source' ? 'Open Source' : 'Carreira'}
                     </span>
                     {activeTab === tab && (
                       <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 rounded-full bg-orange-500" />

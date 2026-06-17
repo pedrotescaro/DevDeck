@@ -275,7 +275,7 @@ export function TrailsContent({
       <Sidebar user={user} />
 
       <div className="flex-grow flex flex-col min-w-0">
-        <main className="flex-grow max-w-4xl w-full mx-auto px-4 py-8 pb-24 md:pb-8 flex flex-col min-w-0 space-y-8">
+        <main className="flex-grow max-w-4xl w-full mx-auto px-4 py-8 pb-36 md:pb-48 flex flex-col min-w-0 space-y-8">
           
           {/* Header & Sound Toggle */}
           <div className="flex items-center justify-between border-b border-dd-border pb-4">
@@ -321,26 +321,26 @@ export function TrailsContent({
           </div>
 
           {/* Progress Indicator da Trilha Ativa */}
-          <div className="bg-dd-surface border border-dd-border rounded-xl p-5 backdrop-blur-sm shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 font-black text-lg">
+          <div className="bg-dd-surface border border-dd-border rounded-xl p-6 backdrop-blur-sm shadow-sm flex flex-col md:flex-row items-center justify-between gap-5">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 font-black text-xl">
                 {activeLang.slice(0, 2)}
               </div>
               <div>
-                <h3 className="text-xs font-bold text-dd-text">Trilha de {activeLang}</h3>
-                <p className="text-[10px] text-dd-muted uppercase tracking-wider font-bold">
+                <h3 className="text-sm font-black text-dd-text">Trilha de {activeLang}</h3>
+                <p className="text-xs text-dd-muted uppercase tracking-wider font-bold mt-0.5">
                   Nível {activeTrail.level} • {activeTrail.xp.toLocaleString("pt-BR")} XP
                 </p>
               </div>
             </div>
             
             {/* XP progress bar */}
-            <div className="flex-1 w-full max-w-md">
-              <div className="flex justify-between text-[9px] font-bold text-dd-muted mb-1.5 uppercase">
+            <div className="flex-1 w-full max-w-lg">
+              <div className="flex justify-between text-[10.5px] font-bold text-dd-muted mb-1.5 uppercase">
                 <span>Progresso do Nível</span>
                 <span>{activeTrail.xp % 500} / 500 XP</span>
               </div>
-              <div className="h-2 w-full bg-dd-border/40 rounded-full overflow-hidden">
+              <div className="h-2.5 w-full bg-dd-border/40 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-orange-500 rounded-full transition-all duration-500" 
                   style={{ width: `${((activeTrail.xp % 500) / 500) * 100}%` }}
@@ -350,12 +350,12 @@ export function TrailsContent({
           </div>
 
           {/* Header Card (Duolingo Style: Dropdown and Active Unit Banner) */}
-          <div className="bg-gradient-to-r from-orange-500/10 via-orange-500/5 to-transparent border border-dd-border rounded-2xl p-6 shadow-md flex flex-col items-center text-center space-y-4">
+          <div className="bg-gradient-to-r from-orange-500/10 via-orange-500/5 to-transparent border border-dd-border rounded-2xl p-7 shadow-md flex flex-col items-center text-center space-y-4.5">
             {/* Section Dropdown */}
             <div className="relative">
               <button
                 onClick={() => setSectionDropdownOpen(!sectionDropdownOpen)}
-                className="flex items-center gap-2 px-4 py-2 bg-dd-surface border border-dd-border hover:border-orange-500/50 hover:bg-dd-border/30 rounded-xl transition-all cursor-pointer shadow-sm text-xs font-black text-dd-text uppercase tracking-wider"
+                className="flex items-center gap-2.5 px-4.5 py-2.5 bg-dd-surface border border-dd-border hover:border-orange-500/50 hover:bg-dd-border/30 rounded-xl transition-all cursor-pointer shadow-sm text-xs md:text-sm font-black text-dd-text uppercase tracking-wider"
               >
                 <span>Nível: {activeSection}</span>
                 <ChevronDown className={`w-4 h-4 text-orange-500 transition-transform ${sectionDropdownOpen ? "rotate-180" : ""}`} />
@@ -403,11 +403,11 @@ export function TrailsContent({
 
             {/* Active Unit Title */}
             {activeUnitLevel && (
-              <div className="space-y-1">
-                <h2 className="text-dd-text text-sm md:text-base font-extrabold uppercase tracking-tight">
+              <div className="space-y-1.5">
+                <h2 className="text-dd-text text-base md:text-lg lg:text-xl font-black uppercase tracking-tight">
                   Unidade {activeUnitLevel.unitNumber}: {activeUnitLevel.unitTitle}
                 </h2>
-                <p className="text-[10px] text-dd-muted font-medium max-w-md">
+                <p className="text-xs md:text-sm text-dd-muted font-medium max-w-xl">
                   Domine esta unidade completando os exercícios e quizzes abaixo para expandir seu conhecimento em {activeLang}.
                 </p>
               </div>
@@ -415,8 +415,8 @@ export function TrailsContent({
           </div>
 
           {/* Winding Trail Path (Duolingo Map) */}
-          <div className="relative flex flex-col items-center py-12 bg-dd-surface/5 border border-dd-border/50 border-dashed rounded-2xl overflow-hidden min-h-[500px]">
-            <div className="space-y-4 w-full max-w-sm flex flex-col items-center">
+          <div className="relative flex flex-col items-center py-14 bg-dd-surface/5 border border-dd-border/50 border-dashed rounded-2xl overflow-hidden min-h-[550px]">
+            <div className="space-y-5 w-full max-w-sm flex flex-col items-center">
               {(() => {
                 let lastUnitNumber: number | null = null;
                 
@@ -432,9 +432,9 @@ export function TrailsContent({
                   return (
                     <div key={level.levelNumber} className="w-full flex flex-col items-center">
                       {showSeparator && (
-                        <div className="w-full flex items-center justify-center my-8 max-w-sm px-4">
+                        <div className="w-full flex items-center justify-center my-10 max-w-sm px-4">
                           <div className="flex-grow border-t border-dd-border/60"></div>
-                          <span className="px-3.5 py-1.5 bg-dd-surface border border-dd-border text-dd-text text-[9px] font-extrabold uppercase tracking-wider rounded-full mx-3 text-center shadow-sm whitespace-nowrap">
+                          <span className="px-4.5 py-2 bg-dd-surface border border-dd-border text-dd-text text-[10px] font-extrabold uppercase tracking-wider rounded-full mx-3 text-center shadow-sm whitespace-nowrap">
                             Unidade {level.unitNumber}: {level.unitTitle}
                           </span>
                           <div className="flex-grow border-t border-dd-border/60"></div>
@@ -442,17 +442,17 @@ export function TrailsContent({
                       )}
 
                       <div
-                        className="relative z-10 flex flex-col items-center my-6 transition-transform"
+                        className="relative z-10 flex flex-col items-center my-7 transition-transform"
                         style={getOffsetStyle(globalIdx)}
                       >
                         {/* Estrelas orgânicas/curvadas */}
-                        <div className="flex gap-1 justify-center mb-2 items-end h-5">
+                        <div className="flex gap-1.5 justify-center mb-2.5 items-end h-6.5">
                           {Array.from({ length: 3 }).map((_, starIdx) => {
                             const isStarEarned = attempts[level.questions[starIdx]?.id] === true;
                             const isMiddle = starIdx === 1;
                             const starClass = isMiddle 
-                              ? "w-4 h-4 -translate-y-0.5 scale-110" 
-                              : "w-3.5 h-3.5 translate-y-0.5 " + (starIdx === 0 ? "rotate-[-12deg]" : "rotate-[12deg]");
+                              ? "w-5.5 h-5.5 -translate-y-0.5 scale-110" 
+                              : "w-5 h-5 translate-y-0.5 " + (starIdx === 0 ? "rotate-[-12deg]" : "rotate-[12deg]");
 
                             return (
                               <Star
@@ -468,27 +468,27 @@ export function TrailsContent({
                         {/* Botão 3D da fase (Rounded-Square) */}
                         <button
                           onClick={() => handleLevelClick(level, unlocked)}
-                          className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all transform cursor-pointer ${
+                          className={`w-20 h-20 rounded-[22px] flex items-center justify-center transition-all transform cursor-pointer ${
                             unlocked
                               ? isCompleted
-                                ? "bg-orange-500 text-white border-x-2 border-t-2 border-b-[6px] border-orange-600 hover:bg-orange-400 active:border-b-0 active:translate-y-[6px]"
-                                : "bg-dd-surface text-orange-500 border-x-2 border-t-2 border-b-[6px] border-orange-500 hover:bg-dd-border/30 active:border-b-0 active:translate-y-[6px]"
-                              : "bg-dd-surface/40 text-dd-muted/30 border-x-2 border-t-2 border-b-[6px] border-dd-border/40 cursor-not-allowed"
+                                ? "bg-orange-500 text-white border-x-2 border-t-2 border-b-[7px] border-orange-600 hover:bg-orange-400 active:border-b-0 active:translate-y-[7px]"
+                                : "bg-dd-surface text-orange-500 border-x-2 border-t-2 border-b-[7px] border-orange-500 hover:bg-dd-border/30 active:border-b-0 active:translate-y-[7px]"
+                              : "bg-dd-surface/40 text-dd-muted/30 border-x-2 border-t-2 border-b-[7px] border-dd-border/40 cursor-not-allowed"
                           }`}
                         >
                           {unlocked ? (
-                            <BookOpen className="w-6 h-6" />
+                            <BookOpen className="w-8 h-8" />
                           ) : (
-                            <Lock className="w-5 h-5" />
+                            <Lock className="w-7 h-7" />
                           )}
                         </button>
 
                         {/* Título da fase */}
-                        <div className="mt-2 text-center max-w-[140px]">
-                          <p className="text-[10px] font-extrabold uppercase text-dd-text leading-tight">
+                        <div className="mt-3 text-center max-w-[170px]">
+                          <p className="text-xs font-black uppercase text-dd-text leading-tight">
                             Fase {level.levelNumber}
                           </p>
-                          <p className="text-[9px] text-dd-muted font-semibold leading-tight mt-0.5 truncate">
+                          <p className="text-[10.5px] text-dd-muted font-bold leading-tight mt-1 truncate">
                             {level.title}
                           </p>
                         </div>
@@ -511,22 +511,22 @@ export function TrailsContent({
               transition={{ type: "spring", stiffness: 350, damping: 25 }}
               className="sticky bottom-6 left-0 right-0 z-30 flex justify-center px-4 pointer-events-none"
             >
-              <div className="pointer-events-auto bg-dd-surface/90 backdrop-blur-md border border-orange-500/30 rounded-2xl px-5 py-4 shadow-xl max-w-md w-full flex items-center justify-between gap-4">
+              <div className="pointer-events-auto bg-dd-surface/90 backdrop-blur-md border border-orange-500/30 rounded-2xl px-6 py-5 shadow-xl max-w-lg w-full flex items-center justify-between gap-5">
                 <div className="min-w-0">
-                  <p className="text-[9px] font-extrabold uppercase text-orange-400 tracking-wider">
+                  <p className="text-[10px] font-extrabold uppercase text-orange-400 tracking-wider">
                     Próxima Atividade Recomendada
                   </p>
-                  <h4 className="text-xs font-bold text-dd-text truncate mt-0.5">
+                  <h4 className="text-sm font-black text-dd-text truncate mt-0.5">
                     Fase {recommendedLevel.levelNumber}: {recommendedLevel.title}
                   </h4>
-                  <p className="text-[10px] text-dd-muted truncate mt-0.5">
+                  <p className="text-xs text-dd-muted truncate mt-0.5">
                     {recommendedLevel.description}
                   </p>
                 </div>
                 
                 <button
                   onClick={() => handleLevelClick(recommendedLevel, true)}
-                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-orange-500/20 whitespace-nowrap cursor-pointer active:scale-95"
+                  className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-orange-500/20 whitespace-nowrap cursor-pointer active:scale-95"
                 >
                   Começar
                 </button>

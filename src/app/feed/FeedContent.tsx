@@ -1229,7 +1229,7 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
                           >
                             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dd-border/50 pb-3">
                               <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-slate-800 text-dd-text flex items-center justify-center font-bold text-xs select-none">
+                                <div className="w-8 h-8 rounded-full bg-dd-surface text-dd-text flex items-center justify-center font-bold text-xs select-none">
                                   {post.author.username.slice(0, 2).toUpperCase()}
                                 </div>
                                 <div>
@@ -1237,7 +1237,7 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
                                     <Link href={`/profile/${post.author.username}`} className="text-xs font-bold text-dd-text hover:text-orange-400 transition-colors">
                                       @{post.author.username}
                                     </Link>
-                                    <span className="text-[9px] bg-slate-800 border border-slate-700/80 px-1 py-0.5 rounded text-dd-muted font-mono font-semibold">
+                                    <span className="text-[9px] bg-dd-surface border border-dd-border px-1 py-0.5 rounded text-dd-muted font-mono font-semibold">
                                       Lvl {Math.max(1, Math.floor(post.author.total_xp / 1000) + 1)}
                                     </span>
                                   </div>
@@ -1271,6 +1271,47 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
                                 </div>
 
                                 {post.language && <LanguageTag language={post.language} size="sm" />}
+
+                                {post.author_id === initialUser.id && (
+                                  <button
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                      if (confirm("Deseja realmente excluir esta publicação?")) {
+                                        try {
+                                          const res = await fetch(`/api/posts/${post.id}`, {
+                                            method: "DELETE",
+                                          });
+                                          if (res.ok) {
+                                            setPosts(prev => prev.filter(p => p.id !== post.id));
+                                          } else {
+                                            alert("Falha ao deletar post.");
+                                          }
+                                        } catch (err) {
+                                          console.error(err);
+                                          alert("Erro ao deletar post.");
+                                        }
+                                      }
+                                    }}
+                                    className="p-1.5 rounded-lg text-dd-muted hover:text-red-450 hover:bg-red-550/10 transition-colors cursor-pointer"
+                                    title="Deletar postagem"
+                                  >
+                                    <svg
+                                      width="14"
+                                      height="14"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    >
+                                      <path d="M3 6h18" />
+                                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                    </svg>
+                                  </button>
+                                )}
                               </div>
                             </div>
 
@@ -1602,7 +1643,7 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
                             </td>
                             <td className="py-4 px-6 font-bold text-dd-text">
                               <Link href={`/profile/${row.username}`} className="flex items-center gap-3 hover:text-orange-400 transition-colors w-fit">
-                                <div className="w-7 h-7 rounded-full bg-slate-800 text-dd-text flex items-center justify-center font-bold text-xs select-none">
+                                <div className="w-7 h-7 rounded-full bg-dd-surface text-dd-text flex items-center justify-center font-bold text-xs select-none">
                                   {row.username.slice(0, 2).toUpperCase()}
                                 </div>
                                 {row.username}
@@ -1743,7 +1784,7 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
                           <span className="font-semibold text-dd-text group-hover:text-orange-400 transition-colors">
                             {formatLangName(trail.language)}
                           </span>
-                          <span className="text-[10px] bg-slate-800 border border-slate-700/60 text-dd-text font-bold px-1.5 py-0.5 rounded font-mono">
+                          <span className="text-[10px] bg-dd-surface border border-dd-border text-dd-text font-bold px-1.5 py-0.5 rounded font-mono">
                             Lvl {trail.level}
                           </span>
                         </div>

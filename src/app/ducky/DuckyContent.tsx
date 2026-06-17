@@ -210,14 +210,14 @@ export function DuckyContent({ user }: DuckyContentProps) {
   };
 
   return (
-    <div className={`flex flex-col md:flex-row min-h-screen bg-black text-dd-text antialiased transition-all ${isFullscreen ? "p-0" : ""}`}>
+    <div className={`flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased transition-all ${isFullscreen ? "p-0" : ""}`}>
       {/* Ocultar sidebar se estiver em tela cheia para maximizar foco no código */}
       {!isFullscreen && <Sidebar user={user} />}
 
-      <div className="flex-grow flex flex-col min-w-0 bg-[#060606] border-l border-dd-border/30 relative">
+      <div className="flex-grow flex flex-col min-w-0 bg-dd-bg border-l border-dd-border/30 relative">
         
         {/* Top Header */}
-        <header className="flex items-center justify-between px-6 py-4 border-b border-dd-border/20 bg-black/60 backdrop-blur-md sticky top-0 z-20">
+        <header className="flex items-center justify-between px-6 py-4 border-b border-dd-border/20 bg-dd-bg/60 backdrop-blur-md sticky top-0 z-20">
           <div className="flex items-center gap-3">
             {isFullscreen && (
               <button 
@@ -383,11 +383,11 @@ export function DuckyContent({ user }: DuckyContentProps) {
         </div>
 
         {/* Bottom Chat Input Form (Grok Style) */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#060606] via-[#060606] to-transparent z-10">
+        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-dd-bg via-dd-bg to-transparent z-10">
           <div className="max-w-3xl w-full mx-auto flex flex-col items-center">
             
             {/* Input Container */}
-            <div className="w-full bg-black border border-dd-border/60 focus-within:border-orange-500/50 rounded-3xl p-2 pl-4 flex items-center gap-3 shadow-xl max-w-2xl">
+            <div className="w-full bg-dd-surface border border-dd-border/60 focus-within:border-orange-500/50 rounded-3xl p-2 pl-4 flex items-center gap-3 shadow-xl max-w-2xl">
               
               {/* Clip Attachment */}
               <button 

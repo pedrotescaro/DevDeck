@@ -42,7 +42,7 @@ export function XPProgressBar({
   return (
     <>
       {showFlash && !reduced && <div className="dd-level-flash" aria-hidden />}
-      <div className="dd-liquid-track h-1.5 w-full rounded-full bg-slate-800">
+      <div className="dd-liquid-track h-1.5 w-full rounded-full bg-dd-surface">
         <motion.div
           className={cn("dd-liquid-fill h-full w-full rounded-full", colorClass)}
           initial={false}

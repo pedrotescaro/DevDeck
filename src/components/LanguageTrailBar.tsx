@@ -30,7 +30,7 @@ export function LanguageTrailBar({
       </span>
 
       {/* Progress bar */}
-      <div className="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden dd-liquid-track">
+      <div className="flex-1 h-1.5 bg-dd-surface rounded-full overflow-hidden dd-liquid-track">
         <div
           className="h-full rounded-full dd-liquid-fill transition-all duration-500"
           style={{

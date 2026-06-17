@@ -142,7 +142,7 @@ export function PostComposerExtras({
           </button>
 
           {openPanel === "reply" && (
-            <div className="absolute left-0 top-full mt-1 z-[100] w-72 rounded-xl border border-dd-border/80 bg-[#151518]/98 backdrop-blur-md p-1.5 shadow-2xl animate-slide-up">
+            <div className="absolute left-0 top-full mt-1 z-[100] w-72 rounded-xl border border-dd-border/80 bg-dd-surface/95 backdrop-blur-md p-1.5 shadow-2xl animate-slide-up">
               {REPLY_AUDIENCE_OPTIONS.map((option) => (
                 <button
                   key={option.value}
@@ -188,7 +188,7 @@ export function PostComposerExtras({
         </button>
 
         {openPanel === "emoji" && (
-          <div className="absolute left-0 bottom-full mb-2 z-[100] w-72 rounded-xl border border-dd-border/80 bg-[#151518]/98 backdrop-blur-md p-3 shadow-2xl animate-slide-up">
+          <div className="absolute left-0 bottom-full mb-2 z-[100] w-72 rounded-xl border border-dd-border/80 bg-dd-surface/95 backdrop-blur-md p-3 shadow-2xl animate-slide-up">
             <p className="text-[10px] font-bold uppercase tracking-wider text-dd-muted mb-2">Emojis</p>
             <div className="space-y-3 max-h-52 overflow-y-auto">
               {EMOJI_CATEGORIES.map((category) => (
@@ -228,7 +228,7 @@ export function PostComposerExtras({
         </button>
 
         {openPanel === "schedule" && (
-          <div className="absolute left-0 bottom-full mb-2 z-[100] w-64 rounded-xl border border-dd-border/80 bg-[#151518]/98 backdrop-blur-md p-3 shadow-2xl animate-slide-up space-y-3">
+          <div className="absolute left-0 bottom-full mb-2 z-[100] w-64 rounded-xl border border-dd-border/80 bg-dd-surface/95 backdrop-blur-md p-3 shadow-2xl animate-slide-up space-y-3">
             <p className="text-xs font-bold text-dd-text">Agendar publicação</p>
             <input
               type="datetime-local"
@@ -274,7 +274,7 @@ export function PostComposerExtras({
         </button>
 
         {openPanel === "location" && (
-          <div className="absolute left-0 bottom-full mb-2 z-[100] w-64 rounded-xl border border-dd-border/80 bg-[#151518]/98 backdrop-blur-md p-3 shadow-2xl animate-slide-up space-y-3">
+          <div className="absolute left-0 bottom-full mb-2 z-[100] w-64 rounded-xl border border-dd-border/80 bg-dd-surface/95 backdrop-blur-md p-3 shadow-2xl animate-slide-up space-y-3">
             <p className="text-xs font-bold text-dd-text">Localização</p>
             <input
               type="text"

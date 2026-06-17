@@ -344,7 +344,7 @@ export function PostDetailContent({ user, post: initialPost, initialIsSaved = fa
         <article className="bg-dd-surface border border-dd-border rounded-xl p-6 space-y-6 backdrop-blur-sm shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dd-border/50 pb-3">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-slate-800 text-dd-text flex items-center justify-center font-bold text-xs select-none">
+              <div className="w-9 h-9 rounded-full bg-dd-surface text-dd-text flex items-center justify-center font-bold text-xs select-none">
                 {post.author.username.slice(0, 2).toUpperCase()}
               </div>
               <div>
@@ -379,7 +379,7 @@ export function PostDetailContent({ user, post: initialPost, initialIsSaved = fa
                 </button>
               </div>
 
-              <span className="text-[9px] bg-slate-800 border border-slate-700/80 px-2 py-0.5 rounded text-dd-muted font-mono font-semibold">
+              <span className="text-[9px] bg-dd-surface border border-dd-border px-2 py-0.5 rounded text-dd-muted font-mono font-semibold">
                 Lvl {Math.max(1, Math.floor(post.author.total_xp / 1000) + 1)}
               </span>
               <LanguageTag language={post.language} size="sm" />

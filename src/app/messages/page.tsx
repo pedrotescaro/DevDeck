@@ -266,7 +266,7 @@ export default function MessagesPage() {
     <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased">
       <Sidebar user={user} />
 
-      <div className="flex-grow flex min-w-0 bg-black">
+      <div className="flex-grow flex min-w-0 bg-dd-bg">
         <div className="flex w-full min-h-screen">
           
           {/* Left Panel: Conversation List Sidebar (Matching image 4) */}
@@ -297,7 +297,7 @@ export default function MessagesPage() {
                   placeholder="Buscar conversas"
                   value={chatSearchQuery}
                   onChange={(e) => setChatSearchQuery(e.target.value)}
-                  className="w-full rounded-full bg-dd-surface/80 border border-transparent focus:border-orange-500/50 focus:bg-black py-2 pl-11 pr-4 text-xs font-semibold text-dd-text placeholder-dd-muted/70 focus:outline-none transition-colors"
+                  className="w-full rounded-full bg-dd-surface/80 border border-transparent focus:border-orange-500/50 focus:bg-dd-bg py-2 pl-11 pr-4 text-xs font-semibold text-dd-text placeholder-dd-muted/70 focus:outline-none transition-colors"
                 />
               </div>
             </div>
@@ -368,12 +368,12 @@ export default function MessagesPage() {
           </div>
 
           {/* Right Panel: Chat Active Viewport OR Empty State (Matching image 4) */}
-          <div className="flex-1 flex flex-col bg-black min-h-screen">
+          <div className="flex-1 flex flex-col bg-dd-bg min-h-screen">
             {activeChat ? (
               // Active Conversation Screen
               <>
                 {/* Active Header */}
-                <div className="p-4 border-b border-dd-border/60 bg-black flex items-center gap-3">
+                <div className="p-4 border-b border-dd-border/60 bg-dd-bg flex items-center gap-3">
                   {activeChat.partner.avatar_url ? (
                     <img
                       src={activeChat.partner.avatar_url}
@@ -392,7 +392,7 @@ export default function MessagesPage() {
                 </div>
 
                 {/* Messages Body */}
-                <div className="flex-grow overflow-y-auto p-4 space-y-3 bg-black/40">
+                <div className="flex-grow overflow-y-auto p-4 space-y-3 bg-dd-surface/10">
                   {loadingMessages ? (
                     <div className="flex flex-col items-center justify-center h-full gap-2 text-dd-muted">
                       <div className="h-5 w-5 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
@@ -435,7 +435,7 @@ export default function MessagesPage() {
                 </div>
 
                 {/* Messages Input Bar */}
-                <div className="p-4 border-t border-dd-border/60 bg-black">
+                <div className="p-4 border-t border-dd-border/60 bg-dd-bg">
                   <form onSubmit={handleSendMessage} className="flex items-center gap-3">
                     <button 
                       type="button" 
@@ -455,7 +455,7 @@ export default function MessagesPage() {
                       placeholder="Enviar uma mensagem..."
                       value={newMessageText}
                       onChange={(e) => setNewMessageText(e.target.value)}
-                      className="flex-1 rounded-full bg-dd-surface/80 border border-transparent focus:border-orange-500/50 focus:bg-black py-2.5 px-4 text-xs font-semibold text-dd-text placeholder-dd-muted/65 focus:outline-none transition-colors"
+                      className="flex-1 rounded-full bg-dd-surface/80 border border-transparent focus:border-orange-500/50 focus:bg-dd-bg py-2.5 px-4 text-xs font-semibold text-dd-text placeholder-dd-muted/65 focus:outline-none transition-colors"
                     />
                     
                     <button
@@ -470,7 +470,7 @@ export default function MessagesPage() {
               </>
             ) : (
               // Empty State Screen (Matching image 4)
-              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-5 bg-black">
+              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-5 bg-dd-bg">
                 <EmptyState type="dm" />
                 <button 
                   onClick={handleOpenNewChatModal}

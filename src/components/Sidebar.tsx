@@ -475,7 +475,7 @@ export function Sidebar({ user }: SidebarProps) {
               // Standard link style (tightened padding)
               const linkClasses = `flex items-center gap-3.5 py-2.5 px-3.5 rounded-xl text-sm font-semibold transition-all duration-200 group border w-full text-left cursor-pointer ${
                 item.active
-                  ? 'bg-transparent text-white border-transparent'
+                  ? 'bg-transparent text-dd-text font-black border-transparent'
                   : 'text-dd-muted border-transparent hover:bg-dd-surface/60 hover:text-dd-text'
               }`;
 
@@ -485,7 +485,7 @@ export function Sidebar({ user }: SidebarProps) {
                   {item.label === 'Notificações' ? (
                     <NotificationBellIcon unreadCount={unreadCount} active={item.active} />
                   ) : (
-                    <Icon className={`w-5 h-5 transition-transform group-hover:scale-105 duration-200 ${item.active ? 'text-white fill-current' : 'text-dd-muted'}`} />
+                    <Icon className={`w-5 h-5 transition-transform group-hover:scale-105 duration-200 ${item.active ? 'text-dd-text fill-current' : 'text-dd-muted'}`} />
                   )}
                   {item.badge === 'dot' && (
                     <span className="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-orange-500 ring-2 ring-dd-bg animate-pulse" />
@@ -526,7 +526,7 @@ export function Sidebar({ user }: SidebarProps) {
                         <div className="absolute bottom-full left-0 w-56 mb-2 rounded-xl border border-dd-border bg-dd-surface/95 backdrop-blur-xl shadow-2xl z-50 py-1.5 font-sans overflow-hidden animate-slide-up">
                           <Link
                              href="/duels"
-                             className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-slate-850 hover:text-dd-text transition-colors border-b border-dd-border/40"
+                             className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors border-b border-dd-border/40"
                              onClick={() => setMoreMenuOpen(false)}
                           >
                             <Swords className="w-4 h-4 text-dd-muted" />
@@ -534,7 +534,7 @@ export function Sidebar({ user }: SidebarProps) {
                           </Link>
                           <Link
                             href="/leaderboard"
-                            className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-slate-850 hover:text-dd-text transition-colors border-b border-dd-border/40"
+                            className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors border-b border-dd-border/40"
                             onClick={() => setMoreMenuOpen(false)}
                           >
                             <Trophy className="w-4 h-4 text-dd-muted" />
@@ -542,7 +542,7 @@ export function Sidebar({ user }: SidebarProps) {
                           </Link>
                           <Link
                             href="/settings"
-                            className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-slate-850 hover:text-dd-text transition-colors"
+                            className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors"
                             onClick={() => setMoreMenuOpen(false)}
                           >
                             <SettingsIcon className="w-4 h-4 text-dd-muted" />
@@ -614,7 +614,7 @@ export function Sidebar({ user }: SidebarProps) {
                 <div className="absolute bottom-full left-0 right-0 mb-2 rounded-xl border border-dd-border bg-dd-surface/95 backdrop-blur-xl shadow-2xl z-50 py-1.5 font-sans overflow-hidden animate-slide-up">
                   <Link
                     href={`/profile/${activeUser.username}`}
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-slate-850 hover:text-dd-text transition-colors"
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors"
                     onClick={() => setDropdownOpen(false)}
                   >
                     <UserIcon className="w-4 h-4 text-dd-muted" />
@@ -622,7 +622,7 @@ export function Sidebar({ user }: SidebarProps) {
                   </Link>
                   <Link
                     href="/settings"
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-slate-800/60 hover:text-dd-text transition-colors"
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors"
                     onClick={() => setDropdownOpen(false)}
                   >
                     <SettingsIcon className="w-4 h-4 text-dd-muted" />
@@ -634,7 +634,7 @@ export function Sidebar({ user }: SidebarProps) {
                       setDropdownOpen(false);
                       handleSignOut();
                     }}
-                    className="flex w-full items-center gap-2.5 px-4 py-2.5 text-xs font-bold text-red-400 hover:bg-slate-800/60 hover:text-red-300 transition-colors cursor-pointer"
+                    className="flex w-full items-center gap-2.5 px-4 py-2.5 text-xs font-bold text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors cursor-pointer"
                   >
                     <LogOut className="w-4 h-4 text-red-500" />
                     Sair da Conta
@@ -689,7 +689,7 @@ export function Sidebar({ user }: SidebarProps) {
                     <div className="absolute right-0 mt-2 w-48 rounded-xl border border-dd-border bg-dd-surface/95 backdrop-blur-xl shadow-2xl z-50 py-1.5 font-sans overflow-hidden">
                       <Link
                         href={`/profile/${activeUser.username}`}
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-slate-850 hover:text-dd-text transition-colors"
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors"
                         onClick={() => setDropdownOpen(false)}
                       >
                         <UserIcon className="w-3.5 h-3.5 text-dd-muted" />
@@ -697,7 +697,7 @@ export function Sidebar({ user }: SidebarProps) {
                       </Link>
                       <Link
                         href="/settings"
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-slate-850 hover:text-dd-text transition-colors"
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors"
                         onClick={() => setDropdownOpen(false)}
                       >
                         <SettingsIcon className="w-3.5 h-3.5 text-dd-muted" />
@@ -709,7 +709,7 @@ export function Sidebar({ user }: SidebarProps) {
                           setDropdownOpen(false);
                           handleSignOut();
                         }}
-                        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-xs font-bold text-red-400 hover:bg-slate-850 hover:text-red-300 transition-colors cursor-pointer"
+                        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-xs font-bold text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors cursor-pointer"
                       >
                         <LogOut className="w-3.5 h-3.5 text-red-500" />
                         Sair
@@ -742,7 +742,7 @@ export function Sidebar({ user }: SidebarProps) {
             );
 
             const classes = `flex flex-col items-center justify-center p-1.5 transition-colors duration-150 ${
-              item.active ? 'text-white' : 'text-dd-muted hover:text-dd-text'
+              item.active ? 'text-dd-text font-black' : 'text-dd-muted hover:text-dd-text'
             }`;
 
             if (item.href) {
@@ -965,7 +965,7 @@ export function Sidebar({ user }: SidebarProps) {
           <div className="relative w-full max-w-md bg-dd-surface border border-dd-border rounded-2xl shadow-2xl p-6 overflow-hidden z-10 animate-scale-up font-sans text-center space-y-6">
             <button 
               onClick={() => setPremiumModalOpen(false)}
-              className="absolute top-4 right-4 p-1 rounded-md text-dd-muted hover:text-dd-text hover:bg-slate-800/60 transition-all cursor-pointer"
+              className="absolute top-4 right-4 p-1 rounded-md text-dd-muted hover:text-dd-text hover:bg-dd-surface transition-all cursor-pointer"
             >
               <X className="w-4.5 h-4.5 animate-pulse" />
             </button>

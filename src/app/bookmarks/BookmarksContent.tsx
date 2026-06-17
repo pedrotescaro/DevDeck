@@ -328,7 +328,7 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
                         {/* Author info header */}
                         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dd-border/50 pb-3">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-slate-800 text-dd-text flex items-center justify-center font-bold text-xs select-none">
+                            <div className="w-8 h-8 rounded-full bg-dd-surface text-dd-text flex items-center justify-center font-bold text-xs select-none">
                               {post.author.username.slice(0, 2).toUpperCase()}
                             </div>
                             <div>
@@ -336,7 +336,7 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
                                 <Link href={`/profile/${post.author.username}`} className="text-xs font-bold text-dd-text hover:text-orange-400 transition-colors">
                                   @{post.author.username}
                                 </Link>
-                                <span className="text-[9px] bg-slate-800 border border-slate-700/80 px-1 py-0.5 rounded text-dd-muted font-mono font-semibold">
+                                <span className="text-[9px] bg-dd-surface border border-dd-border px-1 py-0.5 rounded text-dd-muted font-mono font-semibold">
                                   Lvl {getLevelFromXp(post.author.total_xp)}
                                 </span>
                               </div>
