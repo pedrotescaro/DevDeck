@@ -57,7 +57,7 @@
     "puppeteer": "^25.1.0",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
-    "typescript": "^5",
+    "typescript": "^6",
     "vitest": "^4.1.9"
   },
   "prisma": {
