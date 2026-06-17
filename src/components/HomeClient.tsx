@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { HeroMockup } from '@/components/HeroMockup';
+import { ScreenshotCarousel } from '@/components/ScreenshotCarousel';
 import { 
   Sparkles, 
   Terminal, 
@@ -10,50 +9,18 @@ import {
   Trophy, 
   Award, 
   MessageSquare, 
-  ArrowRight, 
-  Check,
-  Code
+  ArrowRight
 } from 'lucide-react';
 
 interface HomeClientProps {
   initialUser: any;
 }
 
-type CopyOption = 'contraste' | 'tensao' | 'curiosidade';
-
 export default function HomeClient({ initialUser }: HomeClientProps) {
-  const [activeOption, setActiveOption] = useState<CopyOption>('contraste');
-  const [ctaOption, setCtaOption] = useState<number>(0);
-
-  // Copy definitions for each option
-  const heroCopies = {
-    contraste: {
-      headline: 'Cursos não geram XP. DevDeck gera.',
-      subHeadline: 'Onde suas dúvidas reais de Next.js 16 e Supabase viram quizzes por IA e disputas de código em tempo real. Codifique, ajude a comunidade e acumule XP por tecnologia.',
-      primaryCta: 'Entrar na Arena',
-      badgeLabel: 'Contraste'
-    },
-    tensao: {
-      headline: 'Seu perfil técnico vale mais que likes.',
-      subHeadline: 'Esqueça certificados de cursos que você nunca termina. Construa reputação real resolvendo quizzes de IA e trilhas de TypeScript a Rust sob o Prisma.',
-      primaryCta: 'Reivindicar meu Username',
-      badgeLabel: 'Tensão'
-    },
-    curiosidade: {
-      headline: 'O código morre em fóruns silenciosos.',
-      subHeadline: 'Dúvidas ativas geram testes rápidos de IA em tempo real. Suba de nível em trilhas de progresso impulsionadas por TailwindCSS v4 e código limpo.',
-      primaryCta: 'Compilar meu Perfil',
-      badgeLabel: 'Curiosidade'
-    }
-  };
-
-  const finalCtaButtons = [
-    'Entrar na Arena',
-    'Reivindicar meu Username',
-    'Compilar meu Perfil'
-  ];
-
-  const currentCopy = heroCopies[activeOption];
+  // Best copywriting option hardcoded as requested
+  const headline = 'Cursos não geram XP. DevDeck gera.';
+  const subHeadline = 'Onde suas dúvidas reais de Next.js 16 e Supabase viram quizzes por IA e disputas de código em tempo real. Codifique, ajude a comunidade e acumule XP por tecnologia.';
+  const primaryCta = 'Entrar na Arena';
 
   return (
     <div className="flex flex-col min-h-screen bg-dd-bg text-dd-text antialiased selection:bg-orange-500/35 selection:text-white">
@@ -148,47 +115,13 @@ export function useCalculatedXP(xp: number) {
               Código vivo. Progresso real.
             </div>
 
-            {/* Copywriter Headline Option Switcher */}
-            <div className="flex items-center justify-center gap-2 p-1 rounded-xl bg-dd-surface border border-dd-border max-w-xs md:max-w-sm mx-auto">
-              <button
-                onClick={() => setActiveOption('contraste')}
-                className={`flex-1 py-1.5 px-3 rounded-lg text-[10px] font-bold tracking-wider transition-all duration-200 ${
-                  activeOption === 'contraste'
-                    ? 'bg-orange-500 text-white shadow-sm'
-                    : 'text-dd-muted hover:text-dd-text'
-                }`}
-              >
-                Contraste
-              </button>
-              <button
-                onClick={() => setActiveOption('tensao')}
-                className={`flex-1 py-1.5 px-3 rounded-lg text-[10px] font-bold tracking-wider transition-all duration-200 ${
-                  activeOption === 'tensao'
-                    ? 'bg-orange-500 text-white shadow-sm'
-                    : 'text-dd-muted hover:text-dd-text'
-                }`}
-              >
-                Tensão
-              </button>
-              <button
-                onClick={() => setActiveOption('curiosidade')}
-                className={`flex-1 py-1.5 px-3 rounded-lg text-[10px] font-bold tracking-wider transition-all duration-200 ${
-                  activeOption === 'curiosidade'
-                    ? 'bg-orange-500 text-white shadow-sm'
-                    : 'text-dd-muted hover:text-dd-text'
-                }`}
-              >
-                Curiosidade
-              </button>
-            </div>
-
-            <div className="min-h-[140px] md:min-h-[180px] flex flex-col justify-center transition-all duration-300">
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tight mb-4 leading-[1.1] max-w-4xl mx-auto text-dd-text select-text animate-fade-in">
-                {currentCopy.headline}
+            <div className="flex flex-col justify-center">
+              <h1 className="text-4xl md:text-6xl lg:text-7.5xl font-black tracking-tight mb-4 leading-[1.1] max-w-4xl mx-auto text-dd-text select-text">
+                {headline}
               </h1>
               
               <p className="text-sm md:text-base text-dd-muted max-w-2xl mx-auto leading-relaxed select-text mt-2">
-                {currentCopy.subHeadline}
+                {subHeadline}
               </p>
             </div>
 
@@ -197,7 +130,7 @@ export function useCalculatedXP(xp: number) {
                 href={initialUser ? '/feed' : '/register'}
                 className="w-full sm:w-auto rounded-xl bg-orange-500 px-8 h-12 flex items-center justify-center text-sm font-bold text-white transition-all duration-200 hover:bg-orange-600 shadow-lg shadow-orange-500/15 hover:shadow-orange-500/25 active:scale-[0.98] gap-2 group"
               >
-                {currentCopy.primaryCta}
+                {primaryCta}
                 <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
               </Link>
               <a
@@ -221,11 +154,11 @@ export function useCalculatedXP(xp: number) {
               </span>
             </div>
 
-            {/* Interactive Mockup */}
+            {/* Screenshot Carousel Showcase */}
             <div className="pt-8 md:pt-12 relative w-full">
-              {/* Subtle background glow behind the mockup */}
+              {/* Subtle background glow behind the carousel */}
               <div className="absolute top-12 left-1/2 -translate-x-1/2 w-3/4 h-64 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
-              <HeroMockup />
+              <ScreenshotCarousel />
             </div>
           </div>
         </section>
@@ -430,29 +363,12 @@ export function useCalculatedXP(xp: number) {
             </p>
 
             <div className="space-y-6">
-              {/* CTA variation switcher inside the section to showcase flexibility */}
-              <div className="flex flex-wrap items-center justify-center gap-1.5 p-1 rounded-xl bg-dd-surface border border-dd-border max-w-xs md:max-w-md mx-auto">
-                {finalCtaButtons.map((btnName, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setCtaOption(idx)}
-                    className={`px-3 py-1.5 rounded-lg text-[9px] font-bold tracking-wider transition-all duration-200 ${
-                      ctaOption === idx
-                        ? 'bg-orange-500 text-white'
-                        : 'text-dd-muted hover:text-dd-text'
-                    }`}
-                  >
-                    Variação {idx + 1}
-                  </button>
-                ))}
-              </div>
-
               <div className="pt-2">
                 <Link
                   href={initialUser ? '/feed' : '/register'}
                   className="inline-flex rounded-xl bg-orange-500 px-10 h-13 items-center justify-center text-sm font-black text-white transition-all duration-200 hover:bg-orange-600 shadow-xl shadow-orange-500/20 active:scale-[0.98] gap-2 group"
                 >
-                  {finalCtaButtons[ctaOption]}
+                  {primaryCta}
                   <ArrowRight className="w-4.5 h-4.5 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </Link>
               </div>
@@ -476,17 +392,6 @@ export function useCalculatedXP(xp: number) {
           </div>
         </div>
       </footer>
-
-      {/* Embedded style tag for fade-in animations */}
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(4px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in {
-          animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-      `}</style>
     </div>
   );
 }
