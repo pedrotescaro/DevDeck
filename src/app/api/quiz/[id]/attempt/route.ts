@@ -63,10 +63,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       },
     });
 
-    if (existingAttempt) {
-      return NextResponse.json({ error: "Você já respondeu a este quiz" }, { status: 400 });
-    }
-
     const body = await request.json();
     const result = quizAttemptSchema.safeParse(body);
     if (!result.success) {
@@ -75,23 +71,48 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     const { selected_index } = result.data;
     const isCorrect = selected_index === correctIndex;
-    const xpAmount = isCorrect ? 15 : 0;
 
-    // Registrar tentativa de quiz
-    const attempt = await prisma.quizAttempt.create({
-      data: {
-        user_id: user.id,
-        quiz_id: quiz.id,
-        selected_index,
-        is_correct: isCorrect,
-        xp_earned: xpAmount,
-      },
-    });
-
-    // Se estiver correto, conceder XP (+15 XP por acerto)
+    let attempt;
+    let xpAmount = 0;
     let xpResult = null;
-    if (isCorrect) {
-      xpResult = await awardXP(user.id, language as any, xpAmount);
+
+    if (existingAttempt) {
+      // Se já respondeu correto antes, não ganha XP novamente
+      if (existingAttempt.is_correct) {
+        attempt = await prisma.quizAttempt.update({
+          where: { id: existingAttempt.id },
+          data: { selected_index },
+        });
+      } else {
+        // Se errou antes e agora acertou, ganha os 15 XP
+        xpAmount = isCorrect ? 15 : 0;
+        attempt = await prisma.quizAttempt.update({
+          where: { id: existingAttempt.id },
+          data: {
+            selected_index,
+            is_correct: isCorrect,
+            xp_earned: xpAmount,
+          },
+        });
+        if (isCorrect) {
+          xpResult = await awardXP(user.id, language as any, xpAmount);
+        }
+      }
+    } else {
+      // Primeira tentativa
+      xpAmount = isCorrect ? 15 : 0;
+      attempt = await prisma.quizAttempt.create({
+        data: {
+          user_id: user.id,
+          quiz_id: quiz.id,
+          selected_index,
+          is_correct: isCorrect,
+          xp_earned: xpAmount,
+        },
+      });
+      if (isCorrect) {
+        xpResult = await awardXP(user.id, language as any, xpAmount);
+      }
     }
 
     return NextResponse.json({
