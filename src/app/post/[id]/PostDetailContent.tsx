@@ -21,7 +21,9 @@ import {
   ArrowBigUp,
   ArrowBigDown,
   AlertTriangle,
-  Flag
+  Flag,
+  Heart,
+  BarChart2
 } from "lucide-react";
 import { AnimatedCounter } from "@/components/motion/AnimatedCounter";
 import { RepostMenu } from "@/components/motion/RepostMenu";
@@ -70,6 +72,7 @@ export function PostDetailContent({ user, post: initialPost, initialIsSaved = fa
   const [reportReason, setReportReason] = useState("");
   const [reporting, setReporting] = useState(false);
   const [reported, setReported] = useState(false);
+  const [showQuiz, setShowQuiz] = useState(true);
 
   const handleReportSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -350,35 +353,12 @@ export function PostDetailContent({ user, post: initialPost, initialIsSaved = fa
               <div>
                 <p className="text-xs font-bold text-dd-text">@{post.author.username}</p>
                 <div className="flex items-center gap-3 text-[10px] text-dd-muted font-semibold mt-0.5">
-                  <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> {post.view_count} visualizações</span>
                   <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> Postado há pouco</span>
                 </div>
               </div>
             </div>
             
             <div className="flex items-center gap-2 flex-wrap">
-              <div className="flex items-center gap-1 bg-dd-bg/60 rounded-lg p-0.5 border border-dd-border w-fit">
-                <button
-                  onClick={() => handlePostVote('up')}
-                  className={`p-1.5 rounded-md transition-colors cursor-pointer hover:bg-dd-surface ${
-                    postUserVote === 'up' ? "text-orange-500" : "text-dd-muted hover:text-dd-text"
-                  }`}
-                  title="Gostei da Pergunta"
-                >
-                  <ArrowBigUp className="w-4 h-4 fill-current" />
-                </button>
-                <AnimatedCounter value={postVotesCount} className="px-1 font-semibold text-[10px] text-dd-text" />
-                <button
-                  onClick={() => handlePostVote('down')}
-                  className={`p-1.5 rounded-md transition-colors cursor-pointer hover:bg-dd-surface ${
-                    postUserVote === 'down' ? "text-red-500" : "text-dd-muted hover:text-dd-text"
-                  }`}
-                  title="Downvote exige justificativa"
-                >
-                  <ArrowBigDown className="w-4 h-4 fill-current" />
-                </button>
-              </div>
-
               <span className="text-[9px] bg-dd-surface border border-dd-border px-2 py-0.5 rounded text-dd-muted font-mono font-semibold">
                 Lvl {Math.max(1, Math.floor(post.author.total_xp / 1000) + 1)}
               </span>
@@ -397,38 +377,83 @@ export function PostDetailContent({ user, post: initialPost, initialIsSaved = fa
           )}
 
           {/* Post bottom actions section */}
-          <div className="flex items-center gap-3 pt-3 border-t border-dd-border text-xs font-sans">
-            <RepostMenu
-              count={repostState.count}
-              isReposted={repostState.reposted}
-              onRepost={handleRepost}
-              onQuote={handleQuotePost}
-            />
+          <div className="flex items-center justify-between pt-3 border-t border-dd-border text-xs font-sans">
+            <div className="flex items-center gap-4">
+              {/* Comment Bubble */}
+              <div className="flex items-center gap-1.5 text-dd-muted select-none">
+                <MessageSquare className="w-3.5 h-3.5 text-dd-muted" />
+                <span>{post.answers?.length || 0}</span>
+              </div>
+
+              {/* Like/Heart button */}
+              <button
+                onClick={() => handlePostVote('up')}
+                className="flex items-center gap-1 text-dd-muted hover:text-orange-500 transition-colors"
+                title="Curtir post"
+              >
+                <Heart className={`w-4 h-4 transition-colors ${postUserVote === "up" ? "fill-orange-500 text-orange-500" : "text-dd-muted"}`} />
+                <AnimatedCounter
+                  value={postVotesCount}
+                  className="px-1 font-semibold text-[10px] text-dd-text"
+                />
+              </button>
+
+              {/* Repost Menu */}
+              <RepostMenu
+                count={repostState.count}
+                isReposted={repostState.reposted}
+                onRepost={handleRepost}
+                onQuote={handleQuotePost}
+              />
+
+              {/* Views BarChart */}
+              <div className="flex items-center gap-1.5 text-dd-muted select-none">
+                <BarChart2 className="w-4 h-4 text-dd-muted" />
+                <span className="text-[10px] font-semibold text-dd-text">
+                  {post.view_count >= 1000 ? `${(post.view_count / 1000).toFixed(0)}mil` : post.view_count}
+                </span>
+              </div>
+
+              {/* Report button */}
+              <button
+                onClick={() => setReportModalOpen(true)}
+                className="p-1 rounded-md text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer flex items-center justify-center"
+                title="Denunciar postagem"
+              >
+                <Flag className="w-3.5 h-3.5" />
+              </button>
+            </div>
 
             <BookmarkButton
               isSaved={isSaved}
               onToggle={handleBookmarkToggle}
             />
-
-            <button
-              onClick={() => setReportModalOpen(true)}
-              className="p-1.5 rounded-md text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer flex items-center justify-center"
-              title="Denunciar postagem"
-            >
-              <Flag className="w-4 h-4" />
-            </button>
           </div>
         </article>
 
-        {/* Quiz Widget Card */}
+        {/* Resolver como Quiz button outside/below the post box */}
         {post.quizzes && post.quizzes.length > 0 && (
-          <div className="bg-dd-surface border border-dd-border rounded-xl p-5 backdrop-blur-sm shadow-sm">
-            <QuizWidget
-              quiz={post.quizzes[0]}
-              postId={post.id}
-              attempted={post.quizzes[0].attempts && post.quizzes[0].attempts.length > 0}
-              userAnswer={post.quizzes[0].attempts?.[0]?.selected_index}
-            />
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-start">
+              <button
+                onClick={() => setShowQuiz(!showQuiz)}
+                className="flex items-center gap-1.5 rounded-lg bg-orange-500 px-3.5 py-1.5 font-bold text-white transition-colors hover:bg-orange-600 shadow-sm cursor-pointer text-xs"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{showQuiz ? "Ocultar Quiz" : "Resolver como Quiz"}</span>
+              </button>
+            </div>
+
+            {showQuiz && (
+              <div className="bg-dd-surface border border-dd-border rounded-xl p-5 backdrop-blur-sm shadow-sm">
+                <QuizWidget
+                  quiz={post.quizzes[0]}
+                  postId={post.id}
+                  attempted={post.quizzes[0].attempts && post.quizzes[0].attempts.length > 0}
+                  userAnswer={post.quizzes[0].attempts?.[0]?.selected_index}
+                />
+              </div>
+            )}
           </div>
         )}
 

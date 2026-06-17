@@ -47,7 +47,9 @@ import {
   TrendingUp,
   X,
   Search,
-  Flag
+  Flag,
+  Heart,
+  BarChart2
 } from "lucide-react";
 
 interface LanguageTrail {
@@ -1216,190 +1218,194 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
                         const vote = votes[post.id] || { up: post.upvotes ?? 0, userVote: null };
                         const repostMeta = repostState[post.id] ?? { count: post.reposts_count ?? 0, reposted: false };
                         return (
-                          <motion.article
-                            key={post.id}
-                            layout
-                            initial={{ opacity: 0, y: -12 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={springGentle}
-                            className={cn(
-                              "dd-card-hover rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-4 transition-[border-color] duration-300",
-                              post._pending && "dd-optimistic-post"
-                            )}
-                          >
-                            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dd-border/50 pb-3">
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-dd-surface text-dd-text flex items-center justify-center font-bold text-xs select-none">
-                                  {post.author.username.slice(0, 2).toUpperCase()}
-                                </div>
-                                <div>
-                                  <div className="flex items-center gap-1.5">
-                                    <Link href={`/profile/${post.author.username}`} className="text-xs font-bold text-dd-text hover:text-orange-400 transition-colors">
-                                      @{post.author.username}
-                                    </Link>
-                                    <span className="text-[9px] bg-dd-surface border border-dd-border px-1 py-0.5 rounded text-dd-muted font-mono font-semibold">
-                                      Lvl {Math.max(1, Math.floor(post.author.total_xp / 1000) + 1)}
+                          <div key={post.id} className="space-y-2.5">
+                            <motion.article
+                              layout
+                              initial={{ opacity: 0, y: -12 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={springGentle}
+                              className={cn(
+                                "dd-card-hover rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-4 transition-[border-color] duration-300",
+                                post._pending && "dd-optimistic-post"
+                              )}
+                            >
+                              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dd-border/50 pb-3">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 rounded-full bg-dd-surface text-dd-text flex items-center justify-center font-bold text-xs select-none">
+                                    {post.author.username.slice(0, 2).toUpperCase()}
+                                  </div>
+                                  <div>
+                                    <div className="flex items-center gap-1.5">
+                                      <Link href={`/profile/${post.author.username}`} className="text-xs font-bold text-dd-text hover:text-orange-400 transition-colors">
+                                        @{post.author.username}
+                                      </Link>
+                                      <span className="text-[9px] bg-dd-surface border border-dd-border px-1 py-0.5 rounded text-dd-muted font-mono font-semibold">
+                                        Lvl {Math.max(1, Math.floor(post.author.total_xp / 1000) + 1)}
+                                      </span>
+                                    </div>
+                                    <span className="text-[10px] text-dd-muted font-medium">
+                                      {post._pending ? "Sincronizando..." : "Postado ha pouco"}
                                     </span>
                                   </div>
-                                  <span className="text-[10px] text-dd-muted font-medium">
-                                    {post._pending ? "Sincronizando..." : "Postado ha pouco"}
-                                  </span>
+                                </div>
+
+                                <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.preventDefault()}>
+                                  {post.language && <LanguageTag language={post.language} size="sm" />}
+
+                                  {post.author_id === initialUser.id && (
+                                    <button
+                                      onClick={async (e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        if (confirm("Deseja realmente excluir esta publicação?")) {
+                                          try {
+                                            const res = await fetch(`/api/posts/${post.id}`, {
+                                              method: "DELETE",
+                                            });
+                                            if (res.ok) {
+                                              setPosts(prev => prev.filter(p => p.id !== post.id));
+                                            } else {
+                                              alert("Falha ao deletar post.");
+                                            }
+                                          } catch (err) {
+                                            console.error(err);
+                                            alert("Erro ao deletar post.");
+                                          }
+                                        }
+                                      }}
+                                      className="p-1.5 rounded-lg text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+                                      title="Deletar postagem"
+                                    >
+                                      <svg
+                                        width="14"
+                                        height="14"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      >
+                                        <path d="M3 6h18" />
+                                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                      </svg>
+                                    </button>
+                                  )}
                                 </div>
                               </div>
 
-                              <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.preventDefault()}>
-                                <div className="flex items-center gap-1 bg-dd-bg/60 rounded-lg p-0.5 border border-dd-border">
-                                  <ExpandedReactionButton
-                                    isActive={vote.userVote === "up"}
-                                    activeReaction={activeReactions[post.id] as any}
-                                    onReact={(reaction) => void handleReactionSelect(post.id, reaction)}
-                                    title="Reagir ao post"
-                                  />
-                                  <AnimatedCounter
-                                    value={vote.up}
-                                    className="px-1 font-semibold text-[10px] text-dd-text"
-                                  />
-                                  <button
-                                    onClick={() => handleVote(post.id, "down")}
-                                    className={`dd-touch dd-focus-ring p-1.5 rounded-md transition-colors cursor-pointer hover:bg-dd-surface hover:scale-[1.03] ${
-                                      vote.userVote === "down" ? "text-red-500" : "text-dd-muted hover:text-dd-text"
-                                    }`}
-                                    title="Downvote exige justificativa"
-                                  >
-                                    <ArrowBigDown className="w-4 h-4 fill-current" />
-                                  </button>
-                                </div>
+                              <div className="space-y-3">
+                                <Link href={`/post/${post.id}`} className="block">
+                                  <h2 className="text-sm font-bold text-dd-text hover:text-orange-400 transition-colors leading-snug">
+                                    {highlightMatches(post.title, searchQuery)}
+                                  </h2>
+                                </Link>
+                                <p className="text-xs text-dd-muted leading-relaxed">
+                                  {searchQuery.trim() ? highlightMatches(post.body, searchQuery) : parseMentions(post.body)}
+                                </p>
 
-                                {post.language && <LanguageTag language={post.language} size="sm" />}
+                                {post.quoted_post && (
+                                  <div className="rounded-2xl border border-dd-border bg-dd-bg/50 p-3">
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-dd-muted">
+                                      Citando @{post.quoted_post.author.username}
+                                    </p>
+                                    <p className="mt-2 text-xs font-semibold text-dd-text">{post.quoted_post.title}</p>
+                                    <p className="mt-1 line-clamp-2 text-xs text-dd-muted">{post.quoted_post.body}</p>
+                                  </div>
+                                )}
 
-                                {post.author_id === initialUser.id && (
-                                  <button
-                                    onClick={async (e) => {
-                                      e.stopPropagation();
-                                      e.preventDefault();
-                                      if (confirm("Deseja realmente excluir esta publicação?")) {
-                                        try {
-                                          const res = await fetch(`/api/posts/${post.id}`, {
-                                            method: "DELETE",
-                                          });
-                                          if (res.ok) {
-                                            setPosts(prev => prev.filter(p => p.id !== post.id));
-                                          } else {
-                                            alert("Falha ao deletar post.");
-                                          }
-                                        } catch (err) {
-                                          console.error(err);
-                                          alert("Erro ao deletar post.");
-                                        }
-                                      }
-                                    }}
-                                    className="p-1.5 rounded-lg text-dd-muted hover:text-red-450 hover:bg-red-550/10 transition-colors cursor-pointer"
-                                    title="Deletar postagem"
-                                  >
-                                    <svg
-                                      width="14"
-                                      height="14"
-                                      viewBox="0 0 24 24"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="2"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    >
-                                      <path d="M3 6h18" />
-                                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                    </svg>
-                                  </button>
+                                {post.image_url && (
+                                  <div className="relative rounded-xl overflow-hidden border border-dd-border max-h-80 bg-dd-surface/20">
+                                    <img
+                                      src={post.image_url}
+                                      alt={post.title}
+                                      className="w-full h-full object-cover max-h-80"
+                                      onError={(e) => {
+                                        (e.target as HTMLElement).style.display = "none";
+                                      }}
+                                    />
+                                  </div>
+                                )}
+
+                                {post.code_snippet && (
+                                  <div className="rounded-lg border border-dd-border bg-dd-bg p-4 overflow-x-auto max-h-60 shadow-inner">
+                                    {highlightCode(post.code_snippet)}
+                                  </div>
                                 )}
                               </div>
-                            </div>
 
-                            <div className="space-y-3">
-                              <Link href={`/post/${post.id}`} className="block">
-                                <h2 className="text-sm font-bold text-dd-text hover:text-orange-400 transition-colors leading-snug">
-                                  {highlightMatches(post.title, searchQuery)}
-                                </h2>
-                              </Link>
-                              <p className="text-xs text-dd-muted leading-relaxed">
-                                {searchQuery.trim() ? highlightMatches(post.body, searchQuery) : parseMentions(post.body)}
-                              </p>
+                              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-dd-border pt-3 text-xs">
+                                <div className="flex items-center gap-4" onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}>
+                                  {/* 1. Comment bubble */}
+                                  <Link
+                                    href={`/post/${post.id}`}
+                                    className="flex items-center gap-1.5 text-dd-muted hover:text-dd-text transition-colors"
+                                  >
+                                    <MessageSquare className="w-3.5 h-3.5 text-dd-muted" />
+                                    <span>{post._count?.answers || 0}</span>
+                                  </Link>
 
-                              {post.quoted_post && (
-                                <div className="rounded-2xl border border-dd-border bg-dd-bg/50 p-3">
-                                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-dd-muted">
-                                    Citando @{post.quoted_post.author.username}
-                                  </p>
-                                  <p className="mt-2 text-xs font-semibold text-dd-text">{post.quoted_post.title}</p>
-                                  <p className="mt-1 line-clamp-2 text-xs text-dd-muted">{post.quoted_post.body}</p>
-                                </div>
-                              )}
+                                  {/* 2. Heart/Like button */}
+                                  <button
+                                    onClick={() => handleVote(post.id, "up")}
+                                    className="flex items-center gap-1 text-dd-muted hover:text-orange-500 transition-colors"
+                                    title="Curtir post"
+                                  >
+                                    <Heart className={cn("w-4 h-4 transition-colors", vote.userVote === "up" ? "fill-orange-500 text-orange-500" : "text-dd-muted")} />
+                                    <AnimatedCounter
+                                      value={vote.up}
+                                      className="px-1 font-semibold text-[10px] text-dd-text"
+                                    />
+                                  </button>
 
-                              {post.image_url && (
-                                <div className="relative rounded-xl overflow-hidden border border-dd-border max-h-80 bg-dd-surface/20">
-                                  <img
-                                    src={post.image_url}
-                                    alt={post.title}
-                                    className="w-full h-full object-cover max-h-80"
-                                    onError={(e) => {
-                                      (e.target as HTMLElement).style.display = "none";
-                                    }}
+                                  {/* 3. Repost Menu */}
+                                  <RepostMenu
+                                    count={repostMeta.count}
+                                    isReposted={repostMeta.reposted}
+                                    onRepost={() => handleRepost(post)}
+                                    onQuote={() => handleQuotePost(post)}
                                   />
+
+                                  {/* 4. Views BarChart */}
+                                  <div className="flex items-center gap-1.5 text-dd-muted select-none">
+                                    <BarChart2 className="w-4 h-4 text-dd-muted" />
+                                    <span className="text-[10px] font-semibold text-dd-text">{post.view_count >= 1000 ? `${(post.view_count / 1000).toFixed(0)}mil` : post.view_count}</span>
+                                  </div>
+
+                                  {/* 5. Report button */}
+                                  <button
+                                    onClick={() => {
+                                      setSelectedReportPostId(post.id);
+                                      setReportModalOpen(true);
+                                    }}
+                                    className="p-1 rounded-md text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer flex items-center justify-center"
+                                    title="Denunciar postagem"
+                                  >
+                                    <Flag className="w-3.5 h-3.5" />
+                                  </button>
                                 </div>
-                              )}
-
-                              {post.code_snippet && (
-                                <div className="rounded-lg border border-dd-border bg-dd-bg p-4 overflow-x-auto max-h-60 shadow-inner">
-                                  {highlightCode(post.code_snippet)}
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-dd-border pt-3 text-xs">
-                              <div className="flex items-center gap-2">
-                                <Link
-                                  href={`/post/${post.id}`}
-                                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-dd-muted transition-colors hover:bg-dd-surface hover:text-dd-text"
-                                >
-                                  <MessageSquare className="w-3.5 h-3.5 text-dd-muted" />
-                                  <span>{post._count?.answers || 0} respostas</span>
-                                </Link>
-
-                                <RepostMenu
-                                  count={repostMeta.count}
-                                  isReposted={repostMeta.reposted}
-                                  onRepost={() => handleRepost(post)}
-                                  onQuote={() => handleQuotePost(post)}
-                                />
 
                                 <BookmarkButton
                                   isSaved={!!bookmarkedPostIds[post.id]}
                                   onToggle={() => handleBookmarkToggle(post.id)}
                                 />
-
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                    setSelectedReportPostId(post.id);
-                                    setReportModalOpen(true);
-                                  }}
-                                  className="p-1.5 rounded-md text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer flex items-center justify-center"
-                                  title="Denunciar postagem"
-                                >
-                                  <Flag className="w-4 h-4" />
-                                </button>
                               </div>
+                            </motion.article>
 
-                              <Link
-                                href={`/post/${post.id}`}
-                                className="flex items-center gap-1.5 rounded-lg bg-orange-500 px-3.5 py-1.5 font-bold text-white transition-colors hover:bg-orange-600 shadow-sm cursor-pointer"
-                              >
-                                <Sparkles className="w-3.5 h-3.5" />
-                                <span>Resolver como Quiz</span>
-                              </Link>
-                            </div>
-                          </motion.article>
+                            {/* Resolver como Quiz outside/below the post box */}
+                            {post.quizzes && post.quizzes.length > 0 && (
+                              <div className="flex justify-start pl-1">
+                                <Link
+                                  href={`/post/${post.id}`}
+                                  className="flex items-center gap-1.5 rounded-lg bg-orange-500 px-3.5 py-1.5 font-bold text-white transition-colors hover:bg-orange-600 shadow-sm cursor-pointer text-xs"
+                                >
+                                  <Sparkles className="w-3.5 h-3.5" />
+                                  <span>Resolver como Quiz</span>
+                                </Link>
+                              </div>
+                            )}
+                          </div>
                         );
                       })}
                     </LayoutGroup>

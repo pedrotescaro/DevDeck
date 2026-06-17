@@ -22,7 +22,9 @@ import {
   Sparkles, 
   ArrowBigDown, 
   Bookmark,
-  ChevronRight
+  ChevronRight,
+  Heart,
+  BarChart2
 } from "lucide-react";
 
 interface BookmarksContentProps {
@@ -316,136 +318,142 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
                     const repostMeta = repostState[post.id] ?? { count: post.reposts_count ?? 0, reposted: false };
                     
                     return (
-                      <motion.article
-                        key={post.id}
-                        layout
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9, x: -30, transition: { duration: 0.2 } }}
-                        transition={springGentle}
-                        className="dd-card-hover rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-4 transition-[border-color] duration-300"
-                      >
-                        {/* Author info header */}
-                        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dd-border/50 pb-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-dd-surface text-dd-text flex items-center justify-center font-bold text-xs select-none">
-                              {post.author.username.slice(0, 2).toUpperCase()}
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-1.5">
-                                <Link href={`/profile/${post.author.username}`} className="text-xs font-bold text-dd-text hover:text-orange-400 transition-colors">
-                                  @{post.author.username}
-                                </Link>
-                                <span className="text-[9px] bg-dd-surface border border-dd-border px-1 py-0.5 rounded text-dd-muted font-mono font-semibold">
-                                  Lvl {getLevelFromXp(post.author.total_xp)}
+                      <div key={post.id} className="space-y-2.5">
+                        <motion.article
+                          layout
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9, x: -30, transition: { duration: 0.2 } }}
+                          transition={springGentle}
+                          className="dd-card-hover rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-4 transition-[border-color] duration-300"
+                        >
+                          {/* Author info header */}
+                          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dd-border/50 pb-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-dd-surface text-dd-text flex items-center justify-center font-bold text-xs select-none">
+                                {post.author.username.slice(0, 2).toUpperCase()}
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-1.5">
+                                  <Link href={`/profile/${post.author.username}`} className="text-xs font-bold text-dd-text hover:text-orange-400 transition-colors">
+                                    @{post.author.username}
+                                  </Link>
+                                  <span className="text-[9px] bg-dd-surface border border-dd-border px-1 py-0.5 rounded text-dd-muted font-mono font-semibold">
+                                    Lvl {getLevelFromXp(post.author.total_xp)}
+                                  </span>
+                                </div>
+                                <span className="text-[10px] text-dd-muted font-medium">
+                                  Postado ha pouco
                                 </span>
                               </div>
-                              <span className="text-[10px] text-dd-muted font-medium">
-                                Postado ha pouco
-                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.preventDefault()}>
+                              {post.language && <LanguageTag language={post.language} size="sm" />}
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.preventDefault()}>
-                            <div className="flex items-center gap-1 bg-dd-bg/60 rounded-lg p-0.5 border border-dd-border">
-                              <ExpandedReactionButton
-                                isActive={vote.userVote === "up"}
-                                activeReaction={activeReactions[post.id] as any}
-                                onReact={(reaction) => void handleReactionSelect(post.id, (reaction as any) || null)}
-                                title="Reagir ao post"
-                              />
-                              <AnimatedCounter
-                                value={vote.up}
-                                className="px-1 font-semibold text-[10px] text-dd-text"
-                              />
-                              <button
-                                onClick={() => handleVote(post.id, "down")}
-                                className={`dd-touch dd-focus-ring p-1.5 rounded-md transition-colors cursor-pointer hover:bg-dd-surface hover:scale-[1.03] ${
-                                  vote.userVote === "down" ? "text-red-500" : "text-dd-muted hover:text-dd-text"
-                                }`}
-                                title="Downvote exige justificativa"
+                          {/* Title, Body, Code */}
+                          <div className="space-y-3">
+                            <Link href={`/post/${post.id}`} className="block">
+                              <h2 className="text-sm font-bold text-dd-text hover:text-orange-400 transition-colors leading-snug">
+                                {highlightMatches(post.title, searchQuery)}
+                              </h2>
+                            </Link>
+                            <p className="text-xs text-dd-muted leading-relaxed">
+                              {searchQuery.trim() ? highlightMatches(post.body, searchQuery) : parseMentions(post.body)}
+                            </p>
+
+                            {post.image_url && (
+                              <div className="relative rounded-xl overflow-hidden border border-dd-border max-h-80 bg-dd-surface/20">
+                                <img
+                                  src={post.image_url}
+                                  alt={post.title}
+                                  className="w-full h-full object-cover max-h-80"
+                                  onError={(e) => {
+                                    (e.target as HTMLElement).style.display = "none";
+                                  }}
+                                />
+                              </div>
+                            )}
+
+                            {post.code_snippet && (
+                              <div className="rounded-lg border border-dd-border bg-dd-bg p-4 overflow-x-auto max-h-60 shadow-inner">
+                                {highlightCode(post.code_snippet)}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Actions section */}
+                          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-dd-border pt-3 text-xs">
+                            <div className="flex items-center gap-4" onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}>
+                              {/* 1. Comment bubble */}
+                              <Link
+                                href={`/post/${post.id}`}
+                                className="flex items-center gap-1.5 text-dd-muted hover:text-dd-text transition-colors"
                               >
-                                <ArrowBigDown className="w-4 h-4 fill-current" />
+                                <MessageSquare className="w-3.5 h-3.5 text-dd-muted" />
+                                <span>{post._count?.answers || 0}</span>
+                              </Link>
+
+                              {/* 2. Heart/Like button */}
+                              <button
+                                onClick={() => handleVote(post.id, "up")}
+                                className="flex items-center gap-1 text-dd-muted hover:text-orange-500 transition-colors"
+                                title="Curtir post"
+                              >
+                                <Heart className={cn("w-4 h-4 transition-colors", vote.userVote === "up" ? "fill-orange-500 text-orange-500" : "text-dd-muted")} />
+                                <AnimatedCounter
+                                  value={vote.up}
+                                  className="px-1 font-semibold text-[10px] text-dd-text"
+                                />
+                              </button>
+
+                              {/* 3. Repost Menu */}
+                              <RepostMenu
+                                count={repostMeta.count}
+                                isReposted={repostMeta.reposted}
+                                  onRepost={() => handleRepost(post.id)}
+                                onQuote={() => handleQuotePost(post)}
+                              />
+
+                              {/* 4. Views BarChart */}
+                              <div className="flex items-center gap-1.5 text-dd-muted select-none">
+                                <BarChart2 className="w-4 h-4 text-dd-muted" />
+                                <span className="text-[10px] font-semibold text-dd-text">{post.view_count >= 1000 ? `${(post.view_count / 1000).toFixed(0)}mil` : post.view_count}</span>
+                              </div>
+
+                              {/* 5. Report button */}
+                              <button
+                                onClick={() => alert("Denúncia enviada.")}
+                                className="p-1 rounded-md text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer flex items-center justify-center"
+                                title="Denunciar postagem"
+                              >
+                                <Flag className="w-3.5 h-3.5" />
                               </button>
                             </div>
-
-                            {post.language && <LanguageTag language={post.language} size="sm" />}
-                          </div>
-                        </div>
-
-                        {/* Title, Body, Code */}
-                        <div className="space-y-3">
-                          <Link href={`/post/${post.id}`} className="block">
-                            <h2 className="text-sm font-bold text-dd-text hover:text-orange-400 transition-colors leading-snug">
-                              {highlightMatches(post.title, searchQuery)}
-                            </h2>
-                          </Link>
-                          <p className="text-xs text-dd-muted leading-relaxed">
-                            {searchQuery.trim() ? highlightMatches(post.body, searchQuery) : parseMentions(post.body)}
-                          </p>
-
-                          {post.image_url && (
-                            <div className="relative rounded-xl overflow-hidden border border-dd-border max-h-80 bg-dd-surface/20">
-                              <img
-                                src={post.image_url}
-                                alt={post.title}
-                                className="w-full h-full object-cover max-h-80"
-                                onError={(e) => {
-                                  (e.target as HTMLElement).style.display = "none";
-                                }}
-                              />
-                            </div>
-                          )}
-
-                          {post.code_snippet && (
-                            <div className="rounded-lg border border-dd-border bg-dd-bg p-4 overflow-x-auto max-h-60 shadow-inner">
-                              {highlightCode(post.code_snippet)}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Actions section */}
-                        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-dd-border pt-3 text-xs">
-                          <div className="flex items-center gap-2">
-                            <Link
-                              href={`/post/${post.id}`}
-                              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-dd-muted transition-colors hover:bg-dd-surface hover:text-dd-text"
-                            >
-                              <MessageSquare className="w-3.5 h-3.5 text-dd-muted" />
-                              <span>{post._count?.answers || 0} respostas</span>
-                            </Link>
-
-                            <RepostMenu
-                              count={repostMeta.count}
-                              isReposted={repostMeta.reposted}
-                              onRepost={() => handleRepost(post.id)}
-                              onQuote={() => handleQuotePost(post)}
-                            />
 
                             {/* Saved is true by default since they are on the Bookmarks page */}
                             <BookmarkButton
                               isSaved={true}
                               onToggle={() => handleBookmarkToggle(post.id)}
                             />
-
-                            <button
-                              onClick={() => alert("Denúncia enviada.")}
-                              className="p-1.5 rounded-md text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer flex items-center justify-center"
-                              title="Denunciar postagem"
-                            >
-                              <Flag className="w-4 h-4" />
-                            </button>
                           </div>
+                        </motion.article>
 
-                          <Link
-                            href={`/post/${post.id}`}
-                            className="flex items-center gap-1.5 rounded-lg bg-orange-500 px-3.5 py-1.5 font-bold text-white transition-colors hover:bg-orange-600 shadow-sm cursor-pointer"
-                          >
-                            <Sparkles className="w-3.5 h-3.5" />
-                            <span>Resolver como Quiz</span>
-                          </Link>
-                        </div>
-                      </motion.article>
+                        {/* Resolver como Quiz outside/below the post box */}
+                        {post.quizzes && post.quizzes.length > 0 && (
+                          <div className="flex justify-start pl-1">
+                            <Link
+                              href={`/post/${post.id}`}
+                              className="flex items-center gap-1.5 rounded-lg bg-orange-500 px-3.5 py-1.5 font-bold text-white transition-colors hover:bg-orange-600 shadow-sm cursor-pointer text-xs"
+                            >
+                              <Sparkles className="w-3.5 h-3.5" />
+                              <span>Resolver como Quiz</span>
+                            </Link>
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
                 </AnimatePresence>
