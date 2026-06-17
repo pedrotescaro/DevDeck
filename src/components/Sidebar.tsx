@@ -488,7 +488,7 @@ export function Sidebar({ user }: SidebarProps) {
                     <Icon className={`w-5 h-5 transition-transform group-hover:scale-105 duration-200 ${item.active ? 'text-orange-400' : 'text-dd-muted'}`} />
                   )}
                   {item.badge === 'dot' && (
-                    <span className="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-blue-500 ring-2 ring-dd-bg animate-pulse" />
+                    <span className="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-orange-500 ring-2 ring-dd-bg animate-pulse" />
                   )}
                 </div>
               );
@@ -734,7 +734,7 @@ export function Sidebar({ user }: SidebarProps) {
                   <>
                     <Icon className="w-5.5 h-5.5" />
                     {item.badge === 'dot' && (
-                      <span className="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-blue-500 ring-2 ring-dd-bg" />
+                      <span className="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-orange-500 ring-2 ring-dd-bg" />
                     )}
                   </>
                 )}
