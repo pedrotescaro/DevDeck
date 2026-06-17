@@ -1,59 +1,54 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Monitor, Laptop } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sun, Moon } from 'lucide-react';
 
 interface Screenshot {
+  name: string;
   title: string;
-  path: string;
   url: string;
   description: string;
 }
 
 export function ScreenshotCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [displayTheme, setDisplayTheme] = useState<'light' | 'dark'>('dark');
 
   const screenshots: Screenshot[] = [
     {
+      name: 'feed',
       title: 'Feed Principal',
-      path: '/screenshots/media__1781704447616.png',
       url: 'devdeck.com/feed',
       description: 'Discussões técnicas em tempo real. Poste dúvidas de código e veja a comunidade debater soluções.'
     },
     {
+      name: 'trails',
       title: 'Trilhas de Linguagem',
-      path: '/screenshots/media__1781704487853.png',
       url: 'devdeck.com/trails',
       description: 'Progresso ativo por linguagem. Acompanhe seu XP em TypeScript, Python, Rust, Go e suba de nível.'
     },
     {
-      title: 'Quizzes por IA',
-      path: '/screenshots/media__1781704850187.png',
-      url: 'devdeck.com/feed?quiz=active',
-      description: 'Nossa inteligência artificial converte posts de dúvidas em desafios de múltipla escolha para a arena.'
+      name: 'ducky',
+      title: 'Pato de Borracha (Ducky)',
+      url: 'devdeck.com/ducky',
+      description: 'Nosso assistente com IA. Debugue e comente linhas de código diretamente no editor integrado.'
     },
     {
+      name: 'duels',
       title: 'Duelos de Performance',
-      path: '/screenshots/media__1781705036165.png',
       url: 'devdeck.com/duels',
       description: 'Batalhas de código. Desafie colegas e submeta a melhor implementação de algoritmos sob avaliação da IA.'
     },
     {
-      title: 'Pato de Borracha (Ducky)',
-      path: '/screenshots/media__1781705127384.png',
-      url: 'devdeck.com/ducky',
-      description: 'Nosso pato de borracha com IA. Debugue e comente linhas de código diretamente no editor integrado.'
-    },
-    {
+      name: 'leaderboard',
       title: 'Leaderboard Global',
-      path: '/screenshots/media__1781705297394.png',
       url: 'devdeck.com/leaderboard',
       description: 'Rankings semanais e gerais. Garanta seu lugar no topo e compita com engenheiros do mundo todo.'
     },
     {
+      name: 'profile',
       title: 'Perfil Técnico',
-      path: '/screenshots/media__1781705496693.png',
-      url: 'devdeck.com/profile/gustavo',
+      url: 'devdeck.com/profile/pedrodev',
       description: 'Seu currículo vivo. Exiba seu histórico de contribuições, badges raras e link do GitHub integrado.'
     }
   ];
@@ -67,6 +62,7 @@ export function ScreenshotCarousel() {
   };
 
   const current = screenshots[currentIndex];
+  const imagePath = `/screenshots/${current.name}_${displayTheme}.png`;
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6 select-none">
@@ -104,21 +100,42 @@ export function ScreenshotCarousel() {
             {current.url}
           </div>
 
-          <div className="flex items-center gap-1 text-dd-muted opacity-70">
-            <Laptop className="w-4 h-4" />
+          {/* Theme switcher control in address bar */}
+          <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-dd-bg border border-dd-border/60">
+            <button
+              onClick={() => setDisplayTheme('light')}
+              className={`p-1 rounded transition-colors ${
+                displayTheme === 'light' 
+                  ? 'bg-orange-500 text-white' 
+                  : 'text-dd-muted hover:text-dd-text'
+              }`}
+              title="Modo Claro"
+            >
+              <Sun className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => setDisplayTheme('dark')}
+              className={`p-1 rounded transition-colors ${
+                displayTheme === 'dark' 
+                  ? 'bg-orange-500 text-white' 
+                  : 'text-dd-muted hover:text-dd-text'
+              }`}
+              title="Modo Escuro"
+            >
+              <Moon className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
 
         {/* Screenshot Viewport Container */}
         <div className="relative min-h-[300px] md:min-h-[500px] bg-dd-surface/20 flex items-center justify-center overflow-hidden">
           {/* Slide image */}
-          <div className="w-full h-full relative aspect-[16/10] overflow-hidden">
+          <div className="w-full h-full relative aspect-[1440/900] overflow-hidden">
             <img 
-              src={current.path} 
+              src={imagePath} 
               alt={current.title} 
-              className="w-full h-full object-cover transition-opacity duration-300 animate-fade-in"
+              className="w-full h-full object-cover transition-all duration-300 animate-fade-in"
               onError={(e) => {
-                // Failback handling if screenshots are missing
                 e.currentTarget.src = '/logo.png';
               }}
             />
@@ -145,7 +162,7 @@ export function ScreenshotCarousel() {
       {/* Screenshot Caption Description */}
       <div className="text-center max-w-xl mx-auto space-y-1 py-2">
         <h4 className="text-sm font-black text-dd-text uppercase tracking-wide">
-          {current.title}
+          {current.title} ({displayTheme === 'light' ? 'Modo Claro' : 'Modo Escuro'})
         </h4>
         <p className="text-xs text-dd-muted leading-relaxed">
           {current.description}
