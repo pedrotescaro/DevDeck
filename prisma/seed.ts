@@ -116,14 +116,16 @@ async function main() {
     {
       slug: "rust_practitioner",
       label: "Rust Practitioner",
-      description: "Demonstrou excelente uso do compilador e de alocação de memória em Rust (Nível 5)",
+      description:
+        "Demonstrou excelente uso do compilador e de alocação de memória em Rust (Nível 5)",
       icon: "🦀",
       color: "#f77c22",
     },
     {
       slug: "community_educator",
       label: "Community Educator",
-      description: "Escreveu respostas aceitas pela comunidade que ajudaram múltiplos desenvolvedores",
+      description:
+        "Escreveu respostas aceitas pela comunidade que ajudaram múltiplos desenvolvedores",
       icon: "📖",
       color: "#22d48a",
     },
@@ -142,14 +144,17 @@ async function main() {
 
   // ─── Clean & Create Supabase Auth Users ──────────────────────────────────
   console.log("\n👤 Provisioning Supabase Auth users...");
-  const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+  const {
+    data: { users },
+    error: listError,
+  } = await supabaseAdmin.auth.admin.listUsers();
   if (listError) {
     throw new Error(`Error listing auth users: ${listError.message}`);
   }
 
   const seedEmails = ["pedro@devdeck.dev", "ana@devdeck.dev", "carlos@devdeck.dev"];
   for (const email of seedEmails) {
-    const existing = users.find(u => u.email === email);
+    const existing = users.find((u) => u.email === email);
     if (existing) {
       console.log(`  🗑️ Deleting existing auth user for ${email} (${existing.id})`);
       const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(existing.id);
@@ -159,10 +164,10 @@ async function main() {
     }
   }
 
-  const seedPassword = process.env.SEED_DEFAULT_PASSWORD;
-  if (!seedPassword) {
-    throw new Error(
-      "SEED_DEFAULT_PASSWORD não definida. Configure-a no seu .env.local antes de rodar `npx prisma db seed`. Veja .env.example."
+  const seedPassword = process.env.SEED_DEFAULT_PASSWORD || "ChangeMe123!";
+  if (!process.env.SEED_DEFAULT_PASSWORD) {
+    console.warn(
+      "⚠️ Warning: SEED_DEFAULT_PASSWORD não definida no .env.local. Usando fallback padrão: 'ChangeMe123!'."
     );
   }
   if (seedPassword.length < 6) {
@@ -199,7 +204,10 @@ async function main() {
   const createdUsers: Record<string, any> = {};
 
   for (const u of usersToCreate) {
-    const { data: { user }, error: createError } = await supabaseAdmin.auth.admin.createUser({
+    const {
+      data: { user },
+      error: createError,
+    } = await supabaseAdmin.auth.admin.createUser({
       email: u.email,
       password: u.password,
       email_confirm: true,
@@ -239,16 +247,86 @@ async function main() {
 
   // ─── Language Trails ──────────────────────────────────────────────────
   const trailData = [
-    { user_id: pedro.id, language: Language.TS, xp: 1800, level: 5, streak: 12, last_activity_at: new Date() },
-    { user_id: pedro.id, language: Language.JS, xp: 1200, level: 4, streak: 12, last_activity_at: new Date() },
-    { user_id: pedro.id, language: Language.PYTHON, xp: 600, level: 2, streak: 3, last_activity_at: new Date() },
-    { user_id: pedro.id, language: Language.RUST, xp: 350, level: 1, streak: 0, last_activity_at: new Date("2026-06-01") },
-    { user_id: ana.id, language: Language.PYTHON, xp: 2100, level: 6, streak: 21, last_activity_at: new Date() },
-    { user_id: ana.id, language: Language.TS, xp: 500, level: 2, streak: 5, last_activity_at: new Date() },
-    { user_id: ana.id, language: Language.GO, xp: 200, level: 1, streak: 0, last_activity_at: new Date("2026-05-20") },
-    { user_id: carlos.id, language: Language.RUST, xp: 1900, level: 5, streak: 15, last_activity_at: new Date() },
-    { user_id: carlos.id, language: Language.CPP, xp: 800, level: 3, streak: 8, last_activity_at: new Date() },
-    { user_id: carlos.id, language: Language.GO, xp: 400, level: 1, streak: 2, last_activity_at: new Date() },
+    {
+      user_id: pedro.id,
+      language: Language.TS,
+      xp: 1800,
+      level: 5,
+      streak: 12,
+      last_activity_at: new Date(),
+    },
+    {
+      user_id: pedro.id,
+      language: Language.JS,
+      xp: 1200,
+      level: 4,
+      streak: 12,
+      last_activity_at: new Date(),
+    },
+    {
+      user_id: pedro.id,
+      language: Language.PYTHON,
+      xp: 600,
+      level: 2,
+      streak: 3,
+      last_activity_at: new Date(),
+    },
+    {
+      user_id: pedro.id,
+      language: Language.RUST,
+      xp: 350,
+      level: 1,
+      streak: 0,
+      last_activity_at: new Date("2026-06-01"),
+    },
+    {
+      user_id: ana.id,
+      language: Language.PYTHON,
+      xp: 2100,
+      level: 6,
+      streak: 21,
+      last_activity_at: new Date(),
+    },
+    {
+      user_id: ana.id,
+      language: Language.TS,
+      xp: 500,
+      level: 2,
+      streak: 5,
+      last_activity_at: new Date(),
+    },
+    {
+      user_id: ana.id,
+      language: Language.GO,
+      xp: 200,
+      level: 1,
+      streak: 0,
+      last_activity_at: new Date("2026-05-20"),
+    },
+    {
+      user_id: carlos.id,
+      language: Language.RUST,
+      xp: 1900,
+      level: 5,
+      streak: 15,
+      last_activity_at: new Date(),
+    },
+    {
+      user_id: carlos.id,
+      language: Language.CPP,
+      xp: 800,
+      level: 3,
+      streak: 8,
+      last_activity_at: new Date(),
+    },
+    {
+      user_id: carlos.id,
+      language: Language.GO,
+      xp: 400,
+      level: 1,
+      streak: 2,
+      last_activity_at: new Date(),
+    },
   ];
 
   for (const trail of trailData) {
@@ -460,7 +538,7 @@ func debugHandler(w http.ResponseWriter, r *http.Request) {
         "'==' compara tipo e valor, '===' apenas valor",
         "'==' compara apenas valor fazendo coerção de tipo, '===' compara tipo e valor sem coerção",
         "Ambos funcionam de forma idêntica em todos os tipos de dados",
-        "Nenhuma das anteriores"
+        "Nenhuma das anteriores",
       ],
       correct_index: 1,
       is_daily: true,
@@ -475,7 +553,7 @@ func debugHandler(w http.ResponseWriter, r *http.Request) {
         "Terminar a execução do script imediatamente",
         "Criar uma constante local dentro de um escopo",
         "Suspender temporariamente a execução da função e retornar um gerador",
-        "Criar um decorator dinâmico"
+        "Criar um decorator dinâmico",
       ],
       correct_index: 2,
       is_daily: true,
@@ -490,7 +568,7 @@ func debugHandler(w http.ResponseWriter, r *http.Request) {
         "Otimiza a gravação de arquivos em disco de forma assíncrona",
         "Libera a memória heap ocupada por objetos que não possuem mais referências ativas",
         "Acelera as operações matemáticas em laços complexos",
-        "Compila código Java diretamente para binário nativo"
+        "Compila código Java diretamente para binário nativo",
       ],
       correct_index: 1,
       is_daily: true,
@@ -500,12 +578,13 @@ func debugHandler(w http.ResponseWriter, r *http.Request) {
   await prisma.quiz.create({
     data: {
       post_id: null,
-      question: "Como o Rust garante segurança contra 'data races' na concorrência em tempo de compilação?",
+      question:
+        "Como o Rust garante segurança contra 'data races' na concorrência em tempo de compilação?",
       options: [
         "Utilizando um Garbage Collector dinâmico de alta performance",
         "Por meio dos traits Send e Sync e verificação estática das regras de borrow checker",
         "Impedindo totalmente o uso de threads nativas do sistema operacional",
-        "Com tratamento obrigatório de exceções em escopos concorrentes"
+        "Com tratamento obrigatório de exceções em escopos concorrentes",
       ],
       correct_index: 1,
       is_daily: true,
@@ -520,7 +599,7 @@ func debugHandler(w http.ResponseWriter, r *http.Request) {
         "Acessar conexões de banco de dados externas",
         "Transmitir pacotes HTTP brutos entre servidores",
         "Permitir a comunicação síncrona ou assíncrona e troca de dados segura entre goroutines",
-        "Configurar variáveis de ambiente do sistema operacional"
+        "Configurar variáveis de ambiente do sistema operacional",
       ],
       correct_index: 2,
       is_daily: true,
@@ -652,6 +731,184 @@ func debugHandler(w http.ResponseWriter, r *http.Request) {
   }
 
   console.log(`  ✅ User Badges: ${badgeAssignments.length} assigned`);
+
+  // ─── Quiz Library ──────────────────────────────────────────────────────
+  const quizLibraryItems = [
+    {
+      question: "Qual protocolo é a base da comunicação de dados na World Wide Web?",
+      options: ["FTP", "SMTP", "HTTP", "SSH"],
+      correct_index: 2,
+      tags: ["web", "network"],
+    },
+    {
+      question: "O que significa a sigla SQL?",
+      options: [
+        "Structured Query Language",
+        "Simple Queue List",
+        "System Query Link",
+        "Standard Query Line",
+      ],
+      correct_index: 0,
+      tags: ["database", "sql"],
+    },
+    {
+      question: "Qual linguagem é conhecida pelo mascote do caranguejo Ferris?",
+      options: ["Go", "Rust", "Swift", "C++"],
+      correct_index: 1,
+      tags: ["rust", "languages"],
+    },
+    {
+      question: "No git, qual comando é usado para criar uma cópia de um repositório existente?",
+      options: ["git copy", "git fork", "git clone", "git replicate"],
+      correct_index: 2,
+      tags: ["git", "version-control"],
+    },
+    {
+      question: "Qual estrutura de dados funciona no modelo LIFO (Last In, First Out)?",
+      options: ["Fila (Queue)", "Pilha (Stack)", "Vetor (Array)", "Lista Ligada (Linked List)"],
+      correct_index: 1,
+      tags: ["cs", "data-structures"],
+    },
+    {
+      question: "O que faz o comando 'docker build'?",
+      options: [
+        "Roda um container",
+        "Cria uma imagem a partir de um Dockerfile",
+        "Para um container em execução",
+        "Lista os containers ativos",
+      ],
+      correct_index: 1,
+      tags: ["docker", "devops"],
+    },
+    {
+      question: "Qual dessas opções é um banco de dados NoSQL baseado em documentos?",
+      options: ["PostgreSQL", "MongoDB", "MySQL", "SQLite"],
+      correct_index: 1,
+      tags: ["database", "nosql"],
+    },
+    {
+      question:
+        "Qual método HTTP é normalmente utilizado para enviar dados para criar um novo recurso no servidor?",
+      options: ["GET", "POST", "PUT", "DELETE"],
+      correct_index: 1,
+      tags: ["http", "web"],
+    },
+    {
+      question: "O que o acrônimo API significa?",
+      options: [
+        "Application Programming Interface",
+        "Advanced Program Integration",
+        "Automated Protocol Interface",
+        "Active Processing Index",
+      ],
+      correct_index: 0,
+      tags: ["programming", "architecture"],
+    },
+    {
+      question: "Qual porta padrão é usada para conexões HTTPS seguras?",
+      options: ["80", "22", "443", "8080"],
+      correct_index: 2,
+      tags: ["security", "network"],
+    },
+    {
+      question: "Qual tecnologia é usada para estilizar páginas HTML na web?",
+      options: ["CSS", "JavaScript", "XML", "PHP"],
+      correct_index: 0,
+      tags: ["frontend", "css"],
+    },
+    {
+      question:
+        "No JavaScript, qual declaração cria uma variável de escopo de bloco que não pode ser reatribuída?",
+      options: ["var", "let", "const", "def"],
+      correct_index: 2,
+      tags: ["javascript", "programming"],
+    },
+    {
+      question: "O que significa 'CI' no contexto de desenvolvimento de software modernos (CI/CD)?",
+      options: [
+        "Continuous Integration",
+        "Code Inspection",
+        "Compile Instance",
+        "Control Interface",
+      ],
+      correct_index: 0,
+      tags: ["ci-cd", "devops"],
+    },
+    {
+      question:
+        "Qual das alternativas abaixo é uma ferramenta utilizada para gerenciar pacotes no ecossistema Node.js?",
+      options: ["pip", "maven", "npm", "composer"],
+      correct_index: 2,
+      tags: ["nodejs", "tools"],
+    },
+    {
+      question:
+        "Qual dos seguintes algoritmos de ordenação tem a melhor complexidade de tempo no pior caso?",
+      options: ["Bubble Sort", "Insertion Sort", "Merge Sort", "Selection Sort"],
+      correct_index: 2,
+      tags: ["algorithms", "cs"],
+    },
+    {
+      question: "Qual empresa desenvolveu o framework React?",
+      options: ["Google", "Microsoft", "Meta (Facebook)", "Apple"],
+      correct_index: 2,
+      tags: ["frontend", "react"],
+    },
+    {
+      question:
+        "Qual é o principal propósito de um índice (Index) em uma tabela de banco de dados relacional?",
+      options: [
+        "Garantir a segurança dos dados",
+        "Acelerar a velocidade de consulta",
+        "Compactar o armazenamento",
+        "Permitir chaves estrangeiras",
+      ],
+      correct_index: 1,
+      tags: ["database", "sql"],
+    },
+    {
+      question: "O que o termo 'Open Source' descreve na comunidade de tecnologia?",
+      options: [
+        "Software cujo código-fonte é público e pode ser modificado",
+        "Sistemas operacionais gratuitos",
+        "Código proprietário compartilhado internamente",
+        "Projetos em nuvem sem servidores",
+      ],
+      correct_index: 0,
+      tags: ["open-source", "culture"],
+    },
+    {
+      question:
+        "Qual protocolo de rede é responsável por traduzir nomes de domínio legíveis (como devdeck.dev) para IPs?",
+      options: ["FTP", "DNS", "DHCP", "SSH"],
+      correct_index: 1,
+      tags: ["network", "dns"],
+    },
+    {
+      question: "Qual das opções abaixo descreve corretamente o padrão MVC?",
+      options: [
+        "Model-View-Controller",
+        "Merge-Verify-Commit",
+        "Main-Variable-Compiler",
+        "Multiple-View-Column",
+      ],
+      correct_index: 0,
+      tags: ["architecture", "programming"],
+    },
+  ];
+
+  console.log(`\n🌱 Seeding Quiz Library...`);
+  for (const item of quizLibraryItems) {
+    const existing = await prisma.quizLibrary.findFirst({
+      where: { question: item.question },
+    });
+    if (!existing) {
+      await prisma.quizLibrary.create({
+        data: item,
+      });
+    }
+  }
+  console.log(`  ✅ Quiz Library: ${quizLibraryItems.length} items seeded`);
 
   console.log("\n🎉 Seed complete!");
 }

@@ -521,3 +521,31 @@ body {
   will-change: transform, opacity;
   transform: translateZ(0);
 }
+
+/* Custom slide-up, slide-down, and scale-up animations */
+@keyframes dd-slide-up {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes dd-slide-down {
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes dd-scale-up {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.animate-slide-up {
+  animation: dd-slide-up 200ms var(--motion-ease-out) forwards;
+}
+
+.animate-slide-down {
+  animation: dd-slide-down 200ms var(--motion-ease-out) forwards;
+}
+
+.animate-scale-up {
+  animation: dd-scale-up 150ms var(--motion-ease-out) forwards;
+}

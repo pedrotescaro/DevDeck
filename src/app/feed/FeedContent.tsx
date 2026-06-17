@@ -131,7 +131,15 @@ export function FeedContent({
   const [publishState, setPublishState] = useState<PublishState>("idle");
   const [composeFocused, setComposeFocused] = useState(false);
   const [postError, setPostError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
+  const getInitialCursor = (items: any[]) => {
+    if (items.length < 10) return null;
+    const lastItem = items[items.length - 1];
+    if (!lastItem) return null;
+    const lastTime = new Date(lastItem.created_at).getTime();
+    return `${lastTime}_${lastItem.id}`;
+  };
+
+  const [nextCursor, setNextCursor] = useState<string | null>(() => getInitialCursor(initialPosts));
   const [hasMore, setHasMore] = useState(initialPosts.length >= 10);
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadingSearch, setLoadingSearch] = useState(false);
@@ -213,18 +221,46 @@ export function FeedContent({
     if (!searchQuery.trim()) {
       setLoadingSearch(false);
       setFeedError(null);
+      if (posts !== initialPosts || feedFilter !== "for-you") {
+        const fetchFilteredPosts = async () => {
+          setLoadingSearch(true);
+          try {
+            const url =
+              feedFilter === "following"
+                ? `/api/posts?filter=following&limit=${FEED_PAGE_SIZE}&useCursor=true`
+                : `/api/posts?limit=${FEED_PAGE_SIZE}&useCursor=true`;
+            const res = await fetch(url);
+            if (res.ok) {
+              const data = await res.json();
+              setPosts(data.items || []);
+              setNextCursor(data.nextCursor || null);
+              setHasMore(!!data.nextCursor);
+            }
+          } catch (err) {
+            console.error("Error fetching filtered posts:", err);
+          } finally {
+            setLoadingSearch(false);
+          }
+        };
+        fetchFilteredPosts();
+      }
+      return;
+    }
+    if (searchQuery.trim().length < 2) {
+      setLoadingSearch(false);
       return;
     }
     setLoadingSearch(true);
     const delayDebounce = setTimeout(async () => {
       try {
         const res = await fetch(
-          `/api/posts?search=${encodeURIComponent(searchQuery)}&limit=${FEED_PAGE_SIZE}`
+          `/api/search?q=${encodeURIComponent(searchQuery)}&type=posts&limit=${FEED_PAGE_SIZE}`
         );
         if (res.ok) {
           const data = await res.json();
-          setPosts(data);
-          setHasMore(false);
+          setPosts(data.items || []);
+          setNextCursor(data.nextCursor || null);
+          setHasMore(!!data.nextCursor);
           setFeedError(null);
         }
       } catch (err) {
@@ -235,23 +271,23 @@ export function FeedContent({
       }
     }, 300);
     return () => clearTimeout(delayDebounce);
-  }, [searchQuery]);
+  }, [searchQuery, feedFilter]);
 
   // Carregar posts quando o filtro (Para você / Seguindo) muda
   useEffect(() => {
     const fetchFilteredPosts = async () => {
-      setPage(1);
       setLoadingSearch(true);
       try {
         const url =
           feedFilter === "following"
-            ? `/api/posts?filter=following&limit=${FEED_PAGE_SIZE}`
-            : `/api/posts?limit=${FEED_PAGE_SIZE}`;
+            ? `/api/posts?filter=following&limit=${FEED_PAGE_SIZE}&useCursor=true`
+            : `/api/posts?limit=${FEED_PAGE_SIZE}&useCursor=true`;
         const res = await fetch(url);
         if (res.ok) {
           const data = await res.json();
-          setPosts(data);
-          setHasMore(data.length >= FEED_PAGE_SIZE);
+          setPosts(data.items || []);
+          setNextCursor(data.nextCursor || null);
+          setHasMore(!!data.nextCursor);
         }
       } catch (err) {
         console.error("Error fetching filtered posts:", err);
@@ -267,35 +303,39 @@ export function FeedContent({
   }, [feedFilter]);
 
   const loadMorePosts = useCallback(async () => {
-    if (loadingMore || !hasMore || searchQuery.trim()) return;
+    if (loadingMore || !hasMore) return;
     setLoadingMore(true);
     try {
-      const nextPage = page + 1;
-      const url =
-        feedFilter === "following"
-          ? `/api/posts?filter=following&page=${nextPage}&limit=${FEED_PAGE_SIZE}`
-          : `/api/posts?page=${nextPage}&limit=${FEED_PAGE_SIZE}`;
+      let url = "";
+      if (searchQuery.trim()) {
+        url = `/api/search?q=${encodeURIComponent(searchQuery)}&type=posts&limit=${FEED_PAGE_SIZE}${nextCursor ? `&cursor=${nextCursor}` : ""}`;
+      } else {
+        url =
+          feedFilter === "following"
+            ? `/api/posts?filter=following&useCursor=true&limit=${FEED_PAGE_SIZE}${nextCursor ? `&cursor=${nextCursor}` : ""}`
+            : `/api/posts?useCursor=true&limit=${FEED_PAGE_SIZE}${nextCursor ? `&cursor=${nextCursor}` : ""}`;
+      }
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
         setPosts((prev) => {
           const ids = new Set(prev.map((p) => p.id));
-          const fresh = data.filter((p: { id: string }) => !ids.has(p.id));
+          const fresh = (data.items || []).filter((p: { id: string }) => !ids.has(p.id));
           return [...prev, ...fresh];
         });
-        setPage(nextPage);
-        setHasMore(data.length >= FEED_PAGE_SIZE);
+        setNextCursor(data.nextCursor || null);
+        setHasMore(!!data.nextCursor);
       }
     } catch (err) {
       console.error("Load more posts error:", err);
     } finally {
       setLoadingMore(false);
     }
-  }, [loadingMore, hasMore, searchQuery, page, feedFilter]);
+  }, [loadingMore, hasMore, searchQuery, nextCursor, feedFilter]);
 
   const scrollSentinelRef = useInfiniteScroll({
     onLoadMore: loadMorePosts,
-    hasMore: hasMore && !searchQuery.trim(),
+    hasMore: hasMore,
     loading: loadingMore,
   });
 
@@ -2105,7 +2145,7 @@ export function FeedContent({
                     {activeDuels.map((duel) => (
                       <div
                         key={duel.id}
-                        className="rounded-lg border border-dd-border/60 bg-dd-bg/40 p-3 space-y-2 hover:border-slate-850 transition-colors"
+                        className="rounded-lg border border-dd-border/60 bg-dd-bg/40 p-3 space-y-2 hover:border-dd-border transition-colors"
                       >
                         <div className="flex justify-between items-center text-[10px]">
                           <span className="text-orange-400 font-bold tracking-tight">

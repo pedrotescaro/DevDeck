@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
+import { rateLimit } from "@/lib/ratelimit";
 
 // GET /api/messages?receiver_id=[userId]
 export async function GET(request: Request) {
@@ -47,7 +48,19 @@ export async function POST(request: Request) {
     const { receiver_id, content } = body;
 
     if (!receiver_id || !content || content.trim() === "") {
-      return NextResponse.json({ error: "Destinatário e conteúdo são obrigatórios" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Destinatário e conteúdo são obrigatórios" },
+        { status: 400 }
+      );
+    }
+
+    const convoKey = [user.id, receiver_id].sort().join(":");
+    const rateLimitResult = await rateLimit(`messages:${convoKey}`, 50, "1 h");
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: "Limite de 50 mensagens por hora para esta conversa excedido." },
+        { status: 429 }
+      );
     }
 
     const message = await prisma.message.create({

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
 interface Badge {
   slug: string;
@@ -40,7 +40,8 @@ export const badgeDesigns: Record<string, BadgeDesign> = {
     borderColor: "border-slate-400/80 dark:border-slate-400 border-b-slate-600",
     textColor: "text-dd-muted dark:text-dd-muted",
     glowColor: "shadow-slate-500/30",
-    shapeClass: "rounded-lg border-[3px] [clip-path:polygon(50%_0%,_100%_20%,_100%_80%,_50%_100%,_0%_80%,_0%_20%)]",
+    shapeClass:
+      "rounded-lg border-[3px] [clip-path:polygon(50%_0%,_100%_20%,_100%_80%,_50%_100%,_0%_80%,_0%_20%)]",
     innerBg: "bg-gradient-to-b from-slate-500/10 to-transparent",
     ribbonText: "PRO",
   },
@@ -58,7 +59,8 @@ export const badgeDesigns: Record<string, BadgeDesign> = {
     borderColor: "border-purple-500/80 dark:border-purple-500 border-b-purple-800",
     textColor: "text-purple-600 dark:text-purple-400",
     glowColor: "shadow-purple-500/30",
-    shapeClass: "rounded-full border-[3px] outline-double outline-[3px] outline-zinc-950/10 dark:outline-white/5",
+    shapeClass:
+      "rounded-full border-[3px] outline-double outline-[3px] outline-zinc-950/10 dark:outline-white/5",
     innerBg: "bg-gradient-to-br from-purple-500/10 to-transparent",
     ribbonText: "MASTER",
   },
@@ -67,7 +69,8 @@ export const badgeDesigns: Record<string, BadgeDesign> = {
     borderColor: "border-orange-500/80 dark:border-orange-500 border-b-orange-800",
     textColor: "text-orange-600 dark:text-orange-400",
     glowColor: "shadow-orange-500/30",
-    shapeClass: "rounded-lg border-[3px] [clip-path:polygon(25%_0%,_75%_0%,_100%_50%,_75%_100%,_25%_100%,_0%_50%)]",
+    shapeClass:
+      "rounded-lg border-[3px] [clip-path:polygon(25%_0%,_75%_0%,_100%_50%,_75%_100%,_25%_100%,_0%_50%)]",
     innerBg: "bg-gradient-to-br from-orange-500/10 to-transparent",
     ribbonText: "ELITE",
   },
@@ -85,7 +88,8 @@ export const badgeDesigns: Record<string, BadgeDesign> = {
     borderColor: "border-emerald-500/80 dark:border-emerald-500 border-b-emerald-800",
     textColor: "text-emerald-600 dark:text-emerald-500",
     glowColor: "shadow-emerald-500/30",
-    shapeClass: "rounded-xl border-[3px] [clip-path:polygon(50%_0%,_100%_38%,_82%_100%,_18%_100%,_0%_38%)]",
+    shapeClass:
+      "rounded-xl border-[3px] [clip-path:polygon(50%_0%,_100%_38%,_82%_100%,_18%_100%,_0%_38%)]",
     innerBg: "bg-gradient-to-br from-emerald-500/10 to-transparent",
     ribbonText: "AGILE",
   },
@@ -103,24 +107,25 @@ export const badgeDesigns: Record<string, BadgeDesign> = {
     borderColor: "border-amber-600/80 dark:border-amber-600 border-b-amber-900",
     textColor: "text-amber-700 dark:text-amber-500",
     glowColor: "shadow-amber-600/30",
-    shapeClass: "border-[3px] [clip-path:polygon(50%_0%,_100%_25%,_100%_75%,_50%_100%,_0%_75%,_0%_25%)]",
+    shapeClass:
+      "border-[3px] [clip-path:polygon(50%_0%,_100%_25%,_100%_75%,_50%_100%,_0%_75%,_0%_25%)]",
     innerBg: "bg-gradient-to-br from-amber-600/10 to-transparent",
     ribbonText: "SUPREME",
   },
 };
 
-export function BadgeEmblem({ 
-  slug, 
-  icon, 
-  label, 
-  size = "md", 
-  earned = true 
-}: { 
-  slug: string; 
-  icon: string; 
-  label: string; 
-  size?: "sm" | "md"; 
-  earned?: boolean 
+export function BadgeEmblem({
+  slug,
+  icon,
+  label,
+  size = "md",
+  earned = true,
+}: {
+  slug: string;
+  icon: string;
+  label: string;
+  size?: "sm" | "md";
+  earned?: boolean;
 }) {
   const sizeClasses = {
     sm: {
@@ -134,7 +139,7 @@ export function BadgeEmblem({
       inner: "w-16 h-16",
       icon: "text-2xl",
       ribbon: "text-[8px] py-0.5 px-1.5",
-    }
+    },
   }[size];
 
   const realBadgeImages: Record<string, string> = {
@@ -149,14 +154,14 @@ export function BadgeEmblem({
   if (imageSrc) {
     return (
       <div className="flex flex-col items-center justify-center select-none">
-        <div 
+        <div
           className={`relative flex items-center justify-center ${sizeClasses.outer} ${
             earned ? "shadow-lg shadow-orange-500/20" : "opacity-35 grayscale"
           } transition-all duration-300 hover:scale-[1.04]`}
         >
-          <img 
-            src={imageSrc} 
-            alt={label} 
+          <img
+            src={imageSrc}
+            alt={label}
             className={`${sizeClasses.outer} object-contain rounded-xl`}
           />
           {!earned && (
@@ -181,21 +186,31 @@ export function BadgeEmblem({
 
   return (
     <div className="flex flex-col items-center justify-center select-none">
-      <div 
+      <div
         className={`relative flex items-center justify-center ${sizeClasses.outer} ${
-          earned ? design.bgGradient : "bg-gradient-to-b from-slate-900/5 via-slate-950/2 to-transparent"
+          earned
+            ? design.bgGradient
+            : "bg-gradient-to-b from-slate-900/5 via-slate-950/2 to-transparent"
         } ${earned ? design.borderColor : "border-dd-border border-dashed border-2"} ${
           earned ? design.shapeClass : "rounded-xl"
         } ${earned ? `shadow-lg ${design.glowColor}` : "opacity-35 grayscale"} transition-all duration-300 hover:scale-[1.04]`}
       >
-        <div className={`flex items-center justify-center ${sizeClasses.inner} rounded-inherit ${earned ? design.innerBg : "bg-dd-surface/40"} border border-slate-900/10 backdrop-blur-[1px]`}>
-          <span className={`${sizeClasses.icon} transform transition-transform duration-300 hover:scale-110 drop-shadow-md`} role="img" aria-label={label}>
+        <div
+          className={`flex items-center justify-center ${sizeClasses.inner} rounded-inherit ${earned ? design.innerBg : "bg-dd-surface/40"} border border-dd-border/10 backdrop-blur-[1px]`}
+        >
+          <span
+            className={`${sizeClasses.icon} transform transition-transform duration-300 hover:scale-110 drop-shadow-md`}
+            role="img"
+            aria-label={label}
+          >
             {earned ? icon : "🔒"}
           </span>
         </div>
 
         {earned && design.ribbonText && (
-          <span className={`absolute -bottom-2.5 bg-zinc-950 dark:bg-white border-2 border-zinc-900 dark:border-white text-white dark:text-zinc-950 font-extrabold rounded-none shadow-md ${sizeClasses.ribbon} font-mono uppercase text-center [clip-path:polygon(10%_0%,_90%_0%,_100%_50%,_90%_100%,_10%_100%,_0%_50%)]`}>
+          <span
+            className={`absolute -bottom-2.5 bg-zinc-950 dark:bg-white border-2 border-zinc-900 dark:border-white text-white dark:text-zinc-950 font-extrabold rounded-none shadow-md ${sizeClasses.ribbon} font-mono uppercase text-center [clip-path:polygon(10%_0%,_90%_0%,_100%_50%,_90%_100%,_10%_100%,_0%_50%)]`}
+          >
             {design.ribbonText}
           </span>
         )}
@@ -214,20 +229,17 @@ function BadgeItem({ badge }: { badge: Badge }) {
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
     >
-      <BadgeEmblem 
-        slug={badge.slug} 
-        icon={badge.icon} 
-        label={badge.label} 
-        earned={earned} 
-      />
+      <BadgeEmblem slug={badge.slug} icon={badge.icon} label={badge.label} earned={earned} />
 
       <div className="text-center mt-1">
-        <span className={`text-[11px] font-bold block truncate max-w-[120px] ${earned ? "text-dd-text" : "text-dd-muted font-normal"}`}>
+        <span
+          className={`text-[11px] font-bold block truncate max-w-[120px] ${earned ? "text-dd-text" : "text-dd-muted font-normal"}`}
+        >
           {badge.label}
         </span>
         {earned && badge.earned_at && (
           <span className="text-dd-muted text-[9px] font-semibold block mt-0.5">
-            {new Date(badge.earned_at).toLocaleDateString('pt-BR')}
+            {new Date(badge.earned_at).toLocaleDateString("pt-BR")}
           </span>
         )}
       </div>
@@ -235,12 +247,8 @@ function BadgeItem({ badge }: { badge: Badge }) {
       {showTooltip && (
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 z-50 w-52 animate-slide-up">
           <div className="bg-dd-card border border-dd-border rounded-xl px-4 py-3 text-center shadow-2xl backdrop-blur-xl">
-            <p className="text-dd-text text-xs font-bold mb-1">
-              {badge.label}
-            </p>
-            <p className="text-dd-muted text-[10px] leading-relaxed">
-              {badge.description}
-            </p>
+            <p className="text-dd-text text-xs font-bold mb-1">{badge.label}</p>
+            <p className="text-dd-muted text-[10px] leading-relaxed">{badge.description}</p>
             {!earned && (
               <p className="text-dd-amber text-[9px] mt-1.5 font-bold uppercase tracking-wider">
                 Ainda não conquistado

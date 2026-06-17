@@ -48,7 +48,7 @@ export function ProfileContent({
   followingCount,
 }: ProfileContentProps) {
   const [posts, setPosts] = useState<any[]>([]);
-  const [page, setPage] = useState(1);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [following, setFollowing] = useState(isFollowing);
@@ -83,7 +83,7 @@ export function ProfileContent({
       }
       const data = await res.json();
       setFollowing(data.following);
-      
+
       // Sincroniza caso o resultado do servidor seja diferente do otimista
       if (data.following !== newFollowing) {
         setFollowers((prev) => (data.following ? prev + 1 : prev - 1));
@@ -97,30 +97,37 @@ export function ProfileContent({
     }
   };
 
-  useEffect(() => {
-    const fetchUserPosts = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(`/api/posts?author=${profileUser.username}&page=${page}&limit=5`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.length < 5) {
-            setHasMore(false);
-          }
-          if (page === 1) {
-            setPosts(data);
-          } else {
-            setPosts((prev) => [...prev, ...data]);
-          }
+  const fetchUserPosts = async (currentCursor: string | null, isInitial: boolean) => {
+    setLoading(true);
+    try {
+      const url = `/api/posts?author=${profileUser.username}&useCursor=true&limit=10${currentCursor ? `&cursor=${currentCursor}` : ""}`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        const items = data.items || [];
+        if (isInitial) {
+          setPosts(items);
+        } else {
+          setPosts((prev) => [...prev, ...items]);
         }
-      } catch (err) {
-        console.error("Error fetching user posts:", err);
-      } finally {
-        setLoading(false);
+        setNextCursor(data.nextCursor || null);
+        setHasMore(!!data.nextCursor);
       }
-    };
-    fetchUserPosts();
-  }, [profileUser.username, page]);
+    } catch (err) {
+      console.error("Error fetching user posts:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserPosts(null, true);
+  }, [profileUser.username]);
+
+  const loadMorePosts = () => {
+    if (loading || !hasMore) return;
+    fetchUserPosts(nextCursor, false);
+  };
 
   // Mapear todas as conquistas do sistema marcando quais foram ganhas por este usuário
   const userEarnedSlugs = new Map<string, string>(
@@ -162,102 +169,108 @@ export function ProfileContent({
 
       <div className="flex-grow flex flex-col min-w-0">
         <main className="flex-grow max-w-4xl w-full mx-auto px-4 py-8 pb-24 md:pb-8 flex flex-col min-w-0 space-y-8">
-        {/* Cabeçalho do Perfil (Com estatísticas e trilhas de XP) */}
-        <ProfileHeader
-          user={profileUser}
-          stats={stats}
-          trails={mappedTrails}
-          isFollowing={following}
-          onFollowToggle={handleFollowToggle}
-          showFollowButton={user.id !== profileUser.id}
-          followersCount={followers}
-          followingCount={followingCount}
-          onShowFollowers={showFollowersModal}
-          onShowFollowing={showFollowingModal}
-        />
+          {/* Cabeçalho do Perfil (Com estatísticas e trilhas de XP) */}
+          <ProfileHeader
+            user={profileUser}
+            stats={stats}
+            trails={mappedTrails}
+            isFollowing={following}
+            onFollowToggle={handleFollowToggle}
+            showFollowButton={user.id !== profileUser.id}
+            followersCount={followers}
+            followingCount={followingCount}
+            onShowFollowers={showFollowersModal}
+            onShowFollowing={showFollowingModal}
+          />
 
-        {/* Quadro de Badges/Conquistas */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between border-b border-dd-border pb-3">
-            <div>
-              <h2 className="text-base font-extrabold text-dd-text uppercase tracking-wider text-[11px] text-dd-muted flex items-center gap-2">
-                <Award className="w-4 h-4 text-orange-500" />
-                Coleção de Badges & Conquistas
-              </h2>
-              <p className="text-dd-muted text-xs mt-0.5">Complete tarefas na comunidade para desbloquear conquistas exclusivas.</p>
-            </div>
-            <Sparkles className="w-4 h-4 text-orange-500/60" />
-          </div>
-          
-          <BadgeGrid badges={mappedBadges} />
-        </div>
-
-        {/* Histórico de Postagens */}
-        <div className="space-y-4 pt-4 border-t border-dd-border">
-          <div className="flex items-center justify-between border-b border-dd-border pb-3">
-            <div>
-              <h2 className="text-base font-extrabold text-dd-text uppercase tracking-wider text-[11px] text-dd-muted flex items-center gap-2">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-orange-500"
-                >
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                  <line x1="16" y1="13" x2="8" y2="13" />
-                  <line x1="16" y1="17" x2="8" y2="17" />
-                  <polyline points="10 9 9 9 8 9" />
-                </svg>
-                Postagens de @{profileUser.username}
-              </h2>
-              <p className="text-dd-muted text-xs mt-0.5">Todas as dúvidas e discussões publicadas pelo desenvolvedor.</p>
-            </div>
-          </div>
-
+          {/* Quadro de Badges/Conquistas */}
           <div className="space-y-4">
-            {posts.length === 0 && !loading ? (
-              <p className="text-xs text-dd-muted italic py-4 text-center border border-dd-border border-dashed rounded-xl bg-dd-surface/5">
-                Nenhuma publicação encontrada.
-              </p>
-            ) : (
-              <div className="space-y-4">
-                {posts.map((post) => (
-                  <PostCard 
-                    key={post.id} 
-                    post={post} 
-                    isOwner={post.author_id === user.id}
-                    onDelete={(postId) => {
-                      setPosts(prev => prev.filter(p => p.id !== postId));
-                    }}
-                  />
-                ))}
+            <div className="flex items-center justify-between border-b border-dd-border pb-3">
+              <div>
+                <h2 className="text-base font-extrabold text-dd-text uppercase tracking-wider text-[11px] text-dd-muted flex items-center gap-2">
+                  <Award className="w-4 h-4 text-orange-500" />
+                  Coleção de Badges & Conquistas
+                </h2>
+                <p className="text-dd-muted text-xs mt-0.5">
+                  Complete tarefas na comunidade para desbloquear conquistas exclusivas.
+                </p>
               </div>
-            )}
+              <Sparkles className="w-4 h-4 text-orange-500/60" />
+            </div>
 
-            {loading && (
-              <div className="text-center py-4">
-                <span className="text-xs text-dd-muted animate-pulse font-semibold">Carregando postagens...</span>
-              </div>
-            )}
-
-            {hasMore && !loading && (
-              <div className="flex justify-center pt-2">
-                <button
-                  onClick={() => setPage((prev) => prev + 1)}
-                  className="px-5 py-2.5 bg-dd-surface hover:bg-dd-border border border-dd-border text-dd-text rounded-xl text-xs font-bold transition-all cursor-pointer hover:border-orange-500/20 active:scale-95"
-                >
-                  Carregar Mais
-                </button>
-              </div>
-            )}
+            <BadgeGrid badges={mappedBadges} />
           </div>
-        </div>
+
+          {/* Histórico de Postagens */}
+          <div className="space-y-4 pt-4 border-t border-dd-border">
+            <div className="flex items-center justify-between border-b border-dd-border pb-3">
+              <div>
+                <h2 className="text-base font-extrabold text-dd-text uppercase tracking-wider text-[11px] text-dd-muted flex items-center gap-2">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-orange-500"
+                  >
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
+                  </svg>
+                  Postagens de @{profileUser.username}
+                </h2>
+                <p className="text-dd-muted text-xs mt-0.5">
+                  Todas as dúvidas e discussões publicadas pelo desenvolvedor.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {posts.length === 0 && !loading ? (
+                <p className="text-xs text-dd-muted italic py-4 text-center border border-dd-border border-dashed rounded-xl bg-dd-surface/5">
+                  Nenhuma publicação encontrada.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {posts.map((post) => (
+                    <PostCard
+                      key={post.id}
+                      post={post}
+                      isOwner={post.author_id === user.id}
+                      onDelete={(postId) => {
+                        setPosts((prev) => prev.filter((p) => p.id !== postId));
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {loading && (
+                <div className="text-center py-4">
+                  <span className="text-xs text-dd-muted animate-pulse font-semibold">
+                    Carregando postagens...
+                  </span>
+                </div>
+              )}
+
+              {hasMore && !loading && (
+                <div className="flex justify-center pt-2">
+                  <button
+                    onClick={loadMorePosts}
+                    className="px-5 py-2.5 bg-dd-surface hover:bg-dd-border border border-dd-border text-dd-text rounded-xl text-xs font-bold transition-all cursor-pointer hover:border-orange-500/20 active:scale-95"
+                  >
+                    Carregar Mais
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </main>
         <Footer />
       </div>

@@ -4,6 +4,7 @@ import { getAuthUser } from "@/lib/auth";
 import { createPostSchema } from "@/lib/validators";
 import { awardXP } from "@/lib/xp";
 import { Language } from "@prisma/client";
+import { rateLimit } from "@/lib/ratelimit";
 
 // GET /api/posts
 export async function GET(request: Request) {
@@ -14,6 +15,9 @@ export async function GET(request: Request) {
     const author = searchParams.get("author");
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
+    const cursor = searchParams.get("cursor") || undefined;
+    const useCursor = searchParams.get("useCursor") === "true" || !!cursor;
+
     const skip = (page - 1) * limit;
     const user = await getAuthUser();
     const filter = searchParams.get("filter");
@@ -42,11 +46,31 @@ export async function GET(request: Request) {
       ];
     }
 
+    let finalWhere = { ...whereClause };
+    if (cursor) {
+      const parts = cursor.split("_");
+      if (parts.length === 2) {
+        const cursorTime = new Date(parseInt(parts[0], 10));
+        const cursorId = parts[1];
+
+        finalWhere = {
+          ...whereClause,
+          OR: [
+            { created_at: { lt: cursorTime } },
+            { created_at: cursorTime, id: { lt: cursorId } },
+          ],
+        };
+      }
+    }
+
+    const skipVal = cursor ? undefined : skip;
+    const takeVal = useCursor ? limit + 1 : limit;
+
     const posts = await prisma.post.findMany({
-      where: whereClause,
-      orderBy: { created_at: "desc" },
-      skip,
-      take: limit,
+      where: finalWhere,
+      orderBy: [{ created_at: "desc" }, { id: "desc" }],
+      skip: skipVal,
+      take: takeVal,
       include: {
         author: {
           select: {
@@ -65,8 +89,22 @@ export async function GET(request: Request) {
         },
         votes: user ? { where: { user_id: user.id } } : { where: { id: "none" } },
         bookmarks: user ? { where: { user_id: user.id } } : { where: { id: "none" } },
+        reactions: user ? { where: { user_id: user.id } } : { where: { id: "none" } },
       },
     });
+
+    if (useCursor) {
+      const hasNext = posts.length > limit;
+      const items = hasNext ? posts.slice(0, limit) : posts;
+
+      let nextCursor = null;
+      if (hasNext && items.length > 0) {
+        const lastItem = items[items.length - 1];
+        const lastTime = new Date(lastItem.created_at).getTime();
+        nextCursor = `${lastTime}_${lastItem.id}`;
+      }
+      return NextResponse.json({ items, nextCursor });
+    }
 
     return NextResponse.json(posts);
   } catch (error) {
@@ -83,6 +121,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
+    const rateLimitResult = await rateLimit(`posts:${user.id}`, 10, "1 h");
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: "Muitas postagens. Limite de 10 por hora excedido." },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const result = createPostSchema.safeParse(body);
     if (!result.success) {
@@ -90,11 +136,6 @@ export async function POST(request: Request) {
     }
 
     const { title, body: postBody, language, code_snippet, image_url } = result.data;
-
-    // Validar formato de URL da imagem por segurança
-    if (image_url && !image_url.startsWith("http://") && !image_url.startsWith("https://") && !image_url.startsWith("/uploads/")) {
-      return NextResponse.json({ error: "URL de imagem inválida" }, { status: 400 });
-    }
 
     // Criar o post
     const post = await prisma.post.create({
@@ -156,7 +197,7 @@ Formato do JSON esperado:
           if (aiResponse.ok) {
             const aiData = await aiResponse.json();
             const quizJson = JSON.parse(aiData.choices[0].message.content);
-            
+
             await prisma.quiz.create({
               data: {
                 post_id: post.id,
@@ -174,10 +215,19 @@ Formato do JSON esperado:
 
       // Fallback de Quiz premium caso não tenha OpenAI ou dê erro
       if (!quizCreated) {
-        const fallbackQuizzes: Record<Language, { question: string; options: string[]; correct_index: number }> = {
+        const fallbackQuizzes: Record<
+          Language,
+          { question: string; options: string[]; correct_index: number }
+        > = {
           TS: {
-            question: "Qual das opções abaixo é usada para definir uma constraint (restrição) em um generic no TypeScript?",
-            options: ["T extends SomeType", "T implements SomeType", "T requires SomeType", "T interface SomeType"],
+            question:
+              "Qual das opções abaixo é usada para definir uma constraint (restrição) em um generic no TypeScript?",
+            options: [
+              "T extends SomeType",
+              "T implements SomeType",
+              "T requires SomeType",
+              "T interface SomeType",
+            ],
             correct_index: 0,
           },
           JS: {
@@ -191,18 +241,30 @@ Formato do JSON esperado:
             correct_index: 1,
           },
           JAVA: {
-            question: "Qual classe é utilizada para criar strings mutáveis em Java de forma eficiente?",
+            question:
+              "Qual classe é utilizada para criar strings mutáveis em Java de forma eficiente?",
             options: ["String", "StringBuffer", "StringBuilder", "StringWriter"],
             correct_index: 2,
           },
           RUST: {
-            question: "Qual conceito do Rust garante a segurança de memória em tempo de compilação sem Garbage Collector?",
-            options: ["Ownership & Borrowing", "Smart Pointers", "Automatic Reference Counting", "Manual Freeing"],
+            question:
+              "Qual conceito do Rust garante a segurança de memória em tempo de compilação sem Garbage Collector?",
+            options: [
+              "Ownership & Borrowing",
+              "Smart Pointers",
+              "Automatic Reference Counting",
+              "Manual Freeing",
+            ],
             correct_index: 0,
           },
           GO: {
             question: "Como declaramos concorrência em Go?",
-            options: ["async/await", "Utilizando go-routines (palavra-chave 'go')", "Threads nativas", "Promessas"],
+            options: [
+              "async/await",
+              "Utilizando go-routines (palavra-chave 'go')",
+              "Threads nativas",
+              "Promessas",
+            ],
             correct_index: 1,
           },
           KOTLIN: {
@@ -216,7 +278,8 @@ Formato do JSON esperado:
             correct_index: 0,
           },
           CPP: {
-            question: "Qual destes operadores é usado para desalocar memória alocada dinamicamente via 'new' em C++?",
+            question:
+              "Qual destes operadores é usado para desalocar memória alocada dinamicamente via 'new' em C++?",
             options: ["free()", "dispose", "delete", "remove"],
             correct_index: 2,
           },

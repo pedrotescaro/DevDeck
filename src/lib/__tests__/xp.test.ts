@@ -45,7 +45,7 @@ describe("awardXP", () => {
 
   it("should award general XP (without language) correctly", async () => {
     const updatedUserMock = { id: "user-1", total_xp: 100 };
-    vi.mocked(prisma.user.update).mockResolvedValue(updatedUserMock);
+    vi.mocked(prisma.user.update).mockResolvedValue(updatedUserMock as any);
 
     const result = await awardXP("user-1", null, 100);
 
@@ -62,7 +62,7 @@ describe("awardXP", () => {
     const updatedUserMock = { id: "user-1", total_xp: 250 };
     const trailMock = null; // simulate creating new trail
 
-    vi.mocked(prisma.user.update).mockResolvedValue(updatedUserMock);
+    vi.mocked(prisma.user.update).mockResolvedValue(updatedUserMock as any);
     vi.mocked(prisma.languageTrail.findUnique).mockResolvedValue(trailMock);
     vi.mocked(prisma.languageTrail.create).mockResolvedValue({
       id: "trail-1",

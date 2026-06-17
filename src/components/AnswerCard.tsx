@@ -1,10 +1,11 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { AlertTriangle, MessageSquare, BarChart2, Share } from 'lucide-react';
-import { LikeButton } from '@/components/motion/LikeButton';
-import { BookmarkButton } from '@/components/motion/BookmarkButton';
-import { RepostMenu } from '@/components/motion/RepostMenu';
+import { useState } from "react";
+import { AlertTriangle, MessageSquare, BarChart2, Share } from "lucide-react";
+import { formatRelativeTime } from "@/lib/date";
+import { LikeButton } from "@/components/motion/LikeButton";
+import { BookmarkButton } from "@/components/motion/BookmarkButton";
+import { RepostMenu } from "@/components/motion/RepostMenu";
 
 interface AnswerAuthor {
   username: string;
@@ -40,9 +41,10 @@ export function AnswerCard({
   onAnswerAdded,
   postId,
 }: AnswerCardProps) {
-  const initialUserVote = answer.votes?.[0]?.value === 1 ? 'up' : answer.votes?.[0]?.value === -1 ? 'down' : null;
+  const initialUserVote =
+    answer.votes?.[0]?.value === 1 ? "up" : answer.votes?.[0]?.value === -1 ? "down" : null;
   const [voteCount, setVoteCount] = useState(answer.upvotes);
-  const [userVote, setUserVote] = useState<'up' | 'down' | null>(initialUserVote);
+  const [userVote, setUserVote] = useState<"up" | "down" | null>(initialUserVote);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [reposted, setReposted] = useState(false);
   const [repostCount, setRepostCount] = useState(0);
@@ -85,22 +87,22 @@ export function AnswerCard({
   };
 
   const handleShare = () => {
-    const link = `${window.location.origin}/post/${answer.post_id || ''}#answer-${answer.id}`;
+    const link = `${window.location.origin}/post/${answer.post_id || ""}#answer-${answer.id}`;
     navigator.clipboard.writeText(link);
     alert("Link da resposta copiado para a área de transferência!");
   };
 
   const [accepting, setAccepting] = useState(false);
 
-  const handleVote = async (type: 'up' | 'down') => {
+  const handleVote = async (type: "up" | "down") => {
     const currentVote = userVote;
     const currentCount = voteCount;
     let newValue = 0;
 
-    if (type === 'up') {
-      newValue = currentVote === 'up' ? 0 : 1;
+    if (type === "up") {
+      newValue = currentVote === "up" ? 0 : 1;
     } else {
-      newValue = currentVote === 'down' ? 0 : -1;
+      newValue = currentVote === "down" ? 0 : -1;
     }
 
     if (newValue === -1) {
@@ -108,35 +110,37 @@ export function AnswerCard({
         "No DevDeck, o downvote exige uma justificativa construtiva. Escreva seu motivo para o autor melhorar:"
       );
       if (!justification || justification.trim().length <= 3) {
-        alert("O downvote foi cancelado. É necessária uma justificativa construtiva de pelo menos 4 caracteres.");
+        alert(
+          "O downvote foi cancelado. É necessária uma justificativa construtiva de pelo menos 4 caracteres."
+        );
         return;
       }
     }
 
     // Optimistic UI update
     let diff = 0;
-    let newUserVote: 'up' | 'down' | null = null;
-    if (type === 'up') {
-      if (currentVote === 'up') {
+    let newUserVote: "up" | "down" | null = null;
+    if (type === "up") {
+      if (currentVote === "up") {
         diff = -1;
         newUserVote = null;
-      } else if (currentVote === 'down') {
+      } else if (currentVote === "down") {
         diff = 2;
-        newUserVote = 'up';
+        newUserVote = "up";
       } else {
         diff = 1;
-        newUserVote = 'up';
+        newUserVote = "up";
       }
     } else {
-      if (currentVote === 'down') {
+      if (currentVote === "down") {
         diff = 1;
         newUserVote = null;
-      } else if (currentVote === 'up') {
+      } else if (currentVote === "up") {
         diff = -2;
-        newUserVote = 'down';
+        newUserVote = "down";
       } else {
         diff = -1;
-        newUserVote = 'down';
+        newUserVote = "down";
       }
     }
 
@@ -178,9 +182,7 @@ export function AnswerCard({
   return (
     <article
       className={`bg-dd-card border rounded-xl p-5 ${
-        answer.is_accepted
-          ? 'border-dd-green/40'
-          : 'border-dd-border'
+        answer.is_accepted ? "border-dd-green/40" : "border-dd-border"
       }`}
     >
       {/* Accepted badge */}
@@ -207,9 +209,7 @@ export function AnswerCard({
         <div className="w-6 h-6 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-semibold">
           {answer.author.username.slice(0, 2).toUpperCase()}
         </div>
-        <span className="text-dd-text text-sm font-medium">
-          {answer.author.username}
-        </span>
+        <span className="text-dd-text text-sm font-medium">{answer.author.username}</span>
         <span className="text-dd-muted text-xs">{relativeTime}</span>
       </div>
 
@@ -221,9 +221,7 @@ export function AnswerCard({
       {/* Code snippet */}
       {answer.code_snippet && (
         <div className="bg-dd-bg rounded-lg p-3 mb-3 overflow-x-auto">
-          <pre className="text-dd-text text-xs font-mono whitespace-pre">
-            {answer.code_snippet}
-          </pre>
+          <pre className="text-dd-text text-xs font-mono whitespace-pre">{answer.code_snippet}</pre>
         </div>
       )}
 
@@ -253,7 +251,7 @@ export function AnswerCard({
             isReposted={reposted}
             onRepost={() => {
               setReposted(!reposted);
-              setRepostCount(prev => reposted ? prev - 1 : prev + 1);
+              setRepostCount((prev) => (reposted ? prev - 1 : prev + 1));
             }}
             onQuote={() => alert("Citação de resposta mockada!")}
           />
@@ -261,8 +259,8 @@ export function AnswerCard({
           {/* 3. Heart/Like button */}
           <LikeButton
             count={voteCount}
-            isActive={userVote === 'up'}
-            onToggle={() => handleVote('up')}
+            isActive={userVote === "up"}
+            onToggle={() => handleVote("up")}
             title="Curtir resposta"
           />
 
@@ -272,15 +270,12 @@ export function AnswerCard({
               <BarChart2 className="w-4 h-4 text-dd-muted group-hover/views:text-orange-400" />
             </div>
             <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/views:text-orange-400">
-              {(Math.abs(voteCount) * 4) + 12}
+              {Math.abs(voteCount) * 4 + 12}
             </span>
           </div>
 
           {/* 5. BookmarkButton */}
-          <BookmarkButton
-            isSaved={isBookmarked}
-            onToggle={() => setIsBookmarked(!isBookmarked)}
-          />
+          <BookmarkButton isSaved={isBookmarked} onToggle={() => setIsBookmarked(!isBookmarked)} />
 
           {/* 6. Share button */}
           <button
@@ -317,7 +312,10 @@ export function AnswerCard({
         )}
       </div>
       {showReplyBox && (
-        <form onSubmit={handleReplySubmit} className="mt-4 pt-4 border-t border-dd-border/60 flex gap-3">
+        <form
+          onSubmit={handleReplySubmit}
+          className="mt-4 pt-4 border-t border-dd-border/60 flex gap-3"
+        >
           <div className="shrink-0">
             {currentUser?.avatar_url ? (
               <img
@@ -354,7 +352,11 @@ export function AnswerCard({
               </button>
               <button
                 type="submit"
-                disabled={replySubmitting || !replyText.trim() || replyText.trim() === `@${answer.author.username}`}
+                disabled={
+                  replySubmitting ||
+                  !replyText.trim() ||
+                  replyText.trim() === `@${answer.author.username}`
+                }
                 className="px-3 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-xs font-bold text-white transition-all duration-200 active:scale-[0.97] cursor-pointer disabled:opacity-50"
               >
                 {replySubmitting ? "Enviando..." : "Responder"}
@@ -365,19 +367,4 @@ export function AnswerCard({
       )}
     </article>
   );
-}
-
-function formatRelativeTime(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffMins < 1) return 'agora';
-  if (diffMins < 60) return `${diffMins}m atrás`;
-  if (diffHours < 24) return `${diffHours}h atrás`;
-  if (diffDays < 30) return `${diffDays}d atrás`;
-  return date.toLocaleDateString('pt-BR');
 }

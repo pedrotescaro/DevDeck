@@ -9,24 +9,23 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
-    // Buscar todos os quizzes diários do sistema
-    const dailyQuizzes = await prisma.quiz.findMany({
-      where: { is_daily: true, post_id: null },
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    let quiz = await prisma.quiz.findUnique({
+      where: { scheduled_for: today },
     });
 
-    if (dailyQuizzes.length === 0) {
-      return NextResponse.json({ quiz: null, attempt: null });
+    if (!quiz) {
+      quiz = await prisma.quiz.findFirst({
+        where: { is_daily: true },
+        orderBy: { created_at: "desc" },
+      });
     }
 
-    // Obter quiz determinístico para o dia do ano
-    const now = new Date();
-    const start = new Date(now.getFullYear(), 0, 0);
-    const diff = now.getTime() - start.getTime();
-    const oneDay = 1000 * 60 * 60 * 24;
-    const dayOfYear = Math.floor(diff / oneDay);
-
-    const quizIndex = dayOfYear % dailyQuizzes.length;
-    const quiz = dailyQuizzes[quizIndex];
+    if (!quiz) {
+      return NextResponse.json({ quiz: null, attempt: null });
+    }
 
     // Buscar tentativa do usuário
     const attempt = await prisma.quizAttempt.findUnique({

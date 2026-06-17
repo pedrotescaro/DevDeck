@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Bookmark } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -47,27 +47,29 @@ export function BookmarkButton({ isSaved, onToggle, className, onViewAll }: Book
         <Bookmark className={cn("w-4 h-4", saved && "fill-current")} />
       </motion.button>
 
-      {showToast && (
-        <motion.div
-          initial={{ opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0 }}
-          className="absolute bottom-full right-0 mb-2 whitespace-nowrap bg-dd-surface border border-dd-border rounded-lg px-3 py-1.5 shadow-lg z-50"
-        >
-          <p className="text-[10px] font-bold text-dd-text">
-            Salvo nos seus bookmarks
-            {onViewAll && (
-              <button
-                type="button"
-                onClick={onViewAll}
-                className="ml-2 text-dd-accent hover:underline"
-              >
-                Ver todos
-              </button>
-            )}
-          </p>
-        </motion.div>
-      )}
+      <AnimatePresence>
+        {showToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="absolute bottom-full right-0 mb-2 whitespace-nowrap bg-dd-surface border border-dd-border rounded-lg px-3 py-1.5 shadow-lg z-50"
+          >
+            <p className="text-[10px] font-bold text-dd-text">
+              Salvo nos seus bookmarks
+              {onViewAll && (
+                <button
+                  type="button"
+                  onClick={onViewAll}
+                  className="ml-2 text-dd-accent hover:underline"
+                >
+                  Ver todos
+                </button>
+              )}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

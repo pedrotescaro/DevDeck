@@ -6,8 +6,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
     const { username } = await params;
 
     const user = await prisma.user.findFirst({
-      where: { 
-        username: { equals: username, mode: 'insensitive' } 
+      where: {
+        username: { equals: username, mode: "insensitive" },
       },
       include: {
         trails: {
@@ -42,7 +42,61 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
       where: { user_id: user.id, is_correct: true },
     });
 
-    const accuracy = totalQuizAttempts > 0 ? Math.round((correctQuizAttempts / totalQuizAttempts) * 100) : 0;
+    const accuracy =
+      totalQuizAttempts > 0 ? Math.round((correctQuizAttempts / totalQuizAttempts) * 100) : 0;
+
+    // Fetch author posts with cursor-based pagination (10 per page)
+    const { searchParams } = new URL(request.url);
+    const cursor = searchParams.get("cursor") || undefined;
+    const limit = 10;
+
+    let cursorTime: Date | null = null;
+    let cursorId: string | null = null;
+    if (cursor) {
+      const parts = cursor.split("_");
+      if (parts.length === 2) {
+        cursorTime = new Date(parseInt(parts[0], 10));
+        cursorId = parts[1];
+      }
+    }
+
+    const postWhereClause: any = { author_id: user.id };
+    if (cursorTime && cursorId) {
+      postWhereClause.OR = [
+        { created_at: { lt: cursorTime } },
+        { created_at: cursorTime, id: { lt: cursorId } },
+      ];
+    }
+
+    const posts = await prisma.post.findMany({
+      where: postWhereClause,
+      orderBy: [{ created_at: "desc" }, { id: "desc" }],
+      take: limit + 1,
+      include: {
+        author: {
+          select: {
+            username: true,
+            avatar_url: true,
+            total_xp: true,
+          },
+        },
+        _count: {
+          select: { answers: true },
+        },
+        votes: { where: { user_id: user.id } },
+        bookmarks: { where: { user_id: user.id } },
+      },
+    });
+
+    const hasNext = posts.length > limit;
+    const items = hasNext ? posts.slice(0, limit) : posts;
+
+    let nextCursor = null;
+    if (hasNext && items.length > 0) {
+      const lastPost = items[items.length - 1];
+      const lastTime = new Date(lastPost.created_at).getTime();
+      nextCursor = `${lastTime}_${lastPost.id}`;
+    }
 
     return NextResponse.json({
       user: {
@@ -67,6 +121,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
         accepted_count: acceptedCount,
       },
       trails: user.trails,
+      posts: {
+        items,
+        nextCursor,
+      },
     });
   } catch (error) {
     console.error("Error fetching user profile stats:", error);

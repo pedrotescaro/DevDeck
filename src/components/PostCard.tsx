@@ -3,13 +3,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { LanguageTag } from "./LanguageTag";
 import { Flag, Heart, MessageSquare, BarChart2, Trash2 } from "lucide-react";
-import { LikeButton } from "./motion/LikeButton";
+import { ExpandedReactionButton } from "./motion/ExpandedReactions";
 import { BookmarkButton } from "./motion/BookmarkButton";
 import { RepostMenu } from "./motion/RepostMenu";
 import { cn } from "@/lib/cn";
 import { parseMentions } from "@/lib/mentions";
+import { formatRelativeTime } from "@/lib/date";
 
 interface PostAuthor {
   username: string;
@@ -32,6 +34,7 @@ interface Post {
   };
   votes?: Array<{ value: number }>;
   bookmarks?: Array<{ id: string }>;
+  reactions?: Array<{ type: string }>;
   upvotes?: number;
 }
 
@@ -61,22 +64,8 @@ function AuthorAvatar({ author }: { author: PostAuthor }) {
   );
 }
 
-function formatRelativeTime(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffMins < 1) return "agora";
-  if (diffMins < 60) return `${diffMins}m atrás`;
-  if (diffHours < 24) return `${diffHours}h atrás`;
-  if (diffDays < 30) return `${diffDays}d atrás`;
-  return date.toLocaleDateString("pt-BR");
-}
-
 export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
+  const router = useRouter();
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
@@ -84,10 +73,51 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
   const [reported, setReported] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (
+      target.closest("button") ||
+      target.closest("a") ||
+      target.closest("select") ||
+      target.closest("input") ||
+      target.closest("textarea") ||
+      window.getSelection()?.toString()
+    ) {
+      return;
+    }
+    router.push(`/post/${post.id}`);
+  };
+
   // Estados interativos locais
-  const [liked, setLiked] = useState<boolean>(
-    !!(post.votes && post.votes.length > 0 && post.votes[0].value === 1)
-  );
+  const EMOJI_TO_TYPE: Record<string, string> = {
+    "🔥": "FIRE",
+    "❤️": "HEART",
+    "😂": "LAUGH",
+    "👏": "CLAP",
+    "💡": "BULB",
+  };
+
+  const TYPE_TO_EMOJI: Record<string, string> = {
+    FIRE: "🔥",
+    HEART: "❤️",
+    LAUGH: "😂",
+    CLAP: "👏",
+    BULB: "💡",
+  };
+
+  const getInitialReaction = () => {
+    if (post.reactions && post.reactions.length > 0) {
+      return TYPE_TO_EMOJI[post.reactions[0].type] || null;
+    }
+    if (post.votes && post.votes.length > 0 && post.votes[0].value === 1) {
+      return "❤️";
+    }
+    return null;
+  };
+
+  const initialReaction = getInitialReaction();
+  const [activeReaction, setActiveReaction] = useState<string | null>(initialReaction);
+  const [liked, setLiked] = useState<boolean>(!!initialReaction);
   const [likesCount, setLikesCount] = useState(post.upvotes ?? 0);
   const [bookmarked, setBookmarked] = useState<boolean>(
     !!(post.bookmarks && post.bookmarks.length > 0)
@@ -95,29 +125,50 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
   const [repostsCount, setRepostsCount] = useState(0);
   const [reposted, setReposted] = useState(false);
 
-  const handleVoteToggle = async () => {
-    const newLiked = !liked;
-    const newCount = newLiked ? likesCount + 1 : Math.max(0, likesCount - 1);
-    setLiked(newLiked);
-    setLikesCount(newCount);
+  const handleReact = async (reactionEmoji?: string | null) => {
+    let targetEmoji: string | null = null;
+    if (reactionEmoji === undefined || reactionEmoji === null) {
+      targetEmoji = activeReaction ? null : "❤️";
+    } else {
+      targetEmoji = reactionEmoji;
+    }
+
+    const previousReaction = activeReaction;
+    const wasActive = !!previousReaction;
+    const isNowActive = !!targetEmoji;
+
+    setActiveReaction(targetEmoji);
+    setLiked(isNowActive);
+
+    let countDiff = 0;
+    if (wasActive && !isNowActive) {
+      countDiff = -1;
+    } else if (!wasActive && isNowActive) {
+      countDiff = 1;
+    }
+    setLikesCount((prev) => Math.max(0, prev + countDiff));
 
     try {
-      const res = await fetch(`/api/posts/${post.id}/vote`, {
+      const typeToSend = targetEmoji ? EMOJI_TO_TYPE[targetEmoji] : null;
+      const res = await fetch(`/api/posts/${post.id}/react`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ value: newLiked ? 1 : 0 }),
+        body: JSON.stringify({ type: typeToSend }),
       });
 
       if (!res.ok) {
-        throw new Error("Falha ao votar");
+        throw new Error("Falha ao registrar reação");
       }
 
       const data = await res.json();
-      setLikesCount(data.upvotes);
+      const serverEmoji = data.reaction ? TYPE_TO_EMOJI[data.reaction] : null;
+
+      setActiveReaction(serverEmoji);
+      setLiked(!!serverEmoji);
     } catch (err) {
-      console.error(err);
-      // Reverter estado se falhar
-      setLiked(!newLiked);
+      console.error("Error toggling reaction:", err);
+      setActiveReaction(previousReaction);
+      setLiked(wasActive);
       setLikesCount(likesCount);
     }
   };
@@ -244,7 +295,7 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
   };
 
   return (
-    <Link href={`/post/${post.id}`} className="block group">
+    <div onClick={handleCardClick} className="block group cursor-pointer">
       <article className="bg-dd-card border border-dd-border rounded-xl p-5 hover:border-orange-500/30 transition-colors relative">
         {/* Header */}
         <div className="flex items-center gap-3 mb-3">
@@ -329,13 +380,23 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
             onQuote={() => {}}
           />
 
-          {/* 3. Heart/Like button */}
-          <LikeButton
-            count={likesCount}
-            isActive={liked}
-            onToggle={handleVoteToggle}
-            title="Curtir post"
-          />
+          {/* 3. Reactions button */}
+          <div className="flex items-center gap-0.5 text-dd-muted hover:text-orange-500 transition-colors group/likes shrink-0">
+            <ExpandedReactionButton
+              isActive={liked}
+              activeReaction={activeReaction as any}
+              onReact={handleReact}
+              title="Reagir ao post"
+            />
+            <span
+              className={cn(
+                "px-1 font-semibold text-[10px] transition-colors",
+                liked ? "text-orange-500" : "text-dd-muted group-hover/likes:text-orange-500"
+              )}
+            >
+              {likesCount}
+            </span>
+          </div>
 
           {/* 4. Views BarChart */}
           <div className="flex items-center gap-0.5 text-dd-muted select-none group/views">
@@ -384,10 +445,15 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
           }}
         >
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={`report-post-title-${post.id}`}
             className="w-full max-w-md bg-dd-surface border border-dd-border rounded-2xl p-5 space-y-4 text-left relative z-10"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-sm font-black text-dd-text">Denunciar Postagem</h3>
+            <h3 id={`report-post-title-${post.id}`} className="text-sm font-black text-dd-text">
+              Denunciar Postagem
+            </h3>
             <p className="text-xs text-dd-muted font-semibold leading-relaxed">
               Ajude-nos a entender o que há de errado com esta postagem. Ela viola alguma de nossas
               diretrizes de comunidade?
@@ -457,10 +523,15 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
           }}
         >
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={`delete-post-title-${post.id}`}
             className="w-full max-w-md bg-dd-surface border border-dd-border rounded-2xl p-5 space-y-4 text-left relative z-10"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-sm font-black text-dd-text">Deletar Postagem</h3>
+            <h3 id={`delete-post-title-${post.id}`} className="text-sm font-black text-dd-text">
+              Deletar Postagem
+            </h3>
             <p className="text-xs text-dd-muted font-semibold leading-relaxed">
               Tem certeza que deseja deletar esta postagem? Esta ação não pode ser desfeita.
             </p>
@@ -493,6 +564,6 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
           </div>
         </div>
       )}
-    </Link>
+    </div>
   );
 }

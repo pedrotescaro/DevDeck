@@ -2,11 +2,23 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { registerSchema } from "@/lib/validators";
+import { rateLimit } from "@/lib/ratelimit";
 
 export async function POST(request: Request) {
   try {
+    const ip = request.headers.get("x-forwarded-for") || "127.0.0.1";
+    const rateLimitResult = await rateLimit(`register:${ip}`, 5, "1 h");
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          error: "Muitas tentativas de cadastro a partir deste IP. Limite de 5 por hora excedido.",
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
-    
+
     // Validar corpo da requisição
     const result = registerSchema.safeParse(body);
     if (!result.success) {
@@ -83,6 +95,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, user: dbUser });
   } catch (error: any) {
     console.error("Error in registration endpoint:", error);
-    return NextResponse.json({ error: error.message || "Erro interno ao cadastrar" }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || "Erro interno ao cadastrar" },
+      { status: 500 }
+    );
   }
 }

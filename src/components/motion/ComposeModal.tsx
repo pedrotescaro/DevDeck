@@ -66,6 +66,9 @@ export function ComposeModal({
             onClick={handleClose}
           />
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Criar nova publicação"
             variants={reduced ? fadeVariants : modalContentVariants}
             initial="hidden"
             animate="visible"
@@ -77,6 +80,7 @@ export function ComposeModal({
               <button
                 onClick={handleClose}
                 type="button"
+                aria-label="Fechar rascunho"
                 className="dd-focus-ring dd-touch text-dd-text hover:bg-dd-surface/80 p-1.5 rounded-full transition-all cursor-pointer"
               >
                 <X className="w-5 h-5" />

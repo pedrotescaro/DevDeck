@@ -15,6 +15,7 @@
 [![Tailwind](https://img.shields.io/badge/TailwindCSS-v4-38BDF8?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Prisma](https://img.shields.io/badge/Prisma-7.x-2D3748?style=flat-square&logo=prisma&logoColor=white)](https://www.prisma.io/)
 [![Supabase](https://img.shields.io/badge/Supabase-Auth%20%26%20DB-3ECF8E?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 </div>
 
@@ -23,6 +24,17 @@
 ## ⚡ Conecte-se. Codifique. Conquiste.
 
 O **DevDeck** transforma a interação social entre programadores em uma jornada interativa de aprendizado e diversão. Compartilhe suas dúvidas técnicas, ajude a comunidade, dispute duelos de código em tempo real e desbloqueie badges que provam sua senioridade (e senso de humor).
+
+---
+
+## 📖 Documentação do Projeto
+
+Explore as especificações detalhadas do projeto e guias de infraestrutura:
+
+* **[Guia de Contribuição](CONTRIBUTING.md):** Saiba como reportar bugs, sugerir melhorias e enviar Pull Requests.
+* **[Arquitetura do Sistema](docs/ARCHITECTURE.md):** Visão geral da organização de diretórios, escolhas técnicas e fluxo de dados.
+* **[Modelagem de Banco de Dados](docs/DATABASE.md):** Diagramas ER, indexações de Full-Text Search e dicionário de modelos.
+* **[Guia de Implantação e Deploy](docs/DEPLOYMENT.md):** Passo a passo detalhado para colocar a plataforma em produção via Vercel e Supabase.
 
 ---
 
@@ -41,7 +53,7 @@ O **DevDeck** transforma a interação social entre programadores em uma jornada
     <td width="50%" valign="top">
       <h4>⚔️ Duelos de Código 1v1</h4>
       <ul>
-        <li>matchmaking dinâmico para disputas de algoritmo.</li>
+        <li>Matchmaking dinâmico para disputas de algoritmo.</li>
         <li>Editor de código integrado alimentado por <b>CodeMirror</b>.</li>
         <li>Votação aberta para a comunidade escolher a melhor solução de forma justa.</li>
       </ul>
@@ -53,7 +65,7 @@ O **DevDeck** transforma a interação social entre programadores em uma jornada
       <ul>
         <li>Trilhas de XP independentes para linguagens (TypeScript, Rust, Python, Go, C++, etc.).</li>
         <li>Contadores de ofensiva (Streaks) para incentivar a consistência diária.</li>
-        <li><b>Quiz Diário</b> interativo com recompensas diretas de XP no perfil.</li>
+        <li><b>Quiz Diário</b> gerado por inteligência artificial a partir de postagens populares.</li>
       </ul>
     </td>
     <td width="50%" valign="top">
@@ -68,28 +80,6 @@ O **DevDeck** transforma a interação social entre programadores em uma jornada
 
 ---
 
-## 🏗️ Estrutura do Banco de Dados
-
-O banco de dados PostgreSQL estruturado via Prisma 7 mapeia perfeitamente a lógica social e gamificada da plataforma:
-
-```mermaid
-erDiagram
-    User ||--o{ LanguageTrail : "progride"
-    User ||--o{ Post : "escreve"
-    User ||--o{ Answer : "responde"
-    User ||--o{ QuizAttempt : "tenta"
-    User ||--o{ DuelSolution : "submete"
-    User ||--o{ UserBadge : "conquista"
-    User ||--o{ Report : "denuncia"
-    Post ||--o{ Answer : "possui"
-    Post ||--o{ Quiz : "gera"
-    Quiz ||--o{ QuizAttempt : "registra"
-    Duel ||--o{ DuelSolution : "contem"
-    DuelSolution ||--o{ DuelVote : "recebe"
-```
-
----
-
 ## 🛠️ Primeiros Passos (Instalação Rápida)
 
 Para rodar o DevDeck na sua máquina local de forma simples e direta, siga os passos abaixo:
@@ -100,7 +90,7 @@ npm install
 ```
 
 #### 2. Configurar o arquivo `.env.local`
-Crie um arquivo chamado `.env.local` na raiz e configure com as conexões do seu banco de dados Supabase:
+Crie um arquivo chamado `.env.local` na raiz (copiando do `.env.example`) e configure com as conexões do seu banco de dados Supabase:
 ```env
 DATABASE_URL="postgresql://..."
 DIRECT_URL="postgresql://..."
@@ -114,10 +104,10 @@ SUPABASE_SERVICE_ROLE_KEY="..."
 # Gerar o cliente Prisma
 npx prisma generate
 
-# Executar as migrations no banco remoto
-npx prisma migrate dev
+# Executar as migrations no banco
+npx prisma db push
 
-# Inserir badges, trilhas e usuários de teste
+# Inserir badges, trilhas, quizzes iniciais e usuários de teste
 npx prisma db seed
 ```
 
@@ -131,10 +121,10 @@ Abra seu navegador em [http://localhost:3000](http://localhost:3000).
 
 ## 👥 Contas para Testes Rápidos
 
-O seed cria três desenvolvedores com diferentes níveis de XP e trilhas de tecnologia. **A senha dessas contas é definida por você** no momento do seed — nunca é fixa no repositório.
+O seed cria três desenvolvedores com diferentes níveis de XP e trilhas de tecnologia. A senha dessas contas é definida por você no momento do seed através da variável de ambiente `SEED_DEFAULT_PASSWORD`.
 
 > [!IMPORTANT]
-> Defina `SEED_DEFAULT_PASSWORD` no seu `.env.local` **antes** de rodar `npx prisma db seed`. Consulte `.env.example` para a lista completa de variáveis.
+> Defina `SEED_DEFAULT_PASSWORD` no seu `.env.local` **antes** de rodar `npx prisma db seed`.
 
 | Nome | E-mail | Especialidade Principal |
 | :--- | :--- | :--- |
@@ -142,7 +132,7 @@ O seed cria três desenvolvedores com diferentes níveis de XP e trilhas de tecn
 | **Ana** | `ana@devdeck.dev` | Python & Django |
 | **Carlos** | `carlos@devdeck.dev` | Rust & C++ |
 
-Acesse `/login` e utilize qualquer uma das contas acima com a senha que você definiu em `SEED_DEFAULT_PASSWORD`.
+Acesse `/login` e utilize qualquer uma das contas acima com a senha que você configurou.
 
 ---
 
