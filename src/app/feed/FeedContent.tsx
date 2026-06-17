@@ -651,11 +651,25 @@ export function FeedContent({
     e.preventDefault();
     if (!postBody.trim()) return;
 
+    const titleToSubmit = postTitle.trim() || postBody.trim().substring(0, 40) || "Discussao Geral";
+
+    // Client-side validation
+    if (postTitle.trim() && postTitle.trim().length < 5) {
+      setPostError("O título deve ter pelo menos 5 caracteres");
+      setTimeout(() => setPostError(null), 4000);
+      return;
+    }
+
+    if (postBody.trim().length < 10) {
+      setPostError("O conteúdo deve ter pelo menos 10 caracteres");
+      setTimeout(() => setPostError(null), 4000);
+      return;
+    }
+
     setPublishState("submitting");
     setPostError(null);
 
     const isFirstPost = initialPosts.length === 0;
-    const titleToSubmit = postTitle.trim() || postBody.trim().substring(0, 40) || "Discussao Geral";
     const tempId = `temp-${Date.now()}`;
     const optimisticPost = {
       id: tempId,
@@ -742,12 +756,13 @@ export function FeedContent({
           setTimeout(() => setFirstPostToastVisible(false), 3000);
         }
       } else {
-        throw new Error("Erro ao postar");
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Erro ao postar");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setPosts((prev) => prev.filter((p) => p.id !== tempId));
-      setPostError("Algo deu errado. Seu rascunho foi salvo automaticamente.");
+      setPostError(err.message || "Algo deu errado. Seu rascunho foi salvo automaticamente.");
       setPublishState("idle");
       // Auto-dismiss error after 4s
       setTimeout(() => setPostError(null), 4000);

@@ -295,11 +295,23 @@ export function Sidebar({ user }: SidebarProps) {
   const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!postBody.trim()) return;
+
+    const titleToSubmit = postTitle.trim() || postBody.trim().substring(0, 40) || "Discussão Geral";
+
+    // Client-side validation
+    if (postTitle.trim() && postTitle.trim().length < 5) {
+      setPostError("O título deve ter pelo menos 5 caracteres");
+      return;
+    }
+
+    if (postBody.trim().length < 10) {
+      setPostError("O conteúdo deve ter pelo menos 10 caracteres");
+      return;
+    }
+
     setSubmitting(true);
     setPublishState("submitting");
     setPostError(null);
-
-    const titleToSubmit = postTitle.trim() || postBody.trim().substring(0, 40) || "Discussão Geral";
 
     try {
       const res = await fetch("/api/posts", {
@@ -332,11 +344,12 @@ export function Sidebar({ user }: SidebarProps) {
           router.push("/feed");
         }
       } else {
-        throw new Error("Erro ao postar");
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Erro ao postar");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error creating post from sidebar:", err);
-      setPostError("Algo deu errado ao postar. Seu texto foi salvo como rascunho.");
+      setPostError(err.message || "Algo deu errado ao postar. Seu texto foi salvo como rascunho.");
       setPublishState("idle");
     } finally {
       setSubmitting(false);
