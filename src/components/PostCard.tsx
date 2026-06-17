@@ -1,13 +1,15 @@
-'use client';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { LanguageTag } from './LanguageTag';
-import { Flag, Heart, MessageSquare, BarChart2, Trash2 } from 'lucide-react';
-import { LikeButton } from './motion/LikeButton';
-import { BookmarkButton } from './motion/BookmarkButton';
-import { RepostMenu } from './motion/RepostMenu';
-import { cn } from '@/lib/cn';
+import { useState } from "react";
+import Link from "next/link";
+import { LanguageTag } from "./LanguageTag";
+import { Flag, Heart, MessageSquare, BarChart2, Trash2 } from "lucide-react";
+import { LikeButton } from "./motion/LikeButton";
+import { BookmarkButton } from "./motion/BookmarkButton";
+import { RepostMenu } from "./motion/RepostMenu";
+import { cn } from "@/lib/cn";
+import { parseMentions } from "@/lib/mentions";
 
 interface PostAuthor {
   username: string;
@@ -67,32 +69,11 @@ function formatRelativeTime(dateString: string): string {
   const diffHours = Math.floor(diffMins / 60);
   const diffDays = Math.floor(diffHours / 24);
 
-  if (diffMins < 1) return 'agora';
+  if (diffMins < 1) return "agora";
   if (diffMins < 60) return `${diffMins}m atrás`;
   if (diffHours < 24) return `${diffHours}h atrás`;
   if (diffDays < 30) return `${diffDays}d atrás`;
-  return date.toLocaleDateString('pt-BR');
-}
-
-function parseMentions(text: string) {
-  if (!text) return "";
-  const parts = text.split(/(@\w+)/g);
-  return parts.map((part, index) => {
-    if (part.startsWith("@")) {
-      const username = part.slice(1);
-      return (
-        <Link
-          key={index}
-          href={`/profile/${username}`}
-          className="text-orange-500 hover:underline font-semibold"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {part}
-        </Link>
-      );
-    }
-    return part;
-  });
+  return date.toLocaleDateString("pt-BR");
 }
 
 export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
@@ -219,31 +200,40 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
       <pre className="font-mono text-[11px] leading-relaxed text-dd-text">
         <code>
           {lines.map((line, idx) => {
-            let html = line
-              .replace(/&/g, "&amp;")
-              .replace(/</g, "&lt;")
-              .replace(/>/g, "&gt;");
-            
+            let html = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
             // Highlight keywords
-            const keywords = /\b(const|let|var|function|return|fn|impl|pub|use|import|from|def|class|async|await|struct|enum|if|else|for|while|match)\b/g;
+            const keywords =
+              /\b(const|let|var|function|return|fn|impl|pub|use|import|from|def|class|async|await|struct|enum|if|else|for|while|match)\b/g;
             html = html.replace(keywords, '<span class="text-orange-400 font-semibold">$1</span>');
 
             // Highlight types
-            const types = /\b(string|number|boolean|any|void|User|Post|Language|int|float|str|char)\b/g;
+            const types =
+              /\b(string|number|boolean|any|void|User|Post|Language|int|float|str|char)\b/g;
             html = html.replace(types, '<span class="text-cyan-400 font-medium">$1</span>');
 
             // Highlight comments
             if (html.includes("//")) {
-               const parts = html.split("//");
-               html = parts[0] + '<span class="text-dd-muted italic">//' + parts.slice(1).join("//") + '</span>';
+              const parts = html.split("//");
+              html =
+                parts[0] +
+                '<span class="text-dd-muted italic">//' +
+                parts.slice(1).join("//") +
+                "</span>";
             } else if (html.startsWith("#") || html.includes(" #")) {
-               const parts = html.split("#");
-               html = parts[0] + '<span class="text-dd-muted italic">#' + parts.slice(1).join("#") + '</span>';
+              const parts = html.split("#");
+              html =
+                parts[0] +
+                '<span class="text-dd-muted italic">#' +
+                parts.slice(1).join("#") +
+                "</span>";
             }
 
             return (
               <div key={idx} className="table-row">
-                <span className="table-cell text-right pr-4 select-none opacity-20 text-[9px] w-6">{idx + 1}</span>
+                <span className="table-cell text-right pr-4 select-none opacity-20 text-[9px] w-6">
+                  {idx + 1}
+                </span>
                 <span className="table-cell" dangerouslySetInnerHTML={{ __html: html }} />
               </div>
             );
@@ -269,7 +259,9 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
               </span>
             </div>
             <span className="text-dd-muted text-[10px] block mt-0.5 font-medium">
-              {formatRelativeTime(post.created_at) === 'agora' ? 'Postado há pouco' : `Postado ${formatRelativeTime(post.created_at)}`}
+              {formatRelativeTime(post.created_at) === "agora"
+                ? "Postado há pouco"
+                : `Postado ${formatRelativeTime(post.created_at)}`}
             </span>
           </div>
           <div className="flex items-center gap-1.5" onClick={(e) => e.preventDefault()}>
@@ -295,7 +287,7 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
               alt={post.title}
               className="w-full h-full object-cover max-h-80"
               onError={(e) => {
-                (e.target as HTMLElement).style.display = 'none';
+                (e.target as HTMLElement).style.display = "none";
               }}
             />
           </div>
@@ -309,11 +301,11 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
         )}
 
         {/* Footer */}
-        <div 
+        <div
           className="flex items-center justify-between pt-3 border-t border-dd-border text-xs w-full select-none"
-          onClick={(e) => { 
-            e.stopPropagation(); 
-            e.preventDefault(); 
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
           }}
         >
           {/* 1. Comment bubble */}
@@ -324,7 +316,9 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
             <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-500/10 transition-colors">
               <MessageSquare className="w-3.5 h-3.5 text-dd-muted group-hover/comment:text-orange-400" />
             </div>
-            <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/comment:text-orange-400">{post._count.answers}</span>
+            <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/comment:text-orange-400">
+              {post._count.answers}
+            </span>
           </Link>
 
           {/* 2. Repost Menu */}
@@ -336,10 +330,10 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
           />
 
           {/* 3. Heart/Like button */}
-          <LikeButton 
-            count={likesCount} 
-            isActive={liked} 
-            onToggle={handleVoteToggle} 
+          <LikeButton
+            count={likesCount}
+            isActive={liked}
+            onToggle={handleVoteToggle}
             title="Curtir post"
           />
 
@@ -349,7 +343,9 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
               <BarChart2 className="w-4 h-4 text-dd-muted group-hover/views:text-orange-400" />
             </div>
             <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/views:text-orange-400">
-              {post.view_count >= 1000 ? `${(post.view_count / 1000).toFixed(0)}mil` : post.view_count}
+              {post.view_count >= 1000
+                ? `${(post.view_count / 1000).toFixed(0)}mil`
+                : post.view_count}
             </span>
           </div>
 
@@ -374,15 +370,12 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
           )}
 
           {/* 7. BookmarkButton */}
-          <BookmarkButton
-            isSaved={bookmarked}
-            onToggle={handleBookmarkToggle}
-          />
+          <BookmarkButton isSaved={bookmarked} onToggle={handleBookmarkToggle} />
         </div>
       </article>
 
       {reportModalOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
           onClick={(e) => {
             e.stopPropagation();
@@ -390,15 +383,16 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
             setReportModalOpen(false);
           }}
         >
-          <div 
+          <div
             className="w-full max-w-md bg-dd-surface border border-dd-border rounded-2xl p-5 space-y-4 text-left relative z-10"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-sm font-black text-dd-text">Denunciar Postagem</h3>
             <p className="text-xs text-dd-muted font-semibold leading-relaxed">
-              Ajude-nos a entender o que há de errado com esta postagem. Ela viola alguma de nossas diretrizes de comunidade?
+              Ajude-nos a entender o que há de errado com esta postagem. Ela viola alguma de nossas
+              diretrizes de comunidade?
             </p>
-            
+
             {reported ? (
               <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold p-3 rounded-lg text-center animate-pulse">
                 Denúncia enviada com sucesso. Obrigado por ajudar!
@@ -406,7 +400,9 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
             ) : (
               <form onSubmit={handleReportSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] text-dd-muted font-bold uppercase tracking-wider block">Motivo da denúncia</label>
+                  <label className="text-[10px] text-dd-muted font-bold uppercase tracking-wider block">
+                    Motivo da denúncia
+                  </label>
                   <select
                     value={reportReason}
                     onChange={(e) => setReportReason(e.target.value)}
@@ -417,11 +413,13 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
                     <option value="Spam / Propaganda enganosa">Spam / Propaganda enganosa</option>
                     <option value="Discurso de ódio / Ofensa">Discurso de ódio / Ofensa</option>
                     <option value="Assédio / Bullying">Assédio / Bullying</option>
-                    <option value="Código / Conteúdo malicioso ou perigoso">Código / Conteúdo malicioso ou perigoso</option>
+                    <option value="Código / Conteúdo malicioso ou perigoso">
+                      Código / Conteúdo malicioso ou perigoso
+                    </option>
                     <option value="Outro motivo">Outro motivo</option>
                   </select>
                 </div>
-                
+
                 <div className="flex justify-end gap-2 pt-2 border-t border-dd-border">
                   <button
                     type="button"
@@ -450,7 +448,7 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
       )}
 
       {deleteModalOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
           onClick={(e) => {
             e.stopPropagation();
@@ -458,7 +456,7 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
             setDeleteModalOpen(false);
           }}
         >
-          <div 
+          <div
             className="w-full max-w-md bg-dd-surface border border-dd-border rounded-2xl p-5 space-y-4 text-left relative z-10"
             onClick={(e) => e.stopPropagation()}
           >
@@ -466,7 +464,7 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
             <p className="text-xs text-dd-muted font-semibold leading-relaxed">
               Tem certeza que deseja deletar esta postagem? Esta ação não pode ser desfeita.
             </p>
-            
+
             <div className="flex justify-end gap-2 pt-2 border-t border-dd-border">
               <button
                 type="button"

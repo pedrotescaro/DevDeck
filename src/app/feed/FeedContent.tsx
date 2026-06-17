@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
@@ -32,17 +33,18 @@ import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { useSearchWithDebounce } from "@/hooks/useSearchWithDebounce";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { Language } from "@prisma/client";
-import { 
-  Flame, 
-  Award, 
-  Swords, 
-  MessageSquare, 
-  Trophy, 
-  ChevronRight, 
-  ArrowBigDown, 
-  AlertTriangle, 
-  Code, 
-  Plus, 
+import { parseMentions } from "@/lib/mentions";
+import {
+  Flame,
+  Award,
+  Swords,
+  MessageSquare,
+  Trophy,
+  ChevronRight,
+  ArrowBigDown,
+  AlertTriangle,
+  Code,
+  Plus,
   Sparkles,
   BookOpen,
   Calendar,
@@ -51,7 +53,7 @@ import {
   Search,
   Flag,
   Heart,
-  BarChart2
+  BarChart2,
 } from "lucide-react";
 
 interface LanguageTrail {
@@ -70,27 +72,6 @@ interface Badge {
   description: string;
   icon: string;
   color: string;
-}
-
-function parseMentions(text: string) {
-  if (!text) return "";
-  const parts = text.split(/(@\w+)/g);
-  return parts.map((part, index) => {
-    if (part.startsWith("@")) {
-      const username = part.slice(1);
-      return (
-        <Link
-          key={index}
-          href={`/profile/${username}`}
-          className="text-orange-500 hover:underline font-semibold"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {part}
-        </Link>
-      );
-    }
-    return part;
-  });
 }
 
 function getLevelFromXp(xp: number) {
@@ -128,7 +109,12 @@ interface FeedContentProps {
   initialBookmarks?: Record<string, boolean>;
 }
 
-export function FeedContent({ initialUser, initialPosts, initialDuels, initialBookmarks = {} }: FeedContentProps) {
+export function FeedContent({
+  initialUser,
+  initialPosts,
+  initialDuels,
+  initialBookmarks = {},
+}: FeedContentProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"feed" | "quizzes" | "duels" | "ranking">("feed");
   const [feedFilter, setFeedFilter] = useState<"for-you" | "following">("for-you");
@@ -136,7 +122,7 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
   const [duels, setDuels] = useState<any[]>(initialDuels);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [leaderboardLanguage, setLeaderboardLanguage] = useState<string>("GLOBAL");
-  
+
   // Post Form state
   const [postTitle, setPostTitle] = useState("");
   const [postBody, setPostBody] = useState("");
@@ -151,13 +137,16 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [newPostsCount, setNewPostsCount] = useState(0);
   const FEED_PAGE_SIZE = 10;
-  const [postType, setPostType] = useState<'question' | 'discussion'>('question');
+  const [postType, setPostType] = useState<"question" | "discussion">("question");
   const [postImage, setPostImage] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [quotePost, setQuotePost] = useState<any | null>(null);
-  const [bookmarkedPostIds, setBookmarkedPostIds] = useState<Record<string, boolean>>(initialBookmarks);
-  const [repostState, setRepostState] = useState<Record<string, { count: number; reposted: boolean }>>({});
+  const [bookmarkedPostIds, setBookmarkedPostIds] =
+    useState<Record<string, boolean>>(initialBookmarks);
+  const [repostState, setRepostState] = useState<
+    Record<string, { count: number; reposted: boolean }>
+  >({});
   const [activeReactions, setActiveReactions] = useState<Record<string, string | null>>({});
   const [currentXp, setCurrentXp] = useState(initialUser.total_xp);
   const [currentLevel, setCurrentLevel] = useState(getLevelFromXp(initialUser.total_xp));
@@ -178,7 +167,7 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
   // Mention Suggestions state
   const [mentionUsers, setMentionUsers] = useState<any[]>([]);
   const [showMentionSuggestions, setShowMentionSuggestions] = useState(false);
-  const [focusedInput, setFocusedInput] = useState<'inline' | 'modal' | null>(null);
+  const [focusedInput, setFocusedInput] = useState<"inline" | "modal" | null>(null);
   const postBodyTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [replyAudience, setReplyAudience] = useState<ReplyAudience>("everyone");
   const [scheduledAt, setScheduledAt] = useState<string | null>(null);
@@ -229,7 +218,9 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
     setLoadingSearch(true);
     const delayDebounce = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/posts?search=${encodeURIComponent(searchQuery)}&limit=${FEED_PAGE_SIZE}`);
+        const res = await fetch(
+          `/api/posts?search=${encodeURIComponent(searchQuery)}&limit=${FEED_PAGE_SIZE}`
+        );
         if (res.ok) {
           const data = await res.json();
           setPosts(data);
@@ -252,9 +243,10 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
       setPage(1);
       setLoadingSearch(true);
       try {
-        const url = feedFilter === "following"
-          ? `/api/posts?filter=following&limit=${FEED_PAGE_SIZE}`
-          : `/api/posts?limit=${FEED_PAGE_SIZE}`;
+        const url =
+          feedFilter === "following"
+            ? `/api/posts?filter=following&limit=${FEED_PAGE_SIZE}`
+            : `/api/posts?limit=${FEED_PAGE_SIZE}`;
         const res = await fetch(url);
         if (res.ok) {
           const data = await res.json();
@@ -279,9 +271,10 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
     setLoadingMore(true);
     try {
       const nextPage = page + 1;
-      const url = feedFilter === "following"
-        ? `/api/posts?filter=following&page=${nextPage}&limit=${FEED_PAGE_SIZE}`
-        : `/api/posts?page=${nextPage}&limit=${FEED_PAGE_SIZE}`;
+      const url =
+        feedFilter === "following"
+          ? `/api/posts?filter=following&page=${nextPage}&limit=${FEED_PAGE_SIZE}`
+          : `/api/posts?page=${nextPage}&limit=${FEED_PAGE_SIZE}`;
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
@@ -359,7 +352,7 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
     fetchDailyQuiz();
   }, []);
 
-  const handleBodyChange = async (val: string, inputType: 'inline' | 'modal') => {
+  const handleBodyChange = async (val: string, inputType: "inline" | "modal") => {
     setPostBody(val);
     const words = val.split(/\s+/);
     const lastWord = words[words.length - 1];
@@ -424,13 +417,15 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
   const [toastXp, setToastXp] = useState<{ amount: number; language: string } | null>(null);
 
   // Thumbs state for posts
-  const [votes, setVotes] = useState<Record<string, { up: number; userVote: 'up' | 'down' | null }>>(() => {
-    const initialVotes: Record<string, { up: number; userVote: 'up' | 'down' | null }> = {};
+  const [votes, setVotes] = useState<
+    Record<string, { up: number; userVote: "up" | "down" | null }>
+  >(() => {
+    const initialVotes: Record<string, { up: number; userVote: "up" | "down" | null }> = {};
     initialPosts.forEach((post) => {
       const userPostVote = post.votes?.[0];
-      let userVote: 'up' | 'down' | null = null;
+      let userVote: "up" | "down" | null = null;
       if (userPostVote) {
-        userVote = userPostVote.value === 1 ? 'up' : userPostVote.value === -1 ? 'down' : null;
+        userVote = userPostVote.value === 1 ? "up" : userPostVote.value === -1 ? "down" : null;
       }
       initialVotes[post.id] = {
         up: post.upvotes,
@@ -445,11 +440,15 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
     let changed = false;
     posts.forEach((post) => {
       const userPostVote = post.votes?.[0];
-      let userVote: 'up' | 'down' | null = null;
+      let userVote: "up" | "down" | null = null;
       if (userPostVote) {
-        userVote = userPostVote.value === 1 ? 'up' : userPostVote.value === -1 ? 'down' : null;
+        userVote = userPostVote.value === 1 ? "up" : userPostVote.value === -1 ? "down" : null;
       }
-      if (!votes[post.id] || votes[post.id].up !== post.upvotes || votes[post.id].userVote !== userVote) {
+      if (
+        !votes[post.id] ||
+        votes[post.id].up !== post.upvotes ||
+        votes[post.id].userVote !== userVote
+      ) {
         newVotes[post.id] = {
           up: post.upvotes,
           userVote,
@@ -502,31 +501,40 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
       <pre className="font-mono text-[11px] leading-relaxed text-dd-text">
         <code>
           {lines.map((line, idx) => {
-            let html = line
-              .replace(/&/g, "&amp;")
-              .replace(/</g, "&lt;")
-              .replace(/>/g, "&gt;");
-            
+            let html = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
             // Highlight keywords
-            const keywords = /\b(const|let|var|function|return|fn|impl|pub|use|import|from|def|class|async|await|struct|enum|if|else|for|while|match)\b/g;
+            const keywords =
+              /\b(const|let|var|function|return|fn|impl|pub|use|import|from|def|class|async|await|struct|enum|if|else|for|while|match)\b/g;
             html = html.replace(keywords, '<span class="text-orange-400 font-semibold">$1</span>');
 
             // Highlight types
-            const types = /\b(string|number|boolean|any|void|User|Post|Language|int|float|str|char)\b/g;
+            const types =
+              /\b(string|number|boolean|any|void|User|Post|Language|int|float|str|char)\b/g;
             html = html.replace(types, '<span class="text-cyan-400 font-medium">$1</span>');
 
             // Highlight comments
             if (html.includes("//")) {
               const parts = html.split("//");
-              html = parts[0] + '<span class="text-dd-muted italic">//' + parts.slice(1).join("//") + '</span>';
+              html =
+                parts[0] +
+                '<span class="text-dd-muted italic">//' +
+                parts.slice(1).join("//") +
+                "</span>";
             } else if (html.startsWith("#") || html.includes(" #")) {
               const parts = html.split("#");
-              html = parts[0] + '<span class="text-dd-muted italic">#' + parts.slice(1).join("#") + '</span>';
+              html =
+                parts[0] +
+                '<span class="text-dd-muted italic">#' +
+                parts.slice(1).join("#") +
+                "</span>";
             }
 
             return (
               <div key={idx} className="table-row">
-                <span className="table-cell text-right pr-4 select-none opacity-20 text-[9px] w-6">{idx + 1}</span>
+                <span className="table-cell text-right pr-4 select-none opacity-20 text-[9px] w-6">
+                  {idx + 1}
+                </span>
                 <span className="table-cell" dangerouslySetInnerHTML={{ __html: html }} />
               </div>
             );
@@ -590,7 +598,7 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
     setPostError(null);
 
     const isFirstPost = initialPosts.length === 0;
-    const titleToSubmit = postTitle.trim() || (postBody.trim().substring(0, 40) || "Discussao Geral");
+    const titleToSubmit = postTitle.trim() || postBody.trim().substring(0, 40) || "Discussao Geral";
     const tempId = `temp-${Date.now()}`;
     const optimisticPost = {
       id: tempId,
@@ -627,7 +635,8 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
             replyAudience,
             isSensitive,
           }),
-          language: postType === "question" ? postLanguage : postLanguage === "" ? null : postLanguage,
+          language:
+            postType === "question" ? postLanguage : postLanguage === "" ? null : postLanguage,
           code_snippet: postType === "question" ? postCode || null : null,
           image_url: postType === "discussion" ? postImage || null : null,
         }),
@@ -665,7 +674,7 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
         setPostLocation(resetExtras.location);
         setIsSensitive(resetExtras.isSensitive);
         setPublishState("success");
-        playSound('post');
+        playSound("post");
         setTimeout(() => setPublishState("idle"), 1500);
 
         if (data.xpResult?.xpEarned) {
@@ -813,64 +822,68 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
   };
 
   // Upvote/Downvote handling with API
-  const handleVote = async (postId: string, type: 'up' | 'down') => {
+  const handleVote = async (postId: string, type: "up" | "down") => {
     const current = votes[postId] || { up: 0, userVote: null };
     let newValue = 0;
-    
-    if (type === 'up') {
-      newValue = current.userVote === 'up' ? 0 : 1;
+
+    if (type === "up") {
+      newValue = current.userVote === "up" ? 0 : 1;
     } else {
-      newValue = current.userVote === 'down' ? 0 : -1;
+      newValue = current.userVote === "down" ? 0 : -1;
     }
 
     if (newValue === -1) {
-      const justification = prompt("No DevDeck, o downvote exige uma justificativa construtiva. Escreva seu motivo para o autor melhorar:");
+      const justification = prompt(
+        "No DevDeck, o downvote exige uma justificativa construtiva. Escreva seu motivo para o autor melhorar:"
+      );
       if (!justification || justification.trim().length <= 3) {
-        alert("O downvote foi cancelado. É necessária uma justificativa construtiva de pelo menos 4 caracteres.");
+        alert(
+          "O downvote foi cancelado. É necessária uma justificativa construtiva de pelo menos 4 caracteres."
+        );
         return;
       }
     }
 
     // Optimistic UI update
     let diff = 0;
-    let newUserVote: 'up' | 'down' | null = null;
-    if (type === 'up') {
-      if (current.userVote === 'up') {
+    let newUserVote: "up" | "down" | null = null;
+    if (type === "up") {
+      if (current.userVote === "up") {
         diff = -1;
         newUserVote = null;
-      } else if (current.userVote === 'down') {
+      } else if (current.userVote === "down") {
         diff = 2;
-        newUserVote = 'up';
+        newUserVote = "up";
       } else {
         diff = 1;
-        newUserVote = 'up';
+        newUserVote = "up";
       }
     } else {
-      if (current.userVote === 'down') {
+      if (current.userVote === "down") {
         diff = 1;
         newUserVote = null;
-      } else if (current.userVote === 'up') {
+      } else if (current.userVote === "up") {
         diff = -2;
-        newUserVote = 'down';
+        newUserVote = "down";
       } else {
         diff = -1;
-        newUserVote = 'down';
+        newUserVote = "down";
       }
     }
 
-    setVotes(prev => ({
+    setVotes((prev) => ({
       ...prev,
       [postId]: {
         up: current.up + diff,
-        userVote: newUserVote
-      }
+        userVote: newUserVote,
+      },
     }));
 
     try {
       const res = await fetch(`/api/posts/${postId}/vote`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ value: newValue })
+        body: JSON.stringify({ value: newValue }),
       });
 
       if (!res.ok) {
@@ -878,18 +891,18 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
       }
 
       const data = await res.json();
-      setVotes(prev => ({
+      setVotes((prev) => ({
         ...prev,
         [postId]: {
           up: data.upvotes,
-          userVote: newUserVote
-        }
+          userVote: newUserVote,
+        },
       }));
     } catch (err) {
       console.error(err);
-      setVotes(prev => ({
+      setVotes((prev) => ({
         ...prev,
-        [postId]: current
+        [postId]: current,
       }));
     }
   };
@@ -897,15 +910,15 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
   const getTrendingPosts = () => {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    
-    let filtered = posts.filter(post => new Date(post.created_at) >= sevenDaysAgo);
+
+    let filtered = posts.filter((post) => new Date(post.created_at) >= sevenDaysAgo);
     if (filtered.length === 0) {
       filtered = posts;
     }
 
     return filtered
-      .map(post => {
-        const score = (post.view_count * 1) + ((post._count?.answers || 0) * 5) + (post.upvotes * 2);
+      .map((post) => {
+        const score = post.view_count * 1 + (post._count?.answers || 0) * 5 + post.upvotes * 2;
         return { ...post, score };
       })
       .sort((a, b) => b.score - a.score)
@@ -914,12 +927,15 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
 
   const trendingPosts = getTrendingPosts();
 
-  const activeDuels = duels.filter(d => d.status === "ACTIVE").slice(0, 2);
+  const activeDuels = duels.filter((d) => d.status === "ACTIVE").slice(0, 2);
 
   const charRatio = postBody.length / POST_CHAR_LIMIT;
   const xpReward = postType === "question" ? 10 : 5;
   const currentLevelBaseXp = (currentLevel - 1) * 1000;
-  const currentLevelPercent = Math.min(100, Math.max(0, ((currentXp - currentLevelBaseXp) / 1000) * 100));
+  const currentLevelPercent = Math.min(
+    100,
+    Math.max(0, ((currentXp - currentLevelBaseXp) / 1000) * 100)
+  );
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased selection:bg-orange-500/35 selection:text-white">
@@ -955,546 +971,621 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
 
       <div className="flex-grow flex flex-col min-w-0">
         <div className="flex-grow max-w-6xl w-full mx-auto px-4 py-8 pb-24 md:pb-8 flex flex-col min-w-0">
-        {/* Main Grid Layout - 2 Columns on desktop (8 + 4) instead of 3, collapses on mobile */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
-          {/* ========================================================================= */}
-          {/* COLUNA CENTRAL: O Feed Principal e PostCard */}
-          {/* ========================================================================= */}
-          <main className="lg:col-span-8 space-y-6">
-            
-            {/* Seletor de Abas Feed / Quizzes */}
-            <div className="flex border-b border-dd-border select-none">
-              <button
-                onClick={() => setFeedFilter("for-you")}
-                className={`relative flex-1 py-3 text-xs font-bold transition-colors cursor-pointer ${
-                  feedFilter === "for-you"
-                    ? "text-dd-text"
-                    : "text-dd-muted hover:text-dd-text hover:bg-dd-surface/30"
-                }`}
-              >
-                Para você
-                {feedFilter === "for-you" && (
-                  <motion.div
-                    layoutId="feedTabIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full"
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  />
-                )}
-              </button>
-              <button
-                onClick={() => setFeedFilter("following")}
-                className={`relative flex-1 py-3 text-xs font-bold transition-colors cursor-pointer ${
-                  feedFilter === "following"
-                    ? "text-dd-text"
-                    : "text-dd-muted hover:text-dd-text hover:bg-dd-surface/30"
-                }`}
-              >
-                Seguindo
-                {feedFilter === "following" && (
-                  <motion.div
-                    layoutId="feedTabIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full"
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  />
-                )}
-              </button>
-            </div>
-
-             {/* Feed Tab View */}
-            {activeTab === "feed" && (
-              <>
-                <motion.div
-                  layout
-                  className="relative z-30 rounded-2xl border border-dd-border bg-dd-surface p-5 shadow-sm transition-[border-color,box-shadow] duration-200 focus-within:border-orange-500/40 focus-within:shadow-md focus-within:shadow-orange-500/5"
+          {/* Main Grid Layout - 2 Columns on desktop (8 + 4) instead of 3, collapses on mobile */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* ========================================================================= */}
+            {/* COLUNA CENTRAL: O Feed Principal e PostCard */}
+            {/* ========================================================================= */}
+            <main className="lg:col-span-8 space-y-6">
+              {/* Seletor de Abas Feed / Quizzes */}
+              <div className="flex border-b border-dd-border select-none">
+                <button
+                  onClick={() => setFeedFilter("for-you")}
+                  className={`relative flex-1 py-3 text-xs font-bold transition-colors cursor-pointer ${
+                    feedFilter === "for-you"
+                      ? "text-dd-text"
+                      : "text-dd-muted hover:text-dd-text hover:bg-dd-surface/30"
+                  }`}
                 >
-                  <form onSubmit={handleCreatePost} className="flex gap-4">
-                    <div className="shrink-0 pt-1">
-                      {initialUser.avatar_url ? (
-                        <img
-                          src={initialUser.avatar_url}
-                          alt={initialUser.username}
-                          className="w-10 h-10 rounded-full object-cover border border-dd-border"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-sm font-bold border border-orange-500/10">
-                          {initialUser.username.slice(0, 2).toUpperCase()}
-                        </div>
-                      )}
-                    </div>
+                  Para você
+                  {feedFilter === "for-you" && (
+                    <motion.div
+                      layoutId="feedTabIndicator"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full"
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    />
+                  )}
+                </button>
+                <button
+                  onClick={() => setFeedFilter("following")}
+                  className={`relative flex-1 py-3 text-xs font-bold transition-colors cursor-pointer ${
+                    feedFilter === "following"
+                      ? "text-dd-text"
+                      : "text-dd-muted hover:text-dd-text hover:bg-dd-surface/30"
+                  }`}
+                >
+                  Seguindo
+                  {feedFilter === "following" && (
+                    <motion.div
+                      layoutId="feedTabIndicator"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full"
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    />
+                  )}
+                </button>
+              </div>
 
-                    <div className="flex-1 min-w-0 space-y-4">
-                      <motion.div
-                        className="relative"
-                        animate={composeFocused ? { scale: 1 } : { scale: 1 }}
-                        transition={springGentle}
-                      >
-                        <textarea
-                          ref={postBodyTextareaRef}
-                          value={postBody}
-                          onChange={(e) => handleBodyChange(e.target.value, "inline")}
-                          onFocus={() => setComposeFocused(true)}
-                          onBlur={() => {
-                            if (!postBody.trim() && !quotePost) {
-                              setComposeFocused(false);
+              {/* Feed Tab View */}
+              {activeTab === "feed" && (
+                <>
+                  <motion.div
+                    layout
+                    className="relative z-30 rounded-2xl border border-dd-border bg-dd-surface p-5 shadow-sm transition-[border-color,box-shadow] duration-200 focus-within:border-orange-500/40 focus-within:shadow-md focus-within:shadow-orange-500/5"
+                  >
+                    <form onSubmit={handleCreatePost} className="flex gap-4">
+                      <div className="shrink-0 pt-1">
+                        {initialUser.avatar_url ? (
+                          <img
+                            src={initialUser.avatar_url}
+                            alt={initialUser.username}
+                            className="w-10 h-10 rounded-full object-cover border border-dd-border"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-sm font-bold border border-orange-500/10">
+                            {initialUser.username.slice(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex-1 min-w-0 space-y-4">
+                        <motion.div
+                          className="relative"
+                          animate={composeFocused ? { scale: 1 } : { scale: 1 }}
+                          transition={springGentle}
+                        >
+                          <textarea
+                            ref={postBodyTextareaRef}
+                            value={postBody}
+                            onChange={(e) => handleBodyChange(e.target.value, "inline")}
+                            onFocus={() => setComposeFocused(true)}
+                            onBlur={() => {
+                              if (!postBody.trim() && !quotePost) {
+                                setComposeFocused(false);
+                              }
+                            }}
+                            required
+                            rows={composeFocused ? 5 : 2}
+                            maxLength={POST_CHAR_LIMIT}
+                            placeholder={
+                              postType === "question"
+                                ? "Qual a sua duvida tecnica? Compartilhe o contexto e o codigo abaixo..."
+                                : "O que esta acontecendo? Compartilhe ideias, artigos ou links..."
                             }
-                          }}
-                          required
-                          rows={composeFocused ? 5 : 2}
-                          maxLength={POST_CHAR_LIMIT}
-                          placeholder={
-                            postType === "question"
-                              ? "Qual a sua duvida tecnica? Compartilhe o contexto e o codigo abaixo..."
-                              : "O que esta acontecendo? Compartilhe ideias, artigos ou links..."
-                          }
-                          className="w-full resize-none rounded-md bg-transparent text-sm text-dd-text placeholder-dd-muted focus:outline-none dd-focus-ring"
-                        />
-                        <div className="absolute bottom-0 right-0">
-                          <CharCounter text={postBody} limit={POST_CHAR_LIMIT} />
-                        </div>
-                        <MentionDropdown
-                          query={postBody.split(/\s+/).at(-1)?.replace(/^@/, "") || ""}
-                          visible={showMentionSuggestions && focusedInput === "inline"}
-                          onSelect={handleSelectMention}
-                          onClose={() => {
-                            setShowMentionSuggestions(false);
-                            setMentionUsers([]);
-                          }}
-                        />
-                      </motion.div>
+                            className="w-full resize-none rounded-md bg-transparent text-sm text-dd-text placeholder-dd-muted focus:outline-none dd-focus-ring"
+                          />
+                          <div className="absolute bottom-0 right-0">
+                            <CharCounter text={postBody} limit={POST_CHAR_LIMIT} />
+                          </div>
+                          <MentionDropdown
+                            query={postBody.split(/\s+/).at(-1)?.replace(/^@/, "") || ""}
+                            visible={showMentionSuggestions && focusedInput === "inline"}
+                            onSelect={handleSelectMention}
+                            onClose={() => {
+                              setShowMentionSuggestions(false);
+                              setMentionUsers([]);
+                            }}
+                          />
+                        </motion.div>
 
-                      {quotePost && (
-                        <div className="dd-quote-card rounded-2xl border border-dd-border bg-dd-bg/60 p-3">
-                          <div className="mb-2 flex items-center justify-between gap-3">
-                            <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-dd-muted">
-                              Citando @{quotePost.author.username}
-                            </span>
+                        {quotePost && (
+                          <div className="dd-quote-card rounded-2xl border border-dd-border bg-dd-bg/60 p-3">
+                            <div className="mb-2 flex items-center justify-between gap-3">
+                              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-dd-muted">
+                                Citando @{quotePost.author.username}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => setQuotePost(null)}
+                                className="dd-touch rounded-full p-1 text-dd-muted transition-colors hover:bg-dd-surface hover:text-dd-text"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                            <p className="line-clamp-2 text-xs font-semibold text-dd-text">
+                              {quotePost.title}
+                            </p>
+                            <p className="mt-1 line-clamp-2 text-xs text-dd-muted">
+                              {quotePost.body}
+                            </p>
+                          </div>
+                        )}
+
+                        {postError && (
+                          <p className="text-[11px] font-medium text-red-400">{postError}</p>
+                        )}
+
+                        <AnimatePresence initial={false}>
+                          {postType === "question" && (
+                            <motion.div
+                              key="question-compose"
+                              initial={{ opacity: 0, y: -8 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -8 }}
+                              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                              className="space-y-3"
+                            >
+                              <div className="rounded-2xl border border-dd-border bg-dd-bg p-3">
+                                <textarea
+                                  value={postCode}
+                                  onChange={(e) => setPostCode(e.target.value)}
+                                  rows={4}
+                                  placeholder="// Cole seu codigo aqui..."
+                                  className="w-full resize-none bg-transparent font-mono text-xs text-dd-text placeholder-dd-muted focus:outline-none"
+                                />
+                              </div>
+                              <select
+                                value={postLanguage}
+                                onChange={(e) => setPostLanguage(e.target.value)}
+                                className="text-[10px] rounded-lg border border-dd-border bg-dd-bg px-2 py-1 text-dd-text focus:border-orange-500/65 focus:outline-none cursor-pointer font-medium"
+                              >
+                                <option value="TS">TypeScript</option>
+                                <option value="JS">JavaScript</option>
+                                <option value="PYTHON">Python</option>
+                                <option value="RUST">Rust</option>
+                                <option value="GO">Go</option>
+                                <option value="CPP">C++</option>
+                                <option value="JAVA">Java</option>
+                                <option value="KOTLIN">Kotlin</option>
+                                <option value="SWIFT">Swift</option>
+                              </select>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+
+                        {postImage && (
+                          <div className="relative rounded-xl overflow-hidden border border-dd-border max-h-60 bg-dd-bg">
+                            <img
+                              src={postImage}
+                              alt="Preview"
+                              className="w-full h-full object-cover max-h-60"
+                            />
                             <button
                               type="button"
-                              onClick={() => setQuotePost(null)}
-                              className="dd-touch rounded-full p-1 text-dd-muted transition-colors hover:bg-dd-surface hover:text-dd-text"
+                              onClick={() => setPostImage("")}
+                              className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white hover:bg-black/85 transition-colors cursor-pointer"
                             >
                               <X className="w-3.5 h-3.5" />
                             </button>
                           </div>
-                          <p className="line-clamp-2 text-xs font-semibold text-dd-text">{quotePost.title}</p>
-                          <p className="mt-1 line-clamp-2 text-xs text-dd-muted">{quotePost.body}</p>
-                        </div>
-                      )}
-
-                      {postError && (
-                        <p className="text-[11px] font-medium text-red-400">{postError}</p>
-                      )}
-
-                      <AnimatePresence initial={false}>
-                        {postType === "question" && (
-                          <motion.div
-                            key="question-compose"
-                            initial={{ opacity: 0, y: -8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -8 }}
-                            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                            className="space-y-3"
-                          >
-                            <div className="rounded-2xl border border-dd-border bg-dd-bg p-3">
-                              <textarea
-                                value={postCode}
-                                onChange={(e) => setPostCode(e.target.value)}
-                                rows={4}
-                                placeholder="// Cole seu codigo aqui..."
-                                className="w-full resize-none bg-transparent font-mono text-xs text-dd-text placeholder-dd-muted focus:outline-none"
-                              />
-                            </div>
-                            <select
-                              value={postLanguage}
-                              onChange={(e) => setPostLanguage(e.target.value)}
-                              className="text-[10px] rounded-lg border border-dd-border bg-dd-bg px-2 py-1 text-dd-text focus:border-orange-500/65 focus:outline-none cursor-pointer font-medium"
-                            >
-                              <option value="TS">TypeScript</option>
-                              <option value="JS">JavaScript</option>
-                              <option value="PYTHON">Python</option>
-                              <option value="RUST">Rust</option>
-                              <option value="GO">Go</option>
-                              <option value="CPP">C++</option>
-                              <option value="JAVA">Java</option>
-                              <option value="KOTLIN">Kotlin</option>
-                              <option value="SWIFT">Swift</option>
-                            </select>
-                          </motion.div>
                         )}
-                      </AnimatePresence>
 
-                      {postImage && (
-                        <div className="relative rounded-xl overflow-hidden border border-dd-border max-h-60 bg-dd-bg">
-                          <img src={postImage} alt="Preview" className="w-full h-full object-cover max-h-60" />
-                          <button
-                            type="button"
-                            onClick={() => setPostImage("")}
-                            className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white hover:bg-black/85 transition-colors cursor-pointer"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      )}
+                        <PostComposerExtras
+                          section="meta"
+                          postBody={postBody}
+                          setPostBody={setPostBody}
+                          textareaRef={postBodyTextareaRef}
+                          replyAudience={replyAudience}
+                          setReplyAudience={setReplyAudience}
+                          scheduledAt={scheduledAt}
+                          setScheduledAt={setScheduledAt}
+                          location={postLocation}
+                          setLocation={setPostLocation}
+                          isSensitive={isSensitive}
+                          setIsSensitive={setIsSensitive}
+                        />
 
-                      <PostComposerExtras
-                        section="meta"
-                        postBody={postBody}
-                        setPostBody={setPostBody}
-                        textareaRef={postBodyTextareaRef}
-                        replyAudience={replyAudience}
-                        setReplyAudience={setReplyAudience}
-                        scheduledAt={scheduledAt}
-                        setScheduledAt={setScheduledAt}
-                        location={postLocation}
-                        setLocation={setPostLocation}
-                        isSensitive={isSensitive}
-                        setIsSensitive={setIsSensitive}
-                      />
-
-                      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-dd-border/50 pt-3">
-                        <div className="flex items-center gap-1.5 text-orange-500">
-                          <div>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleImageUpload}
-                              className="hidden"
-                              id="inline-file-upload"
-                            />
-                            <label
-                              htmlFor="inline-file-upload"
-                              className="dd-touch inline-flex items-center justify-center rounded-full p-2 transition-colors hover:bg-orange-500/10 cursor-pointer"
-                              title="Adicionar imagem"
-                            >
-                              <svg viewBox="0 0 24 24" className="w-4.5 h-4.5 fill-none stroke-current" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                            </label>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => setPostType(postType === "question" ? "discussion" : "question")}
-                            className="dd-pill-glide rounded-full border border-dd-border bg-dd-bg hover:bg-dd-border/30 hover:text-dd-text px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-dd-muted transition-colors cursor-pointer"
-                          >
-                            {postType === "question" ? "Duvida tecnica +10 XP" : "Discussao geral +5 XP"}
-                          </button>
-
-                          <PostComposerExtras
-                            section="tools"
-                            postBody={postBody}
-                            setPostBody={setPostBody}
-                            textareaRef={postBodyTextareaRef}
-                            replyAudience={replyAudience}
-                            setReplyAudience={setReplyAudience}
-                            scheduledAt={scheduledAt}
-                            setScheduledAt={setScheduledAt}
-                            location={postLocation}
-                            setLocation={setPostLocation}
-                            isSensitive={isSensitive}
-                            setIsSensitive={setIsSensitive}
-                          />
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                          {uploadingImage && (
-                            <span className="text-[10px] text-dd-muted animate-pulse font-semibold">Enviando imagem...</span>
-                          )}
-                          <PublishButton
-                            disabled={!postBody.trim() || uploadingImage || postBody.length >= POST_CHAR_LIMIT}
-                            state={publishState}
-                            xpReward={xpReward}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </form>
-                </motion.div>
-
-                {feedError && (
-                  <div className="rounded-xl border border-red-500/20 bg-red-500/8 px-4 py-3 text-xs font-semibold text-red-300">
-                    {feedError}
-                  </div>
-                )}
-
-                <div className="space-y-4">
-                  {loadingSearch ? (
-                    <PostSkeletonList count={3} />
-                  ) : posts.length === 0 ? (
-                    <EmptyState type={searchQuery.trim() ? "search" : "feed"} searchTerm={searchQuery} className="rounded-2xl border border-dd-border bg-dd-surface/20" />
-                  ) : (
-                    <LayoutGroup>
-                      {posts.map((post) => {
-                        const vote = votes[post.id] || { up: post.upvotes ?? 0, userVote: null };
-                        const repostMeta = repostState[post.id] ?? { count: post.reposts_count ?? 0, reposted: false };
-                        return (
-                          <div key={post.id} className="space-y-2.5">
-                            <motion.article
-                              layout
-                              initial={{ opacity: 0, y: -12 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={springGentle}
-                              className={cn(
-                                "dd-card-hover rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-4 transition-[border-color] duration-300",
-                                post._pending && "dd-optimistic-post"
-                              )}
-                            >
-                              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dd-border/50 pb-3">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 rounded-full bg-dd-surface text-dd-text flex items-center justify-center font-bold text-xs select-none">
-                                    {post.author.username.slice(0, 2).toUpperCase()}
-                                  </div>
-                                  <div>
-                                    <div className="flex items-center gap-1.5">
-                                      <Link href={`/profile/${post.author.username}`} className="text-xs font-bold text-dd-text hover:text-orange-400 transition-colors">
-                                        @{post.author.username}
-                                      </Link>
-                                      <span className="text-[9px] bg-dd-surface border border-dd-border px-1 py-0.5 rounded text-dd-muted font-mono font-semibold">
-                                        Lvl {Math.max(1, Math.floor(post.author.total_xp / 1000) + 1)}
-                                      </span>
-                                    </div>
-                                    <span className="text-[10px] text-dd-muted font-medium">
-                                      {post._pending ? "Sincronizando..." : "Postado ha pouco"}
-                                    </span>
-                                  </div>
-                                </div>
-
-                                <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.preventDefault()}>
-                                  {post.language && <LanguageTag language={post.language} size="sm" />}
-
-                                  {post.author_id === initialUser.id && (
-                                    <button
-                                      onClick={async (e) => {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                        if (confirm("Deseja realmente excluir esta publicação?")) {
-                                          try {
-                                            const res = await fetch(`/api/posts/${post.id}`, {
-                                              method: "DELETE",
-                                            });
-                                            if (res.ok) {
-                                              setPosts(prev => prev.filter(p => p.id !== post.id));
-                                            } else {
-                                              alert("Falha ao deletar post.");
-                                            }
-                                          } catch (err) {
-                                            console.error(err);
-                                            alert("Erro ao deletar post.");
-                                          }
-                                        }
-                                      }}
-                                      className="p-1.5 rounded-lg text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
-                                      title="Deletar postagem"
-                                    >
-                                      <svg
-                                        width="14"
-                                        height="14"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                      >
-                                        <path d="M3 6h18" />
-                                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                      </svg>
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
-
-                              <div className="space-y-3">
-                                <Link href={`/post/${post.id}`} className="block">
-                                  <h2 className="text-sm font-bold text-dd-text hover:text-orange-400 transition-colors leading-snug">
-                                    {highlightMatches(post.title, searchQuery)}
-                                  </h2>
-                                </Link>
-                                <p className="text-xs text-dd-muted leading-relaxed">
-                                  {searchQuery.trim() ? highlightMatches(post.body, searchQuery) : parseMentions(post.body)}
-                                </p>
-
-                                {post.quoted_post && (
-                                  <div className="rounded-2xl border border-dd-border bg-dd-bg/50 p-3">
-                                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-dd-muted">
-                                      Citando @{post.quoted_post.author.username}
-                                    </p>
-                                    <p className="mt-2 text-xs font-semibold text-dd-text">{post.quoted_post.title}</p>
-                                    <p className="mt-1 line-clamp-2 text-xs text-dd-muted">{post.quoted_post.body}</p>
-                                  </div>
-                                )}
-
-                                {post.image_url && (
-                                  <div className="relative rounded-xl overflow-hidden border border-dd-border max-h-80 bg-dd-surface/20">
-                                    <img
-                                      src={post.image_url}
-                                      alt={post.title}
-                                      className="w-full h-full object-cover max-h-80"
-                                      onError={(e) => {
-                                        (e.target as HTMLElement).style.display = "none";
-                                      }}
-                                    />
-                                  </div>
-                                )}
-
-                                {post.code_snippet && (
-                                  <div className="rounded-lg border border-dd-border bg-dd-bg p-4 overflow-x-auto max-h-60 shadow-inner">
-                                    {highlightCode(post.code_snippet)}
-                                  </div>
-                                )}
-                              </div>
-
-                              <div 
-                                className="flex items-center justify-between pt-3 border-t border-dd-border text-xs w-full select-none"
-                                onClick={(e) => { 
-                                  e.stopPropagation(); 
-                                  e.preventDefault(); 
-                                }}
+                        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-dd-border/50 pt-3">
+                          <div className="flex items-center gap-1.5 text-orange-500">
+                            <div>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageUpload}
+                                className="hidden"
+                                id="inline-file-upload"
+                              />
+                              <label
+                                htmlFor="inline-file-upload"
+                                className="dd-touch inline-flex items-center justify-center rounded-full p-2 transition-colors hover:bg-orange-500/10 cursor-pointer"
+                                title="Adicionar imagem"
                               >
-                                {/* 1. Comment bubble */}
-                                <Link
-                                  href={`/post/${post.id}`}
-                                  className="flex items-center gap-1.5 text-dd-muted hover:text-dd-text transition-colors"
+                                <svg
+                                  viewBox="0 0 24 24"
+                                  className="w-4.5 h-4.5 fill-none stroke-current"
+                                  strokeWidth="2"
                                 >
-                                  <MessageSquare className="w-3.5 h-3.5 text-dd-muted" />
-                                  <span className="text-[10px] font-semibold text-dd-muted">{post._count?.answers || 0}</span>
-                                </Link>
+                                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                  <polyline points="21 15 16 10 5 21"></polyline>
+                                </svg>
+                              </label>
+                            </div>
 
-                                {/* 2. Repost Menu */}
-                                <RepostMenu
-                                  count={repostMeta.count}
-                                  isReposted={repostMeta.reposted}
-                                  onRepost={() => handleRepost(post)}
-                                  onQuote={() => handleQuotePost(post)}
-                                />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setPostType(postType === "question" ? "discussion" : "question")
+                              }
+                              className="dd-pill-glide rounded-full border border-dd-border bg-dd-bg hover:bg-dd-border/30 hover:text-dd-text px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-dd-muted transition-colors cursor-pointer"
+                            >
+                              {postType === "question"
+                                ? "Duvida tecnica +10 XP"
+                                : "Discussao geral +5 XP"}
+                            </button>
 
-                                {/* 3. Heart/Like button */}
-                                <LikeButton
-                                  count={vote.up}
-                                  isActive={vote.userVote === "up"}
-                                  onToggle={() => handleVote(post.id, "up")}
-                                  title="Curtir post"
-                                />
-
-                                {/* 4. Views BarChart */}
-                                <div className="flex items-center gap-1.5 text-dd-muted select-none">
-                                  <BarChart2 className="w-4 h-4 text-dd-muted" />
-                                  <span className="text-[10px] font-semibold text-dd-muted">{post.view_count >= 1000 ? `${(post.view_count / 1000).toFixed(0)}mil` : post.view_count}</span>
-                                </div>
-
-                                {/* 5. Report button */}
-                                <button
-                                  onClick={() => {
-                                    setSelectedReportPostId(post.id);
-                                    setReportModalOpen(true);
-                                  }}
-                                  className="p-1 rounded-md text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer flex items-center justify-center"
-                                  title="Denunciar postagem"
-                                >
-                                  <Flag className="w-3.5 h-3.5" />
-                                </button>
-
-                                {/* 6. BookmarkButton */}
-                                <BookmarkButton
-                                  isSaved={!!bookmarkedPostIds[post.id]}
-                                  onToggle={() => handleBookmarkToggle(post.id)}
-                                />
-                              </div>
-                            </motion.article>
-
-                            {/* Resolver como Quiz outside/below the post box */}
-                            {post.quizzes && post.quizzes.length > 0 && (
-                              <div className="flex justify-start pl-1">
-                                <Link
-                                  href={`/post/${post.id}`}
-                                  className="flex items-center gap-1.5 rounded-lg bg-orange-500 px-3.5 py-1.5 font-bold text-white transition-colors hover:bg-orange-600 shadow-sm cursor-pointer text-xs"
-                                >
-                                  <Sparkles className="w-3.5 h-3.5" />
-                                  <span>Resolver como Quiz</span>
-                                </Link>
-                              </div>
-                            )}
+                            <PostComposerExtras
+                              section="tools"
+                              postBody={postBody}
+                              setPostBody={setPostBody}
+                              textareaRef={postBodyTextareaRef}
+                              replyAudience={replyAudience}
+                              setReplyAudience={setReplyAudience}
+                              scheduledAt={scheduledAt}
+                              setScheduledAt={setScheduledAt}
+                              location={postLocation}
+                              setLocation={setPostLocation}
+                              isSensitive={isSensitive}
+                              setIsSensitive={setIsSensitive}
+                            />
                           </div>
-                        );
-                      })}
-                    </LayoutGroup>
-                  )}
-                  {loadingMore && <PostSkeletonList count={2} />}
-                  {!searchQuery.trim() && hasMore && <div ref={scrollSentinelRef} className="h-1" aria-hidden />}
-                </div>
-              </>
-            )}
 
-            {/* TAB DE QUIZZES */}
-            {activeTab === "quizzes" && (
-              <motion.div
-                initial="enter"
-                animate="center"
-                variants={crossfadeVariants}
-                className="space-y-6 dd-tab-crossfade"
-              >
-                <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm">
-                  <h2 className="font-bold text-lg text-dd-text flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-orange-500" />
-                    🧩 DevDeck Quizzes
-                  </h2>
-                  <p className="text-dd-muted text-xs mt-1">Responda aos quizzes diários e da comunidade para ganhar bônus de +15 XP!</p>
-                </div>
-
-                {/* Quiz Diário do Dia */}
-                {dailyQuiz && (
-                  <div className="dd-glow-ring rounded-xl border border-orange-500/35 bg-dd-surface p-5 backdrop-blur-sm space-y-4">
-                    <div className="flex justify-between items-center border-b border-dd-border pb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 text-[10px] font-bold bg-orange-500/10 text-orange-400 border border-orange-500/25 rounded-md uppercase tracking-wider">
-                          Oficial
-                        </span>
-                        <span className="text-xs font-bold text-dd-text">Quiz Diário do Dia (+15 XP)</span>
+                          <div className="flex items-center gap-3">
+                            {uploadingImage && (
+                              <span className="text-[10px] text-dd-muted animate-pulse font-semibold">
+                                Enviando imagem...
+                              </span>
+                            )}
+                            <PublishButton
+                              disabled={
+                                !postBody.trim() ||
+                                uploadingImage ||
+                                postBody.length >= POST_CHAR_LIMIT
+                              }
+                              state={publishState}
+                              xpReward={xpReward}
+                            />
+                          </div>
+                        </div>
                       </div>
-                      <span className="text-[10px] text-dd-muted flex items-center gap-1 font-semibold">
-                        <Calendar className="w-3.5 h-3.5 text-orange-500" /> Rotativo Diário
-                      </span>
+                    </form>
+                  </motion.div>
+
+                  {feedError && (
+                    <div className="rounded-xl border border-red-500/20 bg-red-500/8 px-4 py-3 text-xs font-semibold text-red-300">
+                      {feedError}
                     </div>
-                    <QuizWidget
-                      quiz={dailyQuiz}
-                      postId=""
-                      attempted={!!dailyAttempt}
-                      userAnswer={dailyAttempt?.selected_index}
-                      onAttemptSuccess={(selectedIndex: number, isCorrect: boolean, xpResult: any) => {
-                        setDailyAttempt({
-                          quiz_id: dailyQuiz.id,
-                          selected_index: selectedIndex,
-                          is_correct: isCorrect
-                        });
-                        if (isCorrect) {
-                          showXPToast(15, "Global");
-                        }
-                      }}
-                    />
-                  </div>
-                )}
+                  )}
 
-                {/* Quizzes da Comunidade */}
-                <div className="space-y-4">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-dd-muted px-1">
-                    Quizzes da Comunidade
-                  </h3>
-
-                  <div className="grid grid-cols-1 gap-6">
-                    {filteredCommunityQuizPosts.length === 0 ? (
+                  <div className="space-y-4">
+                    {loadingSearch ? (
+                      <PostSkeletonList count={3} />
+                    ) : posts.length === 0 ? (
                       <EmptyState
-                        type="generic"
-                        className="rounded-xl border border-dd-border bg-dd-surface/10"
+                        type={searchQuery.trim() ? "search" : "feed"}
+                        searchTerm={searchQuery}
+                        className="rounded-2xl border border-dd-border bg-dd-surface/20"
                       />
                     ) : (
-                      filteredCommunityQuizPosts.map((post) => {
-                          const quiz = post.quizzes[0];
-                          const attempt = quiz.attempts?.find((a: any) => a.user_id === initialUser.id);
+                      <LayoutGroup>
+                        {posts.map((post) => {
+                          const vote = votes[post.id] || { up: post.upvotes ?? 0, userVote: null };
+                          const repostMeta = repostState[post.id] ?? {
+                            count: post.reposts_count ?? 0,
+                            reposted: false,
+                          };
                           return (
-                            <div key={quiz.id} className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm space-y-4">
+                            <div key={post.id} className="space-y-2.5">
+                              <motion.article
+                                layout
+                                initial={{ opacity: 0, y: -12 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={springGentle}
+                                className={cn(
+                                  "dd-card-hover rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-4 transition-[border-color] duration-300",
+                                  post._pending && "dd-optimistic-post"
+                                )}
+                              >
+                                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dd-border/50 pb-3">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-dd-surface text-dd-text flex items-center justify-center font-bold text-xs select-none">
+                                      {post.author.username.slice(0, 2).toUpperCase()}
+                                    </div>
+                                    <div>
+                                      <div className="flex items-center gap-1.5">
+                                        <Link
+                                          href={`/profile/${post.author.username}`}
+                                          className="text-xs font-bold text-dd-text hover:text-orange-400 transition-colors"
+                                        >
+                                          @{post.author.username}
+                                        </Link>
+                                        <span className="text-[9px] bg-dd-surface border border-dd-border px-1 py-0.5 rounded text-dd-muted font-mono font-semibold">
+                                          Lvl{" "}
+                                          {Math.max(1, Math.floor(post.author.total_xp / 1000) + 1)}
+                                        </span>
+                                      </div>
+                                      <span className="text-[10px] text-dd-muted font-medium">
+                                        {post._pending ? "Sincronizando..." : "Postado ha pouco"}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div
+                                    className="flex items-center gap-2 flex-wrap"
+                                    onClick={(e) => e.preventDefault()}
+                                  >
+                                    {post.language && (
+                                      <LanguageTag language={post.language} size="sm" />
+                                    )}
+
+                                    {post.author_id === initialUser.id && (
+                                      <button
+                                        onClick={async (e) => {
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                          if (
+                                            confirm("Deseja realmente excluir esta publicação?")
+                                          ) {
+                                            try {
+                                              const res = await fetch(`/api/posts/${post.id}`, {
+                                                method: "DELETE",
+                                              });
+                                              if (res.ok) {
+                                                setPosts((prev) =>
+                                                  prev.filter((p) => p.id !== post.id)
+                                                );
+                                              } else {
+                                                alert("Falha ao deletar post.");
+                                              }
+                                            } catch (err) {
+                                              console.error(err);
+                                              alert("Erro ao deletar post.");
+                                            }
+                                          }
+                                        }}
+                                        className="p-1.5 rounded-lg text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+                                        title="Deletar postagem"
+                                      >
+                                        <svg
+                                          width="14"
+                                          height="14"
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          strokeWidth="2"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                        >
+                                          <path d="M3 6h18" />
+                                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                        </svg>
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                  <Link href={`/post/${post.id}`} className="block">
+                                    <h2 className="text-sm font-bold text-dd-text hover:text-orange-400 transition-colors leading-snug">
+                                      {highlightMatches(post.title, searchQuery)}
+                                    </h2>
+                                  </Link>
+                                  <p className="text-xs text-dd-muted leading-relaxed">
+                                    {searchQuery.trim()
+                                      ? highlightMatches(post.body, searchQuery)
+                                      : parseMentions(post.body)}
+                                  </p>
+
+                                  {post.quoted_post && (
+                                    <div className="rounded-2xl border border-dd-border bg-dd-bg/50 p-3">
+                                      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-dd-muted">
+                                        Citando @{post.quoted_post.author.username}
+                                      </p>
+                                      <p className="mt-2 text-xs font-semibold text-dd-text">
+                                        {post.quoted_post.title}
+                                      </p>
+                                      <p className="mt-1 line-clamp-2 text-xs text-dd-muted">
+                                        {post.quoted_post.body}
+                                      </p>
+                                    </div>
+                                  )}
+
+                                  {post.image_url && (
+                                    <div className="relative rounded-xl overflow-hidden border border-dd-border max-h-80 bg-dd-surface/20">
+                                      <img
+                                        src={post.image_url}
+                                        alt={post.title}
+                                        className="w-full h-full object-cover max-h-80"
+                                        onError={(e) => {
+                                          (e.target as HTMLElement).style.display = "none";
+                                        }}
+                                      />
+                                    </div>
+                                  )}
+
+                                  {post.code_snippet && (
+                                    <div className="rounded-lg border border-dd-border bg-dd-bg p-4 overflow-x-auto max-h-60 shadow-inner">
+                                      {highlightCode(post.code_snippet)}
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div
+                                  className="flex items-center justify-between pt-3 border-t border-dd-border text-xs w-full select-none"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                  }}
+                                >
+                                  {/* 1. Comment bubble */}
+                                  <Link
+                                    href={`/post/${post.id}`}
+                                    className="flex items-center gap-1.5 text-dd-muted hover:text-dd-text transition-colors"
+                                  >
+                                    <MessageSquare className="w-3.5 h-3.5 text-dd-muted" />
+                                    <span className="text-[10px] font-semibold text-dd-muted">
+                                      {post._count?.answers || 0}
+                                    </span>
+                                  </Link>
+
+                                  {/* 2. Repost Menu */}
+                                  <RepostMenu
+                                    count={repostMeta.count}
+                                    isReposted={repostMeta.reposted}
+                                    onRepost={() => handleRepost(post)}
+                                    onQuote={() => handleQuotePost(post)}
+                                  />
+
+                                  {/* 3. Heart/Like button */}
+                                  <LikeButton
+                                    count={vote.up}
+                                    isActive={vote.userVote === "up"}
+                                    onToggle={() => handleVote(post.id, "up")}
+                                    title="Curtir post"
+                                  />
+
+                                  {/* 4. Views BarChart */}
+                                  <div className="flex items-center gap-1.5 text-dd-muted select-none">
+                                    <BarChart2 className="w-4 h-4 text-dd-muted" />
+                                    <span className="text-[10px] font-semibold text-dd-muted">
+                                      {post.view_count >= 1000
+                                        ? `${(post.view_count / 1000).toFixed(0)}mil`
+                                        : post.view_count}
+                                    </span>
+                                  </div>
+
+                                  {/* 5. Report button */}
+                                  <button
+                                    onClick={() => {
+                                      setSelectedReportPostId(post.id);
+                                      setReportModalOpen(true);
+                                    }}
+                                    className="p-1 rounded-md text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer flex items-center justify-center"
+                                    title="Denunciar postagem"
+                                  >
+                                    <Flag className="w-3.5 h-3.5" />
+                                  </button>
+
+                                  {/* 6. BookmarkButton */}
+                                  <BookmarkButton
+                                    isSaved={!!bookmarkedPostIds[post.id]}
+                                    onToggle={() => handleBookmarkToggle(post.id)}
+                                  />
+                                </div>
+                              </motion.article>
+
+                              {/* Resolver como Quiz outside/below the post box */}
+                              {post.quizzes && post.quizzes.length > 0 && (
+                                <div className="flex justify-start pl-1">
+                                  <Link
+                                    href={`/post/${post.id}`}
+                                    className="flex items-center gap-1.5 rounded-lg bg-orange-500 px-3.5 py-1.5 font-bold text-white transition-colors hover:bg-orange-600 shadow-sm cursor-pointer text-xs"
+                                  >
+                                    <Sparkles className="w-3.5 h-3.5" />
+                                    <span>Resolver como Quiz</span>
+                                  </Link>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </LayoutGroup>
+                    )}
+                    {loadingMore && <PostSkeletonList count={2} />}
+                    {!searchQuery.trim() && hasMore && (
+                      <div ref={scrollSentinelRef} className="h-1" aria-hidden />
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* TAB DE QUIZZES */}
+              {activeTab === "quizzes" && (
+                <motion.div
+                  initial="enter"
+                  animate="center"
+                  variants={crossfadeVariants}
+                  className="space-y-6 dd-tab-crossfade"
+                >
+                  <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm">
+                    <h2 className="font-bold text-lg text-dd-text flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-orange-500" />
+                      🧩 DevDeck Quizzes
+                    </h2>
+                    <p className="text-dd-muted text-xs mt-1">
+                      Responda aos quizzes diários e da comunidade para ganhar bônus de +15 XP!
+                    </p>
+                  </div>
+
+                  {/* Quiz Diário do Dia */}
+                  {dailyQuiz && (
+                    <div className="dd-glow-ring rounded-xl border border-orange-500/35 bg-dd-surface p-5 backdrop-blur-sm space-y-4">
+                      <div className="flex justify-between items-center border-b border-dd-border pb-3">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-0.5 text-[10px] font-bold bg-orange-500/10 text-orange-400 border border-orange-500/25 rounded-md uppercase tracking-wider">
+                            Oficial
+                          </span>
+                          <span className="text-xs font-bold text-dd-text">
+                            Quiz Diário do Dia (+15 XP)
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-dd-muted flex items-center gap-1 font-semibold">
+                          <Calendar className="w-3.5 h-3.5 text-orange-500" /> Rotativo Diário
+                        </span>
+                      </div>
+                      <QuizWidget
+                        quiz={dailyQuiz}
+                        postId=""
+                        attempted={!!dailyAttempt}
+                        userAnswer={dailyAttempt?.selected_index}
+                        onAttemptSuccess={(
+                          selectedIndex: number,
+                          isCorrect: boolean,
+                          xpResult: any
+                        ) => {
+                          setDailyAttempt({
+                            quiz_id: dailyQuiz.id,
+                            selected_index: selectedIndex,
+                            is_correct: isCorrect,
+                          });
+                          if (isCorrect) {
+                            showXPToast(15, "Global");
+                          }
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Quizzes da Comunidade */}
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-dd-muted px-1">
+                      Quizzes da Comunidade
+                    </h3>
+
+                    <div className="grid grid-cols-1 gap-6">
+                      {filteredCommunityQuizPosts.length === 0 ? (
+                        <EmptyState
+                          type="generic"
+                          className="rounded-xl border border-dd-border bg-dd-surface/10"
+                        />
+                      ) : (
+                        filteredCommunityQuizPosts.map((post) => {
+                          const quiz = post.quizzes[0];
+                          const attempt = quiz.attempts?.find(
+                            (a: any) => a.user_id === initialUser.id
+                          );
+                          return (
+                            <div
+                              key={quiz.id}
+                              className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm space-y-4"
+                            >
                               <div className="flex justify-between items-center border-b border-dd-border pb-3">
-                                <span className="text-[10px] text-dd-muted font-medium">Post por @{post.author.username}</span>
-                                {post.language && <LanguageTag language={post.language} size="sm" />}
+                                <span className="text-[10px] text-dd-muted font-medium">
+                                  Post por @{post.author.username}
+                                </span>
+                                {post.language && (
+                                  <LanguageTag language={post.language} size="sm" />
+                                )}
                               </div>
                               <QuizWidget
                                 quiz={quiz}
@@ -1533,453 +1624,523 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
                               />
                             </div>
                           );
-                      })
+                        })
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* TAB DE DUELOS */}
+              {activeTab === "duels" && (
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm">
+                    <div>
+                      <h2 className="font-bold text-lg text-dd-text flex items-center gap-2">
+                        <Swords className="w-5 h-5 text-orange-500" />
+                        ⚔️ Arena de Duelos
+                      </h2>
+                      <p className="text-dd-muted text-xs mt-1">
+                        Crie um duelo e aguarde matchmaking, ou entre em duelos abertos criados pela
+                        comunidade.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowDuelForm(!showDuelForm)}
+                      className="bg-orange-500 text-white font-bold py-2.5 px-5 rounded-lg text-xs transition-colors hover:bg-orange-600 whitespace-nowrap cursor-pointer shadow-[0_0_15px_rgba(249,115,22,0.15)] flex items-center gap-1.5 self-start sm:self-auto"
+                    >
+                      <Plus className="w-4 h-4" />
+                      {showDuelForm ? "Fechar Formulário" : "Criar Novo Duelo"}
+                    </button>
+                  </div>
+
+                  {showDuelForm && (
+                    <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm">
+                      <h3 className="font-bold text-sm text-dd-text mb-4">Lançar Novo Desafio</h3>
+                      <form onSubmit={handleCreateDuel} className="space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <div className="sm:col-span-2">
+                            <input
+                              type="text"
+                              value={duelTitle}
+                              onChange={(e) => setDuelTitle(e.target.value)}
+                              required
+                              placeholder="Título do problema (Ex: Inverter String sem Built-ins)..."
+                              className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-dd-text placeholder-slate-600 focus:border-orange-500/60 focus:outline-none"
+                            />
+                          </div>
+                          <div>
+                            <select
+                              value={duelLanguage}
+                              onChange={(e) => setDuelLanguage(e.target.value as Language)}
+                              className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg/80 px-3 py-2.5 text-dd-text focus:border-orange-500/60 focus:outline-none cursor-pointer"
+                            >
+                              <option value="TS">TypeScript</option>
+                              <option value="JS">JavaScript</option>
+                              <option value="PYTHON">Python</option>
+                              <option value="RUST">Rust</option>
+                              <option value="GO">Go</option>
+                              <option value="CPP">C++</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div>
+                          <textarea
+                            value={duelBody}
+                            onChange={(e) => setDuelBody(e.target.value)}
+                            required
+                            rows={4}
+                            placeholder="Descreva o problema de algoritmo, formatos de entradas/saídas e exemplos..."
+                            className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-dd-text placeholder-slate-600 focus:border-orange-500/60 focus:outline-none resize-none"
+                          />
+                        </div>
+                        <div className="flex justify-end">
+                          <button
+                            type="submit"
+                            disabled={creatingDuel}
+                            className="bg-orange-500 text-white text-xs font-bold px-6 py-2 rounded-lg transition-all hover:bg-orange-600 disabled:opacity-50 cursor-pointer"
+                          >
+                            {creatingDuel ? "Enviando..." : "Publicar Duelo"}
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {duels.length === 0 ? (
+                      <div className="col-span-2 rounded-xl border border-dd-border bg-dd-surface/10 p-12 text-center text-dd-muted text-sm">
+                        Nenhum duelo de código ocorrendo no momento. Inicie um novo duelo acima!
+                      </div>
+                    ) : (
+                      duels.map((duel) => <DuelCard key={duel.id} duel={duel} />)
                     )}
                   </div>
                 </div>
-              </motion.div>
-            )}
+              )}
 
-            {/* TAB DE DUELOS */}
-            {activeTab === "duels" && (
-              <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm">
-                  <div>
-                    <h2 className="font-bold text-lg text-dd-text flex items-center gap-2">
-                      <Swords className="w-5 h-5 text-orange-500" />
-                      ⚔️ Arena de Duelos
-                    </h2>
-                    <p className="text-dd-muted text-xs mt-1">Crie um duelo e aguarde matchmaking, ou entre em duelos abertos criados pela comunidade.</p>
+              {/* TAB DE RANKINGS */}
+              {activeTab === "ranking" && (
+                <div className="space-y-6">
+                  <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                    <div>
+                      <h2 className="font-bold text-lg text-dd-text flex items-center gap-2">
+                        <Trophy className="w-5 h-5 text-orange-500" />
+                        🏆 Quadro de Líderes
+                      </h2>
+                      <p className="text-dd-muted text-xs mt-1">
+                        Os desenvolvedores lendários com maior XP na comunidade DevDeck.
+                      </p>
+                    </div>
+                    <div>
+                      <select
+                        value={leaderboardLanguage}
+                        onChange={(e) => setLeaderboardLanguage(e.target.value)}
+                        className="text-xs rounded-lg border border-dd-border bg-dd-bg/80 px-3 py-2 text-dd-text focus:border-orange-500/60 focus:outline-none cursor-pointer font-medium"
+                      >
+                        <option value="GLOBAL">Leaderboard Global</option>
+                        <option value="TS">TypeScript</option>
+                        <option value="JS">JavaScript</option>
+                        <option value="PYTHON">Python</option>
+                        <option value="RUST">Rust</option>
+                        <option value="GO">Go</option>
+                        <option value="CPP">C++</option>
+                        <option value="JAVA">Java</option>
+                        <option value="KOTLIN">Kotlin</option>
+                        <option value="SWIFT">Swift</option>
+                      </select>
+                    </div>
                   </div>
-                  <button
-                    onClick={() => setShowDuelForm(!showDuelForm)}
-                    className="bg-orange-500 text-white font-bold py-2.5 px-5 rounded-lg text-xs transition-colors hover:bg-orange-600 whitespace-nowrap cursor-pointer shadow-[0_0_15px_rgba(249,115,22,0.15)] flex items-center gap-1.5 self-start sm:self-auto"
-                  >
-                    <Plus className="w-4 h-4" />
-                    {showDuelForm ? "Fechar Formulário" : "Criar Novo Duelo"}
-                  </button>
+
+                  <div className="rounded-xl border border-dd-border bg-dd-surface backdrop-blur-sm overflow-hidden shadow-sm">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="border-b border-dd-border bg-dd-surface text-dd-muted font-bold uppercase tracking-wider">
+                          <th className="py-4 px-6 text-center w-20">Rank</th>
+                          <th className="py-4 px-6">Desenvolvedor</th>
+                          <th className="py-4 px-6 text-center">Nível</th>
+                          <th className="py-4 px-6 text-right">XP Acumulado</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {leaderboard.length === 0 ? (
+                          <tr>
+                            <td colSpan={4} className="py-12 text-center text-dd-muted font-medium">
+                              Carregando ranking de líderes...
+                            </td>
+                          </tr>
+                        ) : (
+                          leaderboard.map((row) => (
+                            <tr
+                              key={row.username}
+                              className={`border-b border-dd-border hover:bg-dd-surface transition-colors ${
+                                row.rank === 1
+                                  ? "bg-amber-500/5 border-l-2 border-l-amber-400"
+                                  : row.rank === 2
+                                    ? "bg-slate-300/5 border-l-2 border-l-slate-400"
+                                    : row.rank === 3
+                                      ? "bg-orange-700/5 border-l-2 border-l-orange-700"
+                                      : ""
+                              }`}
+                            >
+                              <td className="py-4 px-6 text-center font-extrabold text-sm text-dd-text">
+                                {row.rank === 1
+                                  ? "🥇"
+                                  : row.rank === 2
+                                    ? "🥈"
+                                    : row.rank === 3
+                                      ? "🥉"
+                                      : `#${row.rank}`}
+                              </td>
+                              <td className="py-4 px-6 font-bold text-dd-text">
+                                <Link
+                                  href={`/profile/${row.username}`}
+                                  className="flex items-center gap-3 hover:text-orange-400 transition-colors w-fit"
+                                >
+                                  <div className="w-7 h-7 rounded-full bg-dd-surface text-dd-text flex items-center justify-center font-bold text-xs select-none">
+                                    {row.username.slice(0, 2).toUpperCase()}
+                                  </div>
+                                  {row.username}
+                                </Link>
+                              </td>
+                              <td className="py-4 px-6 text-center text-orange-400 font-mono font-bold">
+                                Nível {row.level}
+                              </td>
+                              <td className="py-4 px-6 text-right font-mono font-bold text-dd-text">
+                                {row.xp.toLocaleString()} XP
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </main>
+
+            {/* ========================================================================= */}
+            {/* COLUNA DIREITA: GamificationWidget (Engajamento e Streak) */}
+            {/* ========================================================================= */}
+            <aside className="lg:col-span-4 lg:sticky lg:top-6 space-y-6">
+              {/* Controle de Som de Gamefeel */}
+              <div className="flex justify-between items-center bg-dd-surface border border-dd-border rounded-xl p-3 text-xs backdrop-blur-sm shadow-sm select-none">
+                <span className="text-dd-muted font-bold tracking-wide flex items-center gap-2">
+                  {soundEnabled ? (
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      className="text-orange-500 animate-pulse"
+                    >
+                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                      <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                    </svg>
+                  ) : (
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      className="text-dd-muted"
+                    >
+                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                      <line x1="23" y1="9" x2="17" y2="15" />
+                      <line x1="17" y1="9" x2="23" y2="15" />
+                    </svg>
+                  )}
+                  Efeitos Sonoros
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newVal = !soundEnabled;
+                    setSoundEnabled(newVal);
+                    localStorage.setItem("devdeck-sound", String(newVal));
+                  }}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg border text-[10px] font-extrabold uppercase tracking-wider transition-all duration-200 active:scale-[0.97] cursor-pointer",
+                    soundEnabled
+                      ? "bg-orange-500 border-orange-600 text-white shadow-md shadow-orange-500/10 hover:bg-orange-600"
+                      : "bg-dd-surface border-dd-border text-dd-muted hover:text-dd-text hover:bg-dd-border/30"
+                  )}
+                >
+                  {soundEnabled ? "LIGADO" : "DESLIGADO"}
+                </button>
+              </div>
+
+              {/* Search Bar */}
+              <div className="relative w-full">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Search className="h-4 w-4 text-dd-muted" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Buscar"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-11 pr-4 py-2.5 bg-dd-surface hover:bg-dd-surface/80 focus:bg-dd-bg border border-dd-border focus:border-orange-500/50 text-sm rounded-full text-dd-text placeholder-dd-muted focus:outline-none focus:ring-1 focus:ring-orange-500/30 transition-all duration-200"
+                />
+              </div>
+              {searchQuery.trim() && (
+                <div className="rounded-xl border border-dd-border bg-dd-surface/70 p-3 text-xs text-dd-muted">
+                  {loadingSearch
+                    ? "Filtrando o feed em tempo real..."
+                    : `Termo ativo: "${searchQuery}".`}
+                </div>
+              )}
+
+              {/* Streak & User Stats Card */}
+              <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider">
+                    Engajamento
+                  </span>
+                  <span className="flex h-2 w-2 relative">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                  </span>
                 </div>
 
-                {showDuelForm && (
-                  <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm">
-                    <h3 className="font-bold text-sm text-dd-text mb-4">Lançar Novo Desafio</h3>
-                    <form onSubmit={handleCreateDuel} className="space-y-4">
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div className="sm:col-span-2">
-                          <input
-                            type="text"
-                            value={duelTitle}
-                            onChange={(e) => setDuelTitle(e.target.value)}
-                            required
-                            placeholder="Título do problema (Ex: Inverter String sem Built-ins)..."
-                            className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-dd-text placeholder-slate-600 focus:border-orange-500/60 focus:outline-none"
-                          />
-                        </div>
-                        <div>
-                          <select
-                            value={duelLanguage}
-                            onChange={(e) => setDuelLanguage(e.target.value as Language)}
-                            className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg/80 px-3 py-2.5 text-dd-text focus:border-orange-500/60 focus:outline-none cursor-pointer"
-                          >
-                            <option value="TS">TypeScript</option>
-                            <option value="JS">JavaScript</option>
-                            <option value="PYTHON">Python</option>
-                            <option value="RUST">Rust</option>
-                            <option value="GO">Go</option>
-                            <option value="CPP">C++</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div>
-                        <textarea
-                          value={duelBody}
-                          onChange={(e) => setDuelBody(e.target.value)}
-                          required
-                          rows={4}
-                          placeholder="Descreva o problema de algoritmo, formatos de entradas/saídas e exemplos..."
-                          className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-dd-text placeholder-slate-600 focus:border-orange-500/60 focus:outline-none resize-none"
-                        />
-                      </div>
-                      <div className="flex justify-end">
-                        <button
-                          type="submit"
-                          disabled={creatingDuel}
-                          className="bg-orange-500 text-white text-xs font-bold px-6 py-2 rounded-lg transition-all hover:bg-orange-600 disabled:opacity-50 cursor-pointer"
-                        >
-                          {creatingDuel ? "Enviando..." : "Publicar Duelo"}
-                        </button>
-                      </div>
-                    </form>
+                {/* Flame streak */}
+                <div className="flex items-center gap-3 bg-gradient-to-r from-orange-500/10 to-orange-500/0 border border-orange-500/20 rounded-xl p-4">
+                  <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xl shadow-[0_0_15px_rgba(249,115,22,0.15)] animate-pulse">
+                    🔥
                   </div>
-                )}
+                  <div>
+                    <h4 className="font-extrabold text-sm text-dd-text font-sans tracking-tight">
+                      {initialUser.streak || 14} Dias de Ofensiva
+                    </h4>
+                    <p className="text-[10px] text-dd-muted leading-none mt-1">
+                      Resolva quizzes para manter a chama!
+                    </p>
+                  </div>
+                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {duels.length === 0 ? (
-                    <div className="col-span-2 rounded-xl border border-dd-border bg-dd-surface/10 p-12 text-center text-dd-muted text-sm">
-                      Nenhum duelo de código ocorrendo no momento. Inicie um novo duelo acima!
+                <div className="flex justify-between items-center text-xs border-t border-dd-border pt-3 text-dd-muted">
+                  <span>XP Acumulado</span>
+                  <span className="font-bold text-dd-text font-mono">
+                    {currentXp.toLocaleString()} XP
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.16em] text-dd-muted">
+                    <span>Progresso do nivel</span>
+                    <span>Lvl {currentLevel}</span>
+                  </div>
+                  <XPProgressBar
+                    percent={currentLevelPercent}
+                    colorClass="bg-dd-accent"
+                    level={currentLevel}
+                    onLevelUp={() => {
+                      setLevelUpVisible(true);
+                      playSound("levelup");
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Badges Grid (showing 3 latest badges) */}
+              <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider block">
+                    Conquistas
+                  </span>
+                  <Award className="w-4 h-4 text-orange-500" />
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  {initialUser.badges.slice(0, 3).map((badge) => (
+                    <div
+                      key={badge.id}
+                      className="flex flex-col items-center justify-center p-1 group cursor-help"
+                      title={`${badge.label}: ${badge.description}`}
+                    >
+                      <BadgeEmblem
+                        slug={badge.slug}
+                        icon={badge.icon}
+                        label={badge.label}
+                        size="sm"
+                        earned={true}
+                      />
+                      <span className="text-[8px] font-bold text-dd-muted block truncate w-full mt-2 text-center">
+                        {badge.label}
+                      </span>
                     </div>
-                  ) : (
-                    duels.map((duel) => (
-                      <DuelCard key={duel.id} duel={duel} />
-                    ))
+                  ))}
+
+                  {/* Placeholders if less than 3 badges */}
+                  {Array.from({ length: Math.max(0, 3 - initialUser.badges.length) }).map(
+                    (_, idx) => (
+                      <div key={idx} className="flex flex-col items-center justify-center p-1">
+                        <BadgeEmblem slug="" icon="" label="" size="sm" earned={false} />
+                        <span className="text-[8px] font-bold text-dd-muted block mt-2 text-center">
+                          Bloqueado
+                        </span>
+                      </div>
+                    )
                   )}
                 </div>
               </div>
-            )}
 
-            {/* TAB DE RANKINGS */}
-            {activeTab === "ranking" && (
-              <div className="space-y-6">
-                <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                  <div>
-                    <h2 className="font-bold text-lg text-dd-text flex items-center gap-2">
-                      <Trophy className="w-5 h-5 text-orange-500" />
-                      🏆 Quadro de Líderes
-                    </h2>
-                    <p className="text-dd-muted text-xs mt-1">Os desenvolvedores lendários com maior XP na comunidade DevDeck.</p>
-                  </div>
-                  <div>
-                    <select
-                      value={leaderboardLanguage}
-                      onChange={(e) => setLeaderboardLanguage(e.target.value)}
-                      className="text-xs rounded-lg border border-dd-border bg-dd-bg/80 px-3 py-2 text-dd-text focus:border-orange-500/60 focus:outline-none cursor-pointer font-medium"
-                    >
-                      <option value="GLOBAL">Leaderboard Global</option>
-                      <option value="TS">TypeScript</option>
-                      <option value="JS">JavaScript</option>
-                      <option value="PYTHON">Python</option>
-                      <option value="RUST">Rust</option>
-                      <option value="GO">Go</option>
-                      <option value="CPP">C++</option>
-                      <option value="JAVA">Java</option>
-                      <option value="KOTLIN">Kotlin</option>
-                      <option value="SWIFT">Swift</option>
-                    </select>
-                  </div>
+              {/* Language Trail Progress bar */}
+              <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider block">
+                    Minhas Trilhas
+                  </span>
+                  <Sparkles className="w-3.5 h-3.5 text-orange-500/80" />
                 </div>
 
-                <div className="rounded-xl border border-dd-border bg-dd-surface backdrop-blur-sm overflow-hidden shadow-sm">
-                  <table className="w-full text-left border-collapse text-xs">
-                    <thead>
-                      <tr className="border-b border-dd-border bg-dd-surface text-dd-muted font-bold uppercase tracking-wider">
-                        <th className="py-4 px-6 text-center w-20">Rank</th>
-                        <th className="py-4 px-6">Desenvolvedor</th>
-                        <th className="py-4 px-6 text-center">Nível</th>
-                        <th className="py-4 px-6 text-right">XP Acumulado</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {leaderboard.length === 0 ? (
-                        <tr>
-                          <td colSpan={4} className="py-12 text-center text-dd-muted font-medium">
-                            Carregando ranking de líderes...
-                          </td>
-                        </tr>
-                      ) : (
-                        leaderboard.map((row) => (
-                          <tr key={row.username} className={`border-b border-dd-border hover:bg-dd-surface transition-colors ${
-                            row.rank === 1 ? "bg-amber-500/5 border-l-2 border-l-amber-400" :
-                            row.rank === 2 ? "bg-slate-300/5 border-l-2 border-l-slate-400" :
-                            row.rank === 3 ? "bg-orange-700/5 border-l-2 border-l-orange-700" : ""
-                          }`}>
-                            <td className="py-4 px-6 text-center font-extrabold text-sm text-dd-text">
-                              {row.rank === 1 ? "🥇" : row.rank === 2 ? "🥈" : row.rank === 3 ? "🥉" : `#${row.rank}`}
-                            </td>
-                            <td className="py-4 px-6 font-bold text-dd-text">
-                              <Link href={`/profile/${row.username}`} className="flex items-center gap-3 hover:text-orange-400 transition-colors w-fit">
-                                <div className="w-7 h-7 rounded-full bg-dd-surface text-dd-text flex items-center justify-center font-bold text-xs select-none">
-                                  {row.username.slice(0, 2).toUpperCase()}
-                                </div>
-                                {row.username}
-                              </Link>
-                            </td>
-                            <td className="py-4 px-6 text-center text-orange-400 font-mono font-bold">
-                              Nível {row.level}
-                            </td>
-                            <td className="py-4 px-6 text-right font-mono font-bold text-dd-text">
-                              {row.xp.toLocaleString()} XP
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-          </main>
-
-          {/* ========================================================================= */}
-          {/* COLUNA DIREITA: GamificationWidget (Engajamento e Streak) */}
-          {/* ========================================================================= */}
-          <aside className="lg:col-span-4 lg:sticky lg:top-6 space-y-6">
-            
-            {/* Controle de Som de Gamefeel */}
-            <div className="flex justify-between items-center bg-dd-surface border border-dd-border rounded-xl p-3 text-xs backdrop-blur-sm shadow-sm select-none">
-              <span className="text-dd-muted font-bold tracking-wide flex items-center gap-2">
-                {soundEnabled ? (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-orange-500 animate-pulse">
-                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
-                  </svg>
+                {initialUser.trails.length === 0 ? (
+                  <p className="text-xs text-dd-muted italic py-2">Nenhuma trilha ativa ainda.</p>
                 ) : (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-dd-muted">
-                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                    <line x1="23" y1="9" x2="17" y2="15" />
-                    <line x1="17" y1="9" x2="23" y2="15" />
-                  </svg>
-                )}
-                Efeitos Sonoros
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  const newVal = !soundEnabled;
-                  setSoundEnabled(newVal);
-                  localStorage.setItem("devdeck-sound", String(newVal));
-                }}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg border text-[10px] font-extrabold uppercase tracking-wider transition-all duration-200 active:scale-[0.97] cursor-pointer",
-                  soundEnabled
-                    ? "bg-orange-500 border-orange-600 text-white shadow-md shadow-orange-500/10 hover:bg-orange-600"
-                    : "bg-dd-surface border-dd-border text-dd-muted hover:text-dd-text hover:bg-dd-border/30"
-                )}
-              >
-                {soundEnabled ? "LIGADO" : "DESLIGADO"}
-              </button>
-            </div>
+                  <div className="space-y-4">
+                    {initialUser.trails.map((trail) => {
+                      const nextLevelXp = Math.ceil(trail.level * 1000 * 1.5);
+                      const currentLvlBaseXp = Math.ceil((trail.level - 1) * 1000 * 1.5);
+                      const relativeXpEarned = Math.max(0, trail.xp - currentLvlBaseXp);
+                      const relativeNextLvlXp = nextLevelXp - currentLvlBaseXp;
+                      const percent = Math.min(
+                        100,
+                        Math.floor((relativeXpEarned / relativeNextLvlXp) * 100)
+                      );
 
-            {/* Search Bar */}
-            <div className="relative w-full">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-dd-muted" />
+                      return (
+                        <div key={trail.id} className="space-y-1.5 group">
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="font-semibold text-dd-text group-hover:text-orange-400 transition-colors">
+                              {formatLangName(trail.language)}
+                            </span>
+                            <span className="text-[10px] bg-dd-surface border border-dd-border text-dd-text font-bold px-1.5 py-0.5 rounded font-mono">
+                              Lvl {trail.level}
+                            </span>
+                          </div>
+                          {/* Horizontal thin progress bar */}
+                          <XPProgressBar
+                            percent={percent}
+                            colorClass={getLangColor(trail.language)}
+                            level={trail.level}
+                          />
+                          <div className="flex justify-between items-center text-[10px] text-dd-muted font-mono">
+                            <span>{trail.xp.toLocaleString()} XP</span>
+                            <span>{percent}%</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-              <input
-                type="text"
-                placeholder="Buscar"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-11 pr-4 py-2.5 bg-dd-surface hover:bg-dd-surface/80 focus:bg-dd-bg border border-dd-border focus:border-orange-500/50 text-sm rounded-full text-dd-text placeholder-dd-muted focus:outline-none focus:ring-1 focus:ring-orange-500/30 transition-all duration-200"
-              />
-            </div>
-            {searchQuery.trim() && (
-              <div className="rounded-xl border border-dd-border bg-dd-surface/70 p-3 text-xs text-dd-muted">
-                {loadingSearch
-                  ? "Filtrando o feed em tempo real..."
-                  : `Termo ativo: "${searchQuery}".`}
-              </div>
-            )}
 
-            {/* Streak & User Stats Card */}
-            <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider">Engajamento</span>
-                <span className="flex h-2 w-2 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+              {/* Tópicos em Alta (Trending Widget) */}
+              <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider block">
+                    Tópicos em Alta
+                  </span>
+                  <TrendingUp className="w-4 h-4 text-orange-500" />
+                </div>
+
+                {trendingPosts.length === 0 ? (
+                  <p className="text-xs text-dd-muted italic py-1">
+                    Nenhum post em alta no momento.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {trendingPosts.map((post, idx) => (
+                      <button
+                        key={post.id}
+                        type="button"
+                        onClick={() => {
+                          setSearchQuery(post.title);
+                          setActiveTab("feed");
+                        }}
+                        className="group relative block w-full pl-4 border-l-2 border-orange-500/20 text-left transition-colors hover:border-orange-500"
+                      >
+                        <span className="block">
+                          <div className="flex items-center gap-1.5 text-[9px] text-dd-muted">
+                            <span className="font-mono text-orange-500 font-bold"># {idx + 1}</span>
+                            <span>·</span>
+                            {post.language ? (
+                              <span className="font-semibold text-orange-400">
+                                {formatLangName(post.language)}
+                              </span>
+                            ) : (
+                              <span>Geral</span>
+                            )}
+                          </div>
+                          <h5 className="text-xs font-bold text-dd-text group-hover:text-orange-400 transition-colors line-clamp-1 leading-snug mt-0.5">
+                            {post.title}
+                          </h5>
+                          <div className="flex items-center gap-2 text-[9px] text-dd-muted mt-0.5">
+                            <span>{post.view_count} visualizações</span>
+                            <span>·</span>
+                            <span>{post._count?.answers || 0} respostas</span>
+                          </div>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Featured Duels (votar em resoluções) */}
+              <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-3.5">
+                <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider block">
+                  Duelos em Destaque
                 </span>
-              </div>
-              
-              {/* Flame streak */}
-              <div className="flex items-center gap-3 bg-gradient-to-r from-orange-500/10 to-orange-500/0 border border-orange-500/20 rounded-xl p-4">
-                <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xl shadow-[0_0_15px_rgba(249,115,22,0.15)] animate-pulse">
-                  🔥
-                </div>
-                <div>
-                  <h4 className="font-extrabold text-sm text-dd-text font-sans tracking-tight">
-                    {initialUser.streak || 14} Dias de Ofensiva
-                  </h4>
-                  <p className="text-[10px] text-dd-muted leading-none mt-1">Resolva quizzes para manter a chama!</p>
-                </div>
-              </div>
 
-              <div className="flex justify-between items-center text-xs border-t border-dd-border pt-3 text-dd-muted">
-                <span>XP Acumulado</span>
-                <span className="font-bold text-dd-text font-mono">{currentXp.toLocaleString()} XP</span>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.16em] text-dd-muted">
-                  <span>Progresso do nivel</span>
-                  <span>Lvl {currentLevel}</span>
-                </div>
-                <XPProgressBar
-                  percent={currentLevelPercent}
-                  colorClass="bg-dd-accent"
-                  level={currentLevel}
-                  onLevelUp={() => {
-                    setLevelUpVisible(true);
-                    playSound('levelup');
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Badges Grid (showing 3 latest badges) */}
-            <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider block">Conquistas</span>
-                <Award className="w-4 h-4 text-orange-500" />
-              </div>
-              
-              <div className="grid grid-cols-3 gap-2 text-center">
-                {initialUser.badges.slice(0, 3).map((badge) => (
-                  <div 
-                    key={badge.id}
-                    className="flex flex-col items-center justify-center p-1 group cursor-help"
-                    title={`${badge.label}: ${badge.description}`}
-                  >
-                    <BadgeEmblem slug={badge.slug} icon={badge.icon} label={badge.label} size="sm" earned={true} />
-                    <span className="text-[8px] font-bold text-dd-muted block truncate w-full mt-2 text-center">{badge.label}</span>
-                  </div>
-                ))}
-
-                {/* Placeholders if less than 3 badges */}
-                {Array.from({ length: Math.max(0, 3 - initialUser.badges.length) }).map((_, idx) => (
-                  <div 
-                    key={idx}
-                    className="flex flex-col items-center justify-center p-1"
-                  >
-                    <BadgeEmblem slug="" icon="" label="" size="sm" earned={false} />
-                    <span className="text-[8px] font-bold text-dd-muted block mt-2 text-center">Bloqueado</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Language Trail Progress bar */}
-            <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider block">Minhas Trilhas</span>
-                <Sparkles className="w-3.5 h-3.5 text-orange-500/80" />
-              </div>
-              
-              {initialUser.trails.length === 0 ? (
-                <p className="text-xs text-dd-muted italic py-2">Nenhuma trilha ativa ainda.</p>
-              ) : (
-                <div className="space-y-4">
-                  {initialUser.trails.map((trail) => {
-                    const nextLevelXp = Math.ceil((trail.level * 1000) * 1.5);
-                    const currentLvlBaseXp = Math.ceil(((trail.level - 1) * 1000) * 1.5);
-                    const relativeXpEarned = Math.max(0, trail.xp - currentLvlBaseXp);
-                    const relativeNextLvlXp = nextLevelXp - currentLvlBaseXp;
-                    const percent = Math.min(100, Math.floor((relativeXpEarned / relativeNextLvlXp) * 100));
-
-                    return (
-                      <div key={trail.id} className="space-y-1.5 group">
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="font-semibold text-dd-text group-hover:text-orange-400 transition-colors">
-                            {formatLangName(trail.language)}
+                {activeDuels.length === 0 ? (
+                  <p className="text-xs text-dd-muted italic py-1">
+                    Nenhum duelo ativo no momento.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {activeDuels.map((duel) => (
+                      <div
+                        key={duel.id}
+                        className="rounded-lg border border-dd-border/60 bg-dd-bg/40 p-3 space-y-2 hover:border-slate-850 transition-colors"
+                      >
+                        <div className="flex justify-between items-center text-[10px]">
+                          <span className="text-orange-400 font-bold tracking-tight">
+                            DUELO DE CÓDIGO
                           </span>
-                          <span className="text-[10px] bg-dd-surface border border-dd-border text-dd-text font-bold px-1.5 py-0.5 rounded font-mono">
-                            Lvl {trail.level}
-                          </span>
+                          <LanguageTag language={duel.language} size="sm" />
                         </div>
-                        {/* Horizontal thin progress bar */}
-                        <XPProgressBar
-                          percent={percent}
-                          colorClass={getLangColor(trail.language)}
-                          level={trail.level}
-                        />
-                        <div className="flex justify-between items-center text-[10px] text-dd-muted font-mono">
-                          <span>{trail.xp.toLocaleString()} XP</span>
-                          <span>{percent}%</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Tópicos em Alta (Trending Widget) */}
-            <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider block">Tópicos em Alta</span>
-                <TrendingUp className="w-4 h-4 text-orange-500" />
-              </div>
-              
-              {trendingPosts.length === 0 ? (
-                <p className="text-xs text-dd-muted italic py-1">Nenhum post em alta no momento.</p>
-              ) : (
-                <div className="space-y-3">
-                  {trendingPosts.map((post, idx) => (
-                    <button
-                      key={post.id}
-                      type="button"
-                      onClick={() => {
-                        setSearchQuery(post.title);
-                        setActiveTab("feed");
-                      }}
-                      className="group relative block w-full pl-4 border-l-2 border-orange-500/20 text-left transition-colors hover:border-orange-500"
-                    >
-                      <span className="block">
-                        <div className="flex items-center gap-1.5 text-[9px] text-dd-muted">
-                          <span className="font-mono text-orange-500 font-bold"># {idx + 1}</span>
-                          <span>·</span>
-                          {post.language ? (
-                            <span className="font-semibold text-orange-400">{formatLangName(post.language)}</span>
-                          ) : (
-                            <span>Geral</span>
-                          )}
-                        </div>
-                        <h5 className="text-xs font-bold text-dd-text group-hover:text-orange-400 transition-colors line-clamp-1 leading-snug mt-0.5">
-                          {post.title}
+                        <h5 className="text-xs font-bold text-dd-text line-clamp-1 leading-snug">
+                          {duel.problem_title}
                         </h5>
-                        <div className="flex items-center gap-2 text-[9px] text-dd-muted mt-0.5">
-                          <span>{post.view_count} visualizações</span>
-                          <span>·</span>
-                          <span>{post._count?.answers || 0} respostas</span>
+                        <div className="flex items-center justify-between text-[10px] text-dd-muted font-semibold pt-1 border-t border-dd-border">
+                          <span>
+                            @{duel.challenger.username} vs @{duel.opponent?.username || "match..."}
+                          </span>
+                          <Link
+                            href={`/duels/${duel.id}`}
+                            className="text-orange-500 hover:text-orange-400 flex items-center font-bold"
+                          >
+                            Votar
+                            <ChevronRight className="w-3 h-3 ml-0.5" />
+                          </Link>
                         </div>
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Featured Duels (votar em resoluções) */}
-            <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-3.5">
-              <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider block">Duelos em Destaque</span>
-              
-              {activeDuels.length === 0 ? (
-                <p className="text-xs text-dd-muted italic py-1">Nenhum duelo ativo no momento.</p>
-              ) : (
-                <div className="space-y-3">
-                  {activeDuels.map((duel) => (
-                    <div key={duel.id} className="rounded-lg border border-dd-border/60 bg-dd-bg/40 p-3 space-y-2 hover:border-slate-850 transition-colors">
-                      <div className="flex justify-between items-center text-[10px]">
-                        <span className="text-orange-400 font-bold tracking-tight">DUELO DE CÓDIGO</span>
-                        <LanguageTag language={duel.language} size="sm" />
                       </div>
-                      <h5 className="text-xs font-bold text-dd-text line-clamp-1 leading-snug">
-                        {duel.problem_title}
-                      </h5>
-                      <div className="flex items-center justify-between text-[10px] text-dd-muted font-semibold pt-1 border-t border-dd-border">
-                        <span>@{duel.challenger.username} vs @{duel.opponent?.username || "match..."}</span>
-                        <Link 
-                          href={`/duels/${duel.id}`}
-                          className="text-orange-500 hover:text-orange-400 flex items-center font-bold"
-                        >
-                          Votar
-                          <ChevronRight className="w-3 h-3 ml-0.5" />
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-          </aside>
-
+                    ))}
+                  </div>
+                )}
+              </div>
+            </aside>
+          </div>
         </div>
-      </div>
-      <Footer />
+        <Footer />
       </div>
 
       {reportModalOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
           onClick={(e) => {
             e.stopPropagation();
@@ -1987,15 +2148,16 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
             setReportModalOpen(false);
           }}
         >
-          <div 
+          <div
             className="w-full max-w-md bg-dd-surface border border-dd-border rounded-2xl p-5 space-y-4 text-left relative z-10"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-sm font-black text-dd-text">Denunciar Postagem</h3>
             <p className="text-xs text-dd-muted font-semibold leading-relaxed">
-              Ajude-nos a entender o que há de errado com esta postagem. Ela viola alguma de nossas diretrizes de comunidade?
+              Ajude-nos a entender o que há de errado com esta postagem. Ela viola alguma de nossas
+              diretrizes de comunidade?
             </p>
-            
+
             {reported ? (
               <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold p-3 rounded-lg text-center animate-pulse">
                 Denúncia enviada com sucesso. Obrigado por ajudar!
@@ -2003,7 +2165,9 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
             ) : (
               <form onSubmit={handleReportSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] text-dd-muted font-bold uppercase tracking-wider block">Motivo da denúncia</label>
+                  <label className="text-[10px] text-dd-muted font-bold uppercase tracking-wider block">
+                    Motivo da denúncia
+                  </label>
                   <select
                     value={reportReason}
                     onChange={(e) => setReportReason(e.target.value)}
@@ -2014,11 +2178,13 @@ export function FeedContent({ initialUser, initialPosts, initialDuels, initialBo
                     <option value="Spam / Propaganda enganosa">Spam / Propaganda enganosa</option>
                     <option value="Discurso de ódio / Ofensa">Discurso de ódio / Ofensa</option>
                     <option value="Assédio / Bullying">Assédio / Bullying</option>
-                    <option value="Código / Conteúdo malicioso ou perigoso">Código / Conteúdo malicioso ou perigoso</option>
+                    <option value="Código / Conteúdo malicioso ou perigoso">
+                      Código / Conteúdo malicioso ou perigoso
+                    </option>
                     <option value="Outro motivo">Outro motivo</option>
                   </select>
                 </div>
-                
+
                 <div className="flex justify-end gap-2 pt-2 border-t border-dd-border">
                   <button
                     type="button"

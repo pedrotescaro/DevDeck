@@ -1,13 +1,38 @@
 import { z } from "zod";
 import { Language } from "@prisma/client";
 
-export const createPostSchema = z.object({
-  title: z.string().min(5, "O título deve ter pelo menos 5 caracteres").max(100),
-  body: z.string().min(10, "O conteúdo deve ter pelo menos 10 caracteres"),
-  language: z.nativeEnum(Language).optional().nullable(),
-  code_snippet: z.string().optional().nullable(),
-  image_url: z.string().url("URL de imagem inválida").or(z.string().length(0)).optional().nullable(),
-});
+export const createPostSchema = z
+  .object({
+    title: z.string().min(5, "O título deve ter pelo menos 5 caracteres").max(100),
+    body: z.string().min(10, "O conteúdo deve ter pelo menos 10 caracteres"),
+    language: z.nativeEnum(Language).optional().nullable(),
+    code_snippet: z.string().optional().nullable(),
+    image_url: z
+      .string()
+      .optional()
+      .nullable()
+      .refine(
+        (val) => {
+          if (!val) return true;
+          if (val.startsWith("https://") || val.startsWith("/uploads/")) return true;
+          if (val.startsWith("http://localhost") || val.startsWith("http://127.0.0.1")) return true;
+          return false;
+        },
+        {
+          message: "URL de imagem inválida. Deve iniciar com https:// ou /uploads/",
+        }
+      ),
+  })
+  .refine(
+    (data) => {
+      const mentions = data.body.match(/(?<![\w.-])@\w+/g) || [];
+      return mentions.length <= 5;
+    },
+    {
+      message: "O post não pode conter mais de 5 menções",
+      path: ["body"],
+    }
+  );
 
 export const createAnswerSchema = z.object({
   body: z.string().min(5, "A resposta deve ter pelo menos 5 caracteres"),

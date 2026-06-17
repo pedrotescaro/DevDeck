@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState } from "react";
@@ -15,17 +16,18 @@ import { AnimatedCounter } from "@/components/motion/AnimatedCounter";
 import { EmptyState } from "@/components/motion/EmptyState";
 import { cn } from "@/lib/cn";
 import { springGentle } from "@/lib/motion";
-import { 
-  ArrowLeft, 
-  Search, 
-  MessageSquare, 
-  Flag, 
-  Sparkles, 
-  ArrowBigDown, 
+import { parseMentions } from "@/lib/mentions";
+import {
+  ArrowLeft,
+  Search,
+  MessageSquare,
+  Flag,
+  Sparkles,
+  ArrowBigDown,
   Bookmark,
   ChevronRight,
   Heart,
-  BarChart2
+  BarChart2,
 } from "lucide-react";
 
 interface BookmarksContentProps {
@@ -36,27 +38,6 @@ interface BookmarksContentProps {
     total_xp: number;
   };
   initialPosts: any[];
-}
-
-function parseMentions(text: string) {
-  if (!text) return "";
-  const parts = text.split(/(@\w+)/g);
-  return parts.map((part, index) => {
-    if (part.startsWith("@")) {
-      const username = part.slice(1);
-      return (
-        <Link
-          key={index}
-          href={`/profile/${username}`}
-          className="text-orange-500 hover:underline font-semibold"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {part}
-        </Link>
-      );
-    }
-    return part;
-  });
 }
 
 function getLevelFromXp(xp: number) {
@@ -83,9 +64,11 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
   const router = useRouter();
   const [posts, setPosts] = useState<any[]>(initialPosts);
   const [searchQuery, setSearchQuery] = useState("");
-  
+
   // Estados para suportar interação de votos, reposts e reações no feed de bookmarks
-  const [votes, setVotes] = useState<Record<string, { up: number; userVote: "up" | "down" | null }>>(() => {
+  const [votes, setVotes] = useState<
+    Record<string, { up: number; userVote: "up" | "down" | null }>
+  >(() => {
     const initialVotes: Record<string, { up: number; userVote: "up" | "down" | null }> = {};
     initialPosts.forEach((post) => {
       const userVoteRecord = post.votes?.[0];
@@ -97,7 +80,9 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
     return initialVotes;
   });
 
-  const [repostState, setRepostState] = useState<Record<string, { count: number; reposted: boolean }>>(() => {
+  const [repostState, setRepostState] = useState<
+    Record<string, { count: number; reposted: boolean }>
+  >(() => {
     const initialReposts: Record<string, { count: number; reposted: boolean }> = {};
     initialPosts.forEach((post) => {
       initialReposts[post.id] = {
@@ -223,28 +208,37 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
       <pre className="font-mono text-[11px] leading-relaxed text-dd-text">
         <code>
           {lines.map((line, idx) => {
-            let html = line
-              .replace(/&/g, "&amp;")
-              .replace(/</g, "&lt;")
-              .replace(/>/g, "&gt;");
-            
-            const keywords = /\b(const|let|var|function|return|fn|impl|pub|use|import|from|def|class|async|await|struct|enum|if|else|for|while|match)\b/g;
+            let html = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+            const keywords =
+              /\b(const|let|var|function|return|fn|impl|pub|use|import|from|def|class|async|await|struct|enum|if|else|for|while|match)\b/g;
             html = html.replace(keywords, '<span class="text-orange-400 font-semibold">$1</span>');
 
-            const types = /\b(string|number|boolean|any|void|User|Post|Language|int|float|str|char)\b/g;
+            const types =
+              /\b(string|number|boolean|any|void|User|Post|Language|int|float|str|char)\b/g;
             html = html.replace(types, '<span class="text-cyan-400 font-medium">$1</span>');
 
             if (html.includes("//")) {
               const parts = html.split("//");
-              html = parts[0] + '<span class="text-dd-muted italic">//' + parts.slice(1).join("//") + '</span>';
+              html =
+                parts[0] +
+                '<span class="text-dd-muted italic">//' +
+                parts.slice(1).join("//") +
+                "</span>";
             } else if (html.startsWith("#") || html.includes(" #")) {
               const parts = html.split("#");
-              html = parts[0] + '<span class="text-dd-muted italic">#' + parts.slice(1).join("#") + '</span>';
+              html =
+                parts[0] +
+                '<span class="text-dd-muted italic">#' +
+                parts.slice(1).join("#") +
+                "</span>";
             }
 
             return (
               <div key={idx} className="table-row">
-                <span className="table-cell text-right pr-4 select-none opacity-20 text-[9px] w-6">{idx + 1}</span>
+                <span className="table-cell text-right pr-4 select-none opacity-20 text-[9px] w-6">
+                  {idx + 1}
+                </span>
                 <span className="table-cell" dangerouslySetInnerHTML={{ __html: html }} />
               </div>
             );
@@ -260,7 +254,6 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
 
       <div className="flex-grow flex flex-col min-w-0">
         <main className="flex-grow max-w-2xl w-full mx-auto px-4 py-8 pb-24 md:pb-8 flex flex-col min-w-0 space-y-6">
-          
           {/* Header (Twitter style: Back arrow + Title + count) */}
           <div className="flex items-center gap-4 border-b border-dd-border/50 pb-4">
             <button
@@ -302,7 +295,9 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
                 </div>
                 <div className="space-y-1">
                   <h3 className="text-sm font-bold text-dd-text">
-                    {searchQuery.trim() ? "Nenhum resultado encontrado" : "Salvar publicações para depois"}
+                    {searchQuery.trim()
+                      ? "Nenhum resultado encontrado"
+                      : "Salvar publicações para depois"}
                   </h3>
                   <p className="text-[11px] text-dd-muted leading-relaxed">
                     {searchQuery.trim()
@@ -316,8 +311,11 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
                 <AnimatePresence mode="popLayout">
                   {filteredPosts.map((post) => {
                     const vote = votes[post.id] || { up: post.upvotes ?? 0, userVote: null };
-                    const repostMeta = repostState[post.id] ?? { count: post.reposts_count ?? 0, reposted: false };
-                    
+                    const repostMeta = repostState[post.id] ?? {
+                      count: post.reposts_count ?? 0,
+                      reposted: false,
+                    };
+
                     return (
                       <div key={post.id} className="space-y-2.5">
                         <motion.article
@@ -336,7 +334,10 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
                               </div>
                               <div>
                                 <div className="flex items-center gap-1.5">
-                                  <Link href={`/profile/${post.author.username}`} className="text-xs font-bold text-dd-text hover:text-orange-400 transition-colors">
+                                  <Link
+                                    href={`/profile/${post.author.username}`}
+                                    className="text-xs font-bold text-dd-text hover:text-orange-400 transition-colors"
+                                  >
                                     @{post.author.username}
                                   </Link>
                                   <span className="text-[9px] bg-dd-surface border border-dd-border px-1 py-0.5 rounded text-dd-muted font-mono font-semibold">
@@ -349,7 +350,10 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.preventDefault()}>
+                            <div
+                              className="flex items-center gap-2 flex-wrap"
+                              onClick={(e) => e.preventDefault()}
+                            >
                               {post.language && <LanguageTag language={post.language} size="sm" />}
                             </div>
                           </div>
@@ -362,7 +366,9 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
                               </h2>
                             </Link>
                             <p className="text-xs text-dd-muted leading-relaxed">
-                              {searchQuery.trim() ? highlightMatches(post.body, searchQuery) : parseMentions(post.body)}
+                              {searchQuery.trim()
+                                ? highlightMatches(post.body, searchQuery)
+                                : parseMentions(post.body)}
                             </p>
 
                             {post.image_url && (
@@ -385,60 +391,66 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
                             )}
                           </div>
 
-                            <div 
-                              className="flex items-center justify-between pt-3 border-t border-dd-border text-xs w-full select-none"
-                              onClick={(e) => { 
-                                e.stopPropagation(); 
-                                e.preventDefault(); 
-                              }}
+                          <div
+                            className="flex items-center justify-between pt-3 border-t border-dd-border text-xs w-full select-none"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                            }}
+                          >
+                            {/* 1. Comment bubble */}
+                            <Link
+                              href={`/post/${post.id}`}
+                              className="flex items-center gap-1.5 text-dd-muted hover:text-dd-text transition-colors"
                             >
-                              {/* 1. Comment bubble */}
-                              <Link
-                                href={`/post/${post.id}`}
-                                className="flex items-center gap-1.5 text-dd-muted hover:text-dd-text transition-colors"
-                              >
-                                <MessageSquare className="w-3.5 h-3.5 text-dd-muted" />
-                                <span className="text-[10px] font-semibold text-dd-muted">{post._count?.answers || 0}</span>
-                              </Link>
+                              <MessageSquare className="w-3.5 h-3.5 text-dd-muted" />
+                              <span className="text-[10px] font-semibold text-dd-muted">
+                                {post._count?.answers || 0}
+                              </span>
+                            </Link>
 
-                              {/* 2. Repost Menu */}
-                              <RepostMenu
-                                count={repostMeta.count}
-                                isReposted={repostMeta.reposted}
-                                onRepost={() => handleRepost(post.id)}
-                                onQuote={() => handleQuotePost(post)}
-                              />
+                            {/* 2. Repost Menu */}
+                            <RepostMenu
+                              count={repostMeta.count}
+                              isReposted={repostMeta.reposted}
+                              onRepost={() => handleRepost(post.id)}
+                              onQuote={() => handleQuotePost(post)}
+                            />
 
-                              {/* 3. Heart/Like button */}
-                              <LikeButton
-                                count={vote.up}
-                                isActive={vote.userVote === "up"}
-                                onToggle={() => handleVote(post.id, "up")}
-                                title="Curtir post"
-                              />
+                            {/* 3. Heart/Like button */}
+                            <LikeButton
+                              count={vote.up}
+                              isActive={vote.userVote === "up"}
+                              onToggle={() => handleVote(post.id, "up")}
+                              title="Curtir post"
+                            />
 
-                              {/* 4. Views BarChart */}
-                              <div className="flex items-center gap-1.5 text-dd-muted select-none">
-                                <BarChart2 className="w-4 h-4 text-dd-muted" />
-                                <span className="text-[10px] font-semibold text-dd-muted">{post.view_count >= 1000 ? `${(post.view_count / 1000).toFixed(0)}mil` : post.view_count}</span>
-                              </div>
-
-                              {/* 5. Report button */}
-                              <button
-                                onClick={() => alert("Denúncia enviada.")}
-                                className="p-1 rounded-md text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer flex items-center justify-center"
-                                title="Denunciar postagem"
-                              >
-                                <Flag className="w-3.5 h-3.5" />
-                              </button>
-
-                              {/* 6. BookmarkButton (Saved is true by default in Bookmarks page) */}
-                              <BookmarkButton
-                                isSaved={true}
-                                onToggle={() => handleBookmarkToggle(post.id)}
-                              />
+                            {/* 4. Views BarChart */}
+                            <div className="flex items-center gap-1.5 text-dd-muted select-none">
+                              <BarChart2 className="w-4 h-4 text-dd-muted" />
+                              <span className="text-[10px] font-semibold text-dd-muted">
+                                {post.view_count >= 1000
+                                  ? `${(post.view_count / 1000).toFixed(0)}mil`
+                                  : post.view_count}
+                              </span>
                             </div>
-                          </motion.article>
+
+                            {/* 5. Report button */}
+                            <button
+                              onClick={() => alert("Denúncia enviada.")}
+                              className="p-1 rounded-md text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer flex items-center justify-center"
+                              title="Denunciar postagem"
+                            >
+                              <Flag className="w-3.5 h-3.5" />
+                            </button>
+
+                            {/* 6. BookmarkButton (Saved is true by default in Bookmarks page) */}
+                            <BookmarkButton
+                              isSaved={true}
+                              onToggle={() => handleBookmarkToggle(post.id)}
+                            />
+                          </div>
+                        </motion.article>
 
                         {/* Resolver como Quiz outside/below the post box */}
                         {post.quizzes && post.quizzes.length > 0 && (
