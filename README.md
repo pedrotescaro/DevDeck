@@ -1,75 +1,104 @@
-# DevDeck — Rede Social Gamificada para Programadores 🚀
+<p align="center">
+  <img src="public/logo.png" alt="DevDeck Logo" width="128" height="128" />
+</p>
 
-[![Next.js](https://img.shields.io/badge/Next.js-16-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS-v4-38BDF8?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![Prisma ORM](https://img.shields.io/badge/Prisma-7.x-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
-[![Supabase](https://img.shields.io/badge/Supabase-Database%20%26%20Auth-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
+<h1 align="center">DevDeck</h1>
 
-O **DevDeck** é uma rede social completa, moderna e gamificada desenvolvida sob medida para programadores. Nele, desenvolvedores podem compartilhar dúvidas, postar ideias, competir em duelos de código em tempo real com editor integrado, testar seus conhecimentos em quizzes diários gerados automaticamente, acumular XP e subir de nível em trilhas específicas de tecnologia (como TypeScript, Python, Rust, Go, etc.) e colecionar insígnias (badges) meméticas e interativas de conquistas.
+<p align="center">
+  <strong>A plataforma gamificada definitiva para desenvolvedores se conectarem, competirem e evoluírem.</strong>
+</p>
 
----
-
-## 🎨 Funcionalidades Principais (Features)
-
-### 🐦 Interface Estilo Twitter/X (Desktop & Mobile)
-- **Barra Lateral Completa**: Navegação ágil no desktop incluindo Página Inicial, Explorar, Notificações com contador em tempo real, Bate-papo, Ducky (Assistente Virtual), Itens Salvos, Perfil do Usuário e modal de Upgrade Premium ativo com contador regressivo.
-- **Header e Bottom Nav**: Design otimizado para celulares estilo Twitter Mobile, ocultando a barra lateral e dando lugar a um menu inferior e cabeçalho compactos.
-- **Tema Escuro Puro (OLED Black)**: Visual moderno e escuro de alta legibilidade, com suporte a troca de aparência diretamente nas configurações da conta.
-
-### 🎮 Gamificação de Aprendizado e Redes Sociais
-- **Trilhas de XP por Linguagem**: Acumule experiência e avance de nível individualmente em TypeScript, Python, Go, C++, Java, Swift, Rust, Kotlin ou JavaScript.
-- **Quiz Diário Oficial**: Teste rápido de codificação na aba de quizzes que concede `+15 XP` ao ser respondido corretamente.
-- **Badges Meméticos Profissionais**: Conquistas interativas com geometrias exclusivas (hexágonos, escudos, anéis concêntricos) inspiradas no Credly, com títulos como *Hello World!*, *Sobrevivente do Segfault*, *Git Push --force* e *Mago do TypeScript*.
-- **Sequências Diárias (Streaks)**: Acompanhe sua ofensiva diária em cada tecnologia.
-
-### ⚔️ Duelos de Código em Tempo Real
-- **Editor de Código Integrado**: Submeta soluções diretamente da plataforma com destaque de sintaxe profissional (CodeMirror).
-- **Matchmaking & Votação da Comunidade**: Desafie outros usuários no ranking geral e participe votando na melhor resposta dos duelos ativos.
-
-### 💬 Chat / Mensagens e Notificações Reais
-- **Notificações em Tempo Real**: Alertas dinâmicos disparados quando respondem suas dúvidas, quando você ganha XP ou é desafiado para duelos.
-- **Bate-papo Interno (`/messages`)**: Envie mensagens privadas para outros programadores de forma fluida.
-- **Sugestão de Menção com `@`**: Pop-up premium semitransparente que autocompleta nomes de usuário à medida que você escreve postagens.
+<p align="center">
+  <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-16-000000?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js" /></a>
+  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" /></a>
+  <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind_CSS-v4-38BDF8?style=flat-square&logo=tailwindcss&logoColor=white" alt="Tailwind" /></a>
+  <a href="https://www.prisma.io/"><img src="https://img.shields.io/badge/Prisma-7.x-2D3748?style=flat-square&logo=prisma&logoColor=white" alt="Prisma" /></a>
+  <a href="https://supabase.com/"><img src="https://img.shields.io/badge/Supabase-Auth_%26_DB-3ECF8E?style=flat-square&logo=supabase&logoColor=white" alt="Supabase" /></a>
+</p>
 
 ---
 
-## 🛠️ Stack Tecnológica
+## ⚡ Conecte-se. Codifique. Conquiste.
 
-- **Core**: Next.js 16 (App Router) & React 19
-- **Estilização**: Tailwind CSS v4 (Flat Design System em tons OLED e Laranja)
-- **Animações**: Framer Motion (Transições e Toasts dinâmicos)
-- **Banco de Dados**: Supabase (PostgreSQL, Auth baseada em Cookies de Sessão, Realtime)
-- **Banco ORM**: Prisma 7 (com driver adapter nativo `@prisma/adapter-pg` e WASM)
-- **Validação**: Zod
+O **DevDeck** transforma a interação social entre programadores em uma jornada interativa de aprendizado e diversão. Compartilhe suas dúvidas técnicas, ajude a comunidade, dispute duelos de código em tempo real e desbloqueie badges que provam sua senioridade (e senso de humor).
 
 ---
 
-## 🗄️ Arquitetura do Banco de Dados (Modelagem Prisma)
+## 📌 Experiência do Usuário (Destaques)
 
-* `User`: Cadastro principal, bio, total de XP geral e conquistas.
-* `LanguageTrail`: Progressão, XP acumulado e streaks por tecnologia individual.
-* `Post`: Dúvidas técnicas (com linguagem e código) ou postagens de Discussão Geral.
-* `Answer`: Comentários de soluções com suporte à aceitação do autor do post (`is_accepted`).
-* `Quiz` & `QuizAttempt`: Quizzes vinculados a posts e histórico de respostas dos usuários.
-* `Duel`, `DuelSolution` & `DuelVote`: Matchmaking de algoritmo, submissões de código e votação.
-* `Badge` & `UserBadge`: Relação de conquistas e badges desbloqueados pelos usuários.
-* `Report`: Registro de denúncias de posts impróprios.
+<table width="100%">
+  <tr>
+    <td width="50%" valign="top">
+      <h4>🎨 Design Twitter/X OLED Black</h4>
+      <ul>
+        <li>Interface super fluida com barra lateral completa (Página Inicial, Explorar, Notificações, Mensagens, Ducky, Itens Salvos e Perfil).</li>
+        <li>Tema escuro nativo (OLED) para sessões de codificação noturnas saudáveis, configurável nas opções de Aparência.</li>
+        <li>Visual mobile minimalista com bottom navigation bar.</li>
+      </ul>
+    </td>
+    <td width="50%" valign="top">
+      <h4>⚔️ Duelos de Código 1v1</h4>
+      <ul>
+        <li>matchmaking dinâmico para disputas de algoritmo.</li>
+        <li>Editor de código integrado alimentado por <b>CodeMirror</b>.</li>
+        <li>Votação aberta para a comunidade escolher a melhor solução de forma justa.</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h4>🎮 Motor de Gamificação</h4>
+      <ul>
+        <li>Trilhas de XP independentes para linguagens (TypeScript, Rust, Python, Go, C++, etc.).</li>
+        <li>Contadores de ofensiva (Streaks) para incentivar a consistência diária.</li>
+        <li><b>Quiz Diário</b> interativo com recompensas diretas de XP no perfil.</li>
+      </ul>
+    </td>
+    <td width="50%" valign="top">
+      <h4>🎖️ Badges Exclusivos</h4>
+      <ul>
+        <li>Insígnias meméticas com designs geométricos sofisticados (Hexágonos, Escudos, Anéis concêntricos) inspirados no Credly.</li>
+        <li>Conquistas como <i>Sobrevivente do Segfault</i>, <i>Mago do TypeScript</i> e <i>Git Push --force</i>.</li>
+      </ul>
+    </td>
+  </tr>
+</table>
 
 ---
 
-## 🚀 Como Iniciar Localmente
+## 🏗️ Estrutura do Banco de Dados
 
-### 1. Pré-requisitos
-* Node.js v20 ou superior instalado.
+O banco de dados PostgreSQL estruturado via Prisma 7 mapeia perfeitamente a lógica social e gamificada da plataforma:
 
-### 2. Clonar e Instalar Dependências
+```mermaid
+erDiagram
+    User ||--o{ LanguageTrail : "progride"
+    User ||--o{ Post : "escreve"
+    User ||--o{ Answer : "responde"
+    User ||--o{ QuizAttempt : "tenta"
+    User ||--o{ DuelSolution : "submete"
+    User ||--o{ UserBadge : "conquista"
+    User ||--o{ Report : "denuncia"
+    Post ||--o{ Answer : "possui"
+    Post ||--o{ Quiz : "gera"
+    Quiz ||--o{ QuizAttempt : "registra"
+    Duel ||--o{ DuelSolution : "contem"
+    DuelSolution ||--o{ DuelVote : "recebe"
+```
+
+---
+
+## 🛠️ Primeiros Passos (Instalação Rápida)
+
+Para rodar o DevDeck na sua máquina local de forma simples e direta, siga os passos abaixo:
+
+#### 1. Instalar as dependências do projeto
 ```bash
 npm install
 ```
 
-### 3. Configurar Variáveis de Ambiente
-Crie um arquivo `.env.local` na raiz do projeto com as seguintes variáveis obtidas no painel do Supabase:
+#### 2. Configurar o arquivo `.env.local`
+Crie um arquivo chamado `.env.local` na raiz e configure com as conexões do seu banco de dados Supabase:
 ```env
 DATABASE_URL="postgresql://..."
 DIRECT_URL="postgresql://..."
@@ -78,23 +107,19 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY="..."
 SUPABASE_SERVICE_ROLE_KEY="..."
 ```
 
-### 4. Preparar o Banco de Dados (Prisma)
-Gere o cliente do Prisma:
+#### 3. Sincronizar o Prisma e Popular o Banco (Seed)
 ```bash
+# Gerar o cliente Prisma
 npx prisma generate
-```
 
-Aplique as migrations para criar as tabelas no Supabase:
-```bash
+# Executar as migrations no banco remoto
 npx prisma migrate dev
-```
 
-Popule o banco com dados de teste estruturados (badges, usuários confirmados, duelos, etc.):
-```bash
+# Inserir badges, trilhas e usuários de teste
 npx prisma db seed
 ```
 
-### 5. Iniciar Servidor de Desenvolvimento
+#### 4. Executar o Servidor Local
 ```bash
 npm run dev
 ```
@@ -102,20 +127,21 @@ Abra seu navegador em [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## 👥 Contas de Teste (Provisionadas no Seed)
+## 👥 Contas para Testes Rápidos
 
-Você pode logar nas seguintes contas pré-configuradas (senha idêntica para todas):
-* **Senha padrão:** `pedroa080705!`
+O seed do banco cria três desenvolvedores com diferentes níveis de XP e trilhas de tecnologia. Acesse `/login` e utilize qualquer um deles:
 
-1. **Pedro (Especialidade: TypeScript)**
-   - **E-mail:** `pedro@devdeck.dev`
-2. **Ana (Especialidade: Python)**
-   - **E-mail:** `ana@devdeck.dev`
-3. **Carlos (Especialidade: Rust & C++)**
-   - **E-mail:** `carlos@devdeck.dev`
+> [!NOTE]
+> A senha padrão para todas as contas abaixo é: **`pedroa080705!`**
+
+| Nome | E-mail | Especialidade Principal |
+| :--- | :--- | :--- |
+| **Pedro** | `pedro@devdeck.dev` | TypeScript & JavaScript |
+| **Ana** | `ana@devdeck.dev` | Python & Django |
+| **Carlos** | `carlos@devdeck.dev` | Rust & C++ |
 
 ---
 
-## 📄 Licença
-
-Este projeto é desenvolvido para fins acadêmicos e portfólio pessoal. Sinta-se livre para explorar o código, clonar e criar novas features.
+<p align="center">
+  Desenvolvido com carinho para a comunidade dev. ☕✨
+</p>
