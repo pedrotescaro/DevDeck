@@ -115,11 +115,24 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       }
     }
 
+    let formattedXpResult = null;
+    if (xpResult) {
+      const updatedUser = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { total_xp: true }
+      });
+      formattedXpResult = {
+        newTotalXp: updatedUser?.total_xp ?? user.total_xp,
+        newLanguageXp: xpResult.newXp,
+        newLanguageLevel: xpResult.newLevel,
+      };
+    }
+
     return NextResponse.json({
       attempt,
       correct_index: quiz.correct_index,
       is_correct: isCorrect,
-      xpResult,
+      xpResult: formattedXpResult,
     });
   } catch (error) {
     console.error("Error attempting quiz:", error);

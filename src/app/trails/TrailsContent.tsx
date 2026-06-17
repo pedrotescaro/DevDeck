@@ -198,19 +198,31 @@ export function TrailsContent({
         if (data.xpResult) {
           setUserXp(data.xpResult.newTotalXp);
           
-          // Atualizar trilhas de linguagem localmente
-          setTrails((prev) =>
-            prev.map((t) => {
-              if (t.language === activeLang) {
-                return {
-                  ...t,
+          // Atualizar trilhas de linguagem localmente (inserindo se não existir)
+          setTrails((prev) => {
+            const exists = prev.some((t) => t.language === activeLang);
+            if (exists) {
+              return prev.map((t) => {
+                if (t.language === activeLang) {
+                  return {
+                    ...t,
+                    xp: data.xpResult.newLanguageXp,
+                    level: data.xpResult.newLanguageLevel,
+                  };
+                }
+                return t;
+              });
+            } else {
+              return [
+                ...prev,
+                {
+                  language: activeLang,
                   xp: data.xpResult.newLanguageXp,
                   level: data.xpResult.newLanguageLevel,
-                };
-              }
-              return t;
-            })
-          );
+                },
+              ];
+            }
+          });
 
           // Verificar se subiu de nível geral do usuário
           const oldLevel = getLevelFromXp(userXp);
