@@ -25,6 +25,97 @@ function getLevelFromXp(xp: number) {
   return Math.max(1, Math.floor(xp / 1000) + 1);
 }
 
+function getLearnSlidesForLevel(level: TrailLevel) {
+  return level.questions.map((q, idx) => {
+    let title = `Conceito ${idx + 1}: ${level.title}`;
+    let concept = "";
+    let code = "";
+    let tip = "";
+
+    if (q.id === "js-l1-q1") {
+      title = "Escopo de Bloco com 'let'";
+      concept =
+        "Em JavaScript moderno, declaramos variáveis reatribuíveis com escopo de bloco usando a palavra-chave 'let'. Diferente do antigo 'var', que tem escopo de função e sofre com hoisting indesejado, o 'let' respeita as chaves em que foi criado.";
+      code =
+        "{\n  let blockScoped = 'disponível apenas aqui';\n  var functionScoped = 'vaza para fora';\n}\nconsole.log(functionScoped); // Funciona!\nconsole.log(blockScoped); // Erro!";
+      tip = "Use sempre 'const' por padrão, e 'let' apenas se precisar reatribuir a variável.";
+    } else if (q.id === "js-l1-q2") {
+      title = "O Tipo Oculto de 'null'";
+      concept =
+        "O operador 'typeof' retorna uma string indicando o tipo do operando. No entanto, por razões históricas e de compatibilidade com versões antigas do JavaScript, 'typeof null' retorna a string 'object'. Isso é considerado um bug de design na linguagem, mas nunca foi alterado para não quebrar a web legada.";
+      code =
+        "console.log(typeof null); // 'object'\nconsole.log(typeof undefined); // 'undefined'\nconsole.log(null === null); // true";
+      tip =
+        "Para verificar se um valor é nulo, compare diretamente usando 'val === null' em vez de usar 'typeof'.";
+    } else if (q.id === "js-l1-q3") {
+      title = "Conversão de Tipos com 'parseInt()'";
+      concept =
+        "A função global 'parseInt()' analisa um argumento do tipo string e retorna um número inteiro da base especificada (radix). Ela é útil para extrair números de strings de texto mistas.";
+      code =
+        "const larguraStr = '120px';\nconst largura = parseInt(larguraStr, 10);\nconsole.log(largura); // 120 (como number)\nconsole.log(parseInt('abc')); // NaN (Not a Number)";
+      tip =
+        "Sempre passe o segundo argumento (radix, geralmente 10) para o parseInt() para evitar interpretações incorretas em bases antigas (como octal).";
+    } else if (q.id === "js-l2-q1") {
+      title = "Igualdade Estrita (===)";
+      concept =
+        "O operador '===' (identidade ou igualdade estrita) compara tanto o valor quanto o tipo dos dois operandos. Já o operador '==' realiza coerção automática de tipo antes de comparar, o que pode levar a comportamentos inesperados.";
+      code =
+        "console.log(5 == '5');   // true (faz coerção de tipo)\nconsole.log(5 === '5');  // false (tipos diferentes: number vs string)\nconsole.log(0 == false);  // true\nconsole.log(0 === false); // false";
+      tip =
+        "Use sempre o operador de igualdade estrita (===) para evitar bugs silenciosos de coerção de tipo.";
+    } else if (q.id === "js-l2-q2") {
+      title = "Tratamento de Erros com 'try...catch'";
+      concept =
+        "A instrução 'try...catch' marca um bloco de declarações para testar (try) e especifica uma resposta, caso uma exceção seja lançada (catch). Isso previne que um erro interrompa totalmente a execução da sua aplicação.";
+      code =
+        "try {\n  const res = executarFuncaoPerigosa();\n} catch (error) {\n  console.error('Um erro ocorreu:', error.message);\n  // A aplicação continua rodando de forma estável\n}";
+      tip =
+        "Você pode usar um bloco 'finally' opcional que roda independente de ter ocorrido erro ou não.";
+    } else if (q.id === "js-l2-q3") {
+      title = "Garantindo Execução com 'do...while'";
+      concept =
+        "O loop 'do...while' repete uma instrução até que a condição de teste avalie como falsa. A principal característica do 'do...while' é que o bloco de código dentro do 'do' sempre roda pelo menos uma vez antes de avaliar a condição.";
+      code =
+        "let contador = 10;\ndo {\n  console.log('Executou pelo menos uma vez!');\n} while (contador < 5);";
+      tip =
+        "Use 'do...while' quando a primeira interação precisa acontecer antes de fazer a checagem lógica.";
+    } else if (q.id === "ts-l1-q1") {
+      title = "O Tipo 'never' no TypeScript";
+      concept =
+        "No TypeScript, o tipo 'never' representa valores que nunca ocorrem. É usado para tipar funções que sempre lançam exceções ou loops infinitos de onde a execução nunca retorna, garantindo segurança de tipos estrita.";
+      code =
+        "function lancarErro(msg: string): never {\n  throw new Error(msg);\n}\n\nfunction loopInfinito(): never {\n  while (true) {}\n}";
+      tip = "O tipo 'never' é ideal para análise exaustiva em switch statements (type narrowing).";
+    } else if (q.id === "ts-l1-q2") {
+      title = "Diferença entre 'any' e 'unknown'";
+      concept =
+        "Tanto 'any' quanto 'unknown' aceitam qualquer valor. No entanto, 'unknown' é o tipo seguro correspondente. Você não pode chamar métodos ou acessar propriedades de uma variável 'unknown' sem antes realizar uma checagem de tipo (type guard) ou asserção.";
+      code =
+        "let valor1: any = 'olá';\nvalor1.falar(); // Compila (mas pode dar erro em runtime)\n\nlet valor2: unknown = 'olá';\n// valor2.falar(); // Erro de Compilação!\n\nif (typeof valor2 === 'string') {\n  console.log(valor2.toUpperCase()); // Seguro e permitido!\n}";
+      tip =
+        "Prefira sempre usar 'unknown' no lugar de 'any' para manter a segurança estática de tipo.";
+    } else if (q.id === "ts-l1-q3") {
+      title = "Type Assertion (Asserção de Tipo)";
+      concept =
+        "A asserção de tipo informa ao compilador do TypeScript que você sabe mais sobre o tipo da variável do que ele. É uma conversão puramente em tempo de compilação. Pode ser declarada usando a sintaxe 'as Tipo' ou '<Tipo>'.";
+      code =
+        "let algumaCoisa: any = 'DevDeck';\nlet tamanho1 = (algumaCoisa as string).length; // Recomendado\nlet tamanho2 = (<string>algumaCoisa).length; // Sintaxe alternativa";
+      tip =
+        "A sintaxe '<Tipo>' pode conflitar com JSX/TSX em React, portanto, prefira usar a palavra-chave 'as'.";
+    } else {
+      const correctAnswer = q.options[q.correctIndex];
+      title = `Lição: ${q.question.replace(/\?$/, "").replace(/^Qual\s+|^O que\s+|^Qual é o\s+/, "")}`;
+      concept = `Para dominar este tema, entenda o seguinte: no contexto de "${level.title}", a pergunta principal é: "${q.question}"\n\nNesta situação, a resposta correta e mais performática é "${correctAnswer}". Ao projetar sistemas e escrever códigos, lembre-se de que essa convenção ou abordagem ajuda a otimizar a legibilidade, a evitar erros lógicos e a seguir as melhores práticas recomendadas para a linguagem.`;
+      if (q.options.length > 0) {
+        code = `// Exemplo prático do conceito de ${level.title}\n// O valor esperado/correto para esta lógica é:\nconst resultado = "${correctAnswer}";\nconsole.log(resultado); // Atende ao comportamento esperado`;
+      }
+      tip = `Lembre-se sempre de examinar as nuances de ${level.title} ao escrever códigos de produção!`;
+    }
+
+    return { title, concept, code, tip };
+  });
+}
+
 interface TrailsContentProps {
   user: {
     id: string;
@@ -91,6 +182,13 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
   const [submittingAttempt, setSubmittingAttempt] = useState(false);
   const [quizError, setQuizError] = useState<string | null>(null);
 
+  // Estados das etapas (Aprender, Praticar, Desafio)
+  const [currentStage, setCurrentStage] = useState<"learn" | "practice" | "challenge" | "summary">(
+    "learn"
+  );
+  const [learnStep, setLearnStep] = useState(0);
+  const [practiceStep, setPracticeStep] = useState(0);
+
   // Estado do LevelUp
   const [levelUpVisible, setLevelUpVisible] = useState(false);
   const [unlockedTitle, setUnlockedTitle] = useState("");
@@ -146,6 +244,9 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
       return;
     }
     setActiveLevel(level);
+    setCurrentStage("learn");
+    setLearnStep(0);
+    setPracticeStep(0);
     setCurrentQuestionIndex(0);
     setSelectedOption(null);
     setAnswered(false);
@@ -153,6 +254,64 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
     setXpEarned(0);
     setQuizModalOpen(true);
     setQuizError(null);
+  };
+
+  const handleNextStageOrStep = () => {
+    if (!activeLevel) return;
+
+    if (currentStage === "learn") {
+      if (learnStep < 2) {
+        setLearnStep((prev) => prev + 1);
+      } else {
+        setCurrentStage("practice");
+        setPracticeStep(0);
+        setCurrentQuestionIndex(0);
+        setSelectedOption(null);
+        setAnswered(false);
+      }
+    } else if (currentStage === "practice") {
+      if (practiceStep < 1) {
+        setPracticeStep((prev) => prev + 1);
+        setCurrentQuestionIndex(1);
+        setSelectedOption(null);
+        setAnswered(false);
+      } else {
+        setCurrentStage("challenge");
+        setCurrentQuestionIndex(2);
+        setSelectedOption(null);
+        setAnswered(false);
+      }
+    } else if (currentStage === "challenge") {
+      setCurrentStage("summary");
+    }
+  };
+
+  const handlePrevStageOrStep = () => {
+    if (!activeLevel) return;
+
+    if (currentStage === "learn") {
+      if (learnStep > 0) {
+        setLearnStep((prev) => prev - 1);
+      }
+    } else if (currentStage === "practice") {
+      if (practiceStep > 0) {
+        setPracticeStep((prev) => prev - 1);
+        setCurrentQuestionIndex(0);
+        setSelectedOption(null);
+        setAnswered(false);
+      } else {
+        setCurrentStage("learn");
+        setLearnStep(2);
+        setSelectedOption(null);
+        setAnswered(false);
+      }
+    } else if (currentStage === "challenge") {
+      setCurrentStage("practice");
+      setPracticeStep(1);
+      setCurrentQuestionIndex(1);
+      setSelectedOption(null);
+      setAnswered(false);
+    }
   };
 
   const handleOptionSelect = (optionIdx: number) => {
@@ -244,12 +403,6 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
     } finally {
       setSubmittingAttempt(false);
     }
-  };
-
-  const handleNextQuestion = () => {
-    setSelectedOption(null);
-    setAnswered(false);
-    setCurrentQuestionIndex((prev) => prev + 1);
   };
 
   const getLevelTitle = (lvl: number) => {
@@ -556,7 +709,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
               exit="exit"
               className="fixed inset-0 bg-black/60 backdrop-blur-[8px]"
               onClick={() => {
-                if (currentQuestionIndex < activeLevel.questions.length && !submittingAttempt) {
+                if (currentStage !== "summary" && !submittingAttempt) {
                   if (
                     confirm("Quer realmente sair do quiz? Seu progresso nesta sessão será perdido.")
                   ) {
@@ -576,60 +729,143 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
               className="relative w-full max-w-lg bg-dd-surface border border-dd-border rounded-2xl shadow-2xl z-10 font-sans flex flex-col max-h-[90vh] overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Modal Header */}
-              <div className="flex items-center justify-between p-4 border-b border-dd-border">
-                <div>
-                  <h2 className="text-dd-text text-xs font-black uppercase tracking-wider flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-orange-500" />
-                    Fase {activeLevel.levelNumber}: {activeLevel.title}
+              {/* Colored Modal Header */}
+              <div className="bg-gradient-to-r from-orange-500 to-amber-600 text-white p-5 pb-8 relative flex flex-col gap-4">
+                <div className="flex items-center justify-between w-full">
+                  <button
+                    onClick={() => {
+                      if (currentStage !== "summary" && !submittingAttempt) {
+                        if (
+                          confirm(
+                            "Quer realmente sair do quiz? Seu progresso nesta sessão será perdido."
+                          )
+                        ) {
+                          setQuizModalOpen(false);
+                        }
+                      } else {
+                        setQuizModalOpen(false);
+                      }
+                    }}
+                    className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition-all cursor-pointer border-none"
+                    aria-label="Fechar quiz"
+                  >
+                    <X className="w-4.5 h-4.5" />
+                  </button>
+
+                  <h2 className="text-xs font-black uppercase tracking-wider text-center flex-grow pr-8 text-white">
+                    {(() => {
+                      if (currentStage === "learn") {
+                        return `Etapa 1: Aprender ${learnStep + 1} de 3`;
+                      }
+                      if (currentStage === "practice") {
+                        return `Etapa 2: Prática ${practiceStep + 1} de 2`;
+                      }
+                      if (currentStage === "challenge") {
+                        return `Etapa 3: Desafio Final`;
+                      }
+                      return `Fase Concluída!`;
+                    })()}
                   </h2>
-                  <p className="text-[10px] text-dd-muted mt-0.5">{activeLevel.description}</p>
                 </div>
-                <button
-                  onClick={() => setQuizModalOpen(false)}
-                  className="text-dd-muted hover:text-dd-text p-1 rounded-full hover:bg-dd-border/50"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+
+                {/* Segmented Progress Pills */}
+                <div className="flex gap-2 w-full mt-1">
+                  {[0, 1, 2].map((segIdx) => {
+                    let fillPercent = 0;
+                    if (currentStage === "learn") {
+                      if (segIdx === 0) {
+                        fillPercent = ((learnStep + 1) / 3) * 100;
+                      }
+                    } else if (currentStage === "practice") {
+                      if (segIdx === 0) fillPercent = 100;
+                      if (segIdx === 1) {
+                        fillPercent = (practiceStep / 2) * 100;
+                        if (answered && practiceStep === 0) fillPercent = 50;
+                        if (answered && practiceStep === 1) fillPercent = 100;
+                      }
+                    } else if (currentStage === "challenge") {
+                      if (segIdx === 0 || segIdx === 1) fillPercent = 100;
+                      if (segIdx === 2) {
+                        fillPercent = answered ? 100 : 0;
+                      }
+                    } else if (currentStage === "summary") {
+                      fillPercent = 100;
+                    }
+
+                    return (
+                      <div
+                        key={segIdx}
+                        className="h-1.5 flex-grow bg-white/25 rounded-full overflow-hidden relative"
+                      >
+                        <div
+                          className="absolute top-0 left-0 h-full bg-white rounded-full transition-all duration-300"
+                          style={{ width: `${fillPercent}%` }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
-              {/* Wizard Content */}
-              <div className="p-6 overflow-y-auto flex-grow space-y-6">
-                {currentQuestionIndex < activeLevel.questions.length ? (
-                  // QUIZ QUESTIONS SCREEN
+              {/* Overlapping Content Container */}
+              <div className="relative -mt-4 rounded-t-2xl bg-dd-surface p-6 flex-grow flex flex-col overflow-y-auto min-h-[350px]">
+                {currentStage === "learn" &&
+                  (() => {
+                    const slides = getLearnSlidesForLevel(activeLevel);
+                    const slide = slides[learnStep];
+                    return (
+                      <div className="space-y-4 py-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500 font-bold text-sm">
+                            💡
+                          </div>
+                          <h3 className="text-sm font-extrabold text-dd-text">{slide.title}</h3>
+                        </div>
+
+                        <p className="text-xs text-dd-text leading-relaxed font-medium">
+                          {slide.concept}
+                        </p>
+
+                        {slide.code && (
+                          <div className="relative bg-black/40 rounded-xl p-4 border border-dd-border font-mono text-[10px] text-orange-200 overflow-x-auto whitespace-pre leading-relaxed">
+                            {slide.code}
+                          </div>
+                        )}
+
+                        {slide.tip && (
+                          <div className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-3 flex items-start gap-2.5">
+                            <span className="text-orange-500 text-xs mt-0.5">💡</span>
+                            <div className="space-y-0.5">
+                              <h4 className="text-[10px] font-bold text-orange-500 uppercase tracking-wide">
+                                Dica Pro
+                              </h4>
+                              <p className="text-[10px] text-dd-muted leading-relaxed">
+                                {slide.tip}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+
+                {(currentStage === "practice" || currentStage === "challenge") &&
                   (() => {
                     const question = activeLevel.questions[currentQuestionIndex];
                     return (
-                      <div className="space-y-6">
-                        {/* Progress Bar inside Wizard */}
-                        <div className="space-y-1">
-                          <div className="flex justify-between text-[9px] font-bold text-dd-muted">
-                            <span>
-                              Questão {currentQuestionIndex + 1} de {activeLevel.questions.length}
-                            </span>
-                            <span>
-                              {Math.round(
-                                (currentQuestionIndex / activeLevel.questions.length) * 100
-                              )}
-                              % concluído
+                      <div className="space-y-6 py-2">
+                        {currentStage === "challenge" && (
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 rounded bg-orange-500/10 text-[9px] font-black text-orange-500 uppercase tracking-wider">
+                              Desafio Final
                             </span>
                           </div>
-                          <div className="h-1.5 w-full bg-dd-border/40 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-orange-500 rounded-full transition-all"
-                              style={{
-                                width: `${(currentQuestionIndex / activeLevel.questions.length) * 100}%`,
-                              }}
-                            />
-                          </div>
-                        </div>
+                        )}
 
-                        {/* Question Text */}
                         <h3 className="text-sm font-bold text-dd-text leading-relaxed">
                           {question.question}
                         </h3>
 
-                        {/* Options list */}
                         <div className="space-y-2.5">
                           {question.options.map((opt, oIdx) => {
                             const isSelected = selectedOption === oIdx;
@@ -678,9 +914,9 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                         )}
                       </div>
                     );
-                  })()
-                ) : (
-                  // WIZARD SUMMARY SCREEN
+                  })()}
+
+                {currentStage === "summary" && (
                   <div className="text-center py-6 space-y-6">
                     <div className="w-16 h-16 bg-orange-500/10 border border-orange-500/20 rounded-full flex items-center justify-center text-orange-400 mx-auto animate-bounce">
                       <Trophy className="w-8 h-8" />
@@ -709,31 +945,71 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                 )}
               </div>
 
-              {/* Modal Footer (Action Buttons) */}
-              <div className="p-4 border-t border-dd-border flex justify-end">
-                {currentQuestionIndex < activeLevel.questions.length ? (
-                  !answered ? (
+              {/* Navigation Footer */}
+              <div className="p-4 border-t border-dd-border flex justify-between items-center bg-dd-surface">
+                {currentStage !== "summary" ? (
+                  <>
                     <button
-                      onClick={handleCheckAnswer}
-                      disabled={selectedOption === null || submittingAttempt}
-                      className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5"
+                      onClick={handlePrevStageOrStep}
+                      disabled={currentStage === "learn" && learnStep === 0}
+                      className="px-6 py-2.5 bg-transparent border border-dd-border hover:bg-dd-border/20 text-dd-text rounded-full text-xs font-bold transition-all cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed"
                     >
-                      {submittingAttempt ? "Processando..." : "Verificar"}
-                      <ChevronRight className="w-4 h-4" />
+                      Anterior
                     </button>
-                  ) : (
-                    <button
-                      onClick={handleNextQuestion}
-                      className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 animate-pulse"
-                    >
-                      Avançar
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  )
+
+                    {(() => {
+                      if (currentStage === "learn") {
+                        return (
+                          <button
+                            onClick={handleNextStageOrStep}
+                            className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                          >
+                            Próxima
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        );
+                      }
+
+                      if (!answered) {
+                        return (
+                          <button
+                            onClick={handleCheckAnswer}
+                            disabled={selectedOption === null || submittingAttempt}
+                            className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5"
+                          >
+                            {submittingAttempt ? "Processando..." : "Verificar"}
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        );
+                      }
+
+                      if (currentStage === "practice") {
+                        return (
+                          <button
+                            onClick={handleNextStageOrStep}
+                            className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 animate-pulse"
+                          >
+                            Avançar
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        );
+                      }
+
+                      return (
+                        <button
+                          onClick={handleNextStageOrStep}
+                          className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 animate-pulse"
+                        >
+                          Ver Resultado
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                      );
+                    })()}
+                  </>
                 ) : (
                   <button
                     onClick={() => setQuizModalOpen(false)}
-                    className="px-6 py-2.5 bg-dd-surface border border-dd-border hover:bg-dd-border/30 text-dd-text rounded-xl text-xs font-bold transition-all cursor-pointer"
+                    className="w-full py-2.5 bg-dd-surface border border-dd-border hover:bg-dd-border/30 text-dd-text rounded-full text-xs font-bold transition-all cursor-pointer"
                   >
                     Voltar para a Trilha
                   </button>
