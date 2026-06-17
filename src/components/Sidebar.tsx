@@ -475,7 +475,7 @@ export function Sidebar({ user }: SidebarProps) {
               // Standard link style (tightened padding)
               const linkClasses = `flex items-center gap-3.5 py-2.5 px-3.5 rounded-xl text-sm font-semibold transition-all duration-200 group border w-full text-left cursor-pointer ${
                 item.active
-                  ? 'bg-orange-500/10 text-orange-400 border-orange-500/20 shadow-[0_0_15px_rgba(249,115,22,0.03)]'
+                  ? 'bg-transparent text-white border-transparent'
                   : 'text-dd-muted border-transparent hover:bg-dd-surface/60 hover:text-dd-text'
               }`;
 
@@ -483,9 +483,9 @@ export function Sidebar({ user }: SidebarProps) {
               const iconEl = (
                 <div className="relative flex items-center justify-center w-5 h-5">
                   {item.label === 'Notificações' ? (
-                    <NotificationBellIcon unreadCount={unreadCount} />
+                    <NotificationBellIcon unreadCount={unreadCount} active={item.active} />
                   ) : (
-                    <Icon className={`w-5 h-5 transition-transform group-hover:scale-105 duration-200 ${item.active ? 'text-orange-400' : 'text-dd-muted'}`} />
+                    <Icon className={`w-5 h-5 transition-transform group-hover:scale-105 duration-200 ${item.active ? 'text-white fill-current' : 'text-dd-muted'}`} />
                   )}
                   {item.badge === 'dot' && (
                     <span className="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-orange-500 ring-2 ring-dd-bg animate-pulse" />
@@ -729,10 +729,10 @@ export function Sidebar({ user }: SidebarProps) {
             const iconEl = (
               <div className="relative flex items-center justify-center">
                 {item.label === 'Notificações' ? (
-                  <NotificationBellIcon unreadCount={unreadCount} />
+                  <NotificationBellIcon unreadCount={unreadCount} active={item.active} />
                 ) : (
                   <>
-                    <Icon className="w-5.5 h-5.5" />
+                    <Icon className={`w-5.5 h-5.5 ${item.active ? 'fill-current' : ''}`} />
                     {item.badge === 'dot' && (
                       <span className="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-orange-500 ring-2 ring-dd-bg" />
                     )}
@@ -742,7 +742,7 @@ export function Sidebar({ user }: SidebarProps) {
             );
 
             const classes = `flex flex-col items-center justify-center p-1.5 transition-colors duration-150 ${
-              item.active ? 'text-orange-400' : 'text-dd-muted hover:text-dd-text'
+              item.active ? 'text-white' : 'text-dd-muted hover:text-dd-text'
             }`;
 
             if (item.href) {

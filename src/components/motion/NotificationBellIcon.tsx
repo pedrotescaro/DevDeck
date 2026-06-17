@@ -9,12 +9,14 @@ interface NotificationBellIconProps {
   unreadCount: number;
   className?: string;
   shake?: boolean;
+  active?: boolean;
 }
 
 export function NotificationBellIcon({
   unreadCount,
   className,
   shake = false,
+  active = false,
 }: NotificationBellIconProps) {
   const reduced = useReducedMotion();
   const shouldShake = shake || unreadCount > 0;
@@ -29,7 +31,7 @@ export function NotificationBellIcon({
       }
       transition={{ duration: 0.4, ease: "easeInOut" }}
     >
-      <Bell className="w-5 h-5" />
+      <Bell className={cn("w-5 h-5", active ? "fill-current" : "")} />
       {unreadCount > 0 && (
         <span className="absolute -top-1.5 -right-1.5 flex h-2 w-2">
           {!reduced && (
