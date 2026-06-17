@@ -2,20 +2,32 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
+import { EMOJI_CATEGORIES, insertAtCursor } from "@/lib/post-composer";
 import { Sidebar } from "@/components/Sidebar";
 import { EmptyState } from "@/components/motion/EmptyState";
 import { TypingIndicator } from "@/components/motion/TypingIndicator";
-import { 
-  Search, 
-  Settings, 
-  Send, 
-  Plus, 
-  X, 
-  Smile, 
-  Image as ImageIcon 
-} from "lucide-react";
+import { Search, Settings, Send, Plus, X, Smile, Image as ImageIcon } from "lucide-react";
+
+function useClickOutside(
+  ref: React.RefObject<HTMLElement | null>,
+  onClose: () => void,
+  active: boolean
+) {
+  useEffect(() => {
+    if (!active) return;
+
+    const handleClick = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [active, onClose, ref]);
+}
 
 interface ChatItem {
   partnerId: string;
@@ -35,6 +47,7 @@ interface Message {
   receiver_id: string;
   content: string;
   created_at: string;
+  image_url?: string | null;
 }
 
 interface UserListItem {
@@ -46,32 +59,41 @@ interface UserListItem {
 export default function MessagesPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
-  
+
   // Conversations & Messages states
   const [chats, setChats] = useState<ChatItem[]>([]);
   const [activeChat, setActiveChat] = useState<ChatItem | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessageText, setNewMessageText] = useState("");
+  const [messageImage, setMessageImage] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [loadingChats, setLoadingChats] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [showTypingPreview, setShowTypingPreview] = useState(false);
 
   // Search/Filter states
   const [chatSearchQuery, setChatSearchQuery] = useState("");
-  
+
   // New conversation modal states
   const [newChatModalOpen, setNewChatModalOpen] = useState(false);
   const [allUsers, setAllUsers] = useState<UserListItem[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [usersSearchQuery, setUsersSearchQuery] = useState("");
+  const [emojiPanelOpen, setEmojiPanelOpen] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const messageInputRef = useRef<HTMLInputElement | null>(null);
+  const emojiPickerRef = useRef<HTMLDivElement | null>(null);
+
+  useClickOutside(emojiPickerRef, () => setEmojiPanelOpen(false), emojiPanelOpen);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const supabase = createClient();
-        const { data: { user: authUser } } = await supabase.auth.getUser();
+        const {
+          data: { user: authUser },
+        } = await supabase.auth.getUser();
 
         if (!authUser) {
           router.push("/login");
@@ -134,12 +156,45 @@ export default function MessagesPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loadingMessages]);
 
+  const insertEmoji = (emoji: string) => {
+    if (messageInputRef.current) {
+      insertAtCursor(messageInputRef.current, emoji, newMessageText, setNewMessageText);
+      setEmojiPanelOpen(false);
+      messageInputRef.current.focus();
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMessageImage(data.url);
+      }
+    } catch (err) {
+      console.error("Image upload failed:", err);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!activeChat || !newMessageText.trim() || !user) return;
+    if (!activeChat || (!newMessageText.trim() && !messageImage) || !user || uploadingImage) return;
 
     const textToSend = newMessageText.trim();
+    const imageToSend = messageImage;
     setNewMessageText("");
+    setMessageImage("");
 
     // Optimistic UI update
     const tempMessage: Message = {
@@ -147,9 +202,10 @@ export default function MessagesPage() {
       sender_id: user.id,
       receiver_id: activeChat.partnerId,
       content: textToSend,
+      image_url: imageToSend,
       created_at: new Date().toISOString(),
     };
-    setMessages(prev => [...prev, tempMessage]);
+    setMessages((prev) => [...prev, tempMessage]);
 
     try {
       const res = await fetch("/api/messages", {
@@ -158,6 +214,7 @@ export default function MessagesPage() {
         body: JSON.stringify({
           receiver_id: activeChat.partnerId,
           content: textToSend,
+          image_url: imageToSend,
         }),
       });
 
@@ -213,7 +270,7 @@ export default function MessagesPage() {
     setUsersSearchQuery("");
 
     // Check if chat already exists in list
-    const existingChat = chats.find(c => c.partnerId === targetUser.id);
+    const existingChat = chats.find((c) => c.partnerId === targetUser.id);
     if (existingChat) {
       setActiveChat(existingChat);
     } else {
@@ -229,7 +286,7 @@ export default function MessagesPage() {
           avatar_url: targetUser.avatar_url,
         },
       };
-      setChats(prev => [tempChat, ...prev]);
+      setChats((prev) => [tempChat, ...prev]);
       setActiveChat(tempChat);
     }
   };
@@ -246,7 +303,7 @@ export default function MessagesPage() {
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffHours = diffMs / 3600000;
-    
+
     if (diffHours < 24) {
       return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
     }
@@ -257,9 +314,10 @@ export default function MessagesPage() {
   };
 
   // Filter local chats sidebar by search input
-  const filteredChats = chats.filter(c => 
-    c.partner.username.toLowerCase().includes(chatSearchQuery.toLowerCase()) ||
-    c.lastMessage.toLowerCase().includes(chatSearchQuery.toLowerCase())
+  const filteredChats = chats.filter(
+    (c) =>
+      c.partner.username.toLowerCase().includes(chatSearchQuery.toLowerCase()) ||
+      c.lastMessage.toLowerCase().includes(chatSearchQuery.toLowerCase())
   );
 
   return (
@@ -268,7 +326,6 @@ export default function MessagesPage() {
 
       <div className="flex-grow flex min-w-0 bg-dd-bg">
         <div className="flex w-full min-h-screen">
-          
           {/* Left Panel: Conversation List Sidebar (Matching image 4) */}
           <div className="w-80 md:w-96 border-r border-dd-border/60 flex flex-col shrink-0">
             {/* Header */}
@@ -278,7 +335,7 @@ export default function MessagesPage() {
                 <button className="p-2 hover:bg-dd-surface/60 rounded-full text-dd-text transition-colors">
                   <Settings className="w-4.5 h-4.5" />
                 </button>
-                <button 
+                <button
                   onClick={handleOpenNewChatModal}
                   className="p-2 hover:bg-dd-surface/60 rounded-full text-dd-text transition-colors"
                   title="Novo Chat"
@@ -312,7 +369,7 @@ export default function MessagesPage() {
               ) : filteredChats.length === 0 ? (
                 <div className="p-8 text-center space-y-2">
                   <p className="text-xs text-dd-muted font-bold">Nenhum bate-papo iniciado</p>
-                  <button 
+                  <button
                     onClick={handleOpenNewChatModal}
                     className="text-xs text-orange-400 font-extrabold hover:underline"
                   >
@@ -323,13 +380,15 @@ export default function MessagesPage() {
                 filteredChats.map((chat) => {
                   const isActive = activeChat?.partnerId === chat.partnerId;
                   const initials = chat.partner.username.slice(0, 2).toUpperCase();
-                  
+
                   return (
                     <button
                       key={chat.partnerId}
                       onClick={() => setActiveChat(chat)}
                       className={`w-full p-4 flex gap-3 text-left transition-colors duration-150 relative ${
-                        isActive ? "bg-dd-surface/40 border-r-2 border-orange-500" : "hover:bg-dd-surface/20"
+                        isActive
+                          ? "bg-dd-surface/40 border-r-2 border-orange-500"
+                          : "hover:bg-dd-surface/20"
                       }`}
                     >
                       {/* Avatar */}
@@ -356,7 +415,9 @@ export default function MessagesPage() {
                           </span>
                         </div>
                         <p className="text-xs text-dd-muted truncate leading-relaxed">
-                          {chat.lastSenderId === user?.id && <span className="text-orange-400/80 mr-0.5">Você:</span>}
+                          {chat.lastSenderId === user?.id && (
+                            <span className="text-orange-400/80 mr-0.5">Você:</span>
+                          )}
                           {chat.lastMessage || "Nenhuma mensagem enviada."}
                         </p>
                       </div>
@@ -386,8 +447,12 @@ export default function MessagesPage() {
                     </div>
                   )}
                   <div>
-                    <h3 className="text-xs font-black text-dd-text">@{activeChat.partner.username}</h3>
-                    <p className="text-[9.5px] text-dd-muted font-bold tracking-wide mt-0.5">Ativo recentemente</p>
+                    <h3 className="text-xs font-black text-dd-text">
+                      @{activeChat.partner.username}
+                    </h3>
+                    <p className="text-[9.5px] text-dd-muted font-bold tracking-wide mt-0.5">
+                      Ativo recentemente
+                    </p>
                   </div>
                 </div>
 
@@ -400,79 +465,174 @@ export default function MessagesPage() {
                     </div>
                   ) : (
                     <>
-                    {messages.map((msg, index) => {
-                      const isCurrentUser = msg.sender_id === user?.id;
-                      
-                      return (
-                        <motion.div 
-                          key={msg.id}
-                          initial={{ opacity: 0, x: isCurrentUser ? 12 : -12 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.03, duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                          className={`flex flex-col max-w-[75%] space-y-1 ${
-                            isCurrentUser ? "ml-auto items-end" : "mr-auto items-start"
-                          }`}
-                        >
-                          <div 
-                            className={`rounded-2xl px-4 py-2 text-xs leading-relaxed font-semibold shadow-sm ${
-                              isCurrentUser 
-                                ? "bg-orange-500 text-white rounded-br-none" 
-                                : "bg-dd-surface text-dd-text rounded-bl-none border border-dd-border/60"
+                      {messages.map((msg, index) => {
+                        const isCurrentUser = msg.sender_id === user?.id;
+
+                        return (
+                          <motion.div
+                            key={msg.id}
+                            initial={{ opacity: 0, x: isCurrentUser ? 12 : -12 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{
+                              delay: index * 0.03,
+                              duration: 0.2,
+                              ease: [0.22, 1, 0.36, 1],
+                            }}
+                            className={`flex flex-col max-w-[75%] space-y-1 ${
+                              isCurrentUser ? "ml-auto items-end" : "mr-auto items-start"
                             }`}
                           >
-                            <p className="break-words whitespace-pre-wrap">{msg.content}</p>
-                          </div>
-                          <span className="text-[9px] text-dd-muted px-1.5 font-medium">
-                            {formatMessageTime(msg.created_at)}
-                          </span>
-                        </motion.div>
-                      );
-                    })}
-                    {showTypingPreview && <TypingIndicator username={activeChat.partner.username} />}
+                            <div
+                              className={`rounded-2xl px-4 py-2 text-xs leading-relaxed font-semibold shadow-sm ${
+                                isCurrentUser
+                                  ? "bg-orange-500 text-white rounded-br-none"
+                                  : "bg-dd-surface text-dd-text rounded-bl-none border border-dd-border/60"
+                              }`}
+                            >
+                              {msg.image_url && (
+                                <img
+                                  src={msg.image_url}
+                                  alt="Anexo"
+                                  className={`rounded-xl object-cover max-h-48 max-w-full ${msg.content ? "mb-2" : ""}`}
+                                />
+                              )}
+                              {msg.content && (
+                                <p className="break-words whitespace-pre-wrap">{msg.content}</p>
+                              )}
+                            </div>
+                            <span className="text-[9px] text-dd-muted px-1.5 font-medium">
+                              {formatMessageTime(msg.created_at)}
+                            </span>
+                          </motion.div>
+                        );
+                      })}
+                      {showTypingPreview && (
+                        <TypingIndicator username={activeChat.partner.username} />
+                      )}
                     </>
                   )}
                   <div ref={messagesEndRef} />
                 </div>
 
                 {/* Messages Input Bar */}
-                <div className="p-4 border-t border-dd-border/60 bg-dd-bg">
-                  <form onSubmit={handleSendMessage} className="flex items-center gap-3">
-                    <button 
-                      type="button" 
-                      className="p-2 text-dd-muted hover:text-dd-text rounded-full transition-colors shrink-0"
-                    >
-                      <ImageIcon className="w-4.5 h-4.5" />
-                    </button>
-                    <button 
-                      type="button" 
-                      className="p-2 text-dd-muted hover:text-dd-text rounded-full transition-colors shrink-0"
-                    >
-                      <Smile className="w-4.5 h-4.5" />
-                    </button>
-                    
-                    <input
-                      type="text"
-                      placeholder="Enviar uma mensagem..."
-                      value={newMessageText}
-                      onChange={(e) => setNewMessageText(e.target.value)}
-                      className="flex-1 rounded-full bg-dd-surface/80 border border-transparent focus:border-orange-500/50 focus:bg-dd-bg py-2.5 px-4 text-xs font-semibold text-dd-text placeholder-dd-muted/65 focus:outline-none transition-colors"
-                    />
-                    
-                    <button
-                      type="submit"
-                      disabled={!newMessageText.trim()}
-                      className="p-2.5 bg-orange-500 text-white rounded-full transition-all shrink-0 hover:bg-orange-600 disabled:opacity-50 disabled:bg-dd-surface disabled:text-dd-muted active:scale-95 cursor-pointer"
-                    >
-                      <Send className="w-4 h-4" />
-                    </button>
-                  </form>
+                <div className="border-t border-dd-border/60 bg-dd-bg flex flex-col">
+                  {/* Image Preview Area */}
+                  {messageImage && (
+                    <div className="p-3 pb-0">
+                      <div className="relative inline-block">
+                        <img
+                          src={messageImage}
+                          alt="Anexo"
+                          className="h-20 rounded-xl object-cover border border-dd-border shadow-sm"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setMessageImage("")}
+                          className="absolute -top-2 -right-2 p-1 bg-dd-surface border border-dd-border rounded-full text-dd-text hover:text-red-400 transition-colors shadow-md cursor-pointer"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="p-4">
+                    <form onSubmit={handleSendMessage} className="flex items-center gap-3">
+                      <div className="relative">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                          id="dm-image-upload"
+                          disabled={uploadingImage}
+                        />
+                        <label
+                          htmlFor="dm-image-upload"
+                          className={`p-2 rounded-full transition-colors shrink-0 cursor-pointer flex items-center justify-center ${
+                            uploadingImage
+                              ? "text-orange-500 animate-pulse bg-orange-500/10"
+                              : "text-dd-muted hover:text-dd-text"
+                          }`}
+                        >
+                          <ImageIcon className="w-4.5 h-4.5" />
+                        </label>
+                      </div>
+                      <div className="relative" ref={emojiPickerRef}>
+                        <button
+                          type="button"
+                          onClick={() => setEmojiPanelOpen(!emojiPanelOpen)}
+                          className={`p-2 rounded-full transition-colors shrink-0 ${
+                            emojiPanelOpen
+                              ? "bg-orange-500/15 text-orange-400"
+                              : "text-dd-muted hover:text-dd-text"
+                          }`}
+                        >
+                          <Smile className="w-4.5 h-4.5" />
+                        </button>
+                        <AnimatePresence>
+                          {emojiPanelOpen && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: 10 }}
+                              transition={{ duration: 0.2 }}
+                              className="absolute left-0 bottom-full mb-2 z-[100] w-72 rounded-xl border border-dd-border/80 bg-dd-surface/95 backdrop-blur-md p-3 shadow-2xl"
+                            >
+                              <p className="text-[10px] font-bold uppercase tracking-wider text-dd-muted mb-2">
+                                Emojis
+                              </p>
+                              <div className="space-y-3 max-h-52 overflow-y-auto">
+                                {EMOJI_CATEGORIES.map((category) => (
+                                  <div key={category.name}>
+                                    <p className="text-[10px] font-bold text-orange-400 mb-1.5">
+                                      {category.name}
+                                    </p>
+                                    <div className="grid grid-cols-6 gap-1">
+                                      {category.emojis.map((emoji) => (
+                                        <button
+                                          key={`${category.name}-${emoji}`}
+                                          type="button"
+                                          onClick={() => insertEmoji(emoji)}
+                                          className="text-lg rounded-lg p-1.5 hover:bg-orange-500/10 transition-colors cursor-pointer"
+                                        >
+                                          {emoji}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+
+                      <input
+                        ref={messageInputRef}
+                        type="text"
+                        placeholder="Enviar uma mensagem..."
+                        value={newMessageText}
+                        onChange={(e) => setNewMessageText(e.target.value)}
+                        className="flex-1 rounded-full bg-dd-surface/80 border border-transparent focus:border-orange-500/50 focus:bg-dd-bg py-2.5 px-4 text-xs font-semibold text-dd-text placeholder-dd-muted/65 focus:outline-none transition-colors"
+                      />
+
+                      <button
+                        type="submit"
+                        disabled={(!newMessageText.trim() && !messageImage) || uploadingImage}
+                        className="p-2.5 bg-orange-500 text-white rounded-full transition-all shrink-0 hover:bg-orange-600 disabled:opacity-50 disabled:bg-dd-surface disabled:text-dd-muted active:scale-95 cursor-pointer"
+                      >
+                        <Send className="w-4 h-4" />
+                      </button>
+                    </form>
+                  </div>
                 </div>
               </>
             ) : (
               // Empty State Screen (Matching image 4)
               <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-5 bg-dd-bg">
                 <EmptyState type="dm" />
-                <button 
+                <button
                   onClick={handleOpenNewChatModal}
                   className="bg-white hover:bg-slate-200 text-black text-xs font-black py-2.5 px-5 rounded-full transition-all shadow-md active:scale-95 cursor-pointer"
                 >
@@ -481,23 +641,22 @@ export default function MessagesPage() {
               </div>
             )}
           </div>
-
         </div>
       </div>
 
       {/* New Chat Selection Modal */}
       {newChatModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div 
+          <div
             className="fixed inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setNewChatModalOpen(false)}
           />
-          
+
           <div className="relative w-full max-w-md bg-dd-surface border border-dd-border rounded-2xl shadow-2xl overflow-hidden z-10 animate-scale-up font-sans flex flex-col max-h-[80vh]">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-dd-border">
               <h3 className="font-extrabold text-sm text-dd-text">Iniciar conversa</h3>
-              <button 
+              <button
                 onClick={() => setNewChatModalOpen(false)}
                 className="p-1 text-dd-muted hover:text-dd-text rounded-md transition-colors"
               >
@@ -538,10 +697,10 @@ export default function MessagesPage() {
                     className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-dd-bg text-left transition-colors"
                   >
                     {item.avatar_url ? (
-                      <img 
-                        src={item.avatar_url} 
-                        alt={item.username} 
-                        className="w-9 h-9 rounded-full object-cover border border-dd-border" 
+                      <img
+                        src={item.avatar_url}
+                        alt={item.username}
+                        className="w-9 h-9 rounded-full object-cover border border-dd-border"
                       />
                     ) : (
                       <div className="w-9 h-9 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold border border-orange-500/10">
@@ -550,7 +709,9 @@ export default function MessagesPage() {
                     )}
                     <div>
                       <p className="text-xs font-extrabold text-dd-text">{item.username}</p>
-                      <p className="text-[10px] text-dd-muted font-bold">@{item.username.toLowerCase()}</p>
+                      <p className="text-[10px] text-dd-muted font-bold">
+                        @{item.username.toLowerCase()}
+                      </p>
                     </div>
                   </button>
                 ))

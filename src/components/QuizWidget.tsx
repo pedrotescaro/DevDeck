@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useSoundEffects } from '@/hooks/useSoundEffects';
+import { useState, useEffect } from "react";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 
 interface Quiz {
   id: string;
@@ -18,7 +18,7 @@ interface QuizWidgetProps {
   onAttemptSuccess?: (selectedIndex: number, isCorrect: boolean, xpResult: any) => void;
 }
 
-type QuizState = 'unanswered' | 'correct' | 'incorrect';
+type QuizState = "unanswered" | "correct" | "incorrect";
 
 export function QuizWidget({
   quiz,
@@ -28,28 +28,34 @@ export function QuizWidget({
   onAttemptSuccess,
 }: QuizWidgetProps) {
   const [state, setState] = useState<QuizState>(
-    attempted
-      ? userAnswer === quiz.correct_index
-        ? 'correct'
-        : 'incorrect'
-      : 'unanswered'
+    attempted ? (userAnswer === quiz.correct_index ? "correct" : "incorrect") : "unanswered"
   );
-  const [soundEnabled, setSoundEnabled] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
   useEffect(() => {
-    setSoundEnabled(localStorage.getItem('devdeck-sound') === 'true');
+    const updateSoundState = () => {
+      setSoundEnabled(localStorage.getItem("devdeck-sound") !== "false");
+    };
+
+    updateSoundState();
+
+    window.addEventListener("storage", updateSoundState);
+    window.addEventListener("devdeck-sound-changed", updateSoundState);
+
+    return () => {
+      window.removeEventListener("storage", updateSoundState);
+      window.removeEventListener("devdeck-sound-changed", updateSoundState);
+    };
   }, []);
 
   const { playSound } = useSoundEffects(soundEnabled);
 
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(
-    userAnswer ?? null
-  );
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(userAnswer ?? null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleSelect = async (index: number) => {
-    if (state !== 'unanswered' || submitting) return;
+    if (state !== "unanswered" || submitting) return;
 
     setSelectedIndex(index);
     setSubmitting(true);
@@ -57,25 +63,25 @@ export function QuizWidget({
 
     try {
       const res = await fetch(`/api/quiz/${quiz.id}/attempt`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ selected_index: index }),
       });
 
       if (!res.ok) {
-        throw new Error('Failed to submit quiz attempt');
+        throw new Error("Failed to submit quiz attempt");
       }
 
       const data = await res.json();
       const isCorrect = index === quiz.correct_index;
-      setState(isCorrect ? 'correct' : 'incorrect');
-      playSound(isCorrect ? 'quiz_correct' : 'quiz_incorrect');
+      setState(isCorrect ? "correct" : "incorrect");
+      playSound(isCorrect ? "quiz_correct" : "quiz_incorrect");
       if (onAttemptSuccess) {
         onAttemptSuccess(index, isCorrect, data.xpResult);
       }
     } catch {
       setSelectedIndex(null);
-      setSubmitError('Nao deu para registrar sua resposta agora. Tente novamente.');
+      setSubmitError("Nao deu para registrar sua resposta agora. Tente novamente.");
       setSubmitting(false);
       return;
     }
@@ -84,10 +90,9 @@ export function QuizWidget({
   };
 
   const getOptionClasses = (index: number) => {
-    const base =
-      'w-full text-left px-4 py-3 rounded-lg border text-sm transition-colors';
+    const base = "w-full text-left px-4 py-3 rounded-lg border text-sm transition-colors";
 
-    if (state === 'unanswered') {
+    if (state === "unanswered") {
       if (selectedIndex === index && submitting) {
         return `${base} border-orange-500/50 bg-orange-500/10 text-dd-text`;
       }
@@ -98,7 +103,7 @@ export function QuizWidget({
     if (index === quiz.correct_index) {
       return `${base} border-dd-green/50 bg-dd-green/10 text-dd-green`;
     }
-    if (index === selectedIndex && state === 'incorrect') {
+    if (index === selectedIndex && state === "incorrect") {
       return `${base} border-red-500/50 bg-red-500/10 text-red-400`;
     }
     return `${base} border-dd-border bg-dd-surface text-dd-muted opacity-60`;
@@ -107,9 +112,10 @@ export function QuizWidget({
   return (
     <div
       className={`bg-dd-card border border-orange-500/30 rounded-xl p-5 ${
-        state === 'unanswered' ? 'dd-glow-ring' : ''
-      } ${state === 'correct' ? 'dd-correct-flash' : ''
-      } ${state === 'incorrect' ? 'dd-shake-error' : ''}`}
+        state === "unanswered" ? "dd-glow-ring" : ""
+      } ${
+        state === "correct" ? "dd-correct-flash" : ""
+      } ${state === "incorrect" ? "dd-shake-error" : ""}`}
     >
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
@@ -143,25 +149,23 @@ export function QuizWidget({
           <button
             key={index}
             onClick={() => handleSelect(index)}
-            disabled={state !== 'unanswered' || submitting}
+            disabled={state !== "unanswered" || submitting}
             className={getOptionClasses(index)}
           >
             <span className="flex items-center gap-3">
               <span
                 className={`w-6 h-6 rounded-full border flex items-center justify-center text-xs font-medium shrink-0 ${
-                  state !== 'unanswered' && index === quiz.correct_index
-                    ? 'border-dd-green text-dd-green'
-                    : state !== 'unanswered' &&
-                        index === selectedIndex &&
-                        state === 'incorrect'
-                      ? 'border-red-500 text-red-400'
-                      : 'border-dd-border text-dd-muted'
+                  state !== "unanswered" && index === quiz.correct_index
+                    ? "border-dd-green text-dd-green"
+                    : state !== "unanswered" && index === selectedIndex && state === "incorrect"
+                      ? "border-red-500 text-red-400"
+                      : "border-dd-border text-dd-muted"
                 }`}
               >
                 {String.fromCharCode(65 + index)}
               </span>
               <span>{option}</span>
-              {state !== 'unanswered' && index === quiz.correct_index && (
+              {state !== "unanswered" && index === quiz.correct_index && (
                 <svg
                   width="16"
                   height="16"
@@ -174,7 +178,7 @@ export function QuizWidget({
                   <path d="M20 6L9 17l-5-5" />
                 </svg>
               )}
-              {state === 'incorrect' && index === selectedIndex && (
+              {state === "incorrect" && index === selectedIndex && (
                 <svg
                   width="16"
                   height="16"
@@ -192,14 +196,10 @@ export function QuizWidget({
         ))}
       </div>
 
-      {submitError && (
-        <div className="mt-4 text-xs font-semibold text-red-400">
-          {submitError}
-        </div>
-      )}
+      {submitError && <div className="mt-4 text-xs font-semibold text-red-400">{submitError}</div>}
 
       {/* Feedback */}
-      {state === 'correct' && (
+      {state === "correct" && (
         <div className="mt-4 flex items-center gap-2 text-dd-green text-sm">
           <svg
             width="16"
@@ -214,9 +214,9 @@ export function QuizWidget({
           Correto! +15 XP
         </div>
       )}
-      {state === 'incorrect' && (
+      {state === "incorrect" && (
         <div className="mt-4 text-red-400 text-sm">
-          Incorreto. A resposta certa era a opcao{' '}
+          Incorreto. A resposta certa era a opcao{" "}
           <strong>{String.fromCharCode(65 + quiz.correct_index)}</strong>.
         </div>
       )}

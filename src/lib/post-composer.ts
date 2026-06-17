@@ -46,7 +46,7 @@ export const QUICK_LOCATIONS = [
 ];
 
 export function insertAtCursor(
-  textarea: HTMLTextAreaElement | null,
+  textarea: HTMLTextAreaElement | HTMLInputElement | null,
   text: string,
   currentValue: string,
   setValue: (value: string) => void

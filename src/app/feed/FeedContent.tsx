@@ -54,6 +54,7 @@ import {
   Flag,
   Heart,
   BarChart2,
+  ChevronDown,
 } from "lucide-react";
 
 interface LanguageTrail {
@@ -118,6 +119,8 @@ export function FeedContent({
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"feed" | "quizzes" | "duels" | "ranking">("feed");
   const [feedFilter, setFeedFilter] = useState<"for-you" | "following">("for-you");
+  const [followingSort, setFollowingSort] = useState<"recent" | "popular">("recent");
+  const [showFollowingSortMenu, setShowFollowingSortMenu] = useState(false);
   const [posts, setPosts] = useState<any[]>(initialPosts);
   const [duels, setDuels] = useState<any[]>(initialDuels);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
@@ -162,10 +165,24 @@ export function FeedContent({
   const [firstPostToastVisible, setFirstPostToastVisible] = useState(false);
   const [feedError, setFeedError] = useState<string | null>(null);
 
-  const [soundEnabled, setSoundEnabled] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+
   useEffect(() => {
-    setSoundEnabled(localStorage.getItem("devdeck-sound") === "true");
+    const updateSoundState = () => {
+      setSoundEnabled(localStorage.getItem("devdeck-sound") !== "false");
+    };
+
+    updateSoundState();
+
+    window.addEventListener("storage", updateSoundState);
+    window.addEventListener("devdeck-sound-changed", updateSoundState);
+
+    return () => {
+      window.removeEventListener("storage", updateSoundState);
+      window.removeEventListener("devdeck-sound-changed", updateSoundState);
+    };
   }, []);
+
   const { playSound } = useSoundEffects(soundEnabled);
 
   // Daily Quiz state
@@ -227,7 +244,7 @@ export function FeedContent({
           try {
             const url =
               feedFilter === "following"
-                ? `/api/posts?filter=following&limit=${FEED_PAGE_SIZE}&useCursor=true`
+                ? `/api/posts?filter=following&sort=${followingSort}&limit=${FEED_PAGE_SIZE}&useCursor=true`
                 : `/api/posts?limit=${FEED_PAGE_SIZE}&useCursor=true`;
             const res = await fetch(url);
             if (res.ok) {
@@ -271,7 +288,7 @@ export function FeedContent({
       }
     }, 300);
     return () => clearTimeout(delayDebounce);
-  }, [searchQuery, feedFilter]);
+  }, [searchQuery, feedFilter, followingSort]);
 
   // Carregar posts quando o filtro (Para você / Seguindo) muda
   useEffect(() => {
@@ -280,7 +297,7 @@ export function FeedContent({
       try {
         const url =
           feedFilter === "following"
-            ? `/api/posts?filter=following&limit=${FEED_PAGE_SIZE}&useCursor=true`
+            ? `/api/posts?filter=following&sort=${followingSort}&limit=${FEED_PAGE_SIZE}&useCursor=true`
             : `/api/posts?limit=${FEED_PAGE_SIZE}&useCursor=true`;
         const res = await fetch(url);
         if (res.ok) {
@@ -300,7 +317,7 @@ export function FeedContent({
     if (feedFilter === "following" || (feedFilter === "for-you" && posts !== initialPosts)) {
       fetchFilteredPosts();
     }
-  }, [feedFilter]);
+  }, [feedFilter, followingSort]);
 
   const loadMorePosts = useCallback(async () => {
     if (loadingMore || !hasMore) return;
@@ -312,7 +329,7 @@ export function FeedContent({
       } else {
         url =
           feedFilter === "following"
-            ? `/api/posts?filter=following&useCursor=true&limit=${FEED_PAGE_SIZE}${nextCursor ? `&cursor=${nextCursor}` : ""}`
+            ? `/api/posts?filter=following&sort=${followingSort}&useCursor=true&limit=${FEED_PAGE_SIZE}${nextCursor ? `&cursor=${nextCursor}` : ""}`
             : `/api/posts?useCursor=true&limit=${FEED_PAGE_SIZE}${nextCursor ? `&cursor=${nextCursor}` : ""}`;
       }
       const res = await fetch(url);
@@ -331,7 +348,7 @@ export function FeedContent({
     } finally {
       setLoadingMore(false);
     }
-  }, [loadingMore, hasMore, searchQuery, nextCursor, feedFilter]);
+  }, [loadingMore, hasMore, searchQuery, nextCursor, feedFilter, followingSort]);
 
   const scrollSentinelRef = useInfiniteScroll({
     onLoadMore: loadMorePosts,
@@ -644,7 +661,7 @@ export function FeedContent({
       id: tempId,
       title: titleToSubmit,
       body: postBody,
-      language: postType === "question" ? postLanguage : postLanguage === "" ? null : postLanguage,
+      language: postType === "question" ? postLanguage : null,
       code_snippet: postType === "question" ? postCode || null : null,
       image_url: postType === "discussion" ? postImage || null : null,
       created_at: new Date().toISOString(),
@@ -675,8 +692,7 @@ export function FeedContent({
             replyAudience,
             isSensitive,
           }),
-          language:
-            postType === "question" ? postLanguage : postLanguage === "" ? null : postLanguage,
+          language: postType === "question" ? postLanguage : null,
           code_snippet: postType === "question" ? postCode || null : null,
           image_url: postType === "discussion" ? postImage || null : null,
         }),
@@ -854,6 +870,7 @@ export function FeedContent({
   const handleQuotePost = (post: any) => {
     setQuotePost(post);
     setComposeFocused(true);
+    setPostType("discussion");
     setActiveTab("feed");
     requestAnimationFrame(() => {
       postBodyTextareaRef.current?.focus();
@@ -1036,23 +1053,81 @@ export function FeedContent({
                     />
                   )}
                 </button>
-                <button
-                  onClick={() => setFeedFilter("following")}
-                  className={`relative flex-1 py-3 text-xs font-bold transition-colors cursor-pointer ${
-                    feedFilter === "following"
-                      ? "text-dd-text"
-                      : "text-dd-muted hover:text-dd-text hover:bg-dd-surface/30"
-                  }`}
-                >
-                  Seguindo
+                <div className="relative flex-1 flex">
+                  <button
+                    onClick={() => setFeedFilter("following")}
+                    className={`relative flex-1 py-3 text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
+                      feedFilter === "following"
+                        ? "text-dd-text"
+                        : "text-dd-muted hover:text-dd-text hover:bg-dd-surface/30"
+                    }`}
+                  >
+                    Seguindo
+                    {feedFilter === "following" && (
+                      <span className="text-[10px] text-dd-muted font-normal">
+                        ({followingSort === "recent" ? "Recente" : "Popular"})
+                      </span>
+                    )}
+                    {feedFilter === "following" && (
+                      <motion.div
+                        layoutId="feedTabIndicator"
+                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full"
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      />
+                    )}
+                  </button>
                   {feedFilter === "following" && (
-                    <motion.div
-                      layoutId="feedTabIndicator"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full"
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                    />
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowFollowingSortMenu(!showFollowingSortMenu);
+                      }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full hover:bg-dd-surface/50 text-dd-muted hover:text-dd-text transition-colors z-10 cursor-pointer"
+                    >
+                      <ChevronDown
+                        className={`w-3.5 h-3.5 transition-transform ${showFollowingSortMenu ? "rotate-180" : ""}`}
+                      />
+                    </button>
                   )}
-                </button>
+                  <AnimatePresence>
+                    {showFollowingSortMenu && feedFilter === "following" && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -5 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute top-full right-0 mt-1 w-36 rounded-xl border border-dd-border bg-dd-surface shadow-lg backdrop-blur-xl z-50 overflow-hidden py-1"
+                      >
+                        <button
+                          onClick={() => {
+                            setFollowingSort("recent");
+                            setShowFollowingSortMenu(false);
+                          }}
+                          className={`w-full text-left px-4 py-2.5 text-xs transition-colors cursor-pointer ${
+                            followingSort === "recent"
+                              ? "text-orange-400 font-bold bg-orange-500/5"
+                              : "text-dd-text hover:bg-dd-surface/80"
+                          }`}
+                        >
+                          Recente
+                        </button>
+                        <button
+                          onClick={() => {
+                            setFollowingSort("popular");
+                            setShowFollowingSortMenu(false);
+                          }}
+                          className={`w-full text-left px-4 py-2.5 text-xs transition-colors cursor-pointer ${
+                            followingSort === "popular"
+                              ? "text-orange-400 font-bold bg-orange-500/5"
+                              : "text-dd-text hover:bg-dd-surface/80"
+                          }`}
+                        >
+                          Popular
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
 
               {/* Feed Tab View */}
@@ -1863,57 +1938,6 @@ export function FeedContent({
             {/* COLUNA DIREITA: GamificationWidget (Engajamento e Streak) */}
             {/* ========================================================================= */}
             <aside className="lg:col-span-4 lg:sticky lg:top-6 space-y-6">
-              {/* Controle de Som de Gamefeel */}
-              <div className="flex justify-between items-center bg-dd-surface border border-dd-border rounded-xl p-3 text-xs backdrop-blur-sm shadow-sm select-none">
-                <span className="text-dd-muted font-bold tracking-wide flex items-center gap-2">
-                  {soundEnabled ? (
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      className="text-orange-500 animate-pulse"
-                    >
-                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                      <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
-                    </svg>
-                  ) : (
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      className="text-dd-muted"
-                    >
-                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                      <line x1="23" y1="9" x2="17" y2="15" />
-                      <line x1="17" y1="9" x2="23" y2="15" />
-                    </svg>
-                  )}
-                  Efeitos Sonoros
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const newVal = !soundEnabled;
-                    setSoundEnabled(newVal);
-                    localStorage.setItem("devdeck-sound", String(newVal));
-                  }}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg border text-[10px] font-extrabold uppercase tracking-wider transition-all duration-200 active:scale-[0.97] cursor-pointer",
-                    soundEnabled
-                      ? "bg-orange-500 border-orange-600 text-white shadow-md shadow-orange-500/10 hover:bg-orange-600"
-                      : "bg-dd-surface border-dd-border text-dd-muted hover:text-dd-text hover:bg-dd-border/30"
-                  )}
-                >
-                  {soundEnabled ? "LIGADO" : "DESLIGADO"}
-                </button>
-              </div>
-
               {/* Search Bar */}
               <div className="relative w-full">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -2151,7 +2175,7 @@ export function FeedContent({
                           <span className="text-orange-400 font-bold tracking-tight">
                             DUELO DE CÓDIGO
                           </span>
-                          <LanguageTag language={duel.language} size="sm" />
+                          {duel.language && <LanguageTag language={duel.language} size="sm" />}
                         </div>
                         <h5 className="text-xs font-bold text-dd-text line-clamp-1 leading-snug">
                           {duel.problem_title}

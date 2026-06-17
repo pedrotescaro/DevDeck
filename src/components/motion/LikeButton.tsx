@@ -20,10 +20,22 @@ interface LikeButtonProps {
 export function LikeButton({ count, isActive, onToggle, title }: LikeButtonProps) {
   const [bursting, setBursting] = useState(false);
   const reduced = useReducedMotion();
-  const [soundEnabled, setSoundEnabled] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
   useEffect(() => {
-    setSoundEnabled(localStorage.getItem('devdeck-sound') === 'true');
+    const updateSoundState = () => {
+      setSoundEnabled(localStorage.getItem("devdeck-sound") !== "false");
+    };
+
+    updateSoundState();
+
+    window.addEventListener("storage", updateSoundState);
+    window.addEventListener("devdeck-sound-changed", updateSoundState);
+
+    return () => {
+      window.removeEventListener("storage", updateSoundState);
+      window.removeEventListener("devdeck-sound-changed", updateSoundState);
+    };
   }, []);
 
   const { playSound } = useSoundEffects(soundEnabled);
@@ -35,7 +47,7 @@ export function LikeButton({ count, isActive, onToggle, title }: LikeButtonProps
         setBursting(true);
         setTimeout(() => setBursting(false), 400);
       }
-      playSound('like');
+      playSound("like");
     }
     onToggle();
   };
@@ -55,7 +67,12 @@ export function LikeButton({ count, isActive, onToggle, title }: LikeButtonProps
         whileTap={reduced ? undefined : { scale: [1, 1.35, 1.1, 1] }}
         transition={{ duration: 0.3, times: [0, 0.35, 0.7, 1] }}
       >
-        <Heart className={cn("w-4 h-4 transition-colors", isActive ? "fill-orange-500 text-orange-500" : "text-dd-muted")} />
+        <Heart
+          className={cn(
+            "w-4 h-4 transition-colors",
+            isActive ? "fill-orange-500 text-orange-500" : "text-dd-muted"
+          )}
+        />
         {bursting &&
           PARTICLE_ANGLES.map((deg, i) => (
             <span
@@ -69,10 +86,7 @@ export function LikeButton({ count, isActive, onToggle, title }: LikeButtonProps
             />
           ))}
       </motion.button>
-      <AnimatedCounter
-        value={count}
-        className="px-1 font-semibold text-[10px] text-dd-muted"
-      />
+      <AnimatedCounter value={count} className="px-1 font-semibold text-[10px] text-dd-muted" />
     </div>
   );
 }

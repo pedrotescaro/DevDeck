@@ -14,8 +14,6 @@ import {
   Check,
   X,
   ChevronRight,
-  Volume2,
-  VolumeX,
   Trophy,
   Sparkles,
   ArrowLeft,
@@ -134,6 +132,23 @@ interface TrailsContentProps {
 export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsContentProps) {
   const reduced = useReducedMotion();
   const [soundEnabled, setSoundEnabled] = useState(true);
+
+  useEffect(() => {
+    const updateSoundState = () => {
+      setSoundEnabled(localStorage.getItem("devdeck-sound") !== "false");
+    };
+
+    updateSoundState();
+
+    window.addEventListener("storage", updateSoundState);
+    window.addEventListener("devdeck-sound-changed", updateSoundState);
+
+    return () => {
+      window.removeEventListener("storage", updateSoundState);
+      window.removeEventListener("devdeck-sound-changed", updateSoundState);
+    };
+  }, []);
+
   const { playSound } = useSoundEffects(soundEnabled);
 
   // Estados principais
@@ -237,7 +252,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
 
   const handleLevelClick = (level: TrailLevel, unlocked: boolean) => {
     if (!unlocked) {
-      playSound("post"); // Som de aviso de bloqueado
+      playSound("notification"); // Som de aviso de bloqueado
       alert(
         "Esta fase está bloqueada! Complete pelo menos um exercício da fase anterior para liberá-la."
       );
@@ -328,11 +343,11 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
     const isCorrect = selectedOption === question.correctIndex;
 
     if (isCorrect) {
-      playSound("like"); // Som de acerto
+      playSound("quiz_correct"); // Som de acerto
       setCorrectCount((prev) => prev + 1);
       setXpEarned((prev) => prev + 15);
     } else {
-      playSound("post"); // Som de erro
+      playSound("quiz_incorrect"); // Som de erro
     }
 
     try {
@@ -427,7 +442,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
 
       <div className="flex-grow flex flex-col min-w-0">
         <main className="flex-grow max-w-4xl w-full mx-auto px-4 py-8 pb-36 md:pb-48 flex flex-col min-w-0 space-y-8">
-          {/* Header & Sound Toggle */}
+          {/* Header & Title */}
           <div className="flex items-center justify-between border-b border-dd-border pb-4">
             <div>
               <h1 className="text-dd-text text-xl font-extrabold tracking-tight flex items-center gap-2">
@@ -438,13 +453,6 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                 Complete as lições no formato Duolingo e domine as linguagens de programação.
               </p>
             </div>
-            <button
-              onClick={() => setSoundEnabled(!soundEnabled)}
-              className="p-2 border border-dd-border bg-dd-surface hover:bg-dd-border/50 text-dd-muted hover:text-dd-text rounded-xl transition-all"
-              title={soundEnabled ? "Mutar Sons" : "Ativar Sons"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-            </button>
           </div>
 
           {/* Seletor de Linguagens */}

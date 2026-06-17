@@ -44,3 +44,6 @@ next-env.d.ts
 # agents & scratch files
 .agents/
 /scratch/
+
+# uploads
+/public/uploads/
