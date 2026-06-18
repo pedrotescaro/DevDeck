@@ -33,6 +33,9 @@ yarn-error.log*
 # env files — ignoramos tudo exceto o template versionado
 .env*
 !.env.example
+env.local
+env.local.example
+env.example
 
 # vercel
 .vercel
