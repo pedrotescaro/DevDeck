@@ -231,8 +231,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
   const isLevelUnlocked = (levelIndex: number) => {
     if (levelIndex === 0) return true;
     const prevLevel = TRAILS_DATA[activeLang][levelIndex - 1];
-    // Desbloqueia se acertou pelo menos 1 quiz da fase anterior
-    return prevLevel.questions.some((q) => attempts[q.id] === true);
+    return prevLevel.questions.every((q) => attempts[q.id] === true);
   };
 
   // Nível recomendado (primeira fase incompleta da linguagem atual que esteja desbloqueada)
@@ -254,7 +253,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
     if (!unlocked) {
       playSound('notification'); // Som de aviso de bloqueado
       alert(
-        'Esta fase está bloqueada! Complete pelo menos um exercício da fase anterior para liberá-la.'
+        'Esta fase está bloqueada! Complete todos os exercícios da fase anterior para liberá-la.'
       );
       return;
     }
@@ -334,20 +333,34 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
     setSelectedOption(optionIdx);
   };
 
+  useEffect(() => {
+    if (!activeLevel || !quizModalOpen) return;
+    const question = activeLevel.questions[currentQuestionIndex];
+    if (!question) return;
+
+    if (attempts[question.id] === true) {
+      setAnswered(true);
+      setSelectedOption(question.correctIndex);
+    } else {
+      setAnswered(false);
+      setSelectedOption(null);
+    }
+  }, [currentQuestionIndex, activeLevel, quizModalOpen, attempts]);
+
   const handleCheckAnswer = async () => {
     if (selectedOption === null || answered || !activeLevel) return;
+    const question = activeLevel.questions[currentQuestionIndex];
+    if (attempts[question.id] === true) return;
+
     setAnswered(true);
     setSubmittingAttempt(true);
 
-    const question = activeLevel.questions[currentQuestionIndex];
     const isCorrect = selectedOption === question.correctIndex;
 
     if (isCorrect) {
-      playSound('quiz_correct'); // Som de acerto
-      setCorrectCount((prev) => prev + 1);
-      setXpEarned((prev) => prev + 15);
+      playSound('quiz_correct');
     } else {
-      playSound('quiz_incorrect'); // Som de erro
+      playSound('quiz_incorrect');
     }
 
     try {
@@ -368,6 +381,8 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
 
         // Se ganhou XP
         if (data.xpResult) {
+          setCorrectCount((prev) => prev + 1);
+          setXpEarned((prev) => prev + (data.xpResult.xpEarned ?? 15));
           setUserXp(data.xpResult.newTotalXp);
 
           // Atualizar trilhas de linguagem localmente (inserindo se não existir)
@@ -457,7 +472,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
 
           {/* Seletor de Linguagens */}
           <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-            {['JS', 'TS', 'PYTHON', 'RUST', 'GO'].map((lang) => {
+            {['JS', 'TS', 'PYTHON', 'RUST', 'GO', 'JAVA'].map((lang) => {
               const langCode = lang === 'PYTHON' ? 'PYTHON' : lang;
               const isSelected = activeLang === (lang === 'PYTHON' ? 'PYTHON' : lang);
               const label = lang.toUpperCase();

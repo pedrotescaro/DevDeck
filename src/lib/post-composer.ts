@@ -68,6 +68,21 @@ export function insertAtCursor(
   });
 }
 
+export function insertAtEditor(
+  editor: { insertText: (text: string) => void; focus: () => void } | null,
+  text: string,
+  currentValue: string,
+  setValue: (value: string) => void
+) {
+  if (!editor) {
+    setValue(currentValue + text);
+    return;
+  }
+
+  editor.insertText(text);
+  editor.focus();
+}
+
 export function appendPostExtras(
   body: string,
   extras: {

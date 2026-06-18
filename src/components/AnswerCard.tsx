@@ -7,6 +7,7 @@ import { LikeButton } from '@/components/motion/LikeButton';
 import { BookmarkButton } from '@/components/motion/BookmarkButton';
 import { RepostMenu } from '@/components/motion/RepostMenu';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
+import { MarkdownEditor } from '@/components/MarkdownEditor';
 
 interface AnswerAuthor {
   username: string;
@@ -219,8 +220,8 @@ export function AnswerCard({
         <MarkdownRenderer content={answer.body} compact={false} />
       </div>
 
-      {/* Code snippet */}
-      {answer.code_snippet && (
+      {/* Legacy code snippet fallback */}
+      {answer.code_snippet && !answer.body.includes('```') && (
         <div className="bg-dd-bg rounded-lg p-3 mb-3 overflow-x-auto">
           <pre className="text-dd-text text-xs font-mono whitespace-pre">{answer.code_snippet}</pre>
         </div>
@@ -331,14 +332,12 @@ export function AnswerCard({
             )}
           </div>
           <div className="flex-grow space-y-2">
-            <textarea
+            <MarkdownEditor
               value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-              placeholder={`Responder a @${answer.author.username}...`}
-              className="w-full bg-dd-surface border border-dd-border focus:border-orange-500/50 text-sm rounded-lg p-2.5 text-dd-text placeholder-dd-muted focus:outline-none focus:ring-1 focus:ring-orange-500/30 resize-none h-20"
+              onChange={setReplyText}
               maxLength={280}
-              required
-              autoFocus
+              minHeight="5rem"
+              placeholder={`Responder a @${answer.author.username}...`}
             />
             <div className="flex justify-end gap-2">
               <button

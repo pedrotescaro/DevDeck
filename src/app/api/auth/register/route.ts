@@ -54,7 +54,11 @@ export const POST = apiHandler(async (request) => {
   });
 
   if (authError) {
-    return NextResponse.json({ error: authError.message }, { status: 400 });
+    const message =
+      authError.message === 'fetch failed'
+        ? 'Não foi possível conectar ao Supabase. Verifique sua conexão ou SUPABASE_SSL_INSECURE no .env.local.'
+        : authError.message;
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 
   const authUser = authData.user;

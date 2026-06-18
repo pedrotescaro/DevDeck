@@ -1,0 +1,120 @@
+'use client';
+
+import { NodeViewContent, NodeViewWrapper } from '@tiptap/react';
+import type { NodeViewProps } from '@tiptap/react';
+import { useCallback, useState } from 'react';
+import { Play, Loader2 } from 'lucide-react';
+import { CodeEditor } from '@/components/CodeEditor';
+import { CODE_LANGUAGES, codemirrorLanguageId } from '@/lib/editor/languages';
+import { runCodeInSandbox } from '@/lib/code-runner';
+import { cn } from '@/lib/cn';
+
+export function ExecutableCodeBlockView({
+  node,
+  updateAttributes,
+  selected,
+  editor,
+  getPos,
+}: NodeViewProps) {
+  const language = (node.attrs.language as string) || 'typescript';
+  const [output, setOutput] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [running, setRunning] = useState(false);
+
+  const code = node.textContent;
+
+  const handleCodeChange = useCallback(
+    (nextCode: string) => {
+      if (typeof getPos !== 'function') return;
+      const pos = getPos();
+      if (pos === undefined) return;
+
+      editor
+        .chain()
+        .focus(undefined, { scrollIntoView: false })
+        .command(({ tr }) => {
+          const from = pos + 1;
+          const to = pos + node.nodeSize - 1;
+          if (from > to) return false;
+          tr.insertText(nextCode, from, to);
+          return true;
+        })
+        .run();
+    },
+    [editor, getPos, node.nodeSize]
+  );
+
+  const handleRun = useCallback(async () => {
+    setRunning(true);
+    setOutput(null);
+    setError(null);
+    const result = await runCodeInSandbox(code, language);
+    setOutput(result.output || null);
+    setError(result.error || null);
+    setRunning(false);
+  }, [code, language]);
+
+  return (
+    <NodeViewWrapper
+      className={cn(
+        'notion-code-block my-3 overflow-hidden rounded-xl border bg-dd-bg transition-colors',
+        selected ? 'border-dd-accent/60' : 'border-dd-border'
+      )}
+    >
+      <div className="flex items-center justify-between gap-2 border-b border-dd-border bg-dd-surface/80 px-3 py-2">
+        <select
+          value={language}
+          onChange={(event) => updateAttributes({ language: event.target.value })}
+          className="rounded-md border border-dd-border bg-dd-bg px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-dd-text focus:border-dd-accent/60 focus:outline-none cursor-pointer"
+          contentEditable={false}
+        >
+          {CODE_LANGUAGES.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+
+        <button
+          type="button"
+          onClick={handleRun}
+          disabled={running || !code.trim()}
+          className="inline-flex items-center gap-1.5 rounded-md bg-dd-accent px-2.5 py-1 text-[10px] font-bold text-white transition-colors hover:bg-dd-accent/90 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+          contentEditable={false}
+        >
+          {running ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}
+          Executar
+        </button>
+      </div>
+
+      <div className="notion-code-editor" contentEditable={false}>
+        <CodeEditor
+          value={code}
+          onChange={handleCodeChange}
+          language={codemirrorLanguageId(language)}
+          height="160px"
+        />
+      </div>
+
+      <pre className="sr-only">
+        <NodeViewContent />
+      </pre>
+
+      {(output || error) && (
+        <div
+          className="border-t border-dd-border bg-dd-surface/40 px-3 py-2"
+          contentEditable={false}
+        >
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-dd-muted">
+            Output
+          </p>
+          {error ? (
+            <pre className="whitespace-pre-wrap font-mono text-xs text-red-400">{error}</pre>
+          ) : (
+            <pre className="whitespace-pre-wrap font-mono text-xs text-dd-text">{output}</pre>
+          )}
+        </div>
+      )}
+    </NodeViewWrapper>
+  );
+}

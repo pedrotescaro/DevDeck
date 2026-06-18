@@ -7,8 +7,9 @@ import {
   QUICK_LOCATIONS,
   REPLY_AUDIENCE_OPTIONS,
   ReplyAudience,
-  insertAtCursor,
+  insertAtEditor,
 } from '@/lib/post-composer';
+import type { NotionEditorRef } from '@/components/editor/NotionEditor';
 
 export interface PostComposerExtrasState {
   replyAudience: ReplyAudience;
@@ -24,7 +25,7 @@ export interface PostComposerExtrasState {
 interface PostComposerExtrasProps extends PostComposerExtrasState {
   postBody: string;
   setPostBody: (value: string) => void;
-  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
+  editorRef: React.RefObject<NotionEditorRef | null>;
   section: 'meta' | 'tools';
 }
 
@@ -50,7 +51,7 @@ function useClickOutside(
 export function PostComposerExtras({
   postBody,
   setPostBody,
-  textareaRef,
+  editorRef,
   replyAudience,
   setReplyAudience,
   scheduledAt,
@@ -80,7 +81,7 @@ export function PostComposerExtras({
     REPLY_AUDIENCE_OPTIONS[0].label;
 
   const insertEmoji = (emoji: string) => {
-    insertAtCursor(textareaRef.current, emoji, postBody, setPostBody);
+    insertAtEditor(editorRef.current, emoji, postBody, setPostBody);
   };
 
   const togglePanel = (panel: typeof openPanel) => {

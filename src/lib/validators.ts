@@ -65,9 +65,19 @@ const mentionSchema = z.string().refine(
   { message: 'Máximo de 5 menções por post' }
 );
 
+function deriveTitleFromBody(body: string): string {
+  const plain = body
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/[#*_`~>\[\]()]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const snippet = plain.substring(0, 40).trim();
+  return snippet.length >= 5 ? snippet : 'Discussao Geral';
+}
+
 export const createPostSchema = z
   .object({
-    title: z.string().min(5, 'O título deve ter pelo menos 5 caracteres').max(200).trim(),
+    title: z.string().max(200).trim().optional().nullable(),
     body: z
       .string()
       .min(10, 'O conteúdo deve ter pelo menos 10 caracteres')
@@ -82,6 +92,7 @@ export const createPostSchema = z
   })
   .transform((data) => ({
     ...data,
+    title: data.title?.trim() || deriveTitleFromBody(data.body),
     code: data.code ?? data.code_snippet ?? null,
     type: data.type ?? (data.language ? ('question' as const) : ('discussion' as const)),
   }));

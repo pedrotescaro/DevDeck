@@ -27,7 +27,8 @@ import {
   MoreHorizontal,
 } from 'lucide-react';
 import { PostComposerExtras } from '@/components/PostComposerExtras';
-import { MarkdownEditor } from '@/components/MarkdownEditor';
+import { MarkdownEditor, type NotionEditorRef } from '@/components/MarkdownEditor';
+import { extractPostMetadata } from '@/lib/editor/extract-metadata';
 import { ComposeModal } from '@/components/motion/ComposeModal';
 import { NotificationBellIcon } from '@/components/motion/NotificationBellIcon';
 import { PublishButton, PublishState } from '@/components/motion/PublishButton';
@@ -181,17 +182,13 @@ export function Sidebar({ user }: SidebarProps) {
   };
 
   // Post creation modal state
-  const [postTitle, setPostTitle] = useState('');
   const [postBody, setPostBody] = useState('');
-  const [postLanguage, setPostLanguage] = useState('TS');
-  const [postCode, setPostCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [publishState, setPublishState] = useState<PublishState>('idle');
   const [postError, setPostError] = useState<string | null>(null);
-  const [postType, setPostType] = useState<'question' | 'discussion'>('question');
   const [postImage, setPostImage] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
-  const postBodyTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const postBodyEditorRef = useRef<NotionEditorRef>(null);
   const [replyAudience, setReplyAudience] = useState<ReplyAudience>('everyone');
   const [scheduledAt, setScheduledAt] = useState<string | null>(null);
   const [postLocation, setPostLocation] = useState('');
@@ -279,11 +276,8 @@ export function Sidebar({ user }: SidebarProps) {
   };
 
   const resetCompose = () => {
-    setPostTitle('');
     setPostBody('');
-    setPostCode('');
     setPostImage('');
-    setPostType('question');
     setShowMentionSuggestions(false);
     setPostError(null);
     const resetExtras = resetPostComposerExtras();
@@ -297,14 +291,6 @@ export function Sidebar({ user }: SidebarProps) {
     e.preventDefault();
     if (!postBody.trim()) return;
 
-    const titleToSubmit = postTitle.trim() || postBody.trim().substring(0, 40) || 'Discussão Geral';
-
-    // Client-side validation
-    if (postTitle.trim() && postTitle.trim().length < 5) {
-      setPostError('O título deve ter pelo menos 5 caracteres');
-      return;
-    }
-
     if (postBody.trim().length < 10) {
       setPostError('O conteúdo deve ter pelo menos 10 caracteres');
       return;
@@ -314,22 +300,22 @@ export function Sidebar({ user }: SidebarProps) {
     setPublishState('submitting');
     setPostError(null);
 
+    const postMetadata = extractPostMetadata(postBody);
+
     try {
       const res = await fetch('/api/posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: titleToSubmit,
           body: appendPostExtras(postBody, {
             location: postLocation,
             scheduledAt,
             replyAudience,
             isSensitive,
           }),
-          language:
-            postType === 'question' ? postLanguage : postLanguage === '' ? null : postLanguage,
-          code_snippet: postType === 'question' ? postCode || null : null,
-          image_url: postType === 'discussion' ? postImage || null : null,
+          language: postMetadata.language,
+          code_snippet: null,
+          image_url: postImage || null,
         }),
       });
 
@@ -362,7 +348,7 @@ export function Sidebar({ user }: SidebarProps) {
     setPostError(null);
   };
 
-  const hasDraft = Boolean(postBody.trim() || postCode.trim() || postImage);
+  const hasDraft = Boolean(postBody.trim() || postImage);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -857,17 +843,12 @@ export function Sidebar({ user }: SidebarProps) {
             {/* Textarea Area */}
             <div className="flex-grow min-w-0 space-y-3 relative">
               <MarkdownEditor
-                ref={postBodyTextareaRef}
+                ref={postBodyEditorRef}
                 value={postBody}
                 onChange={handleBodyChange}
-                minRows={4}
-                maxRows={14}
                 maxLength={POST_CHAR_LIMIT}
-                placeholder={
-                  postType === 'question'
-                    ? 'Qual a sua duvida tecnica? Compartilhe seu codigo abaixo...'
-                    : 'O que esta acontecendo? Compartilhe ideias, artigos ou links...'
-                }
+                minHeight="8rem"
+                placeholder="O que esta acontecendo? Digite / para inserir blocos..."
               />
               <div className="flex justify-end">
                 <CharCounter text={postBody} limit={POST_CHAR_LIMIT} />
@@ -882,40 +863,6 @@ export function Sidebar({ user }: SidebarProps) {
                   setShowMentionSuggestions(false);
                 }}
               />
-
-              {/* Support fields for questions */}
-              {postType === 'question' && (
-                <div className="space-y-2 animate-slide-down">
-                  <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-bold text-dd-muted uppercase">
-                      Linguagem da Dúvida:
-                    </span>
-                    <select
-                      value={postLanguage}
-                      onChange={(e) => setPostLanguage(e.target.value)}
-                      className="text-[10px] rounded-lg border border-dd-border bg-dd-surface px-2.5 py-1 text-dd-text focus:border-orange-500/60 focus:outline-none cursor-pointer"
-                    >
-                      <option value="TS">TypeScript</option>
-                      <option value="JS">JavaScript</option>
-                      <option value="PYTHON">Python</option>
-                      <option value="RUST">Rust</option>
-                      <option value="GO">Go</option>
-                      <option value="CPP">C++</option>
-                      <option value="JAVA">Java</option>
-                      <option value="KOTLIN">Kotlin</option>
-                      <option value="SWIFT">Swift</option>
-                    </select>
-                  </div>
-
-                  <textarea
-                    value={postCode}
-                    onChange={(e) => setPostCode(e.target.value)}
-                    rows={3}
-                    placeholder="// Cole seu código ou erro aqui..."
-                    className="w-full font-mono text-[10px] leading-relaxed rounded-lg border border-dd-border bg-dd-surface px-3 py-2 text-dd-muted placeholder-dd-muted/50 focus:border-orange-500/50 focus:outline-none"
-                  />
-                </div>
-              )}
 
               {postImage && (
                 <div className="relative rounded-xl overflow-hidden border border-dd-border max-h-40">
@@ -934,7 +881,7 @@ export function Sidebar({ user }: SidebarProps) {
                 section="meta"
                 postBody={postBody}
                 setPostBody={setPostBody}
-                textareaRef={postBodyTextareaRef}
+                editorRef={postBodyEditorRef}
                 replyAudience={replyAudience}
                 setReplyAudience={setReplyAudience}
                 scheduledAt={scheduledAt}
@@ -975,20 +922,11 @@ export function Sidebar({ user }: SidebarProps) {
                 </svg>
               </label>
 
-              {/* GIF/Toggle Mode */}
-              <button
-                type="button"
-                onClick={() => setPostType(postType === 'question' ? 'discussion' : 'question')}
-                className="rounded-full border border-dd-border bg-dd-bg hover:bg-dd-border/30 hover:text-dd-text px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-dd-muted transition-colors cursor-pointer"
-              >
-                {postType === 'question' ? 'Duvida tecnica +10 XP' : 'Discussao geral +5 XP'}
-              </button>
-
               <PostComposerExtras
                 section="tools"
                 postBody={postBody}
                 setPostBody={setPostBody}
-                textareaRef={postBodyTextareaRef}
+                editorRef={postBodyEditorRef}
                 replyAudience={replyAudience}
                 setReplyAudience={setReplyAudience}
                 scheduledAt={scheduledAt}
@@ -1004,7 +942,7 @@ export function Sidebar({ user }: SidebarProps) {
             <PublishButton
               disabled={!postBody.trim() || uploadingImage || postBody.length >= POST_CHAR_LIMIT}
               state={publishState}
-              xpReward={postType === 'question' ? 10 : 5}
+              xpReward={extractPostMetadata(postBody).language ? 10 : 5}
             />
           </div>
           {postError && <p className="text-[11px] text-red-400 font-medium">{postError}</p>}

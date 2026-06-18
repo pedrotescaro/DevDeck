@@ -6,7 +6,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { LanguageTag } from '@/components/LanguageTag';
 import { QuizWidget } from '@/components/QuizWidget';
 import { AnswerCard } from '@/components/AnswerCard';
-import { CodeEditor } from '@/components/CodeEditor';
+import { MarkdownEditor, type NotionEditorRef } from '@/components/MarkdownEditor';
 import { Footer } from '@/components/Footer';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { Sparkles, MessageSquare, ArrowLeft, Flag, MapPin, X } from 'lucide-react';
@@ -15,6 +15,7 @@ import { BookmarkButton } from '@/components/motion/BookmarkButton';
 import { LikeButton } from '@/components/motion/LikeButton';
 import { PostComposerExtras } from '@/components/PostComposerExtras';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
+import { AuthorAvatar } from '@/components/AuthorAvatar';
 import { ReplyAudience } from '@/lib/post-composer';
 
 interface PostDetailContentProps {
@@ -55,20 +56,17 @@ export function PostDetailContent({
 
   const { playSound } = useSoundEffects(soundEnabled);
   const [answerBody, setAnswerBody] = useState('');
-  const [answerCode, setAnswerCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [toastXp, setToastXp] = useState<{ amount: number; language: string } | null>(null);
 
   // States to match the main post composer extra options
-  const [postType, setPostType] = useState<'question' | 'discussion'>('discussion');
-  const [answerLanguage, setAnswerLanguage] = useState<string>('TS');
   const [replyAudience, setReplyAudience] = useState<ReplyAudience>('everyone');
   const [scheduledAt, setScheduledAt] = useState<string | null>(null);
   const [answerLocation, setAnswerLocation] = useState('');
   const [isSensitive, setIsSensitive] = useState(false);
   const [answerImage, setAnswerImage] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
-  const answerBodyTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const answerBodyEditorRef = useRef<NotionEditorRef>(null);
 
   const [isSaved, setIsSaved] = useState(initialIsSaved);
   const [repostState, setRepostState] = useState({
@@ -279,16 +277,14 @@ export function PostDetailContent({
         },
         body: JSON.stringify({
           body: answerBody,
-          code_snippet: answerCode || null,
+          code_snippet: null,
         }),
       });
 
       if (res.ok) {
         const data = await res.json();
         setAnswerBody('');
-        setAnswerCode('');
         setAnswerImage('');
-        setPostType('discussion');
         setReplyAudience('everyone');
         setScheduledAt(null);
         setAnswerLocation('');
@@ -410,9 +406,11 @@ export function PostDetailContent({
           <article className="bg-dd-surface border border-dd-border rounded-xl p-6 space-y-6 backdrop-blur-sm shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dd-border/50 pb-3">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-dd-surface text-dd-text flex items-center justify-center font-bold text-xs select-none">
-                  {post.author.username.slice(0, 2).toUpperCase()}
-                </div>
+                <AuthorAvatar
+                  username={post.author.username}
+                  avatar_url={post.author.avatar_url}
+                  size="md"
+                />
                 <div>
                   <p className="text-xs font-bold text-dd-text">@{post.author.username}</p>
                 </div>
@@ -425,10 +423,6 @@ export function PostDetailContent({
                 <LanguageTag language={post.language} size="sm" />
               </div>
             </div>
-
-            <h1 className="text-xl font-extrabold tracking-tight text-dd-text leading-snug">
-              {post.title}
-            </h1>
 
             <MarkdownRenderer content={post.body} compact={false} />
 
@@ -554,9 +548,7 @@ export function PostDetailContent({
                 type="button"
                 onClick={() => {
                   setAnswerBody('');
-                  setAnswerCode('');
                   setAnswerImage('');
-                  setPostType('discussion');
                   setReplyAudience('everyone');
                   setScheduledAt(null);
                   setAnswerLocation('');
@@ -593,49 +585,14 @@ export function PostDetailContent({
 
               <div className="flex-grow min-w-0 space-y-4">
                 <div className="relative">
-                  <textarea
-                    ref={answerBodyTextareaRef}
+                  <MarkdownEditor
+                    ref={answerBodyEditorRef}
                     value={answerBody}
-                    onChange={(e) => setAnswerBody(e.target.value)}
-                    required
-                    rows={4}
-                    placeholder="O que esta acontecendo? Compartilhe ideias, artigos ou links..."
-                    className="w-full resize-none bg-transparent text-sm text-dd-text placeholder-dd-muted/65 focus:outline-none"
+                    onChange={setAnswerBody}
+                    minHeight="6rem"
+                    placeholder="Escreva sua resposta... Digite / para inserir blocos"
                   />
                 </div>
-
-                {/* Support fields for questions */}
-                {postType === 'question' && (
-                  <div className="space-y-2 animate-slide-down">
-                    <div className="flex items-center gap-3">
-                      <span className="text-[10px] font-bold text-dd-muted uppercase">
-                        Linguagem do Código:
-                      </span>
-                      <select
-                        value={answerLanguage}
-                        onChange={(e) => setAnswerLanguage(e.target.value)}
-                        className="text-[10px] rounded-lg border border-dd-border bg-dd-surface px-2.5 py-1 text-dd-text focus:border-orange-500/60 focus:outline-none cursor-pointer"
-                      >
-                        <option value="TS">TypeScript</option>
-                        <option value="JS">JavaScript</option>
-                        <option value="PYTHON">Python</option>
-                        <option value="RUST">Rust</option>
-                        <option value="GO">Go</option>
-                        <option value="CPP">C++</option>
-                        <option value="JAVA">Java</option>
-                        <option value="KOTLIN">Kotlin</option>
-                        <option value="SWIFT">Swift</option>
-                      </select>
-                    </div>
-
-                    <CodeEditor
-                      value={answerCode}
-                      onChange={setAnswerCode}
-                      language={answerLanguage}
-                      height="180px"
-                    />
-                  </div>
-                )}
 
                 {answerImage && (
                   <div className="relative rounded-xl overflow-hidden border border-dd-border max-h-40">
@@ -654,7 +611,7 @@ export function PostDetailContent({
                   section="meta"
                   postBody={answerBody}
                   setPostBody={setAnswerBody}
-                  textareaRef={answerBodyTextareaRef}
+                  editorRef={answerBodyEditorRef}
                   replyAudience={replyAudience}
                   setReplyAudience={setReplyAudience}
                   scheduledAt={scheduledAt}
@@ -693,22 +650,11 @@ export function PostDetailContent({
                       </svg>
                     </label>
 
-                    {/* Category Toggle button */}
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setPostType(postType === 'question' ? 'discussion' : 'question')
-                      }
-                      className="rounded-full border border-dd-border bg-dd-bg hover:bg-dd-border/30 hover:text-dd-text px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-dd-muted transition-colors cursor-pointer"
-                    >
-                      {postType === 'question' ? 'Duvida tecnica +10 XP' : 'Discussao geral +5 XP'}
-                    </button>
-
                     <PostComposerExtras
                       section="tools"
                       postBody={answerBody}
                       setPostBody={setAnswerBody}
-                      textareaRef={answerBodyTextareaRef}
+                      editorRef={answerBodyEditorRef}
                       replyAudience={replyAudience}
                       setReplyAudience={setReplyAudience}
                       scheduledAt={scheduledAt}

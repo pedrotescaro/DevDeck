@@ -1,0 +1,69 @@
+.notion-editor .ProseMirror {
+  min-height: inherit;
+}
+
+.notion-editor-content {
+  color: var(--color-dd-text, #e8e8ea);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.notion-editor-content.is-editor-empty:first-child::before {
+  color: color-mix(in srgb, var(--color-dd-muted, #8b8b95) 65%, transparent);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.notion-editor-content p {
+  margin: 0.35rem 0;
+}
+
+.notion-editor-content h2 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0.75rem 0 0.35rem;
+}
+
+.notion-editor-content h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0.6rem 0 0.25rem;
+}
+
+.notion-editor-content ul,
+.notion-editor-content ol {
+  margin: 0.35rem 0;
+  padding-left: 1.25rem;
+}
+
+.notion-editor-content code {
+  background: color-mix(in srgb, var(--color-dd-surface, #1f1f24) 90%, transparent);
+  border-radius: 0.25rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8em;
+  padding: 0.1rem 0.35rem;
+}
+
+.notion-editor-content a {
+  color: var(--color-dd-accent, #f97316);
+  text-decoration: underline;
+}
+
+.notion-code-block .cm-editor {
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+.notion-code-block .cm-scroller {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.bubble-toolbar {
+  z-index: 40;
+}
+
+.slash-menu {
+  z-index: 50;
+}

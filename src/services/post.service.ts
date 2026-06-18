@@ -7,6 +7,11 @@ import { NotificationService } from './notification.service';
 import { logger } from '@/lib/logger';
 import { QuizService } from './quiz.service';
 
+function extractCodeFromBody(body: string): string | undefined {
+  const match = body.match(/```[^\n]*\n([\s\S]*?)```/);
+  return match?.[1]?.trim() || undefined;
+}
+
 export const PostService = {
   async create(userId: string, data: CreatePostInput) {
     const { title, body, language, code, image_url, type } = data;
@@ -66,7 +71,13 @@ export const PostService = {
       // We will trigger a quiz generation. In Next.js, we can do it via a service call.
       if (language) {
         try {
-          await QuizService.generateForPost(post.id, language, title, body, code || undefined);
+          await QuizService.generateForPost(
+            post.id,
+            language,
+            title,
+            body,
+            code || extractCodeFromBody(body)
+          );
         } catch (err) {
           logger.error('Failed to generate quiz for post', { postId: post.id, error: String(err) });
         }

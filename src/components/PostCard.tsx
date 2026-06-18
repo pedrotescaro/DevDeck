@@ -9,6 +9,7 @@ import { Flag, Heart, MessageSquare, BarChart2, Trash2 } from 'lucide-react';
 import { ExpandedReactionButton } from './motion/ExpandedReactions';
 import { BookmarkButton } from './motion/BookmarkButton';
 import { RepostMenu } from './motion/RepostMenu';
+import { AuthorAvatar } from '@/components/AuthorAvatar';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { cn } from '@/lib/cn';
 import { formatRelativeTime } from '@/lib/date';
@@ -44,25 +45,6 @@ interface PostCardProps {
   onDelete?: (postId: string) => void;
 }
 
-function AuthorAvatar({ author }: { author: PostAuthor }) {
-  const initials = author.username.slice(0, 2).toUpperCase();
-
-  if (author.avatar_url) {
-    return (
-      <img
-        src={author.avatar_url}
-        alt={author.username}
-        className="w-8 h-8 rounded-full object-cover border border-dd-border"
-      />
-    );
-  }
-
-  return (
-    <div className="w-8 h-8 rounded-full bg-dd-surface text-dd-text border border-dd-border flex items-center justify-center font-bold text-xs select-none">
-      {initials}
-    </div>
-  );
-}
 
 export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
   const router = useRouter();
@@ -299,7 +281,7 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
       <article className="bg-dd-card border border-dd-border rounded-xl p-5 hover:border-orange-500/30 transition-colors relative">
         {/* Header */}
         <div className="flex items-center gap-3 mb-3">
-          <AuthorAvatar author={post.author} />
+          <AuthorAvatar username={post.author.username} avatar_url={post.author.avatar_url} />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-dd-text text-xs font-bold truncate">
@@ -320,11 +302,6 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
           </div>
         </div>
 
-        {/* Title */}
-        <h3 className="text-dd-text font-bold text-sm mb-2 group-hover:text-orange-400 transition-colors leading-snug">
-          {post.title}
-        </h3>
-
         {/* Body preview */}
         <div className="mb-3 text-dd-muted">
           <MarkdownRenderer content={post.body} compact />
@@ -335,7 +312,7 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
           <div className="mt-3 mb-3 relative rounded-xl overflow-hidden border border-dd-border max-h-80 bg-dd-surface/20">
             <img
               src={post.image_url}
-              alt={post.title}
+              alt={`Post de @${post.author.username}`}
               className="w-full h-full object-cover max-h-80"
               onError={(e) => {
                 (e.target as HTMLElement).style.display = 'none';

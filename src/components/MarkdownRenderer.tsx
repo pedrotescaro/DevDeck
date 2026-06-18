@@ -18,6 +18,9 @@ import 'highlight.js/styles/github.css';
 import 'highlight.js/styles/github-dark.css';
 import './MarkdownRenderer.css';
 import { cn } from '@/lib/cn';
+import { Play, Loader2 } from 'lucide-react';
+import { runCodeInSandbox } from '@/lib/code-runner';
+import { isRunnableLanguage } from '@/lib/editor/languages';
 
 interface MarkdownRendererProps {
   content: string;
@@ -193,9 +196,13 @@ function CodeBlock({
 }) {
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [output, setOutput] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [running, setRunning] = useState(false);
   const code = extractText(children).replace(/\n$/, '');
   const language = className?.match(/language-([^\s]+)/)?.[1] ?? 'text';
   const collapsed = compact && !expanded;
+  const canRun = isRunnableLanguage(language);
 
   const handleCopy = async (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
@@ -204,19 +211,43 @@ function CodeBlock({
     window.setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleRun = async (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    setRunning(true);
+    setOutput(null);
+    setError(null);
+    const result = await runCodeInSandbox(code, language);
+    setOutput(result.output || null);
+    setError(result.error || null);
+    setRunning(false);
+  };
+
   return (
     <div className="my-3 overflow-hidden rounded-lg border border-dd-border bg-dd-bg">
       <div className="flex items-center justify-between gap-3 border-b border-dd-border bg-dd-surface px-3 py-2">
         <span className="truncate font-mono text-[10px] font-bold uppercase tracking-wider text-dd-muted">
           {language}
         </span>
-        <button
-          type="button"
-          onClick={handleCopy}
-          className="shrink-0 rounded-md border border-dd-border bg-dd-bg px-2.5 py-1 text-[10px] font-bold text-dd-muted transition-colors hover:border-dd-accent hover:text-dd-accent cursor-pointer"
-        >
-          {copied ? 'Copiado' : 'Copiar'}
-        </button>
+        <div className="flex items-center gap-2">
+          {canRun && (
+            <button
+              type="button"
+              onClick={handleRun}
+              disabled={running}
+              className="inline-flex shrink-0 items-center gap-1 rounded-md bg-dd-accent px-2.5 py-1 text-[10px] font-bold text-white transition-colors hover:bg-dd-accent/90 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+            >
+              {running ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}
+              Executar
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="shrink-0 rounded-md border border-dd-border bg-dd-bg px-2.5 py-1 text-[10px] font-bold text-dd-muted transition-colors hover:border-dd-accent hover:text-dd-accent cursor-pointer"
+          >
+            {copied ? 'Copiado' : 'Copiar'}
+          </button>
+        </div>
       </div>
 
       <div className="relative">
@@ -244,6 +275,17 @@ function CodeBlock({
           </div>
         )}
       </div>
+
+      {(output || error) && (
+        <div className="border-t border-dd-border bg-dd-surface/40 px-3 py-2">
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-dd-muted">Output</p>
+          {error ? (
+            <pre className="whitespace-pre-wrap font-mono text-xs text-red-400">{error}</pre>
+          ) : (
+            <pre className="whitespace-pre-wrap font-mono text-xs text-dd-text">{output}</pre>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -12,7 +12,9 @@ import { LanguageTag } from '@/components/LanguageTag';
 import { Footer } from '@/components/Footer';
 import { BadgeEmblem } from '@/components/BadgeGrid';
 import { PostComposerExtras } from '@/components/PostComposerExtras';
-import { MarkdownEditor } from '@/components/MarkdownEditor';
+import { MarkdownEditor, type NotionEditorRef } from '@/components/MarkdownEditor';
+import { AuthorAvatar } from '@/components/AuthorAvatar';
+import { extractPostMetadata } from '@/lib/editor/extract-metadata';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { appendPostExtras, ReplyAudience, resetPostComposerExtras } from '@/lib/post-composer';
 import { PostSkeletonList } from '@/components/motion/PostSkeleton';
@@ -128,10 +130,7 @@ export function FeedContent({
   const [leaderboardLanguage, setLeaderboardLanguage] = useState<string>('GLOBAL');
 
   // Post Form state
-  const [postTitle, setPostTitle] = useState('');
   const [postBody, setPostBody] = useState('');
-  const [postLanguage, setPostLanguage] = useState<string>('TS');
-  const [postCode, setPostCode] = useState('');
   const [publishState, setPublishState] = useState<PublishState>('idle');
   const [composeFocused, setComposeFocused] = useState(false);
   const [postError, setPostError] = useState<string | null>(null);
@@ -149,7 +148,6 @@ export function FeedContent({
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [newPostsCount, setNewPostsCount] = useState(0);
   const FEED_PAGE_SIZE = 10;
-  const [postType, setPostType] = useState<'question' | 'discussion'>('question');
   const [postImage, setPostImage] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -194,7 +192,7 @@ export function FeedContent({
   const [mentionUsers, setMentionUsers] = useState<any[]>([]);
   const [showMentionSuggestions, setShowMentionSuggestions] = useState(false);
   const [focusedInput, setFocusedInput] = useState<'inline' | 'modal' | null>(null);
-  const postBodyTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const postBodyEditorRef = useRef<NotionEditorRef>(null);
   const [replyAudience, setReplyAudience] = useState<ReplyAudience>('everyone');
   const [scheduledAt, setScheduledAt] = useState<string | null>(null);
   const [postLocation, setPostLocation] = useState('');
@@ -652,15 +650,7 @@ export function FeedContent({
     e.preventDefault();
     if (!postBody.trim()) return;
 
-    const titleToSubmit = postTitle.trim() || postBody.trim().substring(0, 40) || 'Discussao Geral';
-
     // Client-side validation
-    if (postTitle.trim() && postTitle.trim().length < 5) {
-      setPostError('O título deve ter pelo menos 5 caracteres');
-      setTimeout(() => setPostError(null), 4000);
-      return;
-    }
-
     if (postBody.trim().length < 10) {
       setPostError('O conteúdo deve ter pelo menos 10 caracteres');
       setTimeout(() => setPostError(null), 4000);
@@ -672,13 +662,15 @@ export function FeedContent({
 
     const isFirstPost = initialPosts.length === 0;
     const tempId = `temp-${Date.now()}`;
+    const postMetadata = extractPostMetadata(postBody);
+
     const optimisticPost = {
       id: tempId,
-      title: titleToSubmit,
+      title: postBody.trim().substring(0, 40) || 'Discussao Geral',
       body: postBody,
-      language: postType === 'question' ? postLanguage : null,
-      code_snippet: postType === 'question' ? postCode || null : null,
-      image_url: postType === 'discussion' ? postImage || null : null,
+      language: postMetadata.language,
+      code_snippet: null,
+      image_url: postImage || null,
       created_at: new Date().toISOString(),
       view_count: 0,
       upvotes: 0,
@@ -700,16 +692,15 @@ export function FeedContent({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: titleToSubmit,
           body: appendPostExtras(postBody, {
             location: postLocation,
             scheduledAt,
             replyAudience,
             isSensitive,
           }),
-          language: postType === 'question' ? postLanguage : null,
-          code_snippet: postType === 'question' ? postCode || null : null,
-          image_url: postType === 'discussion' ? postImage || null : null,
+          language: postMetadata.language,
+          code_snippet: null,
+          image_url: postImage || null,
         }),
       });
 
@@ -732,11 +723,8 @@ export function FeedContent({
               : p
           )
         );
-        setPostTitle('');
         setPostBody('');
-        setPostCode('');
         setPostImage('');
-        setPostType('question');
         setQuotePost(null);
         setComposeFocused(false);
         const resetExtras = resetPostComposerExtras();
@@ -887,10 +875,9 @@ export function FeedContent({
   const handleQuotePost = (post: any) => {
     setQuotePost(post);
     setComposeFocused(true);
-    setPostType('discussion');
     setActiveTab('feed');
     requestAnimationFrame(() => {
-      postBodyTextareaRef.current?.focus();
+      postBodyEditorRef.current?.focus();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   };
@@ -1004,7 +991,7 @@ export function FeedContent({
   const activeDuels = duels.filter((d) => d.status === 'ACTIVE').slice(0, 2);
 
   const charRatio = postBody.length / POST_CHAR_LIMIT;
-  const xpReward = postType === 'question' ? 10 : 5;
+  const xpReward = extractPostMetadata(postBody).language ? 10 : 5;
   const currentLevelBaseXp = (currentLevel - 1) * 1000;
   const currentLevelPercent = Math.min(
     100,
@@ -1176,7 +1163,7 @@ export function FeedContent({
                           transition={springGentle}
                         >
                           <MarkdownEditor
-                            ref={postBodyTextareaRef}
+                            ref={postBodyEditorRef}
                             value={postBody}
                             onChange={(value) => handleBodyChange(value, 'inline')}
                             onFocus={() => setComposeFocused(true)}
@@ -1186,13 +1173,8 @@ export function FeedContent({
                               }
                             }}
                             maxLength={POST_CHAR_LIMIT}
-                            minRows={composeFocused ? 5 : 2}
-                            maxRows={14}
-                            placeholder={
-                              postType === 'question'
-                                ? 'Qual a sua duvida tecnica? Compartilhe o contexto e o codigo abaixo...'
-                                : 'O que esta acontecendo? Compartilhe ideias, artigos ou links...'
-                            }
+                            minHeight={composeFocused ? '8rem' : '2.5rem'}
+                            placeholder="Qual a sua duvida tecnica? Digite / para inserir blocos..."
                           />
                           <div className="absolute bottom-0 right-0">
                             <CharCounter text={postBody} limit={POST_CHAR_LIMIT} />
@@ -1222,11 +1204,8 @@ export function FeedContent({
                                 <X className="w-3.5 h-3.5" />
                               </button>
                             </div>
-                            <p className="line-clamp-2 text-xs font-semibold text-dd-text">
-                              {quotePost.title}
-                            </p>
-                            <p className="mt-1 line-clamp-2 text-xs text-dd-muted">
-                              {quotePost.body}
+                            <p className="line-clamp-2 text-xs text-dd-muted">
+                              {quotePost.body.replace(/```[\s\S]*?```/g, '').substring(0, 120)}
                             </p>
                           </div>
                         )}
@@ -1234,44 +1213,6 @@ export function FeedContent({
                         {postError && (
                           <p className="text-[11px] font-medium text-red-400">{postError}</p>
                         )}
-
-                        <AnimatePresence initial={false}>
-                          {postType === 'question' && (
-                            <motion.div
-                              key="question-compose"
-                              initial={{ opacity: 0, y: -8 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -8 }}
-                              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                              className="space-y-3"
-                            >
-                              <div className="rounded-2xl border border-dd-border bg-dd-bg p-3">
-                                <textarea
-                                  value={postCode}
-                                  onChange={(e) => setPostCode(e.target.value)}
-                                  rows={4}
-                                  placeholder="// Cole seu codigo aqui..."
-                                  className="w-full resize-none bg-transparent font-mono text-xs text-dd-text placeholder-dd-muted focus:outline-none"
-                                />
-                              </div>
-                              <select
-                                value={postLanguage}
-                                onChange={(e) => setPostLanguage(e.target.value)}
-                                className="text-[10px] rounded-lg border border-dd-border bg-dd-bg px-2 py-1 text-dd-text focus:border-orange-500/65 focus:outline-none cursor-pointer font-medium"
-                              >
-                                <option value="TS">TypeScript</option>
-                                <option value="JS">JavaScript</option>
-                                <option value="PYTHON">Python</option>
-                                <option value="RUST">Rust</option>
-                                <option value="GO">Go</option>
-                                <option value="CPP">C++</option>
-                                <option value="JAVA">Java</option>
-                                <option value="KOTLIN">Kotlin</option>
-                                <option value="SWIFT">Swift</option>
-                              </select>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
 
                         {postImage && (
                           <div className="relative rounded-xl overflow-hidden border border-dd-border max-h-60 bg-dd-bg">
@@ -1294,7 +1235,7 @@ export function FeedContent({
                           section="meta"
                           postBody={postBody}
                           setPostBody={setPostBody}
-                          textareaRef={postBodyTextareaRef}
+                          editorRef={postBodyEditorRef}
                           replyAudience={replyAudience}
                           setReplyAudience={setReplyAudience}
                           scheduledAt={scheduledAt}
@@ -1332,23 +1273,11 @@ export function FeedContent({
                               </label>
                             </div>
 
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setPostType(postType === 'question' ? 'discussion' : 'question')
-                              }
-                              className="dd-pill-glide rounded-full border border-dd-border bg-dd-bg hover:bg-dd-border/30 hover:text-dd-text px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-dd-muted transition-colors cursor-pointer"
-                            >
-                              {postType === 'question'
-                                ? 'Duvida tecnica +10 XP'
-                                : 'Discussao geral +5 XP'}
-                            </button>
-
                             <PostComposerExtras
                               section="tools"
                               postBody={postBody}
                               setPostBody={setPostBody}
-                              textareaRef={postBodyTextareaRef}
+                              editorRef={postBodyEditorRef}
                               replyAudience={replyAudience}
                               setReplyAudience={setReplyAudience}
                               scheduledAt={scheduledAt}
@@ -1418,9 +1347,10 @@ export function FeedContent({
                               >
                                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dd-border/50 pb-3">
                                   <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-dd-surface text-dd-text flex items-center justify-center font-bold text-xs select-none">
-                                      {post.author.username.slice(0, 2).toUpperCase()}
-                                    </div>
+                                    <AuthorAvatar
+                                      username={post.author.username}
+                                      avatar_url={post.author.avatar_url}
+                                    />
                                     <div>
                                       <div className="flex items-center gap-1.5">
                                         <Link
@@ -1497,21 +1427,17 @@ export function FeedContent({
 
                                 <div className="space-y-3">
                                   <Link href={`/post/${post.id}`} className="block">
-                                    <h2 className="text-sm font-bold text-dd-text hover:text-orange-400 transition-colors leading-snug">
-                                      {highlightMatches(post.title, searchQuery)}
-                                    </h2>
+                                    <MarkdownRenderer content={post.body} compact />
                                   </Link>
-                                  <MarkdownRenderer content={post.body} compact />
 
                                   {post.quoted_post && (
                                     <div className="rounded-2xl border border-dd-border bg-dd-bg/50 p-3">
                                       <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-dd-muted">
                                         Citando @{post.quoted_post.author.username}
                                       </p>
-                                      <p className="mt-2 text-xs font-semibold text-dd-text">
-                                        {post.quoted_post.title}
+                                      <p className="mt-2 text-xs text-dd-muted line-clamp-2">
+                                        {post.quoted_post.body.replace(/```[\s\S]*?```/g, '').substring(0, 120)}
                                       </p>
-                                      <MarkdownRenderer content={post.quoted_post.body} compact />
                                     </div>
                                   )}
 
@@ -1519,7 +1445,7 @@ export function FeedContent({
                                     <div className="relative rounded-xl overflow-hidden border border-dd-border max-h-80 bg-dd-surface/20">
                                       <img
                                         src={post.image_url}
-                                        alt={post.title}
+                                        alt={`Post de @${post.author.username}`}
                                         className="w-full h-full object-cover max-h-80"
                                         onError={(e) => {
                                           (e.target as HTMLElement).style.display = 'none';
@@ -1528,7 +1454,7 @@ export function FeedContent({
                                     </div>
                                   )}
 
-                                  {post.code_snippet && (
+                                  {post.code_snippet && !post.body.includes('```') && (
                                     <div className="rounded-lg border border-dd-border bg-dd-bg p-4 overflow-x-auto max-h-60 shadow-inner">
                                       {highlightCode(post.code_snippet)}
                                     </div>
@@ -2132,7 +2058,9 @@ export function FeedContent({
                         key={post.id}
                         type="button"
                         onClick={() => {
-                          setSearchQuery(post.title);
+                          setSearchQuery(
+                            post.body.replace(/```[\s\S]*?```/g, '').substring(0, 40)
+                          );
                           setActiveTab('feed');
                         }}
                         className="group relative block w-full pl-4 border-l-2 border-orange-500/20 text-left transition-colors hover:border-orange-500"
@@ -2150,7 +2078,7 @@ export function FeedContent({
                             )}
                           </div>
                           <h5 className="text-xs font-bold text-dd-text group-hover:text-orange-400 transition-colors line-clamp-1 leading-snug mt-0.5">
-                            {post.title}
+                            {post.body.replace(/```[\s\S]*?```/g, '').replace(/[#*_`~]/g, '').trim().substring(0, 60) || 'Post'}
                           </h5>
                           <div className="flex items-center gap-2 text-[9px] text-dd-muted mt-0.5">
                             <span>{post.view_count} visualizações</span>
