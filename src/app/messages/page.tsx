@@ -777,12 +777,16 @@ export default function MessagesPage() {
                                   {activeMenuMessageId === msg.id && (
                                     <motion.div
                                       ref={messageMenuRef}
-                                      initial={{ opacity: 0, scale: 0.95, y: index < 2 ? -10 : 10 }}
+                                      initial={{
+                                        opacity: 0,
+                                        scale: 0.95,
+                                        y: index <= 3 ? -10 : 10,
+                                      }}
                                       animate={{ opacity: 1, scale: 1, y: 0 }}
-                                      exit={{ opacity: 0, scale: 0.95, y: index < 2 ? -10 : 10 }}
+                                      exit={{ opacity: 0, scale: 0.95, y: index <= 3 ? -10 : 10 }}
                                       transition={{ duration: 0.15, ease: "easeOut" }}
                                       className={`absolute z-[90] min-w-[230px] bg-dd-surface/95 backdrop-blur-md border border-dd-border/80 rounded-2xl shadow-2xl p-1 flex flex-col gap-0.5 font-sans text-xs ${
-                                        index < 2 ? "top-full mt-2" : "bottom-full mb-2"
+                                        index <= 3 ? "top-0 mt-6" : "bottom-0 mb-6"
                                       } ${isCurrentUser ? "right-0" : "left-0"}`}
                                     >
                                       <button
@@ -854,7 +858,7 @@ export default function MessagesPage() {
                                         className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-dd-text hover:bg-dd-surface-hover/80 transition-colors text-left font-semibold cursor-pointer border-b border-dd-border/30 pb-2.5 mb-1"
                                       >
                                         <Sparkles className="w-3.5 h-3.5 text-orange-400" />
-                                        <span>Perguntar ao Grok</span>
+                                        <span>Perguntar ao Ducky</span>
                                       </button>
                                       <button
                                         type="button"
@@ -1357,7 +1361,7 @@ export default function MessagesPage() {
         </div>
       )}
 
-      {/* Grok AI Modal */}
+      {/* Ducky AI Modal */}
       {grokMessage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
@@ -1368,7 +1372,7 @@ export default function MessagesPage() {
           <div className="relative w-full max-w-md bg-dd-surface border border-dd-border rounded-2xl p-5 shadow-2xl z-10 font-sans">
             <div className="flex items-center gap-2 mb-4 text-orange-400">
               <Sparkles className="w-5 h-5 animate-pulse" />
-              <h3 className="text-sm font-black text-dd-text">Análise do Grok AI</h3>
+              <h3 className="text-sm font-black text-dd-text">Análise do Ducky AI</h3>
             </div>
 
             <div className="bg-dd-bg/40 border border-dd-border/80 rounded-xl p-3.5 text-xs leading-relaxed space-y-3.5">
