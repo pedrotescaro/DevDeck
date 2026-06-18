@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { createPostSchema } from '../validators';
 
 describe('createPostSchema', () => {
-  it('should validate correct post data', () => {
-    const result = createPostSchema.safeParse({
+  it('should validate correct post data', async () => {
+    const result = await createPostSchema.safeParseAsync({
       title: 'Valid Post Title',
       body: 'This is a valid post body with more than 10 characters.',
       language: 'TS',
@@ -12,8 +12,8 @@ describe('createPostSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('should allow optional language', () => {
-    const result = createPostSchema.safeParse({
+  it('should allow optional language', async () => {
+    const result = await createPostSchema.safeParseAsync({
       title: 'Valid Post Title',
       body: 'This is a valid post body with more than 10 characters.',
       image_url: 'https://example.com/image.png',
@@ -21,23 +21,23 @@ describe('createPostSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('should reject too short title', () => {
-    const result = createPostSchema.safeParse({
+  it('should reject too short title', async () => {
+    const result = await createPostSchema.safeParseAsync({
       title: 'Shor',
       body: 'This is a valid post body with more than 10 characters.',
     });
     expect(result.success).toBe(false);
   });
 
-  it('should reject too short body', () => {
-    const result = createPostSchema.safeParse({
+  it('should reject too short body', async () => {
+    const result = await createPostSchema.safeParseAsync({
       title: 'Valid Post Title',
       body: 'Short',
     });
     expect(result.success).toBe(false);
   });
 
-  it('should reject invalid image_url formats (http, javascript, data, file)', () => {
+  it('should reject invalid image_url formats (http, javascript, data, file)', async () => {
     const invalidUrls = [
       'http://example.com/image.png',
       'javascript:alert(1)',
@@ -45,7 +45,7 @@ describe('createPostSchema', () => {
       'file:///etc/passwd',
     ];
     for (const url of invalidUrls) {
-      const result = createPostSchema.safeParse({
+      const result = await createPostSchema.safeParseAsync({
         title: 'Valid Post Title',
         body: 'This is a valid post body with more than 10 characters.',
         image_url: url,
@@ -54,10 +54,10 @@ describe('createPostSchema', () => {
     }
   });
 
-  it('should accept valid image_url formats (https, /uploads/)', () => {
+  it('should accept valid image_url formats (https, /uploads/)', async () => {
     const validUrls = ['https://example.com/image.png', '/uploads/image.png', '', null, undefined];
     for (const url of validUrls) {
-      const result = createPostSchema.safeParse({
+      const result = await createPostSchema.safeParseAsync({
         title: 'Valid Post Title',
         body: 'This is a valid post body with more than 10 characters.',
         image_url: url,
@@ -66,32 +66,32 @@ describe('createPostSchema', () => {
     }
   });
 
-  it('should reject more than 5 mentions in the body', () => {
-    const result = createPostSchema.safeParse({
+  it('should reject more than 5 mentions in the body', async () => {
+    const result = await createPostSchema.safeParseAsync({
       title: 'Valid Post Title',
       body: 'Hey @user1 @user2 @user3 @user4 @user5 @user6 check this out!',
     });
     expect(result.success).toBe(false);
   });
 
-  it('should accept 5 or fewer mentions in the body', () => {
-    const result = createPostSchema.safeParse({
+  it('should accept 5 or fewer mentions in the body', async () => {
+    const result = await createPostSchema.safeParseAsync({
       title: 'Valid Post Title',
       body: 'Hey @user1 @user2 @user3 @user4 @user5 check this out!',
     });
     expect(result.success).toBe(true);
   });
 
-  it('should reject empty body', () => {
-    const result = createPostSchema.safeParse({
+  it('should reject empty body', async () => {
+    const result = await createPostSchema.safeParseAsync({
       title: 'Valid Post Title',
       body: '',
     });
     expect(result.success).toBe(false);
   });
 
-  it('should reject http-only image_url that is not localhost or 127.0.0.1', () => {
-    const result = createPostSchema.safeParse({
+  it('should reject http-only image_url that is not localhost or 127.0.0.1', async () => {
+    const result = await createPostSchema.safeParseAsync({
       title: 'Valid Post Title',
       body: 'This is a valid post body with more than 10 characters.',
       image_url: 'http://example.com/image.png',
@@ -99,13 +99,13 @@ describe('createPostSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('should accept http-only image_url for localhost and 127.0.0.1', () => {
-    const localhostResult = createPostSchema.safeParse({
+  it('should accept http-only image_url for localhost and 127.0.0.1', async () => {
+    const localhostResult = await createPostSchema.safeParseAsync({
       title: 'Valid Post Title',
       body: 'This is a valid post body with more than 10 characters.',
       image_url: 'http://localhost/image.png',
     });
-    const loopbackResult = createPostSchema.safeParse({
+    const loopbackResult = await createPostSchema.safeParseAsync({
       title: 'Valid Post Title',
       body: 'This is a valid post body with more than 10 characters.',
       image_url: 'http://127.0.0.1/image.png',

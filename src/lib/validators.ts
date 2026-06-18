@@ -3,9 +3,25 @@ import { Language } from '@prisma/client';
 
 const imageUrlSchema = z
   .string()
-  .refine((val) => val === '' || val.startsWith('https://'), {
-    message: 'Apenas URLs HTTPS são permitidas',
-  })
+  .refine(
+    (val) => {
+      if (!val) return true;
+      if (val.startsWith('https://')) return true;
+      if (val.startsWith('/uploads/')) return true;
+      if (
+        val.startsWith('http://localhost/') ||
+        val.startsWith('http://localhost') ||
+        val.startsWith('http://127.0.0.1/') ||
+        val.startsWith('http://127.0.0.1')
+      ) {
+        return true;
+      }
+      return false;
+    },
+    {
+      message: 'Apenas URLs HTTPS ou caminhos locais autorizados são permitidos',
+    }
+  )
   .refine(
     (val) => {
       if (!val) return true;
@@ -17,6 +33,7 @@ const imageUrlSchema = z
   .refine(
     async (val) => {
       if (!val) return true;
+      if (val.startsWith('/')) return true;
       try {
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), 3000);
@@ -26,7 +43,7 @@ const imageUrlSchema = z
         });
         clearTimeout(id);
         const contentType = res.headers.get('content-type');
-        if (contentType && !contentType.startsWith('image/')) {
+        if (res.ok && contentType && !contentType.startsWith('image/')) {
           return false;
         }
         return true;
@@ -48,19 +65,26 @@ const mentionSchema = z.string().refine(
   { message: 'Máximo de 5 menções por post' }
 );
 
-export const createPostSchema = z.object({
-  title: z.string().min(5, 'O título deve ter pelo menos 5 caracteres').max(200).trim(),
-  body: z
-    .string()
-    .min(10, 'O conteúdo deve ter pelo menos 10 caracteres')
-    .max(5000)
-    .trim()
-    .pipe(mentionSchema),
-  language: z.nativeEnum(Language).optional().nullable(),
-  code: z.string().max(10000).optional().nullable(),
-  image_url: imageUrlSchema,
-  type: z.enum(['question', 'discussion']),
-});
+export const createPostSchema = z
+  .object({
+    title: z.string().min(5, 'O título deve ter pelo menos 5 caracteres').max(200).trim(),
+    body: z
+      .string()
+      .min(10, 'O conteúdo deve ter pelo menos 10 caracteres')
+      .max(5000)
+      .trim()
+      .pipe(mentionSchema),
+    language: z.nativeEnum(Language).optional().nullable(),
+    code: z.string().max(10000).optional().nullable(),
+    code_snippet: z.string().max(10000).optional().nullable(),
+    image_url: imageUrlSchema,
+    type: z.enum(['question', 'discussion']).optional().nullable(),
+  })
+  .transform((data) => ({
+    ...data,
+    code: data.code ?? data.code_snippet ?? null,
+    type: data.type ?? (data.language ? ('question' as const) : ('discussion' as const)),
+  }));
 
 export type CreatePostInput = z.infer<typeof createPostSchema>;
 

@@ -2,31 +2,54 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../route';
 import { getAuthUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { awardXP } from '@/lib/xp';
+import { XpService } from '@/services/xp.service';
 
-vi.mock('@/lib/auth', () => ({
-  getAuthUser: vi.fn(),
-}));
+vi.mock('@/lib/auth', () => {
+  const getAuthUser = vi.fn();
+  return {
+    getAuthUser,
+    requireAuth: vi.fn(async () => {
+      const user = await getAuthUser();
+      if (!user) {
+        const { UnauthorizedError } = await import('@/lib/errors');
+        throw new UnauthorizedError('Não autorizado', 'Autenticação necessária');
+      }
+      return user;
+    }),
+  };
+});
 
-vi.mock('@/lib/prisma', () => ({
-  prisma: {
+vi.mock('@/lib/prisma', () => {
+  const mockPrismaClient = {
     post: {
       create: vi.fn(),
     },
     quiz: {
       create: vi.fn(),
     },
-  },
-}));
+    user: {
+      findMany: vi.fn(() => Promise.resolve([])),
+    },
+    notification: {
+      create: vi.fn(),
+    },
+    $transaction: vi.fn((cb) => cb(mockPrismaClient)),
+  };
+  return {
+    prisma: mockPrismaClient,
+  };
+});
 
-vi.mock('@/lib/xp', () => ({
-  awardXP: vi.fn(() =>
-    Promise.resolve({
-      xpEarned: 10,
-      newXp: 100,
-      newLevel: 1,
-    })
-  ),
+vi.mock('@/services/xp.service', () => ({
+  XpService: {
+    awardXP: vi.fn(() =>
+      Promise.resolve({
+        xpEarned: 10,
+        newXp: 100,
+        newLevel: 1,
+      })
+    ),
+  },
 }));
 
 describe('POST /api/posts integration', () => {
@@ -74,9 +97,9 @@ describe('POST /api/posts integration', () => {
     });
 
     const response = await POST(request);
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(201);
     const json = await response.json();
     expect(json.post.id).toBe('post-123');
-    expect(awardXP).toHaveBeenCalledWith('user-123', 'TS', 10);
+    expect(XpService.awardXP).toHaveBeenCalledWith('user-123', 'TS', 10);
   });
 });
