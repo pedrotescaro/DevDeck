@@ -14,6 +14,94 @@ export interface CreateNotificationInput {
   link?: string;
 }
 
+async function resolveLinkedPostId(resourceType?: string | null, resourceId?: string | null) {
+  if (!resourceId) return null;
+
+  if (resourceType === 'POST') {
+    return resourceId;
+  }
+
+  if (resourceType === 'ANSWER') {
+    const answer = await prisma.answer.findUnique({
+      where: { id: resourceId },
+      select: { post_id: true },
+    });
+
+    return answer?.post_id ?? null;
+  }
+
+  return null;
+}
+
+async function resolveProfileUsername(resourceType?: string | null, resourceId?: string | null) {
+  if (resourceType !== 'PROFILE' || !resourceId) return null;
+
+  const user = await prisma.user.findUnique({
+    where: { id: resourceId },
+    select: { username: true },
+  });
+
+  return user?.username ?? null;
+}
+
+function mapApiType(type: NotificationType) {
+  if (type === 'COMMENT') return 'ANSWER';
+  if (type === 'XP_MILESTONE' || type === 'LEVEL_UP') return 'XP';
+  if (type === 'DUEL_CHALLENGE' || type === 'DUEL_RESULT') return 'DUEL';
+  if (type === 'FOLLOW') return 'SYSTEM';
+  return type;
+}
+
+function getNotificationTitle(type: NotificationType, isMessage: boolean) {
+  if (type === 'FOLLOW') return 'Novo seguidor';
+  if (type === 'LIKE') return 'Novo upvote';
+  if (type === 'REACTION') return 'Nova reacao';
+  if (type === 'COMMENT') return isMessage ? 'Mensagem recebida' : 'Nova resposta no seu post';
+  if (type === 'LEVEL_UP') return 'Subiu de nivel';
+  if (type === 'XP_MILESTONE') return 'Conquista de XP';
+  if (type === 'QUIZ_CORRECT') return 'Quiz correto';
+  if (type === 'DUEL_CHALLENGE') return 'Duelo disponivel';
+  if (type === 'DUEL_RESULT') return 'Resultado do duelo';
+  if (type === 'MENTION') return 'Voce foi mencionado';
+  return 'Notificacao DevDeck';
+}
+
+function getNotificationContent(type: NotificationType, actorName: string, isMessage: boolean) {
+  if (type === 'FOLLOW') return `${actorName} comecou a seguir voce no DevDeck.`;
+  if (type === 'LIKE') return `${actorName} deu um upvote no seu post.`;
+  if (type === 'REACTION') return `${actorName} reagiu ao seu post.`;
+  if (type === 'COMMENT') {
+    return isMessage
+      ? `${actorName} enviou uma mensagem para voce no Bate-papo.`
+      : `${actorName} respondeu a sua pergunta.`;
+  }
+  if (type === 'LEVEL_UP') return 'Parabens, voce subiu de nivel!';
+  if (type === 'QUIZ_CORRECT') return 'Voce acertou um quiz e ganhou XP.';
+  if (type === 'DUEL_CHALLENGE') return 'Ha um novo duelo disponivel para testar suas habilidades.';
+  if (type === 'DUEL_RESULT') return 'O resultado de um duelo foi atualizado.';
+  if (type === 'MENTION') return `${actorName} mencionou voce no DevDeck.`;
+  return 'Voce recebeu uma notificacao.';
+}
+
+function getNotificationLink({
+  isMessage,
+  postId,
+  profileUsername,
+  resourceType,
+}: {
+  isMessage: boolean;
+  postId: string | null;
+  profileUsername: string | null;
+  resourceType?: string | null;
+}) {
+  if (isMessage) return '/messages';
+  if (postId) return `/post/${postId}`;
+  if (resourceType === 'DUEL') return '/duels';
+  if (resourceType === 'FEED') return '/feed';
+  if (profileUsername) return `/profile/${profileUsername}`;
+  return null;
+}
+
 export const NotificationService = {
   async create(data: CreateNotificationInput) {
     return await prisma.notification.create({
@@ -24,9 +112,6 @@ export const NotificationService = {
         resourceId: data.resourceId || null,
         resourceType: data.resourceType || null,
         read: data.read ?? false,
-        title: data.title,
-        content: data.content,
-        link: data.link,
       },
       include: {
         actor: {
@@ -65,36 +150,29 @@ export const NotificationService = {
       },
     });
 
-    // Seed default notifications if user has none and it's the first page
     if (notifications.length === 0 && !cursor) {
       const user = await prisma.user.findUnique({ where: { id: userId } });
+
       if (user) {
         await prisma.notification.createMany({
           data: [
             {
-              userId: userId,
+              userId,
               type: 'XP_MILESTONE',
-              title: 'Bem-vindo ao DevDeck! 🚀',
-              content:
-                'Explore o feed, tire dúvidas com outros programadores e suba no ranking global!',
-              link: '/feed',
+              resourceType: 'FEED',
               read: false,
             },
             {
-              userId: userId,
+              userId,
               type: 'XP_MILESTONE',
-              title: 'Bônus de Cadastro Concedido ⚡',
-              content: 'Você ganhou +100 XP extras por completar seu perfil na plataforma DevDeck.',
-              link: `/profile/${user.username}`,
+              resourceId: user.id,
+              resourceType: 'PROFILE',
               read: false,
             },
             {
-              userId: userId,
+              userId,
               type: 'DUEL_CHALLENGE',
-              title: 'Duelos Disponíveis ⚔️',
-              content:
-                'Vários desenvolvedores criaram duelos na aba Classificação. Aceite um desafio para testar suas habilidades!',
-              link: '/duels',
+              resourceType: 'DUEL',
               read: false,
             },
           ],
@@ -124,12 +202,12 @@ export const NotificationService = {
         let postBody: string | undefined = undefined;
         let upvoters: any[] = [];
 
-        // Check if there is a linked post (e.g. for LIKE or REACTION)
-        const postId =
-          notif.resourceId ||
-          (notif.link && notif.link.startsWith('/post/') ? notif.link.split('/').pop() : null);
+        const [postId, profileUsername] = await Promise.all([
+          resolveLinkedPostId(notif.resourceType, notif.resourceId),
+          resolveProfileUsername(notif.resourceType, notif.resourceId),
+        ]);
 
-        if ((notif.type === 'LIKE' || notif.type === 'REACTION') && postId) {
+        if (postId) {
           try {
             const post = await prisma.post.findUnique({
               where: { id: postId },
@@ -154,60 +232,28 @@ export const NotificationService = {
             if (post) {
               postTitle = post.title;
               postBody = post.body;
-              upvoters = post.votes.map((v) => v.user);
+              upvoters = post.votes.map((vote) => vote.user);
             }
           } catch (err) {
             console.error('Error enhancing notification:', err);
           }
         }
 
-        // Map database fields to the API contract response format
-        let apiType: string = notif.type;
-        if (notif.type === 'COMMENT') apiType = 'ANSWER';
-        else if (notif.type === 'XP_MILESTONE' || notif.type === 'LEVEL_UP') apiType = 'XP';
-        else if (notif.type === 'DUEL_CHALLENGE' || notif.type === 'DUEL_RESULT') apiType = 'DUEL';
-        else if (notif.type === 'FOLLOW') apiType = 'SYSTEM';
-
-        // Provide fallback texts if title/content are not set
-        const title =
-          notif.title ||
-          (notif.type === 'FOLLOW'
-            ? 'Novo Seguidor! 👥'
-            : notif.type === 'LIKE'
-              ? 'Novo Upvote ⚡'
-              : notif.type === 'REACTION'
-                ? 'Nova Reação 🔥'
-                : notif.type === 'COMMENT'
-                  ? 'Nova Resposta no seu Post 💬'
-                  : notif.type === 'LEVEL_UP'
-                    ? 'Subiu de Nível! 🎉'
-                    : notif.type === 'XP_MILESTONE'
-                      ? 'Conquista de XP! ⚡'
-                      : 'Notificação DevDeck');
-
-        const actorName = notif.actor ? `@${notif.actor.username}` : 'Alguém';
-        const content =
-          notif.content ||
-          (notif.type === 'FOLLOW'
-            ? `${actorName} começou a seguir você no DevDeck.`
-            : notif.type === 'LIKE'
-              ? `${actorName} deu um upvote no seu post.`
-              : notif.type === 'REACTION'
-                ? `${actorName} reagiu ao seu post.`
-                : notif.type === 'COMMENT'
-                  ? `${actorName} respondeu à sua pergunta.`
-                  : notif.type === 'LEVEL_UP'
-                    ? 'Parabéns, você subiu de nível!'
-                    : 'Você recebeu uma notificação.');
-
-        const link = notif.link || (postId ? `/post/${postId}` : null);
+        const actorName = notif.actor ? `@${notif.actor.username}` : 'Alguem';
+        const isMessage = notif.resourceType === 'MESSAGE';
+        const link = getNotificationLink({
+          isMessage,
+          postId,
+          profileUsername,
+          resourceType: notif.resourceType,
+        });
 
         return {
           id: notif.id,
           user_id: notif.userId,
-          type: apiType,
-          title,
-          content,
+          type: mapApiType(notif.type),
+          title: getNotificationTitle(notif.type, isMessage),
+          content: getNotificationContent(notif.type, actorName, isMessage),
           link,
           is_read: notif.read,
           created_at: notif.createdAt.toISOString(),
@@ -224,9 +270,8 @@ export const NotificationService = {
       const items = hasNext ? enhancedNotifications.slice(0, limit) : enhancedNotifications;
 
       let nextCursor: string | null = null;
+
       if (hasNext && items.length > 0) {
-        const lastItem = items[items.length - 1];
-        // Re-encode cursor based on original db date
         const originalLastNotif = notifications[items.length - 1];
         nextCursor = encodeCursor(originalLastNotif.createdAt, originalLastNotif.id);
       }

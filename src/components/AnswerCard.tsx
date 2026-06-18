@@ -6,6 +6,7 @@ import { formatRelativeTime } from '@/lib/date';
 import { LikeButton } from '@/components/motion/LikeButton';
 import { BookmarkButton } from '@/components/motion/BookmarkButton';
 import { RepostMenu } from '@/components/motion/RepostMenu';
+import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 
 interface AnswerAuthor {
   username: string;
@@ -214,8 +215,8 @@ export function AnswerCard({
       </div>
 
       {/* Body */}
-      <div className="text-dd-text text-sm leading-relaxed mb-3 whitespace-pre-wrap">
-        {answer.body}
+      <div className="mb-3">
+        <MarkdownRenderer content={answer.body} compact={false} />
       </div>
 
       {/* Code snippet */}

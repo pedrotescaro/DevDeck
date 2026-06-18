@@ -1,0 +1,112 @@
+.dd-markdown .hljs,
+.dd-markdown pre code.hljs {
+  background: transparent;
+  color: var(--color-dd-text);
+}
+
+.dd-markdown pre code.hljs {
+  display: block;
+  overflow-x: visible;
+  padding: 0;
+}
+
+.dd-markdown code.hljs {
+  padding: 0;
+}
+
+.dd-markdown .hljs-doctag,
+.dd-markdown .hljs-keyword,
+.dd-markdown .hljs-meta .hljs-keyword,
+.dd-markdown .hljs-template-tag,
+.dd-markdown .hljs-template-variable,
+.dd-markdown .hljs-type,
+.dd-markdown .hljs-variable.language_ {
+  color: var(--color-dd-accent);
+}
+
+.dd-markdown .hljs-title,
+.dd-markdown .hljs-title.class_,
+.dd-markdown .hljs-title.class_.inherited__,
+.dd-markdown .hljs-title.function_ {
+  color: var(--color-dd-purple);
+}
+
+.dd-markdown .hljs-attr,
+.dd-markdown .hljs-attribute,
+.dd-markdown .hljs-literal,
+.dd-markdown .hljs-meta,
+.dd-markdown .hljs-number,
+.dd-markdown .hljs-operator,
+.dd-markdown .hljs-variable,
+.dd-markdown .hljs-selector-attr,
+.dd-markdown .hljs-selector-class,
+.dd-markdown .hljs-selector-id {
+  color: var(--color-dd-blue);
+}
+
+.dd-markdown .hljs-regexp,
+.dd-markdown .hljs-string,
+.dd-markdown .hljs-meta .hljs-string {
+  color: var(--color-dd-green);
+}
+
+.dd-markdown .hljs-built_in,
+.dd-markdown .hljs-symbol,
+.dd-markdown .hljs-bullet {
+  color: var(--color-dd-amber);
+}
+
+.dd-markdown .hljs-comment,
+.dd-markdown .hljs-code,
+.dd-markdown .hljs-formula {
+  color: var(--color-dd-muted);
+}
+
+.dd-markdown .hljs-name,
+.dd-markdown .hljs-quote,
+.dd-markdown .hljs-selector-tag,
+.dd-markdown .hljs-selector-pseudo,
+.dd-markdown .hljs-addition {
+  color: var(--color-dd-green);
+}
+
+.dd-markdown .hljs-subst,
+.dd-markdown .hljs-emphasis,
+.dd-markdown .hljs-strong {
+  color: var(--color-dd-text);
+}
+
+.dd-markdown .hljs-section {
+  color: var(--color-dd-blue);
+  font-weight: 700;
+}
+
+.dd-markdown .hljs-emphasis {
+  font-style: italic;
+}
+
+.dd-markdown .hljs-strong {
+  font-weight: 700;
+}
+
+.dd-markdown .hljs-addition {
+  background-color: color-mix(in srgb, var(--color-dd-green) 14%, transparent);
+}
+
+.dd-markdown .hljs-deletion {
+  color: var(--color-dd-accent);
+  background-color: color-mix(in srgb, var(--color-dd-accent) 14%, transparent);
+}
+
+.dd-markdown .contains-task-list,
+.dd-markdown .task-list-item {
+  list-style: none;
+}
+
+.dd-markdown .task-list-item {
+  margin-left: -0.25rem;
+}
+
+.dd-markdown .task-list-item input {
+  margin-right: 0.5rem;
+}

@@ -8,6 +8,7 @@ import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { Sidebar } from '@/components/Sidebar';
 import { Footer } from '@/components/Footer';
 import { LanguageTag } from '@/components/LanguageTag';
+import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { BookmarkButton } from '@/components/motion/BookmarkButton';
 import { RepostMenu } from '@/components/motion/RepostMenu';
 import { LikeButton } from '@/components/motion/LikeButton';
@@ -16,7 +17,6 @@ import { AnimatedCounter } from '@/components/motion/AnimatedCounter';
 import { EmptyState } from '@/components/motion/EmptyState';
 import { cn } from '@/lib/cn';
 import { springGentle } from '@/lib/motion';
-import { parseMentions } from '@/lib/mentions';
 import {
   ArrowLeft,
   Search,
@@ -365,11 +365,7 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
                                 {highlightMatches(post.title, searchQuery)}
                               </h2>
                             </Link>
-                            <p className="text-xs text-dd-muted leading-relaxed">
-                              {searchQuery.trim()
-                                ? highlightMatches(post.body, searchQuery)
-                                : parseMentions(post.body)}
-                            </p>
+                            <MarkdownRenderer content={post.body} compact />
 
                             {post.image_url && (
                               <div className="relative rounded-xl overflow-hidden border border-dd-border max-h-80 bg-dd-surface/20">

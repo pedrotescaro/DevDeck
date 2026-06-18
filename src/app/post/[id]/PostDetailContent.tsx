@@ -14,6 +14,7 @@ import { RepostMenu } from '@/components/motion/RepostMenu';
 import { BookmarkButton } from '@/components/motion/BookmarkButton';
 import { LikeButton } from '@/components/motion/LikeButton';
 import { PostComposerExtras } from '@/components/PostComposerExtras';
+import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { ReplyAudience } from '@/lib/post-composer';
 
 interface PostDetailContentProps {
@@ -429,7 +430,7 @@ export function PostDetailContent({
               {post.title}
             </h1>
 
-            <p className="text-xs text-dd-text leading-relaxed whitespace-pre-wrap">{post.body}</p>
+            <MarkdownRenderer content={post.body} compact={false} />
 
             {post.code_snippet && (
               <div className="rounded-lg border border-dd-border bg-dd-bg p-4 overflow-x-auto shadow-inner">

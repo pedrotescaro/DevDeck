@@ -27,6 +27,7 @@ import {
   MoreHorizontal,
 } from 'lucide-react';
 import { PostComposerExtras } from '@/components/PostComposerExtras';
+import { MarkdownEditor } from '@/components/MarkdownEditor';
 import { ComposeModal } from '@/components/motion/ComposeModal';
 import { NotificationBellIcon } from '@/components/motion/NotificationBellIcon';
 import { PublishButton, PublishState } from '@/components/motion/PublishButton';
@@ -855,19 +856,18 @@ export function Sidebar({ user }: SidebarProps) {
 
             {/* Textarea Area */}
             <div className="flex-grow min-w-0 space-y-3 relative">
-              <textarea
+              <MarkdownEditor
                 ref={postBodyTextareaRef}
                 value={postBody}
-                onChange={(e) => handleBodyChange(e.target.value)}
-                required
-                rows={4}
+                onChange={handleBodyChange}
+                minRows={4}
+                maxRows={14}
                 maxLength={POST_CHAR_LIMIT}
                 placeholder={
                   postType === 'question'
                     ? 'Qual a sua duvida tecnica? Compartilhe seu codigo abaixo...'
                     : 'O que esta acontecendo? Compartilhe ideias, artigos ou links...'
                 }
-                className="w-full bg-transparent text-sm text-dd-text placeholder-dd-muted/65 focus:outline-none resize-none"
               />
               <div className="flex justify-end">
                 <CharCounter text={postBody} limit={POST_CHAR_LIMIT} />

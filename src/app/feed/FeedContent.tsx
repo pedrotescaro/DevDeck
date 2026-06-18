@@ -12,6 +12,8 @@ import { LanguageTag } from '@/components/LanguageTag';
 import { Footer } from '@/components/Footer';
 import { BadgeEmblem } from '@/components/BadgeGrid';
 import { PostComposerExtras } from '@/components/PostComposerExtras';
+import { MarkdownEditor } from '@/components/MarkdownEditor';
+import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { appendPostExtras, ReplyAudience, resetPostComposerExtras } from '@/lib/post-composer';
 import { PostSkeletonList } from '@/components/motion/PostSkeleton';
 import { NewPostsPill } from '@/components/motion/NewPostsPill';
@@ -33,7 +35,6 @@ import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { useSearchWithDebounce } from '@/hooks/useSearchWithDebounce';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { Language } from '@prisma/client';
-import { parseMentions } from '@/lib/mentions';
 import {
   Flame,
   Award,
@@ -1174,25 +1175,24 @@ export function FeedContent({
                           animate={composeFocused ? { scale: 1 } : { scale: 1 }}
                           transition={springGentle}
                         >
-                          <textarea
+                          <MarkdownEditor
                             ref={postBodyTextareaRef}
                             value={postBody}
-                            onChange={(e) => handleBodyChange(e.target.value, 'inline')}
+                            onChange={(value) => handleBodyChange(value, 'inline')}
                             onFocus={() => setComposeFocused(true)}
                             onBlur={() => {
                               if (!postBody.trim() && !quotePost) {
                                 setComposeFocused(false);
                               }
                             }}
-                            required
-                            rows={composeFocused ? 5 : 2}
                             maxLength={POST_CHAR_LIMIT}
+                            minRows={composeFocused ? 5 : 2}
+                            maxRows={14}
                             placeholder={
                               postType === 'question'
                                 ? 'Qual a sua duvida tecnica? Compartilhe o contexto e o codigo abaixo...'
                                 : 'O que esta acontecendo? Compartilhe ideias, artigos ou links...'
                             }
-                            className="w-full resize-none rounded-md bg-transparent text-sm text-dd-text placeholder-dd-muted focus:outline-none dd-focus-ring"
                           />
                           <div className="absolute bottom-0 right-0">
                             <CharCounter text={postBody} limit={POST_CHAR_LIMIT} />
@@ -1501,11 +1501,7 @@ export function FeedContent({
                                       {highlightMatches(post.title, searchQuery)}
                                     </h2>
                                   </Link>
-                                  <p className="text-xs text-dd-muted leading-relaxed">
-                                    {searchQuery.trim()
-                                      ? highlightMatches(post.body, searchQuery)
-                                      : parseMentions(post.body)}
-                                  </p>
+                                  <MarkdownRenderer content={post.body} compact />
 
                                   {post.quoted_post && (
                                     <div className="rounded-2xl border border-dd-border bg-dd-bg/50 p-3">
@@ -1515,9 +1511,7 @@ export function FeedContent({
                                       <p className="mt-2 text-xs font-semibold text-dd-text">
                                         {post.quoted_post.title}
                                       </p>
-                                      <p className="mt-1 line-clamp-2 text-xs text-dd-muted">
-                                        {post.quoted_post.body}
-                                      </p>
+                                      <MarkdownRenderer content={post.quoted_post.body} compact />
                                     </div>
                                   )}
 

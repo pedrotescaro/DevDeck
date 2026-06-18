@@ -3,6 +3,7 @@
 import { LanguageTrailBar } from './LanguageTrailBar';
 import { Award, BookOpen, CheckCircle, GraduationCap } from 'lucide-react';
 import { FollowButton } from './motion/FollowButton';
+import { MarkdownRenderer } from './MarkdownRenderer';
 
 interface LanguageTrail {
   language: string;
@@ -90,7 +91,9 @@ export function ProfileHeader({
             </div>
 
             {user.bio ? (
-              <p className="text-dd-muted text-xs leading-relaxed mb-3">{user.bio}</p>
+              <div className="mb-3">
+                <MarkdownRenderer content={user.bio} compact />
+              </div>
             ) : (
               <p className="text-dd-muted text-xs italic mb-3">Sem biografia fornecida.</p>
             )}

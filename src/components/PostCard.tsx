@@ -9,8 +9,8 @@ import { Flag, Heart, MessageSquare, BarChart2, Trash2 } from 'lucide-react';
 import { ExpandedReactionButton } from './motion/ExpandedReactions';
 import { BookmarkButton } from './motion/BookmarkButton';
 import { RepostMenu } from './motion/RepostMenu';
+import { MarkdownRenderer } from './MarkdownRenderer';
 import { cn } from '@/lib/cn';
-import { parseMentions } from '@/lib/mentions';
 import { formatRelativeTime } from '@/lib/date';
 
 interface PostAuthor {
@@ -326,9 +326,9 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
         </h3>
 
         {/* Body preview */}
-        <p className="text-dd-muted text-xs leading-relaxed line-clamp-2 mb-3 font-medium">
-          {parseMentions(post.body)}
-        </p>
+        <div className="mb-3 text-dd-muted">
+          <MarkdownRenderer content={post.body} compact />
+        </div>
 
         {/* Image preview */}
         {post.image_url && (

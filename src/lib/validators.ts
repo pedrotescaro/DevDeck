@@ -89,7 +89,12 @@ export const createPostSchema = z
 export type CreatePostInput = z.infer<typeof createPostSchema>;
 
 export const createAnswerSchema = z.object({
-  body: z.string().min(5, 'A resposta deve ter pelo menos 5 caracteres'),
+  body: z
+    .string()
+    .min(5, 'A resposta deve ter pelo menos 5 caracteres')
+    .max(5000)
+    .trim()
+    .pipe(mentionSchema),
   code_snippet: z.string().optional().nullable(),
 });
 
