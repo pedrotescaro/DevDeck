@@ -1,38 +1,68 @@
 import { z } from 'zod';
 import { Language } from '@prisma/client';
 
-export const createPostSchema = z
-  .object({
-    title: z.string().min(5, 'O título deve ter pelo menos 5 caracteres').max(100),
-    body: z.string().min(10, 'O conteúdo deve ter pelo menos 10 caracteres'),
-    language: z.nativeEnum(Language).optional().nullable(),
-    code_snippet: z.string().optional().nullable(),
-    image_url: z
-      .string()
-      .optional()
-      .nullable()
-      .refine(
-        (val) => {
-          if (!val) return true;
-          if (val.startsWith('https://') || val.startsWith('/uploads/')) return true;
-          if (val.startsWith('http://localhost') || val.startsWith('http://127.0.0.1')) return true;
-          return false;
-        },
-        {
-          message: 'URL de imagem inválida. Deve iniciar com https:// ou /uploads/',
-        }
-      ),
+const imageUrlSchema = z
+  .string()
+  .refine((val) => val === '' || val.startsWith('https://'), {
+    message: 'Apenas URLs HTTPS são permitidas',
   })
   .refine(
-    (data) => {
-      const mentions = data.body.match(/(?<![\w.-])@\w+/g) || [];
-      return mentions.length <= 5;
+    (val) => {
+      if (!val) return true;
+      const blocked = ['javascript:', 'data:', 'file:', 'vbscript:'];
+      return !blocked.some((proto) => val.toLowerCase().startsWith(proto));
     },
-    {
-      message: 'O post não pode conter mais de 5 menções',
-      path: ['body'],
-    }
-  );
+    { message: 'Protocolo não permitido' }
+  )
+  .refine(
+    async (val) => {
+      if (!val) return true;
+      try {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), 3000);
+        const res = await fetch(val, {
+          method: 'HEAD',
+          signal: controller.signal,
+        });
+        clearTimeout(id);
+        const contentType = res.headers.get('content-type');
+        if (contentType && !contentType.startsWith('image/')) {
+          return false;
+        }
+        return true;
+      } catch (err) {
+        // Degrade gracefully on timeout or network issues
+        return true;
+      }
+    },
+    { message: 'A URL deve apontar para uma imagem válida' }
+  )
+  .optional()
+  .nullable();
+
+const mentionSchema = z.string().refine(
+  (body) => {
+    const mentions = body.match(/@[\w-]+/g) || [];
+    return mentions.length <= 5;
+  },
+  { message: 'Máximo de 5 menções por post' }
+);
+
+export const createPostSchema = z.object({
+  title: z.string().min(5, 'O título deve ter pelo menos 5 caracteres').max(200).trim(),
+  body: z
+    .string()
+    .min(10, 'O conteúdo deve ter pelo menos 10 caracteres')
+    .max(5000)
+    .trim()
+    .pipe(mentionSchema),
+  language: z.nativeEnum(Language).optional().nullable(),
+  code: z.string().max(10000).optional().nullable(),
+  image_url: imageUrlSchema,
+  type: z.enum(['question', 'discussion']),
+});
+
+export type CreatePostInput = z.infer<typeof createPostSchema>;
 
 export const createAnswerSchema = z.object({
   body: z.string().min(5, 'A resposta deve ter pelo menos 5 caracteres'),

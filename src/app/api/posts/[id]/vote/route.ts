@@ -1,98 +1,104 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getAuthUser } from '@/lib/auth';
+import { apiHandler } from '@/lib/api-handler';
+import { requireAuth } from '@/lib/auth';
+import { NotificationService } from '@/services/notification.service';
+import { ValidationError, NotFoundError } from '@/lib/errors';
 
-export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const user = await getAuthUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-    }
+export const POST = apiHandler(async (req, { params }) => {
+  const user = await requireAuth();
+  const { id: postId } = await params;
 
-    const { id: postId } = await params;
-    const body = await request.json();
-    const { value } = body; // 1 (upvote), -1 (downvote), ou 0 (remover voto)
+  const body = await req.json();
+  const { value } = body; // 1 (upvote), -1 (downvote), or 0 (remove vote)
 
-    if (value !== 1 && value !== -1 && value !== 0) {
-      return NextResponse.json({ error: 'Valor de voto inválido' }, { status: 400 });
-    }
+  if (value !== 1 && value !== -1 && value !== 0) {
+    throw new ValidationError('INVALID_VOTE_VALUE', 'Valor de voto inválido');
+  }
 
-    // 1. Atualizar ou deletar o PostVote
-    if (value === 0) {
-      await prisma.postVote
-        .delete({
-          where: {
-            post_id_user_id: {
-              post_id: postId,
-              user_id: user.id,
-            },
-          },
-        })
-        .catch(() => {
-          // Silenciar erro se o voto não existir
-        });
-    } else {
-      await prisma.postVote.upsert({
+  // 1. Verify post exists
+  const postExists = await prisma.post.findUnique({
+    where: { id: postId },
+  });
+
+  if (!postExists) {
+    throw new NotFoundError('POST_NOT_FOUND', 'Postagem não encontrada');
+  }
+
+  // 2. Update or delete PostVote
+  if (value === 0) {
+    await prisma.postVote
+      .delete({
         where: {
           post_id_user_id: {
             post_id: postId,
             user_id: user.id,
           },
         },
-        update: { value },
-        create: {
+      })
+      .catch(() => {
+        // Silently ignore if not found
+      });
+  } else {
+    await prisma.postVote.upsert({
+      where: {
+        post_id_user_id: {
           post_id: postId,
           user_id: user.id,
-          value,
+        },
+      },
+      update: { value },
+      create: {
+        post_id: postId,
+        user_id: user.id,
+        value,
+      },
+    });
+  }
+
+  // 3. Aggregate total upvote count
+  const aggregate = await prisma.postVote.aggregate({
+    where: { post_id: postId },
+    _sum: { value: true },
+  });
+
+  const newUpvotes = aggregate._sum.value ?? 0;
+
+  // 4. Update upvotes count on Post
+  const updatedPost = await prisma.post.update({
+    where: { id: postId },
+    data: { upvotes: newUpvotes },
+    select: { author_id: true, title: true },
+  });
+
+  // 5. If upvote and not by author, create LIKE notification
+  if (value === 1 && updatedPost.author_id !== user.id) {
+    try {
+      const existing = await prisma.notification.findFirst({
+        where: {
+          userId: updatedPost.author_id,
+          type: 'LIKE',
+          resourceId: postId,
+          resourceType: 'POST',
         },
       });
-    }
 
-    // 2. Calcular o novo saldo de votos
-    const aggregate = await prisma.postVote.aggregate({
-      where: { post_id: postId },
-      _sum: { value: true },
-    });
-
-    const newUpvotes = aggregate._sum.value ?? 0;
-
-    // 3. Atualizar a contagem total no modelo Post
-    const updatedPost = await prisma.post.update({
-      where: { id: postId },
-      data: { upvotes: newUpvotes },
-      select: { author_id: true, title: true },
-    });
-
-    // 4. Se for Upvote e não for o próprio autor, cria uma notificação
-    if (value === 1 && updatedPost.author_id !== user.id) {
-      try {
-        const existing = await prisma.notification.findFirst({
-          where: {
-            user_id: updatedPost.author_id,
-            type: 'LIKE',
-            link: `/post/${postId}`,
-            content: { contains: `@${user.username}` },
-          },
+      if (!existing) {
+        await NotificationService.create({
+          userId: updatedPost.author_id,
+          type: 'LIKE',
+          actorId: user.id,
+          resourceId: postId,
+          resourceType: 'POST',
+          title: 'Seu post recebeu um Up! 🔺',
+          content: `@${user.username} deu um up no seu post: "${updatedPost.title.substring(0, 30)}${updatedPost.title.length > 30 ? '...' : ''}"`,
+          link: `/post/${postId}`,
         });
-        if (!existing) {
-          await prisma.notification.create({
-            data: {
-              user_id: updatedPost.author_id,
-              type: 'LIKE',
-              title: 'Seu post recebeu um Up! 🔺',
-              content: `@${user.username} deu um up no seu post: "${updatedPost.title.substring(0, 30)}${updatedPost.title.length > 30 ? '...' : ''}"`,
-              link: `/post/${postId}`,
-            },
-          });
-        }
-      } catch (err) {
-        console.error('Failed to create upvote notification:', err);
       }
+    } catch (err) {
+      console.error('Failed to create upvote notification:', err);
     }
-
-    return NextResponse.json({ success: true, upvotes: newUpvotes });
-  } catch (error: any) {
-    console.error('Error casting post vote:', error);
-    return NextResponse.json({ error: error.message || 'Erro ao votar' }, { status: 500 });
   }
-}
+
+  return NextResponse.json({ success: true, upvotes: newUpvotes });
+});

@@ -91,9 +91,9 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   const isFollowing = user
     ? (await prisma.follow.findUnique({
         where: {
-          follower_id_following_id: {
-            follower_id: user.id,
-            following_id: profileUser.id,
+          followerId_followingId: {
+            followerId: user.id,
+            followingId: profileUser.id,
           },
         },
       })) !== null
@@ -101,11 +101,11 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
 
   // Calcular contagem de seguidores e seguindo
   const followersCount = await prisma.follow.count({
-    where: { following_id: profileUser.id },
+    where: { followingId: profileUser.id },
   });
 
   const followingCount = await prisma.follow.count({
-    where: { follower_id: profileUser.id },
+    where: { followerId: profileUser.id },
   });
 
   return (

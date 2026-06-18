@@ -52,10 +52,13 @@ model User {
   received_messages   Message[]      @relation("received_messages")
   bookmarks           Bookmark[]
   notifications       Notification[]
+  notifications_acted Notification[] @relation("NotificationActor")
   reports             Report[]
-  followers           Follow[]       @relation("followers")
-  following           Follow[]       @relation("following")
+  followers           Follow[]       @relation("Followers")
+  following           Follow[]       @relation("Following")
   reactions           Reaction[]
+
+  @@index([total_xp(sort: Desc)])
 }
 
 model LanguageTrail {
@@ -93,7 +96,7 @@ model Post {
   reports  Report[]
   reactions Reaction[]
 
-  @@index([created_at])
+  @@index([created_at(sort: Desc), id(sort: Desc)])
 }
 
 model Answer {
@@ -125,6 +128,7 @@ model Quiz {
   attempts QuizAttempt[]
 
   @@index([is_daily, created_at])
+  @@index([scheduled_for])
 }
 
 model QuizAttempt {
@@ -262,19 +266,31 @@ model Bookmark {
   @@index([created_at])
 }
 
+enum NotificationType {
+  LIKE
+  REACTION
+  COMMENT
+  MENTION
+  XP_MILESTONE
+  FOLLOW
+  QUIZ_CORRECT
+  LEVEL_UP
+  DUEL_CHALLENGE
+  DUEL_RESULT
+}
+
 model Notification {
-  id         String   @id @default(uuid())
-  user_id    String
-  type       String   // 'ANSWER', 'XP', 'DUEL', 'SYSTEM'
-  title      String
-  content    String
-  link       String?
-  is_read    Boolean  @default(false)
-  created_at DateTime @default(now())
-
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@index([user_id, created_at])
+  id           String           @id @default(cuid())
+  userId       String
+  type         NotificationType
+  actorId      String?
+  resourceId   String?
+  resourceType String?
+  read         Boolean          @default(false)
+  createdAt    DateTime         @default(now())
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  actor        User?            @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+  @@index([userId, createdAt(sort: Desc)])
 }
 
 model Report {
@@ -292,13 +308,14 @@ model Report {
 }
 
 model Follow {
-  follower_id  String
-  following_id String
-
-  follower  User @relation("following", fields: [follower_id], references: [id], onDelete: Cascade)
-  following User @relation("followers", fields: [following_id], references: [id], onDelete: Cascade)
-
-  @@id([follower_id, following_id])
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+  follower    User     @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+  @@id([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
 }
 
 model Reaction {
@@ -312,6 +329,7 @@ model Reaction {
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([post_id, user_id])
+  @@index([post_id])
 }
 
 model QuizLibrary {

@@ -1,53 +1,47 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getAuthUser } from '@/lib/auth';
+import { apiHandler } from '@/lib/api-handler';
 
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const { id } = await params;
-    const currentUser = await getAuthUser();
+export const GET = apiHandler(async (req, { session, params }) => {
+  const { id } = await params;
+  const currentUser = session;
 
-    // Buscar relações onde o usuário segue alguém
-    const follows = await prisma.follow.findMany({
-      where: { follower_id: id },
-      include: {
-        following: {
-          select: {
-            id: true,
-            username: true,
-            avatar_url: true,
-            total_xp: true,
-          },
+  const follows = await prisma.follow.findMany({
+    where: { followerId: id },
+    include: {
+      following: {
+        select: {
+          id: true,
+          username: true,
+          avatar_url: true,
+          total_xp: true,
         },
       },
-    });
+    },
+  });
 
-    const users = await Promise.all(
-      follows.map(async (f) => {
-        const isFollowing = currentUser
-          ? (await prisma.follow.findUnique({
-              where: {
-                follower_id_following_id: {
-                  follower_id: currentUser.id,
-                  following_id: f.following.id,
-                },
+  const users = await Promise.all(
+    follows.map(async (f) => {
+      const isFollowing = currentUser
+        ? (await prisma.follow.findUnique({
+            where: {
+              followerId_followingId: {
+                followerId: currentUser.id,
+                followingId: f.following.id,
               },
-            })) !== null
-          : false;
+            },
+          })) !== null
+        : false;
 
-        return {
-          id: f.following.id,
-          username: f.following.username,
-          avatar_url: f.following.avatar_url,
-          total_xp: f.following.total_xp,
-          isFollowing,
-        };
-      })
-    );
+      return {
+        id: f.following.id,
+        username: f.following.username,
+        avatar_url: f.following.avatar_url,
+        total_xp: f.following.total_xp,
+        isFollowing,
+      };
+    })
+  );
 
-    return NextResponse.json(users);
-  } catch (error) {
-    console.error('Error fetching following:', error);
-    return NextResponse.json({ error: 'Erro ao buscar seguidos' }, { status: 500 });
-  }
-}
+  return NextResponse.json(users);
+});
