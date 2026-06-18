@@ -1,13 +1,13 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getAuthUser } from "@/lib/auth";
-import { awardXP } from "@/lib/xp";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth';
+import { awardXP } from '@/lib/xp';
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getAuthUser();
     if (!user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     const { id: duelId } = await params;
@@ -18,17 +18,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     });
 
     if (!duel) {
-      return NextResponse.json({ error: "Duelo não encontrado" }, { status: 404 });
+      return NextResponse.json({ error: 'Duelo não encontrado' }, { status: 404 });
     }
 
     // Verificar se o usuário faz parte do duelo
     if (duel.challenger_id !== user.id && duel.opponent_id !== user.id) {
-      return NextResponse.json({ error: "Você não é participante deste duelo" }, { status: 403 });
+      return NextResponse.json({ error: 'Você não é participante deste duelo' }, { status: 403 });
     }
 
     const { code } = await request.json();
-    if (!code || code.trim() === "") {
-      return NextResponse.json({ error: "O código não pode ser vazio" }, { status: 400 });
+    if (!code || code.trim() === '') {
+      return NextResponse.json({ error: 'O código não pode ser vazio' }, { status: 400 });
     }
 
     // Criar ou atualizar a solução
@@ -52,7 +52,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     return NextResponse.json({ solution, xpResult });
   } catch (error) {
-    console.error("Error submitting duel solution:", error);
-    return NextResponse.json({ error: "Erro ao enviar solução" }, { status: 500 });
+    console.error('Error submitting duel solution:', error);
+    return NextResponse.json({ error: 'Erro ao enviar solução' }, { status: 500 });
   }
 }

@@ -1,7 +1,7 @@
-import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
-import { getAuthUser } from "@/lib/auth";
-import { TrailsContent } from "./TrailsContent";
+import { redirect } from 'next/navigation';
+import { prisma } from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth';
+import { TrailsContent } from './TrailsContent';
 
 export const revalidate = 0; // Desabilitar cache para refletir XP ganho instantaneamente
 
@@ -9,7 +9,7 @@ export default async function TrailsPage() {
   const user = await getAuthUser();
 
   if (!user) {
-    redirect("/login");
+    redirect('/login');
   }
 
   // Buscar todas as trilhas do usuário atual

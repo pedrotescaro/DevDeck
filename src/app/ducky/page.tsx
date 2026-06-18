@@ -1,6 +1,6 @@
-import { redirect } from "next/navigation";
-import { getAuthUser } from "@/lib/auth";
-import { DuckyContent } from "./DuckyContent";
+import { redirect } from 'next/navigation';
+import { getAuthUser } from '@/lib/auth';
+import { DuckyContent } from './DuckyContent';
 
 export const revalidate = 0; // Desabilitar cache para verificar sessão ativa
 
@@ -8,7 +8,7 @@ export default async function DuckyPage() {
   const user = await getAuthUser();
 
   if (!user) {
-    redirect("/login");
+    redirect('/login');
   }
 
   // Serializar usuário

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useState, useRef, useEffect } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { Repeat2, Pencil } from "lucide-react";
-import { cn } from "@/lib/cn";
-import { popoverMenuVariants } from "@/lib/motion";
+import { useState, useRef, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Repeat2, Pencil } from 'lucide-react';
+import { cn } from '@/lib/cn';
+import { popoverMenuVariants } from '@/lib/motion';
 
 interface RepostMenuProps {
   onRepost: () => void;
@@ -31,28 +31,26 @@ export function RepostMenu({
         setOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
   }, [open]);
 
   return (
-    <div className={cn("relative flex items-center gap-0.5", className)} ref={ref}>
+    <div className={cn('relative flex items-center gap-0.5', className)} ref={ref}>
       <button
         type="button"
         onClick={() => setOpen(!open)}
         className={cn(
-          "dd-touch dd-focus-ring w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer shrink-0",
+          'dd-touch dd-focus-ring w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer shrink-0',
           isReposted
-            ? "text-dd-green hover:bg-dd-green/10"
-            : "text-dd-muted hover:text-dd-green hover:bg-dd-green/10"
+            ? 'text-dd-green hover:bg-dd-green/10'
+            : 'text-dd-muted hover:text-dd-green hover:bg-dd-green/10'
         )}
         title="Repostar"
       >
         <Repeat2 className="w-4 h-4" />
       </button>
-      {count > 0 && (
-        <span className="px-1 font-semibold text-[10px] text-dd-muted">{count}</span>
-      )}
+      {count > 0 && <span className="px-1 font-semibold text-[10px] text-dd-muted">{count}</span>}
 
       <AnimatePresence>
         {open && (

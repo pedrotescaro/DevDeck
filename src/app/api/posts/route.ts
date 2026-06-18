@@ -1,29 +1,29 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getAuthUser } from "@/lib/auth";
-import { createPostSchema } from "@/lib/validators";
-import { awardXP } from "@/lib/xp";
-import { Language } from "@prisma/client";
-import { rateLimit } from "@/lib/ratelimit";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth';
+import { createPostSchema } from '@/lib/validators';
+import { awardXP } from '@/lib/xp';
+import { Language } from '@prisma/client';
+import { rateLimit } from '@/lib/ratelimit';
 
 // GET /api/posts
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const language = searchParams.get("language");
-    const search = searchParams.get("search");
-    const author = searchParams.get("author");
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "10");
-    const cursor = searchParams.get("cursor") || undefined;
-    const useCursor = searchParams.get("useCursor") === "true" || !!cursor;
+    const language = searchParams.get('language');
+    const search = searchParams.get('search');
+    const author = searchParams.get('author');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const cursor = searchParams.get('cursor') || undefined;
+    const useCursor = searchParams.get('useCursor') === 'true' || !!cursor;
 
     const skip = (page - 1) * limit;
     const user = await getAuthUser();
-    const filter = searchParams.get("filter");
+    const filter = searchParams.get('filter');
 
     const whereClause: any = {};
-    if (filter === "following" && user) {
+    if (filter === 'following' && user) {
       const followingRelations = await prisma.follow.findMany({
         where: { follower_id: user.id },
         select: { following_id: true },
@@ -40,15 +40,15 @@ export async function GET(request: Request) {
     }
     if (search) {
       whereClause.OR = [
-        { title: { contains: search, mode: "insensitive" } },
-        { body: { contains: search, mode: "insensitive" } },
-        { author: { username: { contains: search, mode: "insensitive" } } },
+        { title: { contains: search, mode: 'insensitive' } },
+        { body: { contains: search, mode: 'insensitive' } },
+        { author: { username: { contains: search, mode: 'insensitive' } } },
       ];
     }
 
     let finalWhere = { ...whereClause };
     if (cursor) {
-      const parts = cursor.split("_");
+      const parts = cursor.split('_');
       if (parts.length === 2) {
         const cursorTime = new Date(parseInt(parts[0], 10));
         const cursorId = parts[1];
@@ -68,7 +68,7 @@ export async function GET(request: Request) {
 
     const posts = await prisma.post.findMany({
       where: finalWhere,
-      orderBy: [{ created_at: "desc" }, { id: "desc" }],
+      orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
       skip: skipVal,
       take: takeVal,
       include: {
@@ -84,12 +84,12 @@ export async function GET(request: Request) {
         },
         quizzes: {
           include: {
-            attempts: user ? { where: { user_id: user.id } } : { where: { id: "none" } },
+            attempts: user ? { where: { user_id: user.id } } : { where: { id: 'none' } },
           },
         },
-        votes: user ? { where: { user_id: user.id } } : { where: { id: "none" } },
-        bookmarks: user ? { where: { user_id: user.id } } : { where: { id: "none" } },
-        reactions: user ? { where: { user_id: user.id } } : { where: { id: "none" } },
+        votes: user ? { where: { user_id: user.id } } : { where: { id: 'none' } },
+        bookmarks: user ? { where: { user_id: user.id } } : { where: { id: 'none' } },
+        reactions: user ? { where: { user_id: user.id } } : { where: { id: 'none' } },
       },
     });
 
@@ -108,8 +108,8 @@ export async function GET(request: Request) {
 
     return NextResponse.json(posts);
   } catch (error) {
-    console.error("Error fetching posts:", error);
-    return NextResponse.json({ error: "Erro ao buscar posts" }, { status: 500 });
+    console.error('Error fetching posts:', error);
+    return NextResponse.json({ error: 'Erro ao buscar posts' }, { status: 500 });
   }
 }
 
@@ -118,13 +118,13 @@ export async function POST(request: Request) {
   try {
     const user = await getAuthUser();
     if (!user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const rateLimitResult = await rateLimit(`posts:${user.id}`, 10, "1 h");
+    const rateLimitResult = await rateLimit(`posts:${user.id}`, 10, '1 h');
     if (!rateLimitResult.success) {
       return NextResponse.json(
-        { error: "Muitas postagens. Limite de 10 por hora excedido." },
+        { error: 'Muitas postagens. Limite de 10 por hora excedido.' },
         { status: 429 }
       );
     }
@@ -160,27 +160,27 @@ export async function POST(request: Request) {
 
       if (openAiKey) {
         try {
-          const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
+          const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
             headers: {
-              "Content-Type": "application/json",
+              'Content-Type': 'application/json',
               Authorization: `Bearer ${openAiKey}`,
             },
             body: JSON.stringify({
-              model: "gpt-4o-mini",
+              model: 'gpt-4o-mini',
               messages: [
                 {
-                  role: "system",
+                  role: 'system',
                   content:
-                    "Você é um assistente técnico especialista em programação. Gere um quiz de múltipla escolha com exatamente 4 opções baseada na postagem enviada.",
+                    'Você é um assistente técnico especialista em programação. Gere um quiz de múltipla escolha com exatamente 4 opções baseada na postagem enviada.',
                 },
                 {
-                  role: "user",
+                  role: 'user',
                   content: `Gere um quiz em formato JSON bruto.
 Linguagem: ${language}
 Título: ${title}
 Conteúdo: ${postBody}
-Código: ${code_snippet || ""}
+Código: ${code_snippet || ''}
 
 Formato do JSON esperado:
 {
@@ -190,7 +190,7 @@ Formato do JSON esperado:
 }`,
                 },
               ],
-              response_format: { type: "json_object" },
+              response_format: { type: 'json_object' },
             }),
           });
 
@@ -209,7 +209,7 @@ Formato do JSON esperado:
             quizCreated = true;
           }
         } catch (aiError) {
-          console.error("OpenAI Quiz generation failed, falling back:", aiError);
+          console.error('OpenAI Quiz generation failed, falling back:', aiError);
         }
       }
 
@@ -221,12 +221,12 @@ Formato do JSON esperado:
         > = {
           TS: {
             question:
-              "Qual das opções abaixo é usada para definir uma constraint (restrição) em um generic no TypeScript?",
+              'Qual das opções abaixo é usada para definir uma constraint (restrição) em um generic no TypeScript?',
             options: [
-              "T extends SomeType",
-              "T implements SomeType",
-              "T requires SomeType",
-              "T interface SomeType",
+              'T extends SomeType',
+              'T implements SomeType',
+              'T requires SomeType',
+              'T interface SomeType',
             ],
             correct_index: 0,
           },
@@ -236,58 +236,58 @@ Formato do JSON esperado:
             correct_index: 2,
           },
           PYTHON: {
-            question: "Qual dessas opções é usada para criar uma lista de forma concisa em Python?",
-            options: ["Map generator", "List comprehension", "List compiler", "Lambda definition"],
+            question: 'Qual dessas opções é usada para criar uma lista de forma concisa em Python?',
+            options: ['Map generator', 'List comprehension', 'List compiler', 'Lambda definition'],
             correct_index: 1,
           },
           JAVA: {
             question:
-              "Qual classe é utilizada para criar strings mutáveis em Java de forma eficiente?",
-            options: ["String", "StringBuffer", "StringBuilder", "StringWriter"],
+              'Qual classe é utilizada para criar strings mutáveis em Java de forma eficiente?',
+            options: ['String', 'StringBuffer', 'StringBuilder', 'StringWriter'],
             correct_index: 2,
           },
           RUST: {
             question:
-              "Qual conceito do Rust garante a segurança de memória em tempo de compilação sem Garbage Collector?",
+              'Qual conceito do Rust garante a segurança de memória em tempo de compilação sem Garbage Collector?',
             options: [
-              "Ownership & Borrowing",
-              "Smart Pointers",
-              "Automatic Reference Counting",
-              "Manual Freeing",
+              'Ownership & Borrowing',
+              'Smart Pointers',
+              'Automatic Reference Counting',
+              'Manual Freeing',
             ],
             correct_index: 0,
           },
           GO: {
-            question: "Como declaramos concorrência em Go?",
+            question: 'Como declaramos concorrência em Go?',
             options: [
-              "async/await",
+              'async/await',
               "Utilizando go-routines (palavra-chave 'go')",
-              "Threads nativas",
-              "Promessas",
+              'Threads nativas',
+              'Promessas',
             ],
             correct_index: 1,
           },
           KOTLIN: {
-            question: "Qual o operador usado em Kotlin para chamadas seguras (null safety)?",
-            options: ["!!", "?.", "?:", ".*"],
+            question: 'Qual o operador usado em Kotlin para chamadas seguras (null safety)?',
+            options: ['!!', '?.', '?:', '.*'],
             correct_index: 1,
           },
           SWIFT: {
-            question: "Qual palavra-chave é usada para definir propriedades constantes em Swift?",
-            options: ["let", "var", "const", "val"],
+            question: 'Qual palavra-chave é usada para definir propriedades constantes em Swift?',
+            options: ['let', 'var', 'const', 'val'],
             correct_index: 0,
           },
           CPP: {
             question:
               "Qual destes operadores é usado para desalocar memória alocada dinamicamente via 'new' em C++?",
-            options: ["free()", "dispose", "delete", "remove"],
+            options: ['free()', 'dispose', 'delete', 'remove'],
             correct_index: 2,
           },
         };
 
         const fallback = fallbackQuizzes[language] || {
           question: `Com base na postagem sobre ${language}, qual seria o comportamento esperado?`,
-          options: ["Comportamento A", "Comportamento B", "Comportamento C", "Comportamento D"],
+          options: ['Comportamento A', 'Comportamento B', 'Comportamento C', 'Comportamento D'],
           correct_index: 0,
         };
 
@@ -304,7 +304,7 @@ Formato do JSON esperado:
 
     return NextResponse.json({ post, xpResult });
   } catch (error: any) {
-    console.error("Error creating post:", error);
-    return NextResponse.json({ error: error.message || "Erro ao criar post" }, { status: 500 });
+    console.error('Error creating post:', error);
+    return NextResponse.json({ error: error.message || 'Erro ao criar post' }, { status: 500 });
   }
 }

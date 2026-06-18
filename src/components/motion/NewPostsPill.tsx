@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { AnimatePresence, motion } from "framer-motion";
-import { newPostsPillVariants } from "@/lib/motion";
+import { AnimatePresence, motion } from 'framer-motion';
+import { newPostsPillVariants } from '@/lib/motion';
 
 interface NewPostsPillProps {
   count: number;
@@ -25,7 +25,7 @@ export function NewPostsPill({ count, onClick, visible }: NewPostsPillProps) {
                      px-4 py-2 rounded-full shadow-lg shadow-orange-500/25
                      hover:scale-[1.03] active:scale-95 dd-focus-ring cursor-pointer"
         >
-          Ver {count} {count === 1 ? "novo post" : "novos posts"}
+          Ver {count} {count === 1 ? 'novo post' : 'novos posts'}
         </motion.button>
       )}
     </AnimatePresence>

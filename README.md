@@ -31,10 +31,10 @@ O **DevDeck** transforma a interação social entre programadores em uma jornada
 
 Explore as especificações detalhadas do projeto e guias de infraestrutura:
 
-* **[Guia de Contribuição](CONTRIBUTING.md):** Saiba como reportar bugs, sugerir melhorias e enviar Pull Requests.
-* **[Arquitetura do Sistema](docs/ARCHITECTURE.md):** Visão geral da organização de diretórios, escolhas técnicas e fluxo de dados.
-* **[Modelagem de Banco de Dados](docs/DATABASE.md):** Diagramas ER, indexações de Full-Text Search e dicionário de modelos.
-* **[Guia de Implantação e Deploy](docs/DEPLOYMENT.md):** Passo a passo detalhado para colocar a plataforma em produção via Vercel e Supabase.
+- **[Guia de Contribuição](CONTRIBUTING.md):** Saiba como reportar bugs, sugerir melhorias e enviar Pull Requests.
+- **[Arquitetura do Sistema](docs/ARCHITECTURE.md):** Visão geral da organização de diretórios, escolhas técnicas e fluxo de dados.
+- **[Modelagem de Banco de Dados](docs/DATABASE.md):** Diagramas ER, indexações de Full-Text Search e dicionário de modelos.
+- **[Guia de Implantação e Deploy](docs/DEPLOYMENT.md):** Passo a passo detalhado para colocar a plataforma em produção via Vercel e Supabase.
 
 ---
 
@@ -85,12 +85,15 @@ Explore as especificações detalhadas do projeto e guias de infraestrutura:
 Para rodar o DevDeck na sua máquina local de forma simples e direta, siga os passos abaixo:
 
 #### 1. Instalar as dependências do projeto
+
 ```bash
 npm install
 ```
 
 #### 2. Configurar o arquivo `.env.local`
+
 Crie um arquivo chamado `.env.local` na raiz (copiando do `.env.example`) e configure com as conexões do seu banco de dados Supabase:
+
 ```env
 DATABASE_URL="postgresql://..."
 DIRECT_URL="postgresql://..."
@@ -100,6 +103,7 @@ SUPABASE_SERVICE_ROLE_KEY="..."
 ```
 
 #### 3. Sincronizar o Prisma e Popular o Banco (Seed)
+
 ```bash
 # Gerar o cliente Prisma
 npx prisma generate
@@ -112,10 +116,44 @@ npx prisma db seed
 ```
 
 #### 4. Executar o Servidor Local
+
 ```bash
 npm run dev
 ```
+
 Abra seu navegador em [http://localhost:3000](http://localhost:3000).
+
+---
+
+## 🛠️ Desenvolvimento e Qualidade de Código
+
+A plataforma possui ferramentas configuradas para garantir a padronização e a qualidade do código:
+
+- **Typecheck:** Verifica os tipos TypeScript:
+  ```bash
+  npm run typecheck
+  ```
+- **Linter:** Analisa o código com ESLint para boas práticas:
+  ```bash
+  npm run lint
+  ```
+- **Format:** Formata o código automaticamente com Prettier (configuração de 2 espaços e aspas simples):
+  ```bash
+  npm run format
+  ```
+- **Testes (Vitest + Testing Library):**
+  - Executar todos os testes uma única vez:
+    ```bash
+    npm test
+    ```
+  - Executar testes no modo watch:
+    ```bash
+    npm run test:watch
+    ```
+
+### ⚓ Hooks de Pré-commit (Husky + lint-staged)
+
+O **Husky** está configurado junto com o **lint-staged** para rodar verificações automáticas antes de cada commit. Quando você faz `git commit`, os arquivos TypeScript e JavaScript modificados serão automaticamente validados pelo ESLint (`eslint --fix`) e formatados pelo Prettier (`prettier --write`). Se houver algum erro de sintaxe ou lint impeditivo, o commit será bloqueado até que o problema seja resolvido.
 
 ---
 
@@ -126,11 +164,11 @@ O seed cria três desenvolvedores com diferentes níveis de XP e trilhas de tecn
 > [!IMPORTANT]
 > Defina `SEED_DEFAULT_PASSWORD` no seu `.env.local` **antes** de rodar `npx prisma db seed`.
 
-| Nome | E-mail | Especialidade Principal |
-| :--- | :--- | :--- |
-| **Pedro** | `pedro@devdeck.dev` | TypeScript & JavaScript |
-| **Ana** | `ana@devdeck.dev` | Python & Django |
-| **Carlos** | `carlos@devdeck.dev` | Rust & C++ |
+| Nome       | E-mail               | Especialidade Principal |
+| :--------- | :------------------- | :---------------------- |
+| **Pedro**  | `pedro@devdeck.dev`  | TypeScript & JavaScript |
+| **Ana**    | `ana@devdeck.dev`    | Python & Django         |
+| **Carlos** | `carlos@devdeck.dev` | Rust & C++              |
 
 Acesse `/login` e utilize qualquer uma das contas acima com a senha que você configurou.
 

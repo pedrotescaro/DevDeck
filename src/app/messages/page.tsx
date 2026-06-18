@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { createClient } from "@/lib/supabase/client";
-import { EMOJI_CATEGORIES, insertAtCursor } from "@/lib/post-composer";
-import { Sidebar } from "@/components/Sidebar";
-import { EmptyState } from "@/components/motion/EmptyState";
-import { TypingIndicator } from "@/components/motion/TypingIndicator";
+import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { createClient } from '@/lib/supabase/client';
+import { EMOJI_CATEGORIES, insertAtCursor } from '@/lib/post-composer';
+import { Sidebar } from '@/components/Sidebar';
+import { EmptyState } from '@/components/motion/EmptyState';
+import { TypingIndicator } from '@/components/motion/TypingIndicator';
 import {
   Search,
   Settings,
@@ -25,8 +25,8 @@ import {
   Sparkles,
   Trash2,
   Heart,
-} from "lucide-react";
-import { useSoundEffects } from "@/hooks/useSoundEffects";
+} from 'lucide-react';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
 
 function useClickOutside(
   ref: React.RefObject<HTMLElement | null>,
@@ -42,8 +42,8 @@ function useClickOutside(
       }
     };
 
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
   }, [active, onClose, ref]);
 }
 
@@ -84,27 +84,27 @@ export default function MessagesPage() {
   const [chats, setChats] = useState<ChatItem[]>([]);
   const [activeChat, setActiveChat] = useState<ChatItem | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessageText, setNewMessageText] = useState("");
-  const [messageImage, setMessageImage] = useState("");
+  const [newMessageText, setNewMessageText] = useState('');
+  const [messageImage, setMessageImage] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
   const [loadingChats, setLoadingChats] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [showTypingPreview, setShowTypingPreview] = useState(false);
 
   // Search/Filter states
-  const [chatSearchQuery, setChatSearchQuery] = useState("");
+  const [chatSearchQuery, setChatSearchQuery] = useState('');
 
   // New conversation modal states
   const [newChatModalOpen, setNewChatModalOpen] = useState(false);
   const [allUsers, setAllUsers] = useState<UserListItem[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
-  const [usersSearchQuery, setUsersSearchQuery] = useState("");
+  const [usersSearchQuery, setUsersSearchQuery] = useState('');
   const [emojiPanelOpen, setEmojiPanelOpen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
 
   // Edit / Delete states
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
-  const [editContent, setEditContent] = useState("");
+  const [editContent, setEditContent] = useState('');
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
   const [activeMenuMessageId, setActiveMenuMessageId] = useState<string | null>(null);
   const [replyingToMessage, setReplyingToMessage] = useState<Message | null>(null);
@@ -123,17 +123,17 @@ export default function MessagesPage() {
 
   useEffect(() => {
     const updateSoundState = () => {
-      setSoundEnabled(localStorage.getItem("devdeck-sound") !== "false");
+      setSoundEnabled(localStorage.getItem('devdeck-sound') !== 'false');
     };
 
     updateSoundState();
 
-    window.addEventListener("storage", updateSoundState);
-    window.addEventListener("devdeck-sound-changed", updateSoundState);
+    window.addEventListener('storage', updateSoundState);
+    window.addEventListener('devdeck-sound-changed', updateSoundState);
 
     return () => {
-      window.removeEventListener("storage", updateSoundState);
-      window.removeEventListener("devdeck-sound-changed", updateSoundState);
+      window.removeEventListener('storage', updateSoundState);
+      window.removeEventListener('devdeck-sound-changed', updateSoundState);
     };
   }, []);
 
@@ -148,24 +148,24 @@ export default function MessagesPage() {
         } = await supabase.auth.getUser();
 
         if (!authUser) {
-          router.push("/login");
+          router.push('/login');
           return;
         }
 
-        const resUser = await fetch("/api/users/me");
+        const resUser = await fetch('/api/users/me');
         if (resUser.ok) {
           const userData = await resUser.json();
           setUser(userData);
         }
 
         // Fetch active chats
-        const resChats = await fetch("/api/messages/chats");
+        const resChats = await fetch('/api/messages/chats');
         if (resChats.ok) {
           const data = await resChats.json();
           setChats(data);
         }
       } catch (err) {
-        console.error("Error fetching messages page data:", err);
+        console.error('Error fetching messages page data:', err);
       } finally {
         setLoadingChats(false);
       }
@@ -187,7 +187,7 @@ export default function MessagesPage() {
           setMessages(data);
         }
       } catch (err) {
-        console.error("Error fetching message history:", err);
+        console.error('Error fetching message history:', err);
       } finally {
         setLoadingMessages(false);
       }
@@ -205,7 +205,7 @@ export default function MessagesPage() {
 
   // Scroll messages to bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loadingMessages]);
 
   // Setup Supabase Realtime for instant messaging, editing, and deletion
@@ -216,11 +216,11 @@ export default function MessagesPage() {
     const channel = supabase
       .channel(`chat-room:${user.id}`)
       .on(
-        "postgres_changes",
+        'postgres_changes',
         {
-          event: "INSERT",
-          schema: "public",
-          table: "Message",
+          event: 'INSERT',
+          schema: 'public',
+          table: 'Message',
           filter: `receiver_id=eq.${user.id}`,
         },
         async (payload) => {
@@ -231,11 +231,11 @@ export default function MessagesPage() {
               if (prev.some((m) => m.id === newMsg.id)) return prev;
               return [...prev, newMsg];
             });
-            playSound("notification");
+            playSound('notification');
           }
 
           // Refetch active chats to update list/order
-          const resChats = await fetch("/api/messages/chats");
+          const resChats = await fetch('/api/messages/chats');
           if (resChats.ok) {
             const data = await resChats.json();
             setChats(data);
@@ -243,11 +243,11 @@ export default function MessagesPage() {
         }
       )
       .on(
-        "postgres_changes",
+        'postgres_changes',
         {
-          event: "UPDATE",
-          schema: "public",
-          table: "Message",
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'Message',
         },
         (payload) => {
           const updatedMsg = payload.new as Message;
@@ -262,11 +262,11 @@ export default function MessagesPage() {
         }
       )
       .on(
-        "postgres_changes",
+        'postgres_changes',
         {
-          event: "DELETE",
-          schema: "public",
-          table: "Message",
+          event: 'DELETE',
+          schema: 'public',
+          table: 'Message',
         },
         (payload) => {
           const deletedId = (payload.old as any).id;
@@ -291,16 +291,16 @@ export default function MessagesPage() {
 
     try {
       const res = await fetch(`/api/messages/${msgId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: newContent }),
       });
 
       if (!res.ok) {
-        console.error("Failed to edit message");
+        console.error('Failed to edit message');
       }
     } catch (err) {
-      console.error("Error editing message:", err);
+      console.error('Error editing message:', err);
     }
   };
 
@@ -311,23 +311,23 @@ export default function MessagesPage() {
 
     try {
       const res = await fetch(`/api/messages/${msgId}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
 
       if (!res.ok) {
-        console.error("Failed to delete message");
+        console.error('Failed to delete message');
       }
     } catch (err) {
-      console.error("Error deleting message:", err);
+      console.error('Error deleting message:', err);
     }
   };
 
   const handleForwardMessage = async (receiverId: string) => {
     if (!forwardingMessage) return;
     try {
-      const res = await fetch("/api/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           receiver_id: receiverId,
           content: forwardingMessage.content,
@@ -335,18 +335,18 @@ export default function MessagesPage() {
         }),
       });
       if (res.ok) {
-        setToastMessage("Mensagem encaminhada!");
+        setToastMessage('Mensagem encaminhada!');
         setTimeout(() => setToastMessage(null), 2500);
 
         // Refetch active chats to update list/order
-        const resChats = await fetch("/api/messages/chats");
+        const resChats = await fetch('/api/messages/chats');
         if (resChats.ok) {
           const data = await resChats.json();
           setChats(data);
         }
       }
     } catch (err) {
-      console.error("Failed to forward message:", err);
+      console.error('Failed to forward message:', err);
     } finally {
       setForwardingMessage(null);
     }
@@ -376,9 +376,9 @@ export default function MessagesPage() {
     setUploadingImage(true);
     try {
       const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/upload", {
-        method: "POST",
+      formData.append('file', file);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
         body: formData,
       });
       if (res.ok) {
@@ -386,7 +386,7 @@ export default function MessagesPage() {
         setMessageImage(data.url);
       }
     } catch (err) {
-      console.error("Image upload failed:", err);
+      console.error('Image upload failed:', err);
     } finally {
       setUploadingImage(false);
     }
@@ -399,13 +399,13 @@ export default function MessagesPage() {
     let textToSend = newMessageText.trim();
     if (replyingToMessage) {
       textToSend =
-        `⤷ Em resposta a @${replyingToMessage.sender_id === user.id ? "você" : activeChat.partner.username}: "${replyingToMessage.content}"\n\n` +
+        `⤷ Em resposta a @${replyingToMessage.sender_id === user.id ? 'você' : activeChat.partner.username}: "${replyingToMessage.content}"\n\n` +
         textToSend;
       setReplyingToMessage(null);
     }
     const imageToSend = messageImage;
-    setNewMessageText("");
-    setMessageImage("");
+    setNewMessageText('');
+    setMessageImage('');
 
     // Optimistic UI update
     const tempMessage: Message = {
@@ -417,12 +417,12 @@ export default function MessagesPage() {
       created_at: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, tempMessage]);
-    playSound("send_dm");
+    playSound('send_dm');
 
     try {
-      const res = await fetch("/api/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           receiver_id: activeChat.partnerId,
           content: textToSend,
@@ -432,14 +432,14 @@ export default function MessagesPage() {
 
       if (res.ok) {
         // Refetch active chats to update list/order
-        const resChats = await fetch("/api/messages/chats");
+        const resChats = await fetch('/api/messages/chats');
         if (resChats.ok) {
           const data = await resChats.json();
           setChats(data);
         }
       }
     } catch (err) {
-      console.error("Failed to send message:", err);
+      console.error('Failed to send message:', err);
     }
   };
 
@@ -448,14 +448,14 @@ export default function MessagesPage() {
     setLoadingUsers(true);
     try {
       // Find all users in the system to choose from
-      const res = await fetch("/api/users/search?q=");
+      const res = await fetch('/api/users/search?q=');
       if (res.ok) {
         const data = await res.json();
         // filter out current user
         setAllUsers(data.filter((u: any) => u.id !== user?.id));
       }
     } catch (err) {
-      console.error("Failed to fetch users list:", err);
+      console.error('Failed to fetch users list:', err);
     } finally {
       setLoadingUsers(false);
     }
@@ -471,7 +471,7 @@ export default function MessagesPage() {
         setAllUsers(data.filter((u: any) => u.id !== user?.id));
       }
     } catch (err) {
-      console.error("Failed to search users:", err);
+      console.error('Failed to search users:', err);
     } finally {
       setLoadingUsers(false);
     }
@@ -479,7 +479,7 @@ export default function MessagesPage() {
 
   const handleStartConversation = (targetUser: UserListItem) => {
     setNewChatModalOpen(false);
-    setUsersSearchQuery("");
+    setUsersSearchQuery('');
 
     // Check if chat already exists in list
     const existingChat = chats.find((c) => c.partnerId === targetUser.id);
@@ -489,9 +489,9 @@ export default function MessagesPage() {
       // Create a temporary ChatItem structure to mount
       const tempChat: ChatItem = {
         partnerId: targetUser.id,
-        lastMessage: "",
+        lastMessage: '',
         lastMessageTime: new Date().toISOString(),
-        lastSenderId: user?.id || "",
+        lastSenderId: user?.id || '',
         partner: {
           id: targetUser.id,
           username: targetUser.username,
@@ -505,8 +505,8 @@ export default function MessagesPage() {
 
   const formatMessageTime = (dateStr: string) => {
     const date = new Date(dateStr);
-    const hrs = date.getHours().toString().padStart(2, "0");
-    const mins = date.getMinutes().toString().padStart(2, "0");
+    const hrs = date.getHours().toString().padStart(2, '0');
+    const mins = date.getMinutes().toString().padStart(2, '0');
     return `${hrs}:${mins}`;
   };
 
@@ -517,10 +517,10 @@ export default function MessagesPage() {
     const diffHours = diffMs / 3600000;
 
     if (diffHours < 24) {
-      return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
+      return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
     }
     const diffDays = Math.floor(diffHours / 24);
-    if (diffDays === 1) return "Ontem";
+    if (diffDays === 1) return 'Ontem';
     if (diffDays < 7) return `Há ${diffDays}d`;
     return `${date.getDate()}/${date.getMonth() + 1}`;
   };
@@ -599,8 +599,8 @@ export default function MessagesPage() {
                       onClick={() => setActiveChat(chat)}
                       className={`w-full p-4 flex gap-3 text-left transition-colors duration-150 relative ${
                         isActive
-                          ? "bg-dd-surface/40 border-r-2 border-orange-500"
-                          : "hover:bg-dd-surface/20"
+                          ? 'bg-dd-surface/40 border-r-2 border-orange-500'
+                          : 'hover:bg-dd-surface/20'
                       }`}
                     >
                       {/* Avatar */}
@@ -630,7 +630,7 @@ export default function MessagesPage() {
                           {chat.lastSenderId === user?.id && (
                             <span className="text-orange-400/80 mr-0.5">Você:</span>
                           )}
-                          {chat.lastMessage || "Nenhuma mensagem enviada."}
+                          {chat.lastMessage || 'Nenhuma mensagem enviada.'}
                         </p>
                       </div>
                     </button>
@@ -681,13 +681,13 @@ export default function MessagesPage() {
                         const isCurrentUser = msg.sender_id === user?.id;
 
                         // Parse reply prefix if any
-                        const replyPrefix = "⤷ Em resposta a @";
-                        let replyUser = "";
-                        let replyText = "";
+                        const replyPrefix = '⤷ Em resposta a @';
+                        let replyUser = '';
+                        let replyText = '';
                         let displayContent = msg.content;
 
                         if (msg.content && msg.content.startsWith(replyPrefix)) {
-                          const firstLineEnd = msg.content.indexOf("\n\n");
+                          const firstLineEnd = msg.content.indexOf('\n\n');
                           if (firstLineEnd !== -1) {
                             const replyLine = msg.content.substring(0, firstLineEnd);
                             displayContent = msg.content.substring(firstLineEnd + 2);
@@ -711,24 +711,24 @@ export default function MessagesPage() {
                               ease: [0.22, 1, 0.36, 1],
                             }}
                             className={`flex flex-col max-w-[75%] space-y-1 group relative ${
-                              isCurrentUser ? "ml-auto items-end" : "mr-auto items-start"
+                              isCurrentUser ? 'ml-auto items-end' : 'mr-auto items-start'
                             }`}
                           >
                             <div
-                              className={`flex items-center gap-2 max-w-full relative ${isCurrentUser ? "flex-row-reverse" : "flex-row"}`}
+                              className={`flex items-center gap-2 max-w-full relative ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'}`}
                             >
                               <div
                                 className={`rounded-2xl px-4 py-2 text-xs leading-relaxed font-semibold shadow-sm max-w-full ${
                                   isCurrentUser
-                                    ? "bg-orange-500 text-white rounded-br-none"
-                                    : "bg-dd-surface text-dd-text rounded-bl-none border border-dd-border/60"
+                                    ? 'bg-orange-500 text-white rounded-br-none'
+                                    : 'bg-dd-surface text-dd-text rounded-bl-none border border-dd-border/60'
                                 }`}
                               >
                                 {msg.image_url && (
                                   <img
                                     src={msg.image_url}
                                     alt="Anexo"
-                                    className={`rounded-xl object-cover max-h-48 max-w-full ${msg.content ? "mb-2" : ""}`}
+                                    className={`rounded-xl object-cover max-h-48 max-w-full ${msg.content ? 'mb-2' : ''}`}
                                   />
                                 )}
                                 {replyText && (
@@ -752,8 +752,8 @@ export default function MessagesPage() {
                                   onClick={(e) => handleToggleMenu(e, msg.id)}
                                   className={`p-1.5 hover:bg-dd-surface/85 text-dd-muted hover:text-dd-text rounded-full transition-colors cursor-pointer ${
                                     activeMenuMessageId === msg.id
-                                      ? "bg-dd-surface/85 text-dd-text"
-                                      : ""
+                                      ? 'bg-dd-surface/85 text-dd-text'
+                                      : ''
                                   }`}
                                   title="Mais opções"
                                 >
@@ -763,8 +763,8 @@ export default function MessagesPage() {
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    playSound("bookmark");
-                                    setToastMessage("Reação adicionada!");
+                                    playSound('bookmark');
+                                    setToastMessage('Reação adicionada!');
                                     setTimeout(() => setToastMessage(null), 2000);
                                   }}
                                   className="p-1.5 hover:bg-dd-surface/85 text-dd-muted hover:text-red-500 rounded-full transition-colors cursor-pointer"
@@ -784,10 +784,10 @@ export default function MessagesPage() {
                                       }}
                                       animate={{ opacity: 1, scale: 1, y: 0 }}
                                       exit={{ opacity: 0, scale: 0.95, y: index <= 3 ? -10 : 10 }}
-                                      transition={{ duration: 0.15, ease: "easeOut" }}
+                                      transition={{ duration: 0.15, ease: 'easeOut' }}
                                       className={`absolute z-[90] min-w-[230px] bg-dd-surface/95 backdrop-blur-md border border-dd-border/80 rounded-2xl shadow-2xl p-1 flex flex-col gap-0.5 font-sans text-xs ${
-                                        index <= 3 ? "top-0 mt-6" : "bottom-0 mb-6"
-                                      } ${isCurrentUser ? "right-0" : "left-0"}`}
+                                        index <= 3 ? 'top-0 mt-6' : 'bottom-0 mb-6'
+                                      } ${isCurrentUser ? 'right-0' : 'left-0'}`}
                                     >
                                       <button
                                         type="button"
@@ -829,7 +829,7 @@ export default function MessagesPage() {
                                         type="button"
                                         onClick={() => {
                                           navigator.clipboard.writeText(displayContent);
-                                          setToastMessage("Copiado!");
+                                          setToastMessage('Copiado!');
                                           setTimeout(() => setToastMessage(null), 2000);
                                           setActiveMenuMessageId(null);
                                         }}
@@ -866,7 +866,7 @@ export default function MessagesPage() {
                                           setMessages((prev) =>
                                             prev.filter((m) => m.id !== msg.id)
                                           );
-                                          setToastMessage("Mensagem excluída para você");
+                                          setToastMessage('Mensagem excluída para você');
                                           setTimeout(() => setToastMessage(null), 2000);
                                           setActiveMenuMessageId(null);
                                         }}
@@ -919,17 +919,17 @@ export default function MessagesPage() {
                       <div className="flex items-center gap-1.5 truncate">
                         <Reply className="w-3.5 h-3.5 text-orange-400" />
                         <span>
-                          Respondendo a{" "}
+                          Respondendo a{' '}
                           <strong className="text-dd-text">
                             @
                             {replyingToMessage.sender_id === user?.id
-                              ? "você"
+                              ? 'você'
                               : activeChat.partner.username}
                           </strong>
                           : &quot;
                           {replyingToMessage.content.replace(
                             /^⤷ Em resposta a @.+: "[\s\S]+"\n\n/,
-                            ""
+                            ''
                           )}
                           &quot;
                         </span>
@@ -955,7 +955,7 @@ export default function MessagesPage() {
                         />
                         <button
                           type="button"
-                          onClick={() => setMessageImage("")}
+                          onClick={() => setMessageImage('')}
                           className="absolute -top-2 -right-2 p-1 bg-dd-surface border border-dd-border rounded-full text-dd-text hover:text-red-400 transition-colors shadow-md cursor-pointer"
                         >
                           <X className="w-3.5 h-3.5" />
@@ -979,8 +979,8 @@ export default function MessagesPage() {
                           htmlFor="dm-image-upload"
                           className={`p-2 rounded-full transition-colors shrink-0 cursor-pointer flex items-center justify-center ${
                             uploadingImage
-                              ? "text-orange-500 animate-pulse bg-orange-500/10"
-                              : "text-dd-muted hover:text-dd-text"
+                              ? 'text-orange-500 animate-pulse bg-orange-500/10'
+                              : 'text-dd-muted hover:text-dd-text'
                           }`}
                         >
                           <ImageIcon className="w-4.5 h-4.5" />
@@ -992,8 +992,8 @@ export default function MessagesPage() {
                           onClick={() => setEmojiPanelOpen(!emojiPanelOpen)}
                           className={`p-2 rounded-full transition-colors shrink-0 ${
                             emojiPanelOpen
-                              ? "bg-orange-500/15 text-orange-400"
-                              : "text-dd-muted hover:text-dd-text"
+                              ? 'bg-orange-500/15 text-orange-400'
+                              : 'text-dd-muted hover:text-dd-text'
                           }`}
                         >
                           <Smile className="w-4.5 h-4.5" />
@@ -1324,28 +1324,28 @@ export default function MessagesPage() {
               <div className="flex justify-between border-b border-dd-border/40 pb-2">
                 <span className="text-dd-muted font-semibold">Enviada por:</span>
                 <span className="text-dd-text font-bold">
-                  {infoMessage.sender_id === user?.id ? "Você" : `@${activeChat?.partner.username}`}
+                  {infoMessage.sender_id === user?.id ? 'Você' : `@${activeChat?.partner.username}`}
                 </span>
               </div>
 
               <div className="flex justify-between border-b border-dd-border/40 pb-2">
                 <span className="text-dd-muted font-semibold">Enviada em:</span>
                 <span className="text-dd-text font-bold">
-                  {new Date(infoMessage.created_at).toLocaleString("pt-BR")}
+                  {new Date(infoMessage.created_at).toLocaleString('pt-BR')}
                 </span>
               </div>
 
               <div className="flex justify-between border-b border-dd-border/40 pb-2">
                 <span className="text-dd-muted font-semibold">Editada:</span>
                 <span className="text-dd-text font-bold">
-                  {infoMessage.is_edited ? "Sim" : "Não"}
+                  {infoMessage.is_edited ? 'Sim' : 'Não'}
                 </span>
               </div>
 
               <div className="flex justify-between border-b border-dd-border/40 pb-2">
                 <span className="text-dd-muted font-semibold">Tamanho:</span>
                 <span className="text-dd-text font-bold">
-                  {infoMessage.content.replace(/^⤷ Em resposta a @.+: "[\s\S]+"\n\n/, "").length}{" "}
+                  {infoMessage.content.replace(/^⤷ Em resposta a @.+: "[\s\S]+"\n\n/, '').length}{' '}
                   caracteres
                 </span>
               </div>
@@ -1381,7 +1381,7 @@ export default function MessagesPage() {
                   Mensagem analisada
                 </span>
                 <p className="text-dd-text font-semibold italic">
-                  &quot;{grokMessage.content.replace(/^⤷ Em resposta a @.+: "[\s\S]+"\n\n/, "")}
+                  &quot;{grokMessage.content.replace(/^⤷ Em resposta a @.+: "[\s\S]+"\n\n/, '')}
                   &quot;
                 </p>
               </div>
@@ -1434,7 +1434,7 @@ export default function MessagesPage() {
             initial={{ opacity: 0, y: 15, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 15, scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             className="fixed bottom-6 right-6 z-[200] bg-dd-surface border border-dd-border text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5"
           >
             <span className="w-2 h-2 bg-orange-500 rounded-full animate-ping" />

@@ -1,16 +1,16 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getAuthUser } from "@/lib/auth";
-import { awardXP } from "@/lib/xp";
-import { Language } from "@prisma/client";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth';
+import { awardXP } from '@/lib/xp';
+import { Language } from '@prisma/client';
 
-const VALID_REACTIONS = ["FIRE", "HEART", "LAUGH", "CLAP", "BULB"];
+const VALID_REACTIONS = ['FIRE', 'HEART', 'LAUGH', 'CLAP', 'BULB'];
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getAuthUser();
     if (!user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     const { id: postId } = await params;
@@ -18,7 +18,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const { type } = body; // 'FIRE' | 'HEART' | 'LAUGH' | 'CLAP' | 'BULB' | null
 
     if (type !== null && !VALID_REACTIONS.includes(type)) {
-      return NextResponse.json({ error: "Tipo de reação inválido" }, { status: 400 });
+      return NextResponse.json({ error: 'Tipo de reação inválido' }, { status: 400 });
     }
 
     // Verificar se o post existe
@@ -27,7 +27,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     });
 
     if (!post) {
-      return NextResponse.json({ error: "Postagem não encontrada" }, { status: 404 });
+      return NextResponse.json({ error: 'Postagem não encontrada' }, { status: 404 });
     }
 
     // Verificar se já existe uma reação deste usuário para este post
@@ -91,9 +91,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       return NextResponse.json({ success: true, reaction: created.type });
     }
   } catch (error: any) {
-    console.error("Error managing reaction:", error);
+    console.error('Error managing reaction:', error);
     return NextResponse.json(
-      { error: error.message || "Erro ao processar reação" },
+      { error: error.message || 'Erro ao processar reação' },
       { status: 500 }
     );
   }

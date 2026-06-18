@@ -1,7 +1,7 @@
-import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
-import { getAuthUser } from "@/lib/auth";
-import { DuelsContent } from "./DuelsContent";
+import { redirect } from 'next/navigation';
+import { prisma } from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth';
+import { DuelsContent } from './DuelsContent';
 
 export const revalidate = 0; // Desabilitar cache para dados dinâmicos de duelos
 
@@ -9,12 +9,12 @@ export default async function DuelsPage() {
   const user = await getAuthUser();
 
   if (!user) {
-    redirect("/login");
+    redirect('/login');
   }
 
   // Buscar todos os duelos
   const duels = await prisma.duel.findMany({
-    orderBy: { created_at: "desc" },
+    orderBy: { created_at: 'desc' },
     include: {
       challenger: {
         select: { username: true, avatar_url: true },

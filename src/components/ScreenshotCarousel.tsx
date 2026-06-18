@@ -21,38 +21,44 @@ export function ScreenshotCarousel() {
       name: 'feed',
       title: 'Feed Principal',
       url: 'devdeck.com/feed',
-      description: 'Discussões técnicas em tempo real. Poste dúvidas de código e veja a comunidade debater soluções.'
+      description:
+        'Discussões técnicas em tempo real. Poste dúvidas de código e veja a comunidade debater soluções.',
     },
     {
       name: 'trails',
       title: 'Trilhas de Linguagem',
       url: 'devdeck.com/trails',
-      description: 'Progresso ativo por linguagem. Acompanhe seu XP em TypeScript, Python, Rust, Go e suba de nível.'
+      description:
+        'Progresso ativo por linguagem. Acompanhe seu XP em TypeScript, Python, Rust, Go e suba de nível.',
     },
     {
       name: 'ducky',
       title: 'Pato de Borracha (Ducky)',
       url: 'devdeck.com/ducky',
-      description: 'Nosso assistente com IA. Debugue e comente linhas de código diretamente no editor integrado.'
+      description:
+        'Nosso assistente com IA. Debugue e comente linhas de código diretamente no editor integrado.',
     },
     {
       name: 'duels',
       title: 'Duelos de Performance',
       url: 'devdeck.com/duels',
-      description: 'Batalhas de código. Desafie colegas e submeta a melhor implementação de algoritmos sob avaliação da IA.'
+      description:
+        'Batalhas de código. Desafie colegas e submeta a melhor implementação de algoritmos sob avaliação da IA.',
     },
     {
       name: 'leaderboard',
       title: 'Leaderboard Global',
       url: 'devdeck.com/leaderboard',
-      description: 'Rankings semanais e gerais. Garanta seu lugar no topo e compita com engenheiros do mundo todo.'
+      description:
+        'Rankings semanais e gerais. Garanta seu lugar no topo e compita com engenheiros do mundo todo.',
     },
     {
       name: 'profile',
       title: 'Perfil Técnico',
       url: 'devdeck.com/profile/pedrodev',
-      description: 'Seu currículo vivo. Exiba seu histórico de contribuições, badges raras e link do GitHub integrado.'
-    }
+      description:
+        'Seu currículo vivo. Exiba seu histórico de contribuições, badges raras e link do GitHub integrado.',
+    },
   ];
 
   // Auto-play effect: changes slide every 4.5 seconds, pauses on hover
@@ -80,7 +86,7 @@ export function ScreenshotCarousel() {
   return (
     <div className="w-full max-w-5xl mx-auto space-y-4 select-none">
       {/* Browser Mockup Frame */}
-      <div 
+      <div
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className="relative rounded-2xl border border-dd-border bg-dd-bg shadow-[0_25px_60px_-15px_rgba(0,0,0,0.4)] overflow-hidden transition-all duration-300"
@@ -93,7 +99,7 @@ export function ScreenshotCarousel() {
             <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
             <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
           </div>
-          
+
           {/* Address Bar */}
           <div className="flex items-center gap-1.5 px-6 py-1 rounded-md bg-dd-bg border border-dd-border/50 text-[10px] text-dd-muted font-mono w-48 md:w-80 justify-center">
             <span className="text-orange-500/80">https://</span>
@@ -105,8 +111,8 @@ export function ScreenshotCarousel() {
             <button
               onClick={() => setDisplayTheme('light')}
               className={`p-1 rounded transition-colors ${
-                displayTheme === 'light' 
-                  ? 'bg-orange-500 text-white' 
+                displayTheme === 'light'
+                  ? 'bg-orange-500 text-white'
                   : 'text-dd-muted hover:text-dd-text'
               }`}
               title="Modo Claro"
@@ -116,8 +122,8 @@ export function ScreenshotCarousel() {
             <button
               onClick={() => setDisplayTheme('dark')}
               className={`p-1 rounded transition-colors ${
-                displayTheme === 'dark' 
-                  ? 'bg-orange-500 text-white' 
+                displayTheme === 'dark'
+                  ? 'bg-orange-500 text-white'
                   : 'text-dd-muted hover:text-dd-text'
               }`}
               title="Modo Escuro"
@@ -131,10 +137,10 @@ export function ScreenshotCarousel() {
         <div className="relative aspect-[1440/900] bg-dd-surface/20 flex items-center justify-center overflow-hidden">
           {/* Motion image container using framer-motion AnimatePresence for smooth crossfades */}
           <AnimatePresence initial={false}>
-            <motion.img 
+            <motion.img
               key={imagePath}
-              src={imagePath} 
-              alt={current.title} 
+              src={imagePath}
+              alt={current.title}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -171,9 +177,7 @@ export function ScreenshotCarousel() {
             key={idx}
             onClick={() => setCurrentIndex(idx)}
             className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-              currentIndex === idx 
-                ? 'bg-orange-500 w-3.5' 
-                : 'bg-dd-border hover:bg-dd-muted'
+              currentIndex === idx ? 'bg-orange-500 w-3.5' : 'bg-dd-border hover:bg-dd-muted'
             }`}
             title={`Slide ${idx + 1}`}
           />
@@ -185,9 +189,7 @@ export function ScreenshotCarousel() {
         <h4 className="text-sm font-black text-dd-text uppercase tracking-wide">
           {current.title} ({displayTheme === 'light' ? 'Modo Claro' : 'Modo Escuro'})
         </h4>
-        <p className="text-xs text-dd-muted leading-relaxed">
-          {current.description}
-        </p>
+        <p className="text-xs text-dd-muted leading-relaxed">{current.description}</p>
       </div>
     </div>
   );

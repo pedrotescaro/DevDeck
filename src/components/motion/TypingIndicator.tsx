@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
 
 interface TypingIndicatorProps {
   username?: string;
@@ -20,9 +20,7 @@ export function TypingIndicator({ username }: TypingIndicatorProps) {
         <span className="dd-typing-dot" />
       </div>
       {username && (
-        <span className="text-[10px] text-dd-muted font-medium">
-          {username} esta digitando...
-        </span>
+        <span className="text-[10px] text-dd-muted font-medium">{username} esta digitando...</span>
       )}
     </motion.div>
   );

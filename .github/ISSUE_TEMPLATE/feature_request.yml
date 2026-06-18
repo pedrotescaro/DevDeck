@@ -1,7 +1,7 @@
-name: "feature_request"
-description: "Sugira uma melhoria ou nova funcionalidade para a plataforma."
-title: "[FEAT]: "
-labels: ["enhancement"]
+name: 'feature_request'
+description: 'Sugira uma melhoria ou nova funcionalidade para a plataforma.'
+title: '[FEAT]: '
+labels: ['enhancement']
 body:
   - type: markdown
     attributes:
@@ -10,32 +10,32 @@ body:
   - type: textarea
     id: problem
     attributes:
-      label: "Esta sugestão resolve algum problema?"
-      description: "Descreva a dor ou limitação que motivou sua sugestão de melhoria."
-      placeholder: "Ex: É difícil acompanhar se minhas respostas no fórum foram visualizadas..."
+      label: 'Esta sugestão resolve algum problema?'
+      description: 'Descreva a dor ou limitação que motivou sua sugestão de melhoria.'
+      placeholder: 'Ex: É difícil acompanhar se minhas respostas no fórum foram visualizadas...'
     validations:
       required: true
   - type: textarea
     id: solution
     attributes:
-      label: "Qual é a solução proposta?"
-      description: "Explique como você imagina que essa funcionalidade deve funcionar e ser visualizada."
-      placeholder: "Ex: Adicionar uma bolinha vermelha de notificação em tempo real..."
+      label: 'Qual é a solução proposta?'
+      description: 'Explique como você imagina que essa funcionalidade deve funcionar e ser visualizada.'
+      placeholder: 'Ex: Adicionar uma bolinha vermelha de notificação em tempo real...'
     validations:
       required: true
   - type: textarea
     id: alternatives
     attributes:
-      label: "Alternativas Consideradas"
-      description: "Você pensou em caminhos ou soluções alternativas? Descreva-os aqui."
-      placeholder: "Ex: Poderíamos mandar e-mails semanais, mas prefiro notificações in-app..."
+      label: 'Alternativas Consideradas'
+      description: 'Você pensou em caminhos ou soluções alternativas? Descreva-os aqui.'
+      placeholder: 'Ex: Poderíamos mandar e-mails semanais, mas prefiro notificações in-app...'
     validations:
       required: false
   - type: textarea
     id: context
     attributes:
-      label: "Contexto Adicional"
-      description: "Qualquer outra imagem, print, ou informação sobre sua sugestão."
-      placeholder: "Ex: Link de referência, mockups ou fluxogramas..."
+      label: 'Contexto Adicional'
+      description: 'Qualquer outra imagem, print, ou informação sobre sua sugestão.'
+      placeholder: 'Ex: Link de referência, mockups ou fluxogramas...'
     validations:
       required: false

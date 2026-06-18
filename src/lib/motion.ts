@@ -1,10 +1,10 @@
-import { Variants } from "framer-motion";
+import { Variants } from 'framer-motion';
 
 /* ── Spring Configs ── */
-export const springSnappy = { type: "spring" as const, stiffness: 500, damping: 28, mass: 0.8 };
-export const springBouncy = { type: "spring" as const, stiffness: 400, damping: 15, mass: 0.6 };
-export const springGentle = { type: "spring" as const, stiffness: 260, damping: 24 };
-export const springReaction = { type: "spring" as const, stiffness: 600, damping: 20, mass: 0.5 };
+export const springSnappy = { type: 'spring' as const, stiffness: 500, damping: 28, mass: 0.8 };
+export const springBouncy = { type: 'spring' as const, stiffness: 400, damping: 15, mass: 0.6 };
+export const springGentle = { type: 'spring' as const, stiffness: 260, damping: 24 };
+export const springReaction = { type: 'spring' as const, stiffness: 600, damping: 20, mass: 0.5 };
 
 /* ── Base Variants ── */
 export const fadeVariants: Variants = {
@@ -57,16 +57,16 @@ export const reactionItemVariants: Variants = {
 
 /* ── Bottom Sheet (draft discard) ── */
 export const bottomSheetVariants: Variants = {
-  hidden: { y: "100%", opacity: 0 },
+  hidden: { y: '100%', opacity: 0 },
   visible: { y: 0, opacity: 1, transition: { ...springGentle, duration: 0.3 } },
-  exit: { y: "100%", opacity: 0, transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] } },
+  exit: { y: '100%', opacity: 0, transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] } },
 };
 
 /* ── Optimistic Post ── */
 export const optimisticPostVariants: Variants = {
   hidden: { opacity: 0, y: -20, scale: 0.98 },
   visible: { opacity: 1, y: 0, scale: 1, transition: { ...springGentle, duration: 0.3 } },
-  exit: { opacity: 0, scale: 0.95, transition: { duration: 0.3, ease: "easeOut" } },
+  exit: { opacity: 0, scale: 0.95, transition: { duration: 0.3, ease: 'easeOut' } },
 };
 
 /* ── Level Up Overlay ── */
@@ -82,7 +82,7 @@ export const levelUpBadgeVariants: Variants = {
     scale: [0.5, 1.1, 1],
     rotate: [-10, 4, 0],
     opacity: 1,
-    transition: { duration: 0.4, ease: "easeOut" },
+    transition: { duration: 0.4, ease: 'easeOut' },
   },
 };
 
@@ -95,8 +95,8 @@ export const crossfadeVariants: Variants = {
 
 /* ── Slide Down (content reveal) ── */
 export const slideDownVariants: Variants = {
-  hidden: { height: 0, opacity: 0, overflow: "hidden" as const },
-  visible: { height: "auto", opacity: 1, transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] } },
+  hidden: { height: 0, opacity: 0, overflow: 'hidden' as const },
+  visible: { height: 'auto', opacity: 1, transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] } },
   exit: { height: 0, opacity: 0, transition: { duration: 0.15 } },
 };
 

@@ -1,11 +1,8 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getAuthUser } from "@/lib/auth";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth';
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const currentUser = await getAuthUser();
@@ -28,14 +25,14 @@ export async function GET(
     const users = await Promise.all(
       follows.map(async (f) => {
         const isFollowing = currentUser
-          ? await prisma.follow.findUnique({
+          ? (await prisma.follow.findUnique({
               where: {
                 follower_id_following_id: {
                   follower_id: currentUser.id,
                   following_id: f.follower.id,
                 },
               },
-            }) !== null
+            })) !== null
           : false;
 
         return {
@@ -50,7 +47,7 @@ export async function GET(
 
     return NextResponse.json(users);
   } catch (error) {
-    console.error("Error fetching followers:", error);
-    return NextResponse.json({ error: "Erro ao buscar seguidores" }, { status: 500 });
+    console.error('Error fetching followers:', error);
+    return NextResponse.json({ error: 'Erro ao buscar seguidores' }, { status: 500 });
   }
 }

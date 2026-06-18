@@ -1,22 +1,22 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-"use client";
+'use client';
 
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
-import { Sidebar } from "@/components/Sidebar";
-import { Footer } from "@/components/Footer";
-import { LanguageTag } from "@/components/LanguageTag";
-import { BookmarkButton } from "@/components/motion/BookmarkButton";
-import { RepostMenu } from "@/components/motion/RepostMenu";
-import { LikeButton } from "@/components/motion/LikeButton";
-import { ExpandedReactionButton } from "@/components/motion/ExpandedReactions";
-import { AnimatedCounter } from "@/components/motion/AnimatedCounter";
-import { EmptyState } from "@/components/motion/EmptyState";
-import { cn } from "@/lib/cn";
-import { springGentle } from "@/lib/motion";
-import { parseMentions } from "@/lib/mentions";
+import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
+import { Sidebar } from '@/components/Sidebar';
+import { Footer } from '@/components/Footer';
+import { LanguageTag } from '@/components/LanguageTag';
+import { BookmarkButton } from '@/components/motion/BookmarkButton';
+import { RepostMenu } from '@/components/motion/RepostMenu';
+import { LikeButton } from '@/components/motion/LikeButton';
+import { ExpandedReactionButton } from '@/components/motion/ExpandedReactions';
+import { AnimatedCounter } from '@/components/motion/AnimatedCounter';
+import { EmptyState } from '@/components/motion/EmptyState';
+import { cn } from '@/lib/cn';
+import { springGentle } from '@/lib/motion';
+import { parseMentions } from '@/lib/mentions';
 import {
   ArrowLeft,
   Search,
@@ -28,7 +28,7 @@ import {
   ChevronRight,
   Heart,
   BarChart2,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface BookmarksContentProps {
   user: {
@@ -46,8 +46,8 @@ function getLevelFromXp(xp: number) {
 
 function highlightMatches(text: string, query: string) {
   if (!query.trim()) return text;
-  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const parts = text.split(new RegExp(`(${escaped})`, "ig"));
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const parts = text.split(new RegExp(`(${escaped})`, 'ig'));
   return parts.map((part, index) => {
     if (part.toLowerCase() === query.toLowerCase()) {
       return (
@@ -63,18 +63,18 @@ function highlightMatches(text: string, query: string) {
 export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) {
   const router = useRouter();
   const [posts, setPosts] = useState<any[]>(initialPosts);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Estados para suportar interação de votos, reposts e reações no feed de bookmarks
   const [votes, setVotes] = useState<
-    Record<string, { up: number; userVote: "up" | "down" | null }>
+    Record<string, { up: number; userVote: 'up' | 'down' | null }>
   >(() => {
-    const initialVotes: Record<string, { up: number; userVote: "up" | "down" | null }> = {};
+    const initialVotes: Record<string, { up: number; userVote: 'up' | 'down' | null }> = {};
     initialPosts.forEach((post) => {
       const userVoteRecord = post.votes?.[0];
       initialVotes[post.id] = {
         up: post.upvotes ?? 0,
-        userVote: userVoteRecord ? (userVoteRecord.value === 1 ? "up" : "down") : null,
+        userVote: userVoteRecord ? (userVoteRecord.value === 1 ? 'up' : 'down') : null,
       };
     });
     return initialVotes;
@@ -114,10 +114,10 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
 
     try {
       await fetch(`/api/posts/${postId}/bookmark`, {
-        method: "POST",
+        method: 'POST',
       });
     } catch (err) {
-      console.error("Failed to remove bookmark:", err);
+      console.error('Failed to remove bookmark:', err);
       // Caso dê erro, re-adicionar o post
       const originalPost = initialPosts.find((p) => p.id === postId);
       if (originalPost) {
@@ -126,25 +126,25 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
     }
   };
 
-  const handleVote = async (postId: string, type: "up" | "down") => {
+  const handleVote = async (postId: string, type: 'up' | 'down') => {
     const current = votes[postId] || { up: 0, userVote: null };
     let newValue: number;
-    let newVoteType: "up" | "down" | null;
+    let newVoteType: 'up' | 'down' | null;
 
     if (current.userVote === type) {
       newValue = 0; // Cancelar voto
       newVoteType = null;
     } else {
-      newValue = type === "up" ? 1 : -1;
+      newValue = type === 'up' ? 1 : -1;
       newVoteType = type;
     }
 
     // Calcular nova contagem de upvotes locais
     let diff = 0;
-    if (current.userVote === "up") diff -= 1;
-    if (current.userVote === "down") diff += 1;
-    if (newVoteType === "up") diff += 1;
-    if (newVoteType === "down") diff -= 1;
+    if (current.userVote === 'up') diff -= 1;
+    if (current.userVote === 'down') diff += 1;
+    if (newVoteType === 'up') diff += 1;
+    if (newVoteType === 'down') diff -= 1;
 
     setVotes((prev) => ({
       ...prev,
@@ -156,22 +156,22 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
 
     try {
       await fetch(`/api/posts/${postId}/vote`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ value: newValue }),
       });
     } catch (err) {
-      console.error("Failed to submit vote:", err);
+      console.error('Failed to submit vote:', err);
     }
   };
 
   const handleReactionSelect = (postId: string, reaction: string | null) => {
     const currentVote = votes[postId] || { up: 0, userVote: null };
-    const hasUpvote = currentVote.userVote === "up";
+    const hasUpvote = currentVote.userVote === 'up';
 
     if (!hasUpvote) {
       setActiveReactions((prev) => ({ ...prev, [postId]: reaction ?? null }));
-      handleVote(postId, "up");
+      handleVote(postId, 'up');
       return;
     }
 
@@ -181,7 +181,7 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
     }
 
     setActiveReactions((prev) => ({ ...prev, [postId]: null }));
-    handleVote(postId, "up");
+    handleVote(postId, 'up');
   };
 
   const handleRepost = (postId: string) => {
@@ -203,12 +203,12 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
 
   const highlightCode = (code: string) => {
     if (!code) return null;
-    const lines = code.split("\n");
+    const lines = code.split('\n');
     return (
       <pre className="font-mono text-[11px] leading-relaxed text-dd-text">
         <code>
           {lines.map((line, idx) => {
-            let html = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            let html = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
             const keywords =
               /\b(const|let|var|function|return|fn|impl|pub|use|import|from|def|class|async|await|struct|enum|if|else|for|while|match)\b/g;
@@ -218,20 +218,20 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
               /\b(string|number|boolean|any|void|User|Post|Language|int|float|str|char)\b/g;
             html = html.replace(types, '<span class="text-cyan-400 font-medium">$1</span>');
 
-            if (html.includes("//")) {
-              const parts = html.split("//");
+            if (html.includes('//')) {
+              const parts = html.split('//');
               html =
                 parts[0] +
                 '<span class="text-dd-muted italic">//' +
-                parts.slice(1).join("//") +
-                "</span>";
-            } else if (html.startsWith("#") || html.includes(" #")) {
-              const parts = html.split("#");
+                parts.slice(1).join('//') +
+                '</span>';
+            } else if (html.startsWith('#') || html.includes(' #')) {
+              const parts = html.split('#');
               html =
                 parts[0] +
                 '<span class="text-dd-muted italic">#' +
-                parts.slice(1).join("#") +
-                "</span>";
+                parts.slice(1).join('#') +
+                '</span>';
             }
 
             return (
@@ -269,7 +269,7 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
                 Itens salvos
               </h1>
               <p className="text-dd-muted text-[10px] uppercase font-bold tracking-wider">
-                {posts.length} {posts.length === 1 ? "publicação salva" : "publicações salvas"}
+                {posts.length} {posts.length === 1 ? 'publicação salva' : 'publicações salvas'}
               </p>
             </div>
           </div>
@@ -296,13 +296,13 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
                 <div className="space-y-1">
                   <h3 className="text-sm font-bold text-dd-text">
                     {searchQuery.trim()
-                      ? "Nenhum resultado encontrado"
-                      : "Salvar publicações para depois"}
+                      ? 'Nenhum resultado encontrado'
+                      : 'Salvar publicações para depois'}
                   </h3>
                   <p className="text-[11px] text-dd-muted leading-relaxed">
                     {searchQuery.trim()
-                      ? "Experimente buscar por outros termos de título, tags ou conteúdo."
-                      : "Não deixe posts interessantes passarem! Salve-os em sua barra de ações para ler ou estudar com calma mais tarde."}
+                      ? 'Experimente buscar por outros termos de título, tags ou conteúdo.'
+                      : 'Não deixe posts interessantes passarem! Salve-os em sua barra de ações para ler ou estudar com calma mais tarde.'}
                   </p>
                 </div>
               </div>
@@ -378,7 +378,7 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
                                   alt={post.title}
                                   className="w-full h-full object-cover max-h-80"
                                   onError={(e) => {
-                                    (e.target as HTMLElement).style.display = "none";
+                                    (e.target as HTMLElement).style.display = 'none';
                                   }}
                                 />
                               </div>
@@ -420,8 +420,8 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
                             {/* 3. Heart/Like button */}
                             <LikeButton
                               count={vote.up}
-                              isActive={vote.userVote === "up"}
-                              onToggle={() => handleVote(post.id, "up")}
+                              isActive={vote.userVote === 'up'}
+                              onToggle={() => handleVote(post.id, 'up')}
                               title="Curtir post"
                             />
 
@@ -437,7 +437,7 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
 
                             {/* 5. Report button */}
                             <button
-                              onClick={() => alert("Denúncia enviada.")}
+                              onClick={() => alert('Denúncia enviada.')}
                               className="p-1 rounded-md text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer flex items-center justify-center"
                               title="Denunciar postagem"
                             >

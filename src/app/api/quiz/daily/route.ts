@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getAuthUser } from "@/lib/auth";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth';
 
 export async function GET(request: Request) {
   try {
     const user = await getAuthUser();
     if (!user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     const today = new Date();
@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     if (!quiz) {
       quiz = await prisma.quiz.findFirst({
         where: { is_daily: true },
-        orderBy: { created_at: "desc" },
+        orderBy: { created_at: 'desc' },
       });
     }
 
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ quiz, attempt });
   } catch (error) {
-    console.error("Error fetching daily quiz:", error);
-    return NextResponse.json({ error: "Erro ao carregar quiz diário" }, { status: 500 });
+    console.error('Error fetching daily quiz:', error);
+    return NextResponse.json({ error: 'Erro ao carregar quiz diário' }, { status: 500 });
   }
 }

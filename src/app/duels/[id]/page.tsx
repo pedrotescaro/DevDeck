@@ -1,7 +1,7 @@
-import { redirect, notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
-import { getAuthUser } from "@/lib/auth";
-import { DuelDetailContent } from "./DuelDetailContent";
+import { redirect, notFound } from 'next/navigation';
+import { prisma } from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth';
+import { DuelDetailContent } from './DuelDetailContent';
 
 export const revalidate = 0; // Desabilitar cache para dados dinâmicos de duelos em tempo real
 
@@ -9,7 +9,7 @@ export default async function DuelDetailPage({ params }: { params: Promise<{ id:
   const user = await getAuthUser();
 
   if (!user) {
-    redirect("/login");
+    redirect('/login');
   }
 
   const { id } = await params;

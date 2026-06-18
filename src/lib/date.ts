@@ -6,9 +6,9 @@ export function formatRelativeTime(dateString: string | Date): string {
   const diffHours = Math.floor(diffMins / 60);
   const diffDays = Math.floor(diffHours / 24);
 
-  if (diffMins < 1) return "agora";
+  if (diffMins < 1) return 'agora';
   if (diffMins < 60) return `${diffMins}m atrás`;
   if (diffHours < 24) return `${diffHours}h atrás`;
   if (diffDays < 30) return `${diffDays}d atrás`;
-  return date.toLocaleDateString("pt-BR");
+  return date.toLocaleDateString('pt-BR');
 }

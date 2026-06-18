@@ -1,15 +1,15 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getAuthUser } from "@/lib/auth";
-import { quizAttemptSchema } from "@/lib/validators";
-import { awardXP } from "@/lib/xp";
-import { findTrailQuestionById } from "@/lib/trailsData";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth';
+import { quizAttemptSchema } from '@/lib/validators';
+import { awardXP } from '@/lib/xp';
+import { findTrailQuestionById } from '@/lib/trailsData';
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getAuthUser();
     if (!user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     const { id: quizId } = await params;
@@ -29,7 +29,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       // Verificar se é um quiz de trilha (duolingo-like)
       const trailInfo = findTrailQuestionById(quizId);
       if (!trailInfo) {
-        return NextResponse.json({ error: "Quiz não encontrado" }, { status: 404 });
+        return NextResponse.json({ error: 'Quiz não encontrado' }, { status: 404 });
       }
 
       // Registrar dinamicamente no banco para respeitar a integridade referencial
@@ -119,7 +119,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (xpResult) {
       const updatedUser = await prisma.user.findUnique({
         where: { id: user.id },
-        select: { total_xp: true }
+        select: { total_xp: true },
       });
       formattedXpResult = {
         newTotalXp: updatedUser?.total_xp ?? user.total_xp,
@@ -135,7 +135,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       xpResult: formattedXpResult,
     });
   } catch (error) {
-    console.error("Error attempting quiz:", error);
-    return NextResponse.json({ error: "Erro ao tentar responder o quiz" }, { status: 500 });
+    console.error('Error attempting quiz:', error);
+    return NextResponse.json({ error: 'Erro ao tentar responder o quiz' }, { status: 500 });
   }
 }

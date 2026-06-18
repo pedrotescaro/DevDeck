@@ -1,17 +1,17 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { Language } from "@prisma/client";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { Language } from '@prisma/client';
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const language = searchParams.get("language");
+    const language = searchParams.get('language');
 
     if (language) {
       // Leaderboard filtrado por linguagem
       const leaders = await prisma.languageTrail.findMany({
         where: { language: language as Language },
-        orderBy: { xp: "desc" },
+        orderBy: { xp: 'desc' },
         take: 10,
         include: {
           user: {
@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     } else {
       // Leaderboard global baseado no total_xp do usuário
       const leaders = await prisma.user.findMany({
-        orderBy: { total_xp: "desc" },
+        orderBy: { total_xp: 'desc' },
         take: 10,
         select: {
           username: true,
@@ -56,7 +56,7 @@ export async function GET(request: Request) {
       return NextResponse.json(formatted);
     }
   } catch (error) {
-    console.error("Error fetching leaderboard:", error);
-    return NextResponse.json({ error: "Erro ao buscar ranking" }, { status: 500 });
+    console.error('Error fetching leaderboard:', error);
+    return NextResponse.json({ error: 'Erro ao buscar ranking' }, { status: 500 });
   }
 }

@@ -9,11 +9,17 @@ export function Footer() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="DevDeck Logo" className="w-5 h-5 object-contain hidden dark:block" />
-            <img src="/logo-light.png" alt="DevDeck Logo" className="w-5 h-5 object-contain block dark:hidden" />
-            <span className="text-dd-text font-bold text-sm">
-              DevDeck
-            </span>
+            <img
+              src="/logo.png"
+              alt="DevDeck Logo"
+              className="w-5 h-5 object-contain hidden dark:block"
+            />
+            <img
+              src="/logo-light.png"
+              alt="DevDeck Logo"
+              className="w-5 h-5 object-contain block dark:hidden"
+            />
+            <span className="text-dd-text font-bold text-sm">DevDeck</span>
           </div>
 
           {/* Links */}
@@ -26,16 +32,10 @@ export function Footer() {
             >
               GitHub
             </Link>
-            <Link
-              href="#"
-              className="text-dd-muted hover:text-dd-text text-xs transition-colors"
-            >
+            <Link href="#" className="text-dd-muted hover:text-dd-text text-xs transition-colors">
               Sobre
             </Link>
-            <Link
-              href="#"
-              className="text-dd-muted hover:text-dd-text text-xs transition-colors"
-            >
+            <Link href="#" className="text-dd-muted hover:text-dd-text text-xs transition-colors">
               Termos
             </Link>
           </div>

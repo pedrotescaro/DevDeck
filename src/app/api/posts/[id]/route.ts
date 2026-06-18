@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getAuthUser } from "@/lib/auth";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth';
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -28,7 +28,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
           },
         },
         answers: {
-          orderBy: { created_at: "asc" },
+          orderBy: { created_at: 'asc' },
           include: {
             author: {
               select: {
@@ -36,27 +36,27 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
                 avatar_url: true,
               },
             },
-            votes: user ? { where: { user_id: user.id } } : { where: { id: "none" } },
+            votes: user ? { where: { user_id: user.id } } : { where: { id: 'none' } },
           },
         },
         quizzes: {
           include: {
-            attempts: user ? { where: { user_id: user.id } } : { where: { id: "none" } },
+            attempts: user ? { where: { user_id: user.id } } : { where: { id: 'none' } },
           },
         },
-        votes: user ? { where: { user_id: user.id } } : { where: { id: "none" } },
-        bookmarks: user ? { where: { user_id: user.id } } : { where: { id: "none" } },
+        votes: user ? { where: { user_id: user.id } } : { where: { id: 'none' } },
+        bookmarks: user ? { where: { user_id: user.id } } : { where: { id: 'none' } },
       },
     });
 
     if (!post) {
-      return NextResponse.json({ error: "Post não encontrado" }, { status: 404 });
+      return NextResponse.json({ error: 'Post não encontrado' }, { status: 404 });
     }
 
     return NextResponse.json(post);
   } catch (error) {
-    console.error("Error fetching post details:", error);
-    return NextResponse.json({ error: "Erro ao buscar detalhes do post" }, { status: 500 });
+    console.error('Error fetching post details:', error);
+    return NextResponse.json({ error: 'Erro ao buscar detalhes do post' }, { status: 500 });
   }
 }
 
@@ -66,7 +66,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     const user = await getAuthUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
     }
 
     const post = await prisma.post.findUnique({
@@ -75,11 +75,11 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     });
 
     if (!post) {
-      return NextResponse.json({ error: "Post não encontrado" }, { status: 404 });
+      return NextResponse.json({ error: 'Post não encontrado' }, { status: 404 });
     }
 
     if (post.author_id !== user.id) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 403 });
     }
 
     await prisma.post.delete({
@@ -88,7 +88,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting post:", error);
-    return NextResponse.json({ error: "Erro ao deletar post" }, { status: 500 });
+    console.error('Error deleting post:', error);
+    return NextResponse.json({ error: 'Erro ao deletar post' }, { status: 500 });
   }
 }

@@ -1,39 +1,39 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-"use client";
+'use client';
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
-import { Sidebar } from "@/components/Sidebar";
-import { QuizWidget } from "@/components/QuizWidget";
-import { DuelCard } from "@/components/DuelCard";
-import { LanguageTag } from "@/components/LanguageTag";
-import { Footer } from "@/components/Footer";
-import { BadgeEmblem } from "@/components/BadgeGrid";
-import { PostComposerExtras } from "@/components/PostComposerExtras";
-import { appendPostExtras, ReplyAudience, resetPostComposerExtras } from "@/lib/post-composer";
-import { PostSkeletonList } from "@/components/motion/PostSkeleton";
-import { NewPostsPill } from "@/components/motion/NewPostsPill";
-import { PublishButton, PublishState } from "@/components/motion/PublishButton";
-import { XPProgressBar } from "@/components/motion/XPProgressBar";
-import { CharCounter } from "@/components/motion/CharCounter";
-import { MentionDropdown } from "@/components/motion/MentionDropdown";
-import { LikeButton } from "@/components/motion/LikeButton";
-import { ExpandedReactionButton } from "@/components/motion/ExpandedReactions";
-import { AnimatedCounter } from "@/components/motion/AnimatedCounter";
-import { BookmarkButton } from "@/components/motion/BookmarkButton";
-import { RepostMenu } from "@/components/motion/RepostMenu";
-import { EmptyState } from "@/components/motion/EmptyState";
-import { LevelUpOverlay } from "@/components/motion/LevelUpOverlay";
-import { TabSwitcher } from "@/components/motion/TabSwitcher";
-import { POST_CHAR_LIMIT, crossfadeVariants, springGentle } from "@/lib/motion";
-import { cn } from "@/lib/cn";
-import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
-import { useSearchWithDebounce } from "@/hooks/useSearchWithDebounce";
-import { useSoundEffects } from "@/hooks/useSoundEffects";
-import { Language } from "@prisma/client";
-import { parseMentions } from "@/lib/mentions";
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
+import { Sidebar } from '@/components/Sidebar';
+import { QuizWidget } from '@/components/QuizWidget';
+import { DuelCard } from '@/components/DuelCard';
+import { LanguageTag } from '@/components/LanguageTag';
+import { Footer } from '@/components/Footer';
+import { BadgeEmblem } from '@/components/BadgeGrid';
+import { PostComposerExtras } from '@/components/PostComposerExtras';
+import { appendPostExtras, ReplyAudience, resetPostComposerExtras } from '@/lib/post-composer';
+import { PostSkeletonList } from '@/components/motion/PostSkeleton';
+import { NewPostsPill } from '@/components/motion/NewPostsPill';
+import { PublishButton, PublishState } from '@/components/motion/PublishButton';
+import { XPProgressBar } from '@/components/motion/XPProgressBar';
+import { CharCounter } from '@/components/motion/CharCounter';
+import { MentionDropdown } from '@/components/motion/MentionDropdown';
+import { LikeButton } from '@/components/motion/LikeButton';
+import { ExpandedReactionButton } from '@/components/motion/ExpandedReactions';
+import { AnimatedCounter } from '@/components/motion/AnimatedCounter';
+import { BookmarkButton } from '@/components/motion/BookmarkButton';
+import { RepostMenu } from '@/components/motion/RepostMenu';
+import { EmptyState } from '@/components/motion/EmptyState';
+import { LevelUpOverlay } from '@/components/motion/LevelUpOverlay';
+import { TabSwitcher } from '@/components/motion/TabSwitcher';
+import { POST_CHAR_LIMIT, crossfadeVariants, springGentle } from '@/lib/motion';
+import { cn } from '@/lib/cn';
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
+import { useSearchWithDebounce } from '@/hooks/useSearchWithDebounce';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
+import { Language } from '@prisma/client';
+import { parseMentions } from '@/lib/mentions';
 import {
   Flame,
   Award,
@@ -55,7 +55,7 @@ import {
   Heart,
   BarChart2,
   ChevronDown,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface LanguageTrail {
   id: string;
@@ -81,8 +81,8 @@ function getLevelFromXp(xp: number) {
 
 function highlightMatches(text: string, query: string) {
   if (!query.trim()) return text;
-  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const parts = text.split(new RegExp(`(${escaped})`, "ig"));
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const parts = text.split(new RegExp(`(${escaped})`, 'ig'));
   return parts.map((part, index) => {
     if (part.toLowerCase() === query.toLowerCase()) {
       return (
@@ -117,21 +117,21 @@ export function FeedContent({
   initialBookmarks = {},
 }: FeedContentProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"feed" | "quizzes" | "duels" | "ranking">("feed");
-  const [feedFilter, setFeedFilter] = useState<"for-you" | "following">("for-you");
-  const [followingSort, setFollowingSort] = useState<"recent" | "popular">("recent");
+  const [activeTab, setActiveTab] = useState<'feed' | 'quizzes' | 'duels' | 'ranking'>('feed');
+  const [feedFilter, setFeedFilter] = useState<'for-you' | 'following'>('for-you');
+  const [followingSort, setFollowingSort] = useState<'recent' | 'popular'>('recent');
   const [showFollowingSortMenu, setShowFollowingSortMenu] = useState(false);
   const [posts, setPosts] = useState<any[]>(initialPosts);
   const [duels, setDuels] = useState<any[]>(initialDuels);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
-  const [leaderboardLanguage, setLeaderboardLanguage] = useState<string>("GLOBAL");
+  const [leaderboardLanguage, setLeaderboardLanguage] = useState<string>('GLOBAL');
 
   // Post Form state
-  const [postTitle, setPostTitle] = useState("");
-  const [postBody, setPostBody] = useState("");
-  const [postLanguage, setPostLanguage] = useState<string>("TS");
-  const [postCode, setPostCode] = useState("");
-  const [publishState, setPublishState] = useState<PublishState>("idle");
+  const [postTitle, setPostTitle] = useState('');
+  const [postBody, setPostBody] = useState('');
+  const [postLanguage, setPostLanguage] = useState<string>('TS');
+  const [postCode, setPostCode] = useState('');
+  const [publishState, setPublishState] = useState<PublishState>('idle');
   const [composeFocused, setComposeFocused] = useState(false);
   const [postError, setPostError] = useState<string | null>(null);
   const getInitialCursor = (items: any[]) => {
@@ -148,10 +148,10 @@ export function FeedContent({
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [newPostsCount, setNewPostsCount] = useState(0);
   const FEED_PAGE_SIZE = 10;
-  const [postType, setPostType] = useState<"question" | "discussion">("question");
-  const [postImage, setPostImage] = useState("");
+  const [postType, setPostType] = useState<'question' | 'discussion'>('question');
+  const [postImage, setPostImage] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [quotePost, setQuotePost] = useState<any | null>(null);
   const [bookmarkedPostIds, setBookmarkedPostIds] =
     useState<Record<string, boolean>>(initialBookmarks);
@@ -169,17 +169,17 @@ export function FeedContent({
 
   useEffect(() => {
     const updateSoundState = () => {
-      setSoundEnabled(localStorage.getItem("devdeck-sound") !== "false");
+      setSoundEnabled(localStorage.getItem('devdeck-sound') !== 'false');
     };
 
     updateSoundState();
 
-    window.addEventListener("storage", updateSoundState);
-    window.addEventListener("devdeck-sound-changed", updateSoundState);
+    window.addEventListener('storage', updateSoundState);
+    window.addEventListener('devdeck-sound-changed', updateSoundState);
 
     return () => {
-      window.removeEventListener("storage", updateSoundState);
-      window.removeEventListener("devdeck-sound-changed", updateSoundState);
+      window.removeEventListener('storage', updateSoundState);
+      window.removeEventListener('devdeck-sound-changed', updateSoundState);
     };
   }, []);
 
@@ -192,16 +192,16 @@ export function FeedContent({
   // Mention Suggestions state
   const [mentionUsers, setMentionUsers] = useState<any[]>([]);
   const [showMentionSuggestions, setShowMentionSuggestions] = useState(false);
-  const [focusedInput, setFocusedInput] = useState<"inline" | "modal" | null>(null);
+  const [focusedInput, setFocusedInput] = useState<'inline' | 'modal' | null>(null);
   const postBodyTextareaRef = useRef<HTMLTextAreaElement>(null);
-  const [replyAudience, setReplyAudience] = useState<ReplyAudience>("everyone");
+  const [replyAudience, setReplyAudience] = useState<ReplyAudience>('everyone');
   const [scheduledAt, setScheduledAt] = useState<string | null>(null);
-  const [postLocation, setPostLocation] = useState("");
+  const [postLocation, setPostLocation] = useState('');
   const [isSensitive, setIsSensitive] = useState(false);
 
   // Report post state
   const [reportModalOpen, setReportModalOpen] = useState(false);
-  const [reportReason, setReportReason] = useState("");
+  const [reportReason, setReportReason] = useState('');
   const [reporting, setReporting] = useState(false);
   const [reported, setReported] = useState(false);
   const [selectedReportPostId, setSelectedReportPostId] = useState<string | null>(null);
@@ -212,8 +212,8 @@ export function FeedContent({
     setReporting(true);
     try {
       const res = await fetch(`/api/posts/${selectedReportPostId}/report`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason: reportReason.trim() }),
       });
       if (res.ok) {
@@ -221,11 +221,11 @@ export function FeedContent({
         setTimeout(() => {
           setReportModalOpen(false);
           setReported(false);
-          setReportReason("");
+          setReportReason('');
           setSelectedReportPostId(null);
         }, 1500);
       } else {
-        alert("Falha ao enviar denúncia.");
+        alert('Falha ao enviar denúncia.');
       }
     } catch (err) {
       console.error(err);
@@ -238,12 +238,12 @@ export function FeedContent({
     if (!searchQuery.trim()) {
       setLoadingSearch(false);
       setFeedError(null);
-      if (posts !== initialPosts || feedFilter !== "for-you") {
+      if (posts !== initialPosts || feedFilter !== 'for-you') {
         const fetchFilteredPosts = async () => {
           setLoadingSearch(true);
           try {
             const url =
-              feedFilter === "following"
+              feedFilter === 'following'
                 ? `/api/posts?filter=following&sort=${followingSort}&limit=${FEED_PAGE_SIZE}&useCursor=true`
                 : `/api/posts?limit=${FEED_PAGE_SIZE}&useCursor=true`;
             const res = await fetch(url);
@@ -254,7 +254,7 @@ export function FeedContent({
               setHasMore(!!data.nextCursor);
             }
           } catch (err) {
-            console.error("Error fetching filtered posts:", err);
+            console.error('Error fetching filtered posts:', err);
           } finally {
             setLoadingSearch(false);
           }
@@ -281,8 +281,8 @@ export function FeedContent({
           setFeedError(null);
         }
       } catch (err) {
-        console.error("Search posts error:", err);
-        setFeedError("Nao foi possivel atualizar a busca agora.");
+        console.error('Search posts error:', err);
+        setFeedError('Nao foi possivel atualizar a busca agora.');
       } finally {
         setLoadingSearch(false);
       }
@@ -296,7 +296,7 @@ export function FeedContent({
       setLoadingSearch(true);
       try {
         const url =
-          feedFilter === "following"
+          feedFilter === 'following'
             ? `/api/posts?filter=following&sort=${followingSort}&limit=${FEED_PAGE_SIZE}&useCursor=true`
             : `/api/posts?limit=${FEED_PAGE_SIZE}&useCursor=true`;
         const res = await fetch(url);
@@ -307,14 +307,14 @@ export function FeedContent({
           setHasMore(!!data.nextCursor);
         }
       } catch (err) {
-        console.error("Error fetching filtered posts:", err);
+        console.error('Error fetching filtered posts:', err);
       } finally {
         setLoadingSearch(false);
       }
     };
 
     // Evita carregar duas vezes no mount inicial
-    if (feedFilter === "following" || (feedFilter === "for-you" && posts !== initialPosts)) {
+    if (feedFilter === 'following' || (feedFilter === 'for-you' && posts !== initialPosts)) {
       fetchFilteredPosts();
     }
   }, [feedFilter, followingSort]);
@@ -323,14 +323,14 @@ export function FeedContent({
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
     try {
-      let url = "";
+      let url = '';
       if (searchQuery.trim()) {
-        url = `/api/search?q=${encodeURIComponent(searchQuery)}&type=posts&limit=${FEED_PAGE_SIZE}${nextCursor ? `&cursor=${nextCursor}` : ""}`;
+        url = `/api/search?q=${encodeURIComponent(searchQuery)}&type=posts&limit=${FEED_PAGE_SIZE}${nextCursor ? `&cursor=${nextCursor}` : ''}`;
       } else {
         url =
-          feedFilter === "following"
-            ? `/api/posts?filter=following&sort=${followingSort}&useCursor=true&limit=${FEED_PAGE_SIZE}${nextCursor ? `&cursor=${nextCursor}` : ""}`
-            : `/api/posts?useCursor=true&limit=${FEED_PAGE_SIZE}${nextCursor ? `&cursor=${nextCursor}` : ""}`;
+          feedFilter === 'following'
+            ? `/api/posts?filter=following&sort=${followingSort}&useCursor=true&limit=${FEED_PAGE_SIZE}${nextCursor ? `&cursor=${nextCursor}` : ''}`
+            : `/api/posts?useCursor=true&limit=${FEED_PAGE_SIZE}${nextCursor ? `&cursor=${nextCursor}` : ''}`;
       }
       const res = await fetch(url);
       if (res.ok) {
@@ -344,7 +344,7 @@ export function FeedContent({
         setHasMore(!!data.nextCursor);
       }
     } catch (err) {
-      console.error("Load more posts error:", err);
+      console.error('Load more posts error:', err);
     } finally {
       setLoadingMore(false);
     }
@@ -357,13 +357,13 @@ export function FeedContent({
   });
 
   useEffect(() => {
-    if (activeTab !== "feed" || searchQuery.trim()) return;
+    if (activeTab !== 'feed' || searchQuery.trim()) return;
     const interval = setInterval(async () => {
       try {
         const res = await fetch(`/api/posts?limit=5`);
         if (!res.ok) return;
         const latest: { id: string; created_at: string }[] = await res.json();
-        const topPost = posts.find((p) => !p._pending && !String(p.id).startsWith("temp-"));
+        const topPost = posts.find((p) => !p._pending && !String(p.id).startsWith('temp-'));
         if (!topPost || latest.length === 0) return;
         const topTime = new Date(topPost.created_at).getTime();
         const newer = latest.filter(
@@ -389,31 +389,31 @@ export function FeedContent({
       });
       setNewPostsCount(0);
     } catch (err) {
-      console.error("Load new posts error:", err);
+      console.error('Load new posts error:', err);
     }
   };
 
   useEffect(() => {
     const fetchDailyQuiz = async () => {
       try {
-        const res = await fetch("/api/quiz/daily");
+        const res = await fetch('/api/quiz/daily');
         if (res.ok) {
           const data = await res.json();
           setDailyQuiz(data.quiz);
           setDailyAttempt(data.attempt);
         }
       } catch (err) {
-        console.error("Error loading daily quiz:", err);
+        console.error('Error loading daily quiz:', err);
       }
     };
     fetchDailyQuiz();
   }, []);
 
-  const handleBodyChange = async (val: string, inputType: "inline" | "modal") => {
+  const handleBodyChange = async (val: string, inputType: 'inline' | 'modal') => {
     setPostBody(val);
     const words = val.split(/\s+/);
     const lastWord = words[words.length - 1];
-    if (lastWord.startsWith("@") && lastWord.length >= 1) {
+    if (lastWord.startsWith('@') && lastWord.length >= 1) {
       const q = lastWord.slice(1);
       try {
         const res = await fetch(`/api/users/search?q=${q}`);
@@ -435,7 +435,7 @@ export function FeedContent({
   const handleSelectMention = (username: string) => {
     const words = postBody.split(/\s+/);
     words[words.length - 1] = `@${username} `;
-    setPostBody(words.join(" "));
+    setPostBody(words.join(' '));
     setShowMentionSuggestions(false);
     setMentionUsers([]);
   };
@@ -447,9 +447,9 @@ export function FeedContent({
     setUploadingImage(true);
     try {
       const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/upload", {
-        method: "POST",
+      formData.append('file', file);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
         body: formData,
       });
       if (res.ok) {
@@ -457,16 +457,16 @@ export function FeedContent({
         setPostImage(data.url);
       }
     } catch (err) {
-      console.error("Image upload failed:", err);
+      console.error('Image upload failed:', err);
     } finally {
       setUploadingImage(false);
     }
   };
 
   // Duel Form state
-  const [duelTitle, setDuelTitle] = useState("");
-  const [duelBody, setDuelBody] = useState("");
-  const [duelLanguage, setDuelLanguage] = useState<Language>("TS");
+  const [duelTitle, setDuelTitle] = useState('');
+  const [duelBody, setDuelBody] = useState('');
+  const [duelLanguage, setDuelLanguage] = useState<Language>('TS');
   const [creatingDuel, setCreatingDuel] = useState(false);
   const [showDuelForm, setShowDuelForm] = useState(false);
 
@@ -475,14 +475,14 @@ export function FeedContent({
 
   // Thumbs state for posts
   const [votes, setVotes] = useState<
-    Record<string, { up: number; userVote: "up" | "down" | null }>
+    Record<string, { up: number; userVote: 'up' | 'down' | null }>
   >(() => {
-    const initialVotes: Record<string, { up: number; userVote: "up" | "down" | null }> = {};
+    const initialVotes: Record<string, { up: number; userVote: 'up' | 'down' | null }> = {};
     initialPosts.forEach((post) => {
       const userPostVote = post.votes?.[0];
-      let userVote: "up" | "down" | null = null;
+      let userVote: 'up' | 'down' | null = null;
       if (userPostVote) {
-        userVote = userPostVote.value === 1 ? "up" : userPostVote.value === -1 ? "down" : null;
+        userVote = userPostVote.value === 1 ? 'up' : userPostVote.value === -1 ? 'down' : null;
       }
       initialVotes[post.id] = {
         up: post.upvotes,
@@ -497,9 +497,9 @@ export function FeedContent({
     let changed = false;
     posts.forEach((post) => {
       const userPostVote = post.votes?.[0];
-      let userVote: "up" | "down" | null = null;
+      let userVote: 'up' | 'down' | null = null;
       if (userPostVote) {
-        userVote = userPostVote.value === 1 ? "up" : userPostVote.value === -1 ? "down" : null;
+        userVote = userPostVote.value === 1 ? 'up' : userPostVote.value === -1 ? 'down' : null;
       }
       if (
         !votes[post.id] ||
@@ -521,15 +521,15 @@ export function FeedContent({
   // Helper to format language name
   const formatLangName = (lang: string) => {
     const map: Record<string, string> = {
-      TS: "TypeScript",
-      JS: "JavaScript",
-      PYTHON: "Python",
-      RUST: "Rust",
-      GO: "Go",
-      CPP: "C++",
-      JAVA: "Java",
-      KOTLIN: "Kotlin",
-      SWIFT: "Swift",
+      TS: 'TypeScript',
+      JS: 'JavaScript',
+      PYTHON: 'Python',
+      RUST: 'Rust',
+      GO: 'Go',
+      CPP: 'C++',
+      JAVA: 'Java',
+      KOTLIN: 'Kotlin',
+      SWIFT: 'Swift',
     };
     return map[lang] || lang;
   };
@@ -537,28 +537,28 @@ export function FeedContent({
   // Helper to get language specific progress bar color
   const getLangColor = (lang: string) => {
     const map: Record<string, string> = {
-      TS: "bg-blue-500",
-      JS: "bg-amber-500",
-      PYTHON: "bg-emerald-500",
-      RUST: "bg-orange-500",
-      GO: "bg-cyan-500",
-      CPP: "bg-blue-600",
-      JAVA: "bg-red-500",
-      KOTLIN: "bg-purple-500",
-      SWIFT: "bg-orange-600",
+      TS: 'bg-blue-500',
+      JS: 'bg-amber-500',
+      PYTHON: 'bg-emerald-500',
+      RUST: 'bg-orange-500',
+      GO: 'bg-cyan-500',
+      CPP: 'bg-blue-600',
+      JAVA: 'bg-red-500',
+      KOTLIN: 'bg-purple-500',
+      SWIFT: 'bg-orange-600',
     };
-    return map[lang] || "bg-slate-500";
+    return map[lang] || 'bg-slate-500';
   };
 
   // Simulated syntax highlighter for code snippets
   const highlightCode = (code: string) => {
     if (!code) return null;
-    const lines = code.split("\n");
+    const lines = code.split('\n');
     return (
       <pre className="font-mono text-[11px] leading-relaxed text-dd-text">
         <code>
           {lines.map((line, idx) => {
-            let html = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            let html = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
             // Highlight keywords
             const keywords =
@@ -571,20 +571,20 @@ export function FeedContent({
             html = html.replace(types, '<span class="text-cyan-400 font-medium">$1</span>');
 
             // Highlight comments
-            if (html.includes("//")) {
-              const parts = html.split("//");
+            if (html.includes('//')) {
+              const parts = html.split('//');
               html =
                 parts[0] +
                 '<span class="text-dd-muted italic">//' +
-                parts.slice(1).join("//") +
-                "</span>";
-            } else if (html.startsWith("#") || html.includes(" #")) {
-              const parts = html.split("#");
+                parts.slice(1).join('//') +
+                '</span>';
+            } else if (html.startsWith('#') || html.includes(' #')) {
+              const parts = html.split('#');
               html =
                 parts[0] +
                 '<span class="text-dd-muted italic">#' +
-                parts.slice(1).join("#") +
-                "</span>";
+                parts.slice(1).join('#') +
+                '</span>';
             }
 
             return (
@@ -604,7 +604,7 @@ export function FeedContent({
   // Fetch posts helper
   const refreshPosts = async () => {
     try {
-      const res = await fetch("/api/posts");
+      const res = await fetch('/api/posts');
       if (res.ok) {
         const data = await res.json();
         setPosts(data);
@@ -617,7 +617,7 @@ export function FeedContent({
   // Fetch duels helper
   const refreshDuels = async () => {
     try {
-      const res = await fetch("/api/duels");
+      const res = await fetch('/api/duels');
       if (res.ok) {
         const data = await res.json();
         setDuels(data);
@@ -630,7 +630,7 @@ export function FeedContent({
   // Fetch leaderboard ranking
   const fetchRankings = async (lang: string) => {
     try {
-      const url = lang === "GLOBAL" ? "/api/leaderboard" : `/api/leaderboard?language=${lang}`;
+      const url = lang === 'GLOBAL' ? '/api/leaderboard' : `/api/leaderboard?language=${lang}`;
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
@@ -642,7 +642,7 @@ export function FeedContent({
   };
 
   useEffect(() => {
-    if (activeTab === "ranking") {
+    if (activeTab === 'ranking') {
       fetchRankings(leaderboardLanguage);
     }
   }, [activeTab, leaderboardLanguage]);
@@ -651,22 +651,22 @@ export function FeedContent({
     e.preventDefault();
     if (!postBody.trim()) return;
 
-    const titleToSubmit = postTitle.trim() || postBody.trim().substring(0, 40) || "Discussao Geral";
+    const titleToSubmit = postTitle.trim() || postBody.trim().substring(0, 40) || 'Discussao Geral';
 
     // Client-side validation
     if (postTitle.trim() && postTitle.trim().length < 5) {
-      setPostError("O título deve ter pelo menos 5 caracteres");
+      setPostError('O título deve ter pelo menos 5 caracteres');
       setTimeout(() => setPostError(null), 4000);
       return;
     }
 
     if (postBody.trim().length < 10) {
-      setPostError("O conteúdo deve ter pelo menos 10 caracteres");
+      setPostError('O conteúdo deve ter pelo menos 10 caracteres');
       setTimeout(() => setPostError(null), 4000);
       return;
     }
 
-    setPublishState("submitting");
+    setPublishState('submitting');
     setPostError(null);
 
     const isFirstPost = initialPosts.length === 0;
@@ -675,9 +675,9 @@ export function FeedContent({
       id: tempId,
       title: titleToSubmit,
       body: postBody,
-      language: postType === "question" ? postLanguage : null,
-      code_snippet: postType === "question" ? postCode || null : null,
-      image_url: postType === "discussion" ? postImage || null : null,
+      language: postType === 'question' ? postLanguage : null,
+      code_snippet: postType === 'question' ? postCode || null : null,
+      image_url: postType === 'discussion' ? postImage || null : null,
       created_at: new Date().toISOString(),
       view_count: 0,
       upvotes: 0,
@@ -695,9 +695,9 @@ export function FeedContent({
     setPosts((prev) => [optimisticPost, ...prev]);
 
     try {
-      const res = await fetch("/api/posts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: titleToSubmit,
           body: appendPostExtras(postBody, {
@@ -706,9 +706,9 @@ export function FeedContent({
             replyAudience,
             isSensitive,
           }),
-          language: postType === "question" ? postLanguage : null,
-          code_snippet: postType === "question" ? postCode || null : null,
-          image_url: postType === "discussion" ? postImage || null : null,
+          language: postType === 'question' ? postLanguage : null,
+          code_snippet: postType === 'question' ? postCode || null : null,
+          image_url: postType === 'discussion' ? postImage || null : null,
         }),
       });
 
@@ -731,11 +731,11 @@ export function FeedContent({
               : p
           )
         );
-        setPostTitle("");
-        setPostBody("");
-        setPostCode("");
-        setPostImage("");
-        setPostType("question");
+        setPostTitle('');
+        setPostBody('');
+        setPostCode('');
+        setPostImage('');
+        setPostType('question');
         setQuotePost(null);
         setComposeFocused(false);
         const resetExtras = resetPostComposerExtras();
@@ -743,27 +743,27 @@ export function FeedContent({
         setScheduledAt(resetExtras.scheduledAt);
         setPostLocation(resetExtras.location);
         setIsSensitive(resetExtras.isSensitive);
-        setPublishState("success");
-        playSound("post");
-        setTimeout(() => setPublishState("idle"), 1500);
+        setPublishState('success');
+        playSound('post');
+        setTimeout(() => setPublishState('idle'), 1500);
 
         if (data.xpResult?.xpEarned) {
           showXPToast(data.xpResult.xpEarned, data.xpResult.language);
         }
         if (isFirstPost) {
           setFirstPostToastVisible(true);
-          showXPToast(50, "Primeira postagem");
+          showXPToast(50, 'Primeira postagem');
           setTimeout(() => setFirstPostToastVisible(false), 3000);
         }
       } else {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || "Erro ao postar");
+        throw new Error(errorData.error || 'Erro ao postar');
       }
     } catch (err: any) {
       console.error(err);
       setPosts((prev) => prev.filter((p) => p.id !== tempId));
-      setPostError(err.message || "Algo deu errado. Seu rascunho foi salvo automaticamente.");
-      setPublishState("idle");
+      setPostError(err.message || 'Algo deu errado. Seu rascunho foi salvo automaticamente.');
+      setPublishState('idle');
       // Auto-dismiss error after 4s
       setTimeout(() => setPostError(null), 4000);
     }
@@ -774,9 +774,9 @@ export function FeedContent({
     setCreatingDuel(true);
 
     try {
-      const res = await fetch("/api/duels", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/duels', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           problem_title: duelTitle,
           problem_body: duelBody,
@@ -785,8 +785,8 @@ export function FeedContent({
       });
 
       if (res.ok) {
-        setDuelTitle("");
-        setDuelBody("");
+        setDuelTitle('');
+        setDuelBody('');
         setShowDuelForm(false);
         await refreshDuels();
       }
@@ -800,7 +800,7 @@ export function FeedContent({
   const showXPToast = (amount: number, language: string) => {
     setToastXp({ amount, language });
     setCurrentXp((prevXp) => prevXp + amount);
-    playSound("xpgain");
+    playSound('xpgain');
     setTimeout(() => {
       setToastXp(null);
     }, 4000);
@@ -828,11 +828,11 @@ export function FeedContent({
   );
 
   const handleReactionSelect = async (postId: string, reaction?: string | null) => {
-    const hasUpvote = votes[postId]?.userVote === "up";
+    const hasUpvote = votes[postId]?.userVote === 'up';
 
     if (!hasUpvote) {
       setActiveReactions((prev) => ({ ...prev, [postId]: reaction ?? null }));
-      await handleVote(postId, "up");
+      await handleVote(postId, 'up');
       return;
     }
 
@@ -842,7 +842,7 @@ export function FeedContent({
     }
 
     setActiveReactions((prev) => ({ ...prev, [postId]: null }));
-    await handleVote(postId, "up");
+    await handleVote(postId, 'up');
   };
 
   const handleBookmarkToggle = async (postId: string) => {
@@ -853,7 +853,7 @@ export function FeedContent({
     }));
     try {
       const res = await fetch(`/api/posts/${postId}/bookmark`, {
-        method: "POST",
+        method: 'POST',
       });
       if (!res.ok) {
         setBookmarkedPostIds((prev) => ({
@@ -862,7 +862,7 @@ export function FeedContent({
         }));
       }
     } catch (err) {
-      console.error("Failed to toggle bookmark:", err);
+      console.error('Failed to toggle bookmark:', err);
       setBookmarkedPostIds((prev) => ({
         ...prev,
         [postId]: isCurrentlySaved,
@@ -886,32 +886,32 @@ export function FeedContent({
   const handleQuotePost = (post: any) => {
     setQuotePost(post);
     setComposeFocused(true);
-    setPostType("discussion");
-    setActiveTab("feed");
+    setPostType('discussion');
+    setActiveTab('feed');
     requestAnimationFrame(() => {
       postBodyTextareaRef.current?.focus();
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   };
 
   // Upvote/Downvote handling with API
-  const handleVote = async (postId: string, type: "up" | "down") => {
+  const handleVote = async (postId: string, type: 'up' | 'down') => {
     const current = votes[postId] || { up: 0, userVote: null };
     let newValue = 0;
 
-    if (type === "up") {
-      newValue = current.userVote === "up" ? 0 : 1;
+    if (type === 'up') {
+      newValue = current.userVote === 'up' ? 0 : 1;
     } else {
-      newValue = current.userVote === "down" ? 0 : -1;
+      newValue = current.userVote === 'down' ? 0 : -1;
     }
 
     if (newValue === -1) {
       const justification = prompt(
-        "No DevDeck, o downvote exige uma justificativa construtiva. Escreva seu motivo para o autor melhorar:"
+        'No DevDeck, o downvote exige uma justificativa construtiva. Escreva seu motivo para o autor melhorar:'
       );
       if (!justification || justification.trim().length <= 3) {
         alert(
-          "O downvote foi cancelado. É necessária uma justificativa construtiva de pelo menos 4 caracteres."
+          'O downvote foi cancelado. É necessária uma justificativa construtiva de pelo menos 4 caracteres.'
         );
         return;
       }
@@ -919,28 +919,28 @@ export function FeedContent({
 
     // Optimistic UI update
     let diff = 0;
-    let newUserVote: "up" | "down" | null = null;
-    if (type === "up") {
-      if (current.userVote === "up") {
+    let newUserVote: 'up' | 'down' | null = null;
+    if (type === 'up') {
+      if (current.userVote === 'up') {
         diff = -1;
         newUserVote = null;
-      } else if (current.userVote === "down") {
+      } else if (current.userVote === 'down') {
         diff = 2;
-        newUserVote = "up";
+        newUserVote = 'up';
       } else {
         diff = 1;
-        newUserVote = "up";
+        newUserVote = 'up';
       }
     } else {
-      if (current.userVote === "down") {
+      if (current.userVote === 'down') {
         diff = 1;
         newUserVote = null;
-      } else if (current.userVote === "up") {
+      } else if (current.userVote === 'up') {
         diff = -2;
-        newUserVote = "down";
+        newUserVote = 'down';
       } else {
         diff = -1;
-        newUserVote = "down";
+        newUserVote = 'down';
       }
     }
 
@@ -954,13 +954,13 @@ export function FeedContent({
 
     try {
       const res = await fetch(`/api/posts/${postId}/vote`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ value: newValue }),
       });
 
       if (!res.ok) {
-        throw new Error("Erro ao registrar voto");
+        throw new Error('Erro ao registrar voto');
       }
 
       const data = await res.json();
@@ -1000,10 +1000,10 @@ export function FeedContent({
 
   const trendingPosts = getTrendingPosts();
 
-  const activeDuels = duels.filter((d) => d.status === "ACTIVE").slice(0, 2);
+  const activeDuels = duels.filter((d) => d.status === 'ACTIVE').slice(0, 2);
 
   const charRatio = postBody.length / POST_CHAR_LIMIT;
-  const xpReward = postType === "question" ? 10 : 5;
+  const xpReward = postType === 'question' ? 10 : 5;
   const currentLevelBaseXp = (currentLevel - 1) * 1000;
   const currentLevelPercent = Math.min(
     100,
@@ -1020,7 +1020,7 @@ export function FeedContent({
       <NewPostsPill
         count={newPostsCount}
         onClick={handleLoadNewPosts}
-        visible={activeTab === "feed" && !searchQuery.trim()}
+        visible={activeTab === 'feed' && !searchQuery.trim()}
       />
       {/* XP Toast Notification */}
       {toastXp && (
@@ -1053,46 +1053,46 @@ export function FeedContent({
               {/* Seletor de Abas Feed / Quizzes */}
               <div className="flex border-b border-dd-border select-none">
                 <button
-                  onClick={() => setFeedFilter("for-you")}
+                  onClick={() => setFeedFilter('for-you')}
                   className={`relative flex-1 py-3 text-xs font-bold transition-colors cursor-pointer ${
-                    feedFilter === "for-you"
-                      ? "text-dd-text"
-                      : "text-dd-muted hover:text-dd-text hover:bg-dd-surface/30"
+                    feedFilter === 'for-you'
+                      ? 'text-dd-text'
+                      : 'text-dd-muted hover:text-dd-text hover:bg-dd-surface/30'
                   }`}
                 >
                   Para você
-                  {feedFilter === "for-you" && (
+                  {feedFilter === 'for-you' && (
                     <motion.div
                       layoutId="feedTabIndicator"
                       className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full"
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                     />
                   )}
                 </button>
                 <div className="relative flex-1 flex">
                   <button
-                    onClick={() => setFeedFilter("following")}
+                    onClick={() => setFeedFilter('following')}
                     className={`relative flex-1 py-3 text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
-                      feedFilter === "following"
-                        ? "text-dd-text"
-                        : "text-dd-muted hover:text-dd-text hover:bg-dd-surface/30"
+                      feedFilter === 'following'
+                        ? 'text-dd-text'
+                        : 'text-dd-muted hover:text-dd-text hover:bg-dd-surface/30'
                     }`}
                   >
                     Seguindo
-                    {feedFilter === "following" && (
+                    {feedFilter === 'following' && (
                       <span className="text-[10px] text-dd-muted font-normal">
-                        ({followingSort === "recent" ? "Recente" : "Popular"})
+                        ({followingSort === 'recent' ? 'Recente' : 'Popular'})
                       </span>
                     )}
-                    {feedFilter === "following" && (
+                    {feedFilter === 'following' && (
                       <motion.div
                         layoutId="feedTabIndicator"
                         className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full"
-                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                       />
                     )}
                   </button>
-                  {feedFilter === "following" && (
+                  {feedFilter === 'following' && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -1101,12 +1101,12 @@ export function FeedContent({
                       className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full hover:bg-dd-surface/50 text-dd-muted hover:text-dd-text transition-colors z-10 cursor-pointer"
                     >
                       <ChevronDown
-                        className={`w-3.5 h-3.5 transition-transform ${showFollowingSortMenu ? "rotate-180" : ""}`}
+                        className={`w-3.5 h-3.5 transition-transform ${showFollowingSortMenu ? 'rotate-180' : ''}`}
                       />
                     </button>
                   )}
                   <AnimatePresence>
-                    {showFollowingSortMenu && feedFilter === "following" && (
+                    {showFollowingSortMenu && feedFilter === 'following' && (
                       <motion.div
                         initial={{ opacity: 0, y: -5 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -1116,26 +1116,26 @@ export function FeedContent({
                       >
                         <button
                           onClick={() => {
-                            setFollowingSort("recent");
+                            setFollowingSort('recent');
                             setShowFollowingSortMenu(false);
                           }}
                           className={`w-full text-left px-4 py-2.5 text-xs transition-colors cursor-pointer ${
-                            followingSort === "recent"
-                              ? "text-orange-400 font-bold bg-orange-500/5"
-                              : "text-dd-text hover:bg-dd-surface/80"
+                            followingSort === 'recent'
+                              ? 'text-orange-400 font-bold bg-orange-500/5'
+                              : 'text-dd-text hover:bg-dd-surface/80'
                           }`}
                         >
                           Recente
                         </button>
                         <button
                           onClick={() => {
-                            setFollowingSort("popular");
+                            setFollowingSort('popular');
                             setShowFollowingSortMenu(false);
                           }}
                           className={`w-full text-left px-4 py-2.5 text-xs transition-colors cursor-pointer ${
-                            followingSort === "popular"
-                              ? "text-orange-400 font-bold bg-orange-500/5"
-                              : "text-dd-text hover:bg-dd-surface/80"
+                            followingSort === 'popular'
+                              ? 'text-orange-400 font-bold bg-orange-500/5'
+                              : 'text-dd-text hover:bg-dd-surface/80'
                           }`}
                         >
                           Popular
@@ -1147,7 +1147,7 @@ export function FeedContent({
               </div>
 
               {/* Feed Tab View */}
-              {activeTab === "feed" && (
+              {activeTab === 'feed' && (
                 <>
                   <motion.div
                     layout
@@ -1177,7 +1177,7 @@ export function FeedContent({
                           <textarea
                             ref={postBodyTextareaRef}
                             value={postBody}
-                            onChange={(e) => handleBodyChange(e.target.value, "inline")}
+                            onChange={(e) => handleBodyChange(e.target.value, 'inline')}
                             onFocus={() => setComposeFocused(true)}
                             onBlur={() => {
                               if (!postBody.trim() && !quotePost) {
@@ -1188,9 +1188,9 @@ export function FeedContent({
                             rows={composeFocused ? 5 : 2}
                             maxLength={POST_CHAR_LIMIT}
                             placeholder={
-                              postType === "question"
-                                ? "Qual a sua duvida tecnica? Compartilhe o contexto e o codigo abaixo..."
-                                : "O que esta acontecendo? Compartilhe ideias, artigos ou links..."
+                              postType === 'question'
+                                ? 'Qual a sua duvida tecnica? Compartilhe o contexto e o codigo abaixo...'
+                                : 'O que esta acontecendo? Compartilhe ideias, artigos ou links...'
                             }
                             className="w-full resize-none rounded-md bg-transparent text-sm text-dd-text placeholder-dd-muted focus:outline-none dd-focus-ring"
                           />
@@ -1198,8 +1198,8 @@ export function FeedContent({
                             <CharCounter text={postBody} limit={POST_CHAR_LIMIT} />
                           </div>
                           <MentionDropdown
-                            query={postBody.split(/\s+/).at(-1)?.replace(/^@/, "") || ""}
-                            visible={showMentionSuggestions && focusedInput === "inline"}
+                            query={postBody.split(/\s+/).at(-1)?.replace(/^@/, '') || ''}
+                            visible={showMentionSuggestions && focusedInput === 'inline'}
                             onSelect={handleSelectMention}
                             onClose={() => {
                               setShowMentionSuggestions(false);
@@ -1236,7 +1236,7 @@ export function FeedContent({
                         )}
 
                         <AnimatePresence initial={false}>
-                          {postType === "question" && (
+                          {postType === 'question' && (
                             <motion.div
                               key="question-compose"
                               initial={{ opacity: 0, y: -8 }}
@@ -1282,7 +1282,7 @@ export function FeedContent({
                             />
                             <button
                               type="button"
-                              onClick={() => setPostImage("")}
+                              onClick={() => setPostImage('')}
                               className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white hover:bg-black/85 transition-colors cursor-pointer"
                             >
                               <X className="w-3.5 h-3.5" />
@@ -1335,13 +1335,13 @@ export function FeedContent({
                             <button
                               type="button"
                               onClick={() =>
-                                setPostType(postType === "question" ? "discussion" : "question")
+                                setPostType(postType === 'question' ? 'discussion' : 'question')
                               }
                               className="dd-pill-glide rounded-full border border-dd-border bg-dd-bg hover:bg-dd-border/30 hover:text-dd-text px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-dd-muted transition-colors cursor-pointer"
                             >
-                              {postType === "question"
-                                ? "Duvida tecnica +10 XP"
-                                : "Discussao geral +5 XP"}
+                              {postType === 'question'
+                                ? 'Duvida tecnica +10 XP'
+                                : 'Discussao geral +5 XP'}
                             </button>
 
                             <PostComposerExtras
@@ -1392,7 +1392,7 @@ export function FeedContent({
                       <PostSkeletonList count={3} />
                     ) : posts.length === 0 ? (
                       <EmptyState
-                        type={searchQuery.trim() ? "search" : "feed"}
+                        type={searchQuery.trim() ? 'search' : 'feed'}
                         searchTerm={searchQuery}
                         className="rounded-2xl border border-dd-border bg-dd-surface/20"
                       />
@@ -1412,8 +1412,8 @@ export function FeedContent({
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={springGentle}
                                 className={cn(
-                                  "dd-card-hover rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-4 transition-[border-color] duration-300",
-                                  post._pending && "dd-optimistic-post"
+                                  'dd-card-hover rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-4 transition-[border-color] duration-300',
+                                  post._pending && 'dd-optimistic-post'
                                 )}
                               >
                                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dd-border/50 pb-3">
@@ -1430,12 +1430,12 @@ export function FeedContent({
                                           @{post.author.username}
                                         </Link>
                                         <span className="text-[9px] bg-dd-surface border border-dd-border px-1 py-0.5 rounded text-dd-muted font-mono font-semibold">
-                                          Lvl{" "}
+                                          Lvl{' '}
                                           {Math.max(1, Math.floor(post.author.total_xp / 1000) + 1)}
                                         </span>
                                       </div>
                                       <span className="text-[10px] text-dd-muted font-medium">
-                                        {post._pending ? "Sincronizando..." : "Postado ha pouco"}
+                                        {post._pending ? 'Sincronizando...' : 'Postado ha pouco'}
                                       </span>
                                     </div>
                                   </div>
@@ -1454,22 +1454,22 @@ export function FeedContent({
                                           e.stopPropagation();
                                           e.preventDefault();
                                           if (
-                                            confirm("Deseja realmente excluir esta publicação?")
+                                            confirm('Deseja realmente excluir esta publicação?')
                                           ) {
                                             try {
                                               const res = await fetch(`/api/posts/${post.id}`, {
-                                                method: "DELETE",
+                                                method: 'DELETE',
                                               });
                                               if (res.ok) {
                                                 setPosts((prev) =>
                                                   prev.filter((p) => p.id !== post.id)
                                                 );
                                               } else {
-                                                alert("Falha ao deletar post.");
+                                                alert('Falha ao deletar post.');
                                               }
                                             } catch (err) {
                                               console.error(err);
-                                              alert("Erro ao deletar post.");
+                                              alert('Erro ao deletar post.');
                                             }
                                           }
                                         }}
@@ -1528,7 +1528,7 @@ export function FeedContent({
                                         alt={post.title}
                                         className="w-full h-full object-cover max-h-80"
                                         onError={(e) => {
-                                          (e.target as HTMLElement).style.display = "none";
+                                          (e.target as HTMLElement).style.display = 'none';
                                         }}
                                       />
                                     </div>
@@ -1570,8 +1570,8 @@ export function FeedContent({
                                   {/* 3. Heart/Like button */}
                                   <LikeButton
                                     count={vote.up}
-                                    isActive={vote.userVote === "up"}
-                                    onToggle={() => handleVote(post.id, "up")}
+                                    isActive={vote.userVote === 'up'}
+                                    onToggle={() => handleVote(post.id, 'up')}
                                     title="Curtir post"
                                   />
 
@@ -1631,7 +1631,7 @@ export function FeedContent({
               )}
 
               {/* TAB DE QUIZZES */}
-              {activeTab === "quizzes" && (
+              {activeTab === 'quizzes' && (
                 <motion.div
                   initial="enter"
                   animate="center"
@@ -1680,7 +1680,7 @@ export function FeedContent({
                             is_correct: isCorrect,
                           });
                           if (isCorrect) {
-                            showXPToast(15, "Global");
+                            showXPToast(15, 'Global');
                           }
                         }}
                       />
@@ -1749,7 +1749,7 @@ export function FeedContent({
                                     })
                                   );
                                   if (isCorrect) {
-                                    showXPToast(15, post.language || "Global");
+                                    showXPToast(15, post.language || 'Global');
                                   }
                                 }}
                               />
@@ -1763,7 +1763,7 @@ export function FeedContent({
               )}
 
               {/* TAB DE DUELOS */}
-              {activeTab === "duels" && (
+              {activeTab === 'duels' && (
                 <div className="space-y-6">
                   <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm">
                     <div>
@@ -1781,7 +1781,7 @@ export function FeedContent({
                       className="bg-orange-500 text-white font-bold py-2.5 px-5 rounded-lg text-xs transition-colors hover:bg-orange-600 whitespace-nowrap cursor-pointer shadow-[0_0_15px_rgba(249,115,22,0.15)] flex items-center gap-1.5 self-start sm:self-auto"
                     >
                       <Plus className="w-4 h-4" />
-                      {showDuelForm ? "Fechar Formulário" : "Criar Novo Duelo"}
+                      {showDuelForm ? 'Fechar Formulário' : 'Criar Novo Duelo'}
                     </button>
                   </div>
 
@@ -1831,7 +1831,7 @@ export function FeedContent({
                             disabled={creatingDuel}
                             className="bg-orange-500 text-white text-xs font-bold px-6 py-2 rounded-lg transition-all hover:bg-orange-600 disabled:opacity-50 cursor-pointer"
                           >
-                            {creatingDuel ? "Enviando..." : "Publicar Duelo"}
+                            {creatingDuel ? 'Enviando...' : 'Publicar Duelo'}
                           </button>
                         </div>
                       </form>
@@ -1851,7 +1851,7 @@ export function FeedContent({
               )}
 
               {/* TAB DE RANKINGS */}
-              {activeTab === "ranking" && (
+              {activeTab === 'ranking' && (
                 <div className="space-y-6">
                   <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                     <div>
@@ -1906,21 +1906,21 @@ export function FeedContent({
                               key={row.username}
                               className={`border-b border-dd-border hover:bg-dd-surface transition-colors ${
                                 row.rank === 1
-                                  ? "bg-amber-500/5 border-l-2 border-l-amber-400"
+                                  ? 'bg-amber-500/5 border-l-2 border-l-amber-400'
                                   : row.rank === 2
-                                    ? "bg-slate-300/5 border-l-2 border-l-slate-400"
+                                    ? 'bg-slate-300/5 border-l-2 border-l-slate-400'
                                     : row.rank === 3
-                                      ? "bg-orange-700/5 border-l-2 border-l-orange-700"
-                                      : ""
+                                      ? 'bg-orange-700/5 border-l-2 border-l-orange-700'
+                                      : ''
                               }`}
                             >
                               <td className="py-4 px-6 text-center font-extrabold text-sm text-dd-text">
                                 {row.rank === 1
-                                  ? "🥇"
+                                  ? '🥇'
                                   : row.rank === 2
-                                    ? "🥈"
+                                    ? '🥈'
                                     : row.rank === 3
-                                      ? "🥉"
+                                      ? '🥉'
                                       : `#${row.rank}`}
                               </td>
                               <td className="py-4 px-6 font-bold text-dd-text">
@@ -1970,7 +1970,7 @@ export function FeedContent({
               {searchQuery.trim() && (
                 <div className="rounded-xl border border-dd-border bg-dd-surface/70 p-3 text-xs text-dd-muted">
                   {loadingSearch
-                    ? "Filtrando o feed em tempo real..."
+                    ? 'Filtrando o feed em tempo real...'
                     : `Termo ativo: "${searchQuery}".`}
                 </div>
               )}
@@ -2019,7 +2019,7 @@ export function FeedContent({
                     level={currentLevel}
                     onLevelUp={() => {
                       setLevelUpVisible(true);
-                      playSound("levelup");
+                      playSound('levelup');
                     }}
                   />
                 </div>
@@ -2139,7 +2139,7 @@ export function FeedContent({
                         type="button"
                         onClick={() => {
                           setSearchQuery(post.title);
-                          setActiveTab("feed");
+                          setActiveTab('feed');
                         }}
                         className="group relative block w-full pl-4 border-l-2 border-orange-500/20 text-left transition-colors hover:border-orange-500"
                       >
@@ -2198,7 +2198,7 @@ export function FeedContent({
                         </h5>
                         <div className="flex items-center justify-between text-[10px] text-dd-muted font-semibold pt-1 border-t border-dd-border">
                           <span>
-                            @{duel.challenger.username} vs @{duel.opponent?.username || "match..."}
+                            @{duel.challenger.username} vs @{duel.opponent?.username || 'match...'}
                           </span>
                           <Link
                             href={`/duels/${duel.id}`}
@@ -2283,7 +2283,7 @@ export function FeedContent({
                     disabled={reporting || !reportReason}
                     className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2 px-5 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
                   >
-                    {reporting ? "Enviando..." : "Denunciar"}
+                    {reporting ? 'Enviando...' : 'Denunciar'}
                   </button>
                 </div>
               </form>

@@ -1,4 +1,4 @@
-export type ReplyAudience = "everyone" | "followers" | "mentioned";
+export type ReplyAudience = 'everyone' | 'followers' | 'mentioned';
 
 export const REPLY_AUDIENCE_OPTIONS: {
   value: ReplyAudience;
@@ -6,43 +6,43 @@ export const REPLY_AUDIENCE_OPTIONS: {
   description: string;
 }[] = [
   {
-    value: "everyone",
-    label: "Qualquer pessoa pode responder",
-    description: "Todos os devs podem comentar",
+    value: 'everyone',
+    label: 'Qualquer pessoa pode responder',
+    description: 'Todos os devs podem comentar',
   },
   {
-    value: "followers",
-    label: "Apenas seguidores",
-    description: "Somente quem você segue",
+    value: 'followers',
+    label: 'Apenas seguidores',
+    description: 'Somente quem você segue',
   },
   {
-    value: "mentioned",
-    label: "Pessoas que você mencionar",
-    description: "Apenas @mencionados no post",
+    value: 'mentioned',
+    label: 'Pessoas que você mencionar',
+    description: 'Apenas @mencionados no post',
   },
 ];
 
 export const EMOJI_CATEGORIES = [
   {
-    name: "Frequentes",
-    emojis: ["😀", "😂", "🔥", "👍", "❤️", "🎉", "💡", "🚀", "👀", "✅", "🙏", "💯"],
+    name: 'Frequentes',
+    emojis: ['😀', '😂', '🔥', '👍', '❤️', '🎉', '💡', '🚀', '👀', '✅', '🙏', '💯'],
   },
   {
-    name: "Dev",
-    emojis: ["💻", "🐛", "⚡", "🔧", "📦", "🧪", "☕", "🦀", "🐍", "⚙️", "📝", "🔍"],
+    name: 'Dev',
+    emojis: ['💻', '🐛', '⚡', '🔧', '📦', '🧪', '☕', '🦀', '🐍', '⚙️', '📝', '🔍'],
   },
   {
-    name: "Gestos",
-    emojis: ["👏", "🙌", "💪", "🤔", "😅", "😎", "🫡", "👋", "🎯", "📌", "🤝", "✨"],
+    name: 'Gestos',
+    emojis: ['👏', '🙌', '💪', '🤔', '😅', '😎', '🫡', '👋', '🎯', '📌', '🤝', '✨'],
   },
 ];
 
 export const QUICK_LOCATIONS = [
-  "Remoto",
-  "São Paulo, BR",
-  "Rio de Janeiro, BR",
-  "Lisboa, PT",
-  "DevDeck Community",
+  'Remoto',
+  'São Paulo, BR',
+  'Rio de Janeiro, BR',
+  'Lisboa, PT',
+  'DevDeck Community',
 ];
 
 export function insertAtCursor(
@@ -90,18 +90,18 @@ export function appendPostExtras(
   if (extras.scheduledAt) {
     const date = new Date(extras.scheduledAt);
     if (!Number.isNaN(date.getTime())) {
-      finalBody += `\n\n📅 Publicação planejada para ${date.toLocaleString("pt-BR", {
-        dateStyle: "short",
-        timeStyle: "short",
+      finalBody += `\n\n📅 Publicação planejada para ${date.toLocaleString('pt-BR', {
+        dateStyle: 'short',
+        timeStyle: 'short',
       })}`;
     }
   }
 
-  if (extras.replyAudience && extras.replyAudience !== "everyone") {
+  if (extras.replyAudience && extras.replyAudience !== 'everyone') {
     const label =
-      extras.replyAudience === "followers"
-        ? "Apenas seguidores podem responder"
-        : "Apenas pessoas mencionadas podem responder";
+      extras.replyAudience === 'followers'
+        ? 'Apenas seguidores podem responder'
+        : 'Apenas pessoas mencionadas podem responder';
     finalBody += `\n\n🔒 ${label}`;
   }
 
@@ -110,9 +110,9 @@ export function appendPostExtras(
 
 export function resetPostComposerExtras() {
   return {
-    replyAudience: "everyone" as ReplyAudience,
+    replyAudience: 'everyone' as ReplyAudience,
     scheduledAt: null as string | null,
-    location: "",
+    location: '',
     isSensitive: false,
   };
 }

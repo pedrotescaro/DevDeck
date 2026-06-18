@@ -56,12 +56,8 @@ function CodeEditorInner({
   height = '300px',
   readOnly = false,
 }: CodeEditorProps) {
-  const [extensions, setExtensions] = useState<
-    import('@codemirror/state').Extension[]
-  >([]);
-  const [theme, setTheme] = useState<
-    import('@codemirror/state').Extension | null
-  >(null);
+  const [extensions, setExtensions] = useState<import('@codemirror/state').Extension[]>([]);
+  const [theme, setTheme] = useState<import('@codemirror/state').Extension | null>(null);
 
   // Dynamically load language extension and theme
   useEffect(() => {

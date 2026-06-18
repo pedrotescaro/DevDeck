@@ -1,19 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Sparkles, 
-  Terminal, 
-  Swords, 
-  Flame, 
-  Check, 
-  Heart, 
-  MessageSquare, 
-  Bookmark, 
-  User, 
+import {
+  Sparkles,
+  Terminal,
+  Swords,
+  Flame,
+  Check,
+  Heart,
+  MessageSquare,
+  Bookmark,
+  User,
   Code,
   Trophy,
-  HelpCircle
+  HelpCircle,
 } from 'lucide-react';
 
 export function HeroMockup() {
@@ -27,7 +27,7 @@ export function HeroMockup() {
     const runCycle = () => {
       // Step 1: Select correct option (Option B / Index 1)
       setSelectedOption(1);
-      
+
       // Step 2: Show XP badge floating up and update XP bar after 600ms
       setTimeout(() => {
         setShowXPBadge(true);
@@ -55,11 +55,11 @@ export function HeroMockup() {
   }, []);
 
   return (
-    <div 
+    <div
       className="relative w-full max-w-5xl mx-auto rounded-2xl border border-dd-border bg-dd-bg shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] overflow-hidden transition-all duration-700 ease-out select-none transform-gpu"
       style={{
-        transform: isHovered 
-          ? 'rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.02)' 
+        transform: isHovered
+          ? 'rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.02)'
           : 'rotateX(6deg) rotateY(-8deg) rotateZ(1.5deg)',
         perspective: '1200px',
       }}
@@ -74,7 +74,7 @@ export function HeroMockup() {
           <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
           <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
         </div>
-        
+
         {/* Address Bar */}
         <div className="flex items-center gap-1.5 px-6 py-1 rounded-md bg-dd-bg border border-dd-border/50 text-[10px] text-dd-muted font-mono w-48 md:w-64 justify-center">
           <span className="text-orange-500/80">https://</span>
@@ -87,7 +87,6 @@ export function HeroMockup() {
 
       {/* Main Container */}
       <div className="grid grid-cols-1 md:grid-cols-4 min-h-[460px] text-dd-text font-sans">
-        
         {/* Left Navigation */}
         <div className="hidden md:flex flex-col p-4 border-r border-dd-border bg-dd-surface/10 space-y-6">
           <div className="flex items-center gap-2 px-2">
@@ -134,7 +133,6 @@ export function HeroMockup() {
 
         {/* Central Feed Area */}
         <div className="col-span-1 md:col-span-2 p-5 space-y-4 bg-dd-bg flex flex-col justify-between overflow-y-auto">
-          
           {/* Main Simulated Post */}
           <div className="space-y-3.5 border border-dd-border bg-dd-surface/5 hover:border-dd-border/80 transition-colors p-4 rounded-xl relative">
             {/* Header */}
@@ -159,7 +157,16 @@ export function HeroMockup() {
                 Como calcular a complexidade de tempo neste loop?
               </h3>
               <p className="text-[11px] text-dd-muted leading-relaxed">
-                Estou filtrando elementos duplicados de uma array grande em TypeScript. Qual a complexidade de tempo do método com <code className="px-1 py-0.5 rounded bg-dd-surface text-dd-text font-mono text-[9px]">filter</code> + <code className="px-1 py-0.5 rounded bg-dd-surface text-dd-text font-mono text-[9px]">Set</code>?
+                Estou filtrando elementos duplicados de uma array grande em TypeScript. Qual a
+                complexidade de tempo do método com{' '}
+                <code className="px-1 py-0.5 rounded bg-dd-surface text-dd-text font-mono text-[9px]">
+                  filter
+                </code>{' '}
+                +{' '}
+                <code className="px-1 py-0.5 rounded bg-dd-surface text-dd-text font-mono text-[9px]">
+                  Set
+                </code>
+                ?
               </p>
             </div>
 
@@ -169,9 +176,27 @@ export function HeroMockup() {
                 typescript
               </div>
               <pre className="space-y-0.5 leading-relaxed">
-                <div><span className="text-amber-500">function</span> <span className="text-blue-400">findDuplicates</span>(arr: <span className="text-cyan-400">number</span>[]): <span className="text-cyan-400">number</span>[] &#123;</div>
-                <div>  <span className="text-amber-500">const</span> seen = <span className="text-amber-500">new</span> <span className="text-green-400">Set</span>&lt;<span className="text-cyan-400">number</span>&gt;();</div>
-                <div>  <span className="text-amber-500">return</span> arr.<span className="text-blue-400">filter</span>(x =&gt; seen.<span className="text-blue-400">has</span>(x) ? <span className="text-amber-500">true</span> : !seen.<span className="text-blue-400">add</span>(x));</div>
+                <div>
+                  <span className="text-amber-500">function</span>{' '}
+                  <span className="text-blue-400">findDuplicates</span>(arr:{' '}
+                  <span className="text-cyan-400">number</span>[]):{' '}
+                  <span className="text-cyan-400">number</span>[] &#123;
+                </div>
+                <div>
+                  {' '}
+                  <span className="text-amber-500">const</span> seen ={' '}
+                  <span className="text-amber-500">new</span>{' '}
+                  <span className="text-green-400">Set</span>&lt;
+                  <span className="text-cyan-400">number</span>&gt;();
+                </div>
+                <div>
+                  {' '}
+                  <span className="text-amber-500">return</span> arr.
+                  <span className="text-blue-400">filter</span>(x =&gt; seen.
+                  <span className="text-blue-400">has</span>(x) ?{' '}
+                  <span className="text-amber-500">true</span> : !seen.
+                  <span className="text-blue-400">add</span>(x));
+                </div>
                 <div>&#125;</div>
               </pre>
             </div>
@@ -179,11 +204,13 @@ export function HeroMockup() {
             {/* AI Generated Quiz Widget */}
             <div className="border border-orange-500/20 bg-orange-500/[0.02] rounded-xl p-3.5 space-y-3 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-full blur-xl pointer-events-none" />
-              
+
               <div className="flex items-center justify-between border-b border-orange-500/10 pb-2">
                 <div className="flex items-center gap-1.5 text-orange-400">
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span className="text-[10px] font-bold uppercase tracking-wider">Quiz Gerado por IA</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider">
+                    Quiz Gerado por IA
+                  </span>
                 </div>
                 <span className="text-[9px] text-orange-400/80 font-bold bg-orange-500/10 px-1.5 py-0.5 rounded">
                   +15 XP
@@ -201,10 +228,10 @@ export function HeroMockup() {
                 </div>
 
                 {/* Option B (Simulated Correct Option) */}
-                <div 
+                <div
                   className={`border p-2.5 rounded-lg flex items-center justify-between transition-all duration-300 relative ${
-                    selectedOption === 1 
-                      ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400 font-bold shadow-[0_0_12px_rgba(16,185,129,0.15)] scale-[1.01]' 
+                    selectedOption === 1
+                      ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400 font-bold shadow-[0_0_12px_rgba(16,185,129,0.15)] scale-[1.01]'
                       : 'border-dd-border bg-dd-surface/40 text-dd-text hover:border-dd-border/80'
                   }`}
                 >
@@ -255,17 +282,21 @@ export function HeroMockup() {
           {/* XP Progress Card */}
           <div className="bg-dd-bg border border-dd-border rounded-xl p-3.5 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] text-dd-muted uppercase tracking-wider font-semibold">XP Diário</span>
-              <span className="text-[10px] text-orange-400 font-mono font-bold">{xpValue} / 1500 XP</span>
+              <span className="text-[10px] text-dd-muted uppercase tracking-wider font-semibold">
+                XP Diário
+              </span>
+              <span className="text-[10px] text-orange-400 font-mono font-bold">
+                {xpValue} / 1500 XP
+              </span>
             </div>
-            
+
             {/* Progress track */}
             <div className="h-2 w-full bg-dd-surface rounded-full overflow-hidden relative">
-              <div 
+              <div
                 className="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full transition-all duration-700 ease-out"
                 style={{ width: `${(xpValue / 1500) * 100}%` }}
               />
-              <div 
+              <div
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"
                 style={{
                   backgroundSize: '200% 100%',
@@ -274,25 +305,26 @@ export function HeroMockup() {
             </div>
 
             <div className="text-[9px] text-dd-muted leading-relaxed">
-              Faltam apenas <strong className="text-dd-text font-bold">{1500 - xpValue} XP</strong> para completar sua meta diária!
+              Faltam apenas <strong className="text-dd-text font-bold">{1500 - xpValue} XP</strong>{' '}
+              para completar sua meta diária!
             </div>
           </div>
 
           {/* Mini Active Duel Card */}
           <div className="bg-dd-bg border border-dd-border rounded-xl p-3.5 space-y-3 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-16 h-16 bg-cyan-500/5 rounded-full blur-lg pointer-events-none" />
-            
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-cyan-400">
                 <Swords className="w-3.5 h-3.5" />
-                <span className="text-[10px] font-bold uppercase tracking-wider">Duelo em Alta</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider">
+                  Duelo em Alta
+                </span>
               </div>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             </div>
 
-            <div className="text-[10px] font-bold">
-              Desafio de Performance: JS vs Rust
-            </div>
+            <div className="text-[10px] font-bold">Desafio de Performance: JS vs Rust</div>
 
             <div className="space-y-1.5 pt-1">
               <div className="flex justify-between text-[9px] font-mono text-dd-muted">
@@ -314,28 +346,43 @@ export function HeroMockup() {
             </button>
           </div>
         </div>
-
       </div>
 
       {/* Tailwind and Custom CSS inject for animations */}
       <style jsx global>{`
         @keyframes scale-in {
-          0% { transform: scale(0); opacity: 0; }
-          100% { transform: scale(1); opacity: 1; }
+          0% {
+            transform: scale(0);
+            opacity: 0;
+          }
+          100% {
+            transform: scale(1);
+            opacity: 1;
+          }
         }
         .animate-scale-in {
           animation: scale-in 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
         @keyframes xp-float {
-          0% { transform: translateY(0) scale(1); opacity: 1; }
-          100% { transform: translateY(-40px) scale(0.9); opacity: 0; }
+          0% {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(-40px) scale(0.9);
+            opacity: 0;
+          }
         }
         .animate-xp-float {
           animation: xp-float 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
         @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
         }
         .animate-shimmer {
           animation: shimmer 2s infinite linear;

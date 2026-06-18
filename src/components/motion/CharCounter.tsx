@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { cn } from "@/lib/cn";
-import { useCharCounter } from "@/hooks/useCharCounter";
+import { cn } from '@/lib/cn';
+import { useCharCounter } from '@/hooks/useCharCounter';
 
 interface CharCounterProps {
   text: string;
@@ -17,11 +17,11 @@ export function CharCounter({ text, limit, className }: CharCounterProps) {
   return (
     <span
       className={cn(
-        "text-[10px] font-mono font-medium tabular-nums transition-colors duration-150",
-        color === "default" && "text-dd-muted",
-        color === "amber" && "text-amber-400",
-        color === "red" && "text-red-500",
-        shake && "dd-char-shake",
+        'text-[10px] font-mono font-medium tabular-nums transition-colors duration-150',
+        color === 'default' && 'text-dd-muted',
+        color === 'amber' && 'text-amber-400',
+        color === 'red' && 'text-red-500',
+        shake && 'dd-char-shake',
         className
       )}
     >

@@ -49,7 +49,9 @@ This document details the architecture, design choices, folder structure, and da
 ## Key Data Flow
 
 ### 1. Keyset Cursor-Based Pagination
+
 When fetching lists of posts, notifications, or user posts, the client sends a `limit` and an optional `cursor` (structured as `timestamp_id`):
+
 ```mermaid
 sequenceDiagram
     Client->>API: GET /api/posts?limit=10&cursor=17186000_post-uuid
@@ -60,6 +62,7 @@ sequenceDiagram
 ```
 
 ### 2. Gamified User Reactions
+
 ```mermaid
 sequenceDiagram
     User->>PostCard: Clicks or holds reaction button

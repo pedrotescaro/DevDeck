@@ -1,18 +1,18 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
   try {
-    const authHeader = request.headers.get("Authorization");
+    const authHeader = request.headers.get('Authorization');
     const cronSecret = process.env.CRON_SECRET;
     if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
 
-    let question = "";
+    let question = '';
     let options: string[] = [];
     let correctIndex = 0;
     let quizCreated = false;
@@ -21,24 +21,24 @@ export async function POST(request: Request) {
 
     if (openAiKey) {
       try {
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
-          method: "POST",
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${openAiKey}`,
           },
           body: JSON.stringify({
-            model: "gpt-4o-mini",
-            response_format: { type: "json_object" },
+            model: 'gpt-4o-mini',
+            response_format: { type: 'json_object' },
             messages: [
               {
-                role: "system",
+                role: 'system',
                 content:
                   'Você é um gerador de quiz técnico. Você deve retornar um JSON com a seguinte estrutura: { "question": "pergunta de tecnologia geral", "options": ["opção A", "opção B", "opção C", "opção D"], "correct_index": 0 }',
               },
               {
-                role: "user",
-                content: "Gere um quiz desafiador sobre desenvolvimento de software geral.",
+                role: 'user',
+                content: 'Gere um quiz desafiador sobre desenvolvimento de software geral.',
               },
             ],
           }),
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
             content.question &&
             Array.isArray(content.options) &&
             content.options.length === 4 &&
-            typeof content.correct_index === "number"
+            typeof content.correct_index === 'number'
           ) {
             question = content.question;
             options = content.options;
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
           }
         }
       } catch (err) {
-        console.error("OpenAI failed generating daily quiz, falling back:", err);
+        console.error('OpenAI failed generating daily quiz, falling back:', err);
       }
     }
 
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
     }
 
     if (!quizCreated) {
-      question = "Qual é o comportamento do typeof null no JavaScript?";
+      question = 'Qual é o comportamento do typeof null no JavaScript?';
       options = ["'null'", "'undefined'", "'object'", "'string'"];
       correctIndex = 2;
     }
@@ -107,9 +107,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, quiz });
   } catch (error: any) {
-    console.error("Daily quiz generation error:", error);
+    console.error('Daily quiz generation error:', error);
     return NextResponse.json(
-      { error: error.message || "Erro ao gerar quiz diário" },
+      { error: error.message || 'Erro ao gerar quiz diário' },
       { status: 500 }
     );
   }

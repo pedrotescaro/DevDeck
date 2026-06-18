@@ -9,6 +9,7 @@ Complete interaction system specification for DevDeck — a gamified social netw
 ### 1.1 Optimistic UI no Post
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Already defined in globals.css */
 .dd-optimistic-post {
@@ -18,22 +19,31 @@ Complete interaction system specification for DevDeck — a gamified social netw
 }
 
 @keyframes dd-optimistic-pulse {
-  0%, 100% { border-color: var(--color-dd-accent); opacity: 0.85; }
-  50% { border-color: color-mix(in srgb, var(--color-dd-accent) 75%, white); opacity: 1; }
+  0%,
+  100% {
+    border-color: var(--color-dd-accent);
+    opacity: 0.85;
+  }
+  50% {
+    border-color: color-mix(in srgb, var(--color-dd-accent) 75%, white);
+    opacity: 1;
+  }
 }
 ```
 
 **Tailwind Classes:**
+
 ```tsx
-className="dd-optimistic-post dd-gpu transition-all duration-300"
+className = 'dd-optimistic-post dd-gpu transition-all duration-300';
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useOptimisticPost.ts
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 
 interface OptimisticPostOptions {
   onPublish: (content: string) => Promise<void>;
@@ -44,21 +54,24 @@ export function useOptimisticPost({ onPublish, onError }: OptimisticPostOptions)
   const [isPublishing, setIsPublishing] = useState(false);
   const [optimisticPost, setOptimisticPost] = useState<string | null>(null);
 
-  const publish = useCallback(async (content: string) => {
-    // Instant optimistic update
-    setOptimisticPost(content);
-    setIsPublishing(true);
+  const publish = useCallback(
+    async (content: string) => {
+      // Instant optimistic update
+      setOptimisticPost(content);
+      setIsPublishing(true);
 
-    try {
-      await onPublish(content);
-      setOptimisticPost(null); // Remove optimistic state on success
-    } catch (error) {
-      setOptimisticPost(null); // Remove on error
-      onError?.(error as Error);
-    } finally {
-      setIsPublishing(false);
-    }
-  }, [onPublish, onError]);
+      try {
+        await onPublish(content);
+        setOptimisticPost(null); // Remove optimistic state on success
+      } catch (error) {
+        setOptimisticPost(null); // Remove on error
+        onError?.(error as Error);
+      } finally {
+        setIsPublishing(false);
+      }
+    },
+    [onPublish, onError]
+  );
 
   return { publish, isPublishing, optimisticPost };
 }
@@ -75,15 +88,23 @@ On error, the optimistic post fades out with a 300ms transition and a toast appe
 ### 1.2 Reações com Física
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Already defined in globals.css */
 @keyframes dd-particle {
-  0% { transform: translate(0, 0) scale(1); opacity: 1; }
-  100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx), var(--ty)) scale(0);
+    opacity: 0;
+  }
 }
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <motion.button
   whileTap={{ scale: [1, 1.35, 1.1, 1] }}
@@ -93,12 +114,13 @@ On error, the optimistic post fades out with a 300ms transition and a toast appe
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useReactionBurst.ts
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
-import { useReducedMotion } from "./useReducedMotion";
+import { useState, useCallback } from 'react';
+import { useReducedMotion } from './useReducedMotion';
 
 const PARTICLE_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
 
@@ -106,18 +128,23 @@ export function useReactionBurst() {
   const [bursting, setBursting] = useState(false);
   const reduced = useReducedMotion();
 
-  const triggerBurst = useCallback((color: string = "#f97316") => {
-    if (reduced) return;
-    setBursting(true);
-    setTimeout(() => setBursting(false), 400);
-  }, [reduced]);
+  const triggerBurst = useCallback(
+    (color: string = '#f97316') => {
+      if (reduced) return;
+      setBursting(true);
+      setTimeout(() => setBursting(false), 400);
+    },
+    [reduced]
+  );
 
-  const particles = bursting ? PARTICLE_ANGLES.map((deg) => ({
-    angle: deg,
-    tx: `${Math.cos((deg * Math.PI) / 180) * 16}px`,
-    ty: `${Math.sin((deg * Math.PI) / 180) * 16}px`,
-    animation: "dd-particle 400ms ease-out forwards",
-  })) : [];
+  const particles = bursting
+    ? PARTICLE_ANGLES.map((deg) => ({
+        angle: deg,
+        tx: `${Math.cos((deg * Math.PI) / 180) * 16}px`,
+        ty: `${Math.sin((deg * Math.PI) / 180) * 16}px`,
+        animation: 'dd-particle 400ms ease-out forwards',
+      }))
+    : [];
 
   return { triggerBurst, particles, bursting };
 }
@@ -134,6 +161,7 @@ If the reaction fails to sync with the server, the animation plays in reverse (p
 ### 1.3 Sistema de Reações Expandidas (🔥 ❤️ 😂 👏 💡)
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Already defined in lib/motion.ts */
 export const reactionPickerVariants = {
@@ -154,6 +182,7 @@ export const reactionItemVariants = {
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <motion.div
   className="absolute bottom-full left-0 mb-2 z-50 flex gap-1 bg-dd-surface border border-dd-border rounded-full px-2 py-1.5 shadow-xl"
@@ -169,6 +198,7 @@ export const reactionItemVariants = {
 ```
 
 **React Hook:**
+
 ```tsx
 // Already exists: src/hooks/useLongPress.ts
 // Usage with ExpandedReactionButton component
@@ -190,11 +220,18 @@ If the picker fails to open or the reaction doesn't save, the picker closes grac
 ### 1.4 XP Flutuante
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Already defined in globals.css */
 @keyframes dd-xp-float {
-  0% { transform: translateY(0) scale(1); opacity: 1; }
-  100% { transform: translateY(-48px) scale(0.92); opacity: 0; }
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-48px) scale(0.92);
+    opacity: 0;
+  }
 }
 
 .dd-xp-float {
@@ -206,6 +243,7 @@ If the picker fails to open or the reaction doesn't save, the picker closes grac
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <span className="dd-xp-float absolute font-mono text-dd-accent font-semibold text-sm pointer-events-none">
   +{amount} XP
@@ -213,29 +251,35 @@ If the picker fails to open or the reaction doesn't save, the picker closes grac
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useXPFloat.ts
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
-import { useReducedMotion } from "./useReducedMotion";
+import { useState, useCallback } from 'react';
+import { useReducedMotion } from './useReducedMotion';
 
 export function useXPFloat() {
-  const [floatingXP, setFloatingXP] = useState<{ amount: number; x: number; y: number } | null>(null);
+  const [floatingXP, setFloatingXP] = useState<{ amount: number; x: number; y: number } | null>(
+    null
+  );
   const reduced = useReducedMotion();
 
-  const showXP = useCallback((amount: number, element: HTMLElement) => {
-    if (reduced) return;
-    
-    const rect = element.getBoundingClientRect();
-    setFloatingXP({
-      amount,
-      x: rect.left + rect.width / 2,
-      y: rect.top,
-    });
+  const showXP = useCallback(
+    (amount: number, element: HTMLElement) => {
+      if (reduced) return;
 
-    setTimeout(() => setFloatingXP(null), 800);
-  }, [reduced]);
+      const rect = element.getBoundingClientRect();
+      setFloatingXP({
+        amount,
+        x: rect.left + rect.width / 2,
+        y: rect.top,
+      });
+
+      setTimeout(() => setFloatingXP(null), 800);
+    },
+    [reduced]
+  );
 
   return { showXP, floatingXP };
 }
@@ -252,12 +296,19 @@ If the animation fails or the user has reduced motion enabled, the XP is still a
 ### 1.5 Level Up
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Already defined in globals.css */
 @keyframes dd-level-flash {
-  0% { opacity: 0; }
-  20% { opacity: 0.08; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.08;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 .dd-level-flash {
@@ -270,9 +321,18 @@ If the animation fails or the user has reduced motion enabled, the XP is still a
 }
 
 @keyframes dd-badge-entrance {
-  0% { transform: scale(0.5) rotate(-10deg); opacity: 0; }
-  60% { transform: scale(1.1) rotate(2deg); opacity: 1; }
-  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  0% {
+    transform: scale(0.5) rotate(-10deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1) rotate(2deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
 }
 
 .dd-badge-entrance {
@@ -281,6 +341,7 @@ If the animation fails or the user has reduced motion enabled, the XP is still a
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <div className="dd-level-flash" />
 <motion.div
@@ -292,12 +353,13 @@ If the animation fails or the user has reduced motion enabled, the XP is still a
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useLevelUp.ts
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
-import { useReducedMotion } from "./useReducedMotion";
+import { useState, useCallback } from 'react';
+import { useReducedMotion } from './useReducedMotion';
 
 interface LevelUpOptions {
   newLevel: number;
@@ -330,6 +392,7 @@ If animations fail, show a static badge and toast. The level up is still recorde
 ### 2.1 Expansão do Compose
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Height transition with spring physics */
 .compose-textarea {
@@ -343,6 +406,7 @@ If animations fail, show a static badge and toast. The level up is still recorde
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <textarea
   className="w-full bg-transparent text-sm text-dd-text placeholder-dd-muted/65 focus:outline-none resize-none transition-all duration-250"
@@ -351,11 +415,12 @@ If animations fail, show a static badge and toast. The level up is still recorde
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useComposeExpansion.ts
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 
 export function useComposeExpansion() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -384,6 +449,7 @@ If the expansion animation fails, the textarea defaults to the expanded height. 
 ### 2.2 Seletor de Tipo de Post
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Pill toggle with sliding indicator */
 .post-type-pill {
@@ -403,8 +469,14 @@ If the expansion animation fails, the textarea defaults to the expanded height. 
 
 /* Slide down for code area */
 @keyframes slide-down {
-  from { height: 0; opacity: 0; }
-  to { height: auto; opacity: 1; }
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: auto;
+    opacity: 1;
+  }
 }
 
 .slide-down {
@@ -414,9 +486,10 @@ If the expansion animation fails, the textarea defaults to the expanded height. 
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <div className="post-type-pill flex gap-1 p-1 bg-dd-surface rounded-full">
-  <div 
+  <div
     className="post-type-indicator absolute h-[calc(100%-8px)] bg-dd-accent rounded-full transition-transform duration-200"
     style={{ transform: postType === 'question' ? 'translateX(0)' : 'translateX(100%)' }}
   />
@@ -430,11 +503,12 @@ If the expansion animation fails, the textarea defaults to the expanded height. 
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/usePostTypeToggle.ts
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 
 type PostType = 'question' | 'discussion';
 
@@ -460,12 +534,20 @@ If the toggle animation fails, both options remain visible. Default to "Dúvida 
 ### 2.3 Contador de Caracteres
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Already defined in globals.css */
 @keyframes dd-char-shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-2px); }
-  75% { transform: translateX(2px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-2px);
+  }
+  75% {
+    transform: translateX(2px);
+  }
 }
 
 .dd-char-shake {
@@ -474,20 +556,24 @@ If the toggle animation fails, both options remain visible. Default to "Dúvida 
 ```
 
 **Tailwind Classes:**
+
 ```tsx
-<span className={cn(
-  "text-xs font-semibold transition-colors",
-  !visible && "invisible",
-  color === "default" && "text-dd-muted",
-  color === "amber" && "text-amber-500",
-  color === "red" && "text-red-500",
-  shake && "dd-char-shake"
-)}>
+<span
+  className={cn(
+    'text-xs font-semibold transition-colors',
+    !visible && 'invisible',
+    color === 'default' && 'text-dd-muted',
+    color === 'amber' && 'text-amber-500',
+    color === 'red' && 'text-red-500',
+    shake && 'dd-char-shake'
+  )}
+>
   {limit - count}
 </span>
 ```
 
 **React Hook:**
+
 ```tsx
 // Already exists: src/hooks/useCharCounter.ts
 // Verified to match specification:
@@ -507,6 +593,7 @@ If the counter fails to update, the publish button still enforces the limit serv
 ### 2.4 Descarte de Rascunho
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Already defined in lib/motion.ts */
 export const bottomSheetVariants = {
@@ -517,6 +604,7 @@ export const bottomSheetVariants = {
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <motion.div
   variants={bottomSheetVariants}
@@ -528,6 +616,7 @@ export const bottomSheetVariants = {
 ```
 
 **React Hook:**
+
 ```tsx
 // Already implemented in ComposeModal component
 // Uses escape key handler and click-outside detection
@@ -545,6 +634,7 @@ If the bottom sheet fails to open, the modal closes immediately and the draft is
 ### 2.5 Menções @username
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Already defined in lib/motion.ts */
 export const mentionDropdownVariants = {
@@ -555,6 +645,7 @@ export const mentionDropdownVariants = {
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <motion.div
   variants={mentionDropdownVariants}
@@ -573,19 +664,20 @@ export const mentionDropdownVariants = {
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useMentionDropdown.ts
-"use client";
+'use client';
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from 'react';
 
 export function useMentionDropdown() {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
   const [results, setResults] = useState<any[]>([]);
   const [visible, setVisible] = useState(false);
 
   const searchUsers = useCallback(async (q: string) => {
-    if (!q.startsWith("@") || q.length < 2) {
+    if (!q.startsWith('@') || q.length < 2) {
       setResults([]);
       setVisible(false);
       return;
@@ -599,7 +691,7 @@ export function useMentionDropdown() {
         setVisible(true);
       }
     } catch (error) {
-      console.error("Mention search failed:", error);
+      console.error('Mention search failed:', error);
     }
   }, []);
 
@@ -631,11 +723,16 @@ If the search fails, the dropdown doesn't appear and the user can continue typin
 ### 3.1 Loading States
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Already defined in globals.css */
 @keyframes dd-shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .dd-skeleton {
@@ -652,6 +749,7 @@ If the search fails, the dropdown doesn't appear and the user can continue typin
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <div className="dd-skeleton h-4 w-3/4 rounded mb-2" />
 <div className="dd-skeleton h-4 w-1/2 rounded mb-2" />
@@ -659,11 +757,12 @@ If the search fails, the dropdown doesn't appear and the user can continue typin
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useSkeletonLoader.ts
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 export function useSkeletonLoader(isLoading: boolean, delay: number = 200) {
   const [showSkeleton, setShowSkeleton] = useState(false);
@@ -692,6 +791,7 @@ If loading fails, the skeleton is replaced with an error state or empty state. T
 ### 3.2 Novos Posts
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Already defined in lib/motion.ts */
 export const newPostsPillVariants = {
@@ -715,6 +815,7 @@ export const staggerItemVariants = {
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <motion.button
   variants={newPostsPillVariants}
@@ -733,18 +834,19 @@ export const staggerItemVariants = {
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useNewPostsIndicator.ts
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 
 export function useNewPostsIndicator() {
   const [newPostCount, setNewPostCount] = useState(0);
   const [hasNewPosts, setHasNewPosts] = useState(false);
 
   const increment = useCallback(() => {
-    setNewPostCount(prev => prev + 1);
+    setNewPostCount((prev) => prev + 1);
     setHasNewPosts(true);
   }, []);
 
@@ -768,11 +870,16 @@ If the scroll fails, the pill remains clickable. The stagger animation is skippe
 ### 3.3 Infinite Scroll
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Fade-in for appended posts */
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .fade-in {
@@ -781,6 +888,7 @@ If the scroll fails, the pill remains clickable. The stagger animation is skippe
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <motion.div
   initial={{ opacity: 0 }}
@@ -793,6 +901,7 @@ If the scroll fails, the pill remains clickable. The stagger animation is skippe
 ```
 
 **React Hook:**
+
 ```tsx
 // Already exists: src/hooks/useInfiniteScroll.ts
 // Verify it loads 3 posts before the end
@@ -810,6 +919,7 @@ If loading fails, show a "Carregar mais" button at the bottom. Stop infinite scr
 ### 3.4 Busca em Tempo Real
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Already defined in globals.css */
 .dd-search-highlight {
@@ -820,33 +930,41 @@ If loading fails, show a "Carregar mais" button at the bottom. Stop infinite scr
 }
 
 @keyframes dd-search-pulse {
-  0% { background-color: rgba(245, 166, 35, 0.12); }
-  100% { background-color: rgba(245, 166, 35, 0.24); }
+  0% {
+    background-color: rgba(245, 166, 35, 0.12);
+  }
+  100% {
+    background-color: rgba(245, 166, 35, 0.24);
+  }
 }
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <input
   className="w-full bg-dd-surface border border-dd-border rounded-full px-4 py-2 text-sm text-dd-text placeholder-dd-muted focus:outline-none focus:border-dd-accent transition-colors"
   placeholder="Buscar posts..."
-/>
+/>;
 
-{highlightedText.map((part, i) => (
-  <span key={i} className={part.isMatch ? "dd-search-highlight" : ""}>
-    {part.text}
-  </span>
-))}
+{
+  highlightedText.map((part, i) => (
+    <span key={i} className={part.isMatch ? 'dd-search-highlight' : ''}>
+      {part.text}
+    </span>
+  ));
+}
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useSearchWithDebounce.ts
-"use client";
+'use client';
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from 'react';
 
-export function useSearchWithDebounce(initialQuery: string = "", delay: number = 300) {
+export function useSearchWithDebounce(initialQuery: string = '', delay: number = 300) {
   const [query, setQuery] = useState(initialQuery);
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery);
 
@@ -872,6 +990,7 @@ If the search fails, show the empty state with a generic message. The highlight 
 ### 3.5 Abas Feed / Quizzes
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Sliding underline indicator */
 .tab-indicator {
@@ -880,13 +999,19 @@ If the search fails, show the empty state with a generic message. The highlight 
   height: 2px;
   background: var(--color-dd-accent);
   border-radius: 2px;
-  transition: transform 200ms var(--motion-ease-out), width 200ms var(--motion-ease-out);
+  transition:
+    transform 200ms var(--motion-ease-out),
+    width 200ms var(--motion-ease-out);
 }
 
 /* Crossfade for tab content */
 @keyframes crossfade {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .crossfade {
@@ -895,13 +1020,14 @@ If the search fails, show the empty state with a generic message. The highlight 
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <div className="relative flex gap-6 border-b border-dd-border">
   <button className="relative py-3 text-sm font-semibold text-dd-text">
     Feed
-    <div 
+    <div
       className="tab-indicator"
-      style={{ 
+      style={{
         width: activeTab === 'feed' ? '100%' : '0',
         transform: activeTab === 'feed' ? 'translateX(0)' : 'translateX(-100%)'
       }}
@@ -909,9 +1035,9 @@ If the search fails, show the empty state with a generic message. The highlight 
   </button>
   <button className="relative py-3 text-sm font-semibold text-dd-muted">
     Quizzes
-    <div 
+    <div
       className="tab-indicator"
-      style={{ 
+      style={{
         width: activeTab === 'quizzes' ? '100%' : '0',
         transform: activeTab === 'quizzes' ? 'translateX(0)' : 'translateX(100%)'
       }}
@@ -930,11 +1056,12 @@ If the search fails, show the empty state with a generic message. The highlight 
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useTabSwitch.ts
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 
 type Tab = 'feed' | 'quizzes';
 
@@ -962,9 +1089,10 @@ If the tab switch fails, the content remains on the current tab. The crossfade a
 ### 4.1 Seguir / Unfollow
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Already defined in globals.css */
-.dd-follow-btn[data-following="true"]:hover {
+.dd-follow-btn[data-following='true']:hover {
   background-color: rgba(239, 68, 68, 0.1) !important;
   color: #ef4444 !important;
   border-color: rgba(239, 68, 68, 0.3) !important;
@@ -972,8 +1100,12 @@ If the tab switch fails, the content remains on the current tab. The crossfade a
 
 /* Scale-in for check icon */
 @keyframes scale-in {
-  from { transform: scale(0); }
-  to { transform: scale(1); }
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
 }
 
 .scale-in {
@@ -982,14 +1114,15 @@ If the tab switch fails, the content remains on the current tab. The crossfade a
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <button
   data-following={isFollowing}
   className={cn(
-    "dd-touch dd-focus-ring px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200",
-    isFollowing 
-      ? "bg-dd-surface text-dd-text border border-dd-border hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30"
-      : "bg-dd-accent text-white hover:bg-orange-600"
+    'dd-touch dd-focus-ring px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200',
+    isFollowing
+      ? 'bg-dd-surface text-dd-text border border-dd-border hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30'
+      : 'bg-dd-accent text-white hover:bg-orange-600'
   )}
 >
   {isFollowing ? (
@@ -998,17 +1131,18 @@ If the tab switch fails, the content remains on the current tab. The crossfade a
       Seguindo
     </span>
   ) : (
-    "Seguir"
+    'Seguir'
   )}
 </button>
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useFollowButton.ts
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 
 export function useFollowButton(initialFollowing: boolean = false) {
   const [isFollowing, setIsFollowing] = useState(initialFollowing);
@@ -1025,7 +1159,7 @@ export function useFollowButton(initialFollowing: boolean = false) {
       const res = await fetch(`/api/users/${userId}/follow`, {
         method: newFollowing ? 'POST' : 'DELETE',
       });
-      
+
       if (!res.ok) {
         // Revert on error
         setIsFollowing(!newFollowing);
@@ -1052,6 +1186,7 @@ If the follow/unfollow fails, the button reverts to its previous state silently.
 ### 4.2 Repost / Compartilhar
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Already defined in lib/motion.ts */
 export const popoverMenuVariants = {
@@ -1062,6 +1197,7 @@ export const popoverMenuVariants = {
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <motion.div
   variants={popoverMenuVariants}
@@ -1077,11 +1213,12 @@ export const popoverMenuVariants = {
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useRepostMenu.ts
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 
 export function useRepostMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -1090,24 +1227,30 @@ export function useRepostMenu() {
   const openMenu = useCallback(() => setIsOpen(true), []);
   const closeMenu = useCallback(() => setIsOpen(false), []);
 
-  const repost = useCallback(async (postId: string) => {
-    setIsReposting(true);
-    // Optimistic counter increment
-    try {
-      const res = await fetch(`/api/posts/${postId}/repost`, { method: 'POST' });
-      if (!res.ok) throw new Error('Repost failed');
-    } catch (error) {
-      // Revert counter
-    } finally {
-      setIsReposting(false);
-      closeMenu();
-    }
-  }, [closeMenu]);
+  const repost = useCallback(
+    async (postId: string) => {
+      setIsReposting(true);
+      // Optimistic counter increment
+      try {
+        const res = await fetch(`/api/posts/${postId}/repost`, { method: 'POST' });
+        if (!res.ok) throw new Error('Repost failed');
+      } catch (error) {
+        // Revert counter
+      } finally {
+        setIsReposting(false);
+        closeMenu();
+      }
+    },
+    [closeMenu]
+  );
 
-  const quote = useCallback((postId: string) => {
-    closeMenu();
-    // Open compose modal with quoted post
-  }, [closeMenu]);
+  const quote = useCallback(
+    (postId: string) => {
+      closeMenu();
+      // Open compose modal with quoted post
+    },
+    [closeMenu]
+  );
 
   return { isOpen, isReposting, openMenu, closeMenu, repost, quote };
 }
@@ -1124,12 +1267,19 @@ If repost fails, the counter reverts and a toast appears. If quoting fails, the 
 ### 4.3 Bookmarks
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Already defined in globals.css */
 @keyframes dd-bookmark-pop {
-  0% { transform: scale(1); }
-  40% { transform: scale(1.2); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .dd-bookmark-pop {
@@ -1138,48 +1288,51 @@ If repost fails, the counter reverts and a toast appears. If quoting fails, the 
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <motion.button
   whileTap={{ scale: 0.95 }}
   className={cn(
-    "dd-touch dd-focus-ring p-1.5 rounded-md transition-colors",
-    isBookmarked 
-      ? "text-dd-accent dd-bookmark-pop" 
-      : "text-dd-muted hover:text-dd-text"
+    'dd-touch dd-focus-ring p-1.5 rounded-md transition-colors',
+    isBookmarked ? 'text-dd-accent dd-bookmark-pop' : 'text-dd-muted hover:text-dd-text'
   )}
 >
-  <Bookmark className={cn("w-4 h-4", isBookmarked && "fill-current")} />
+  <Bookmark className={cn('w-4 h-4', isBookmarked && 'fill-current')} />
 </motion.button>
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useBookmarkButton.ts
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 
 export function useBookmarkButton(initialBookmarked: boolean = false) {
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
 
-  const toggle = useCallback(async (postId: string) => {
-    const newBookmarked = !isBookmarked;
-    setIsBookmarked(newBookmarked);
+  const toggle = useCallback(
+    async (postId: string) => {
+      const newBookmarked = !isBookmarked;
+      setIsBookmarked(newBookmarked);
 
-    try {
-      const res = await fetch(`/api/posts/${postId}/bookmark`, {
-        method: newBookmarked ? 'POST' : 'DELETE',
-      });
-      
-      if (!res.ok) {
+      try {
+        const res = await fetch(`/api/posts/${postId}/bookmark`, {
+          method: newBookmarked ? 'POST' : 'DELETE',
+        });
+
+        if (!res.ok) {
+          setIsBookmarked(!newBookmarked);
+        } else {
+          // Show toast
+        }
+      } catch (error) {
         setIsBookmarked(!newBookmarked);
-      } else {
-        // Show toast
       }
-    } catch (error) {
-      setIsBookmarked(!newBookmarked);
-    }
-  }, [isBookmarked]);
+    },
+    [isBookmarked]
+  );
 
   return { isBookmarked, toggle };
 }
@@ -1196,15 +1349,22 @@ If bookmarking fails, the icon reverts to its previous state. A toast appears: "
 ### 4.4 DMs
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Badge pulse with ripple */
 @keyframes dd-dot-ripple {
-  0% { transform: scale(1); opacity: 0.6; }
-  100% { transform: scale(2.2); opacity: 0; }
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
 }
 
 .dd-dot-pulse::after {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   border-radius: 9999px;
@@ -1214,8 +1374,14 @@ If bookmarking fails, the icon reverts to its previous state. A toast appears: "
 
 /* Staggered message entrance */
 @keyframes message-slide-in {
-  from { transform: translateX(12px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+  from {
+    transform: translateX(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 .message-slide-in {
@@ -1224,8 +1390,14 @@ If bookmarking fails, the icon reverts to its previous state. A toast appears: "
 
 /* Typing indicator */
 @keyframes dd-typing-bounce {
-  0%, 60%, 100% { transform: translateY(0); }
-  30% { transform: translateY(-4px); }
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-4px);
+  }
 }
 
 .dd-typing-dot {
@@ -1236,13 +1408,20 @@ If bookmarking fails, the icon reverts to its previous state. A toast appears: "
   background-color: var(--color-dd-muted);
   animation: dd-typing-bounce 1.2s ease-in-out infinite;
 }
-.dd-typing-dot:nth-child(2) { animation-delay: 200ms; }
-.dd-typing-dot:nth-child(3) { animation-delay: 400ms; }
+.dd-typing-dot:nth-child(2) {
+  animation-delay: 200ms;
+}
+.dd-typing-dot:nth-child(3) {
+  animation-delay: 400ms;
+}
 ```
 
 **Tailwind Classes:**
+
 ```tsx
-{/* Unread badge */}
+{
+  /* Unread badge */
+}
 <div className="relative">
   <MessageCircle className="w-5 h-5" />
   {unreadCount > 0 && (
@@ -1250,22 +1429,25 @@ If bookmarking fails, the icon reverts to its previous state. A toast appears: "
       {unreadCount}
     </span>
   )}
-</div>
+</div>;
 
-{/* Typing indicator */}
+{
+  /* Typing indicator */
+}
 <div className="flex gap-1">
   <span className="dd-typing-dot" />
   <span className="dd-typing-dot" />
   <span className="dd-typing-dot" />
-</div>
+</div>;
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useDMBadge.ts
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 export function useDMBadge() {
   const [unreadCount, setUnreadCount] = useState(0);
@@ -1287,9 +1469,9 @@ export function useDMBadge() {
 }
 
 // src/hooks/useMessageStagger.ts
-"use client";
+('use client');
 
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
 export function useMessageStagger(messages: any[], containerRef: React.RefObject<HTMLDivElement>) {
   useEffect(() => {
@@ -1315,12 +1497,20 @@ If the badge animation fails, show a static badge. If message stagger fails, sho
 ### 4.5 Notificações em Tempo Real
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Bell shake */
 @keyframes dd-bell-shake {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-2deg); }
-  75% { transform: rotate(2deg); }
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-2deg);
+  }
+  75% {
+    transform: rotate(2deg);
+  }
 }
 
 .dd-bell-shake {
@@ -1328,57 +1518,66 @@ If the badge animation fails, show a static badge. If message stagger fails, sho
 }
 
 /* Notification type colors */
-.dd-notif-like { color: var(--color-dd-amber); }
-.dd-notif-comment { color: var(--color-dd-blue); }
-.dd-notif-mention { color: var(--color-dd-purple); }
-.dd-notif-xp { color: var(--color-dd-green); }
-.dd-notif-follow { color: #14b8a6; }
+.dd-notif-like {
+  color: var(--color-dd-amber);
+}
+.dd-notif-comment {
+  color: var(--color-dd-blue);
+}
+.dd-notif-mention {
+  color: var(--color-dd-purple);
+}
+.dd-notif-xp {
+  color: var(--color-dd-green);
+}
+.dd-notif-follow {
+  color: #14b8a6;
+}
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <motion.div
   animate={{ rotate: [0, -2, 2, 0] }}
   transition={{ duration: 0.4, repeat: 2 }}
-  className={cn(
-    "dd-bell-shake",
-    hasNew && "dd-notif-" + notificationType
-  )}
+  className={cn('dd-bell-shake', hasNew && 'dd-notif-' + notificationType)}
 >
   <Bell className="w-5 h-5" />
-</motion.div>
+</motion.div>;
 
-{/* Staggered notification items */}
-<motion.div
-  variants={notifStaggerContainer}
-  initial="hidden"
-  animate="visible"
->
+{
+  /* Staggered notification items */
+}
+<motion.div variants={notifStaggerContainer} initial="hidden" animate="visible">
   {notifications.map((notif) => (
     <motion.div key={notif.id} variants={notifItemVariants}>
       <NotificationItem notification={notif} />
     </motion.div>
   ))}
-</motion.div>
+</motion.div>;
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useNotificationBell.ts
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 export function useNotificationBell() {
   const [hasNew, setHasNew] = useState(false);
-  const [notificationType, setNotificationType] = useState<'like' | 'comment' | 'mention' | 'xp' | 'follow' | null>(null);
+  const [notificationType, setNotificationType] = useState<
+    'like' | 'comment' | 'mention' | 'xp' | 'follow' | null
+  >(null);
 
   useEffect(() => {
     // Listen for real-time notifications via WebSocket or polling
     const handleNewNotification = (type: 'like' | 'comment' | 'mention' | 'xp' | 'follow') => {
       setHasNew(true);
       setNotificationType(type);
-      
+
       // Reset after animation
       setTimeout(() => setHasNew(false), 800);
     };
@@ -1406,11 +1605,17 @@ If the shake animation fails, show a static badge. If the stagger fails, show al
 ### 5.1 Quiz Diário
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Already defined in globals.css */
 @keyframes dd-glow-ring {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); }
-  50% { box-shadow: 0 0 12px 4px rgba(249, 115, 22, 0.15); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 12px 4px rgba(249, 115, 22, 0.15);
+  }
 }
 
 .dd-glow-ring {
@@ -1419,8 +1624,12 @@ If the shake animation fails, show a static badge. If the stagger fails, show al
 
 /* Correct answer flash */
 @keyframes dd-correct-flash {
-  0% { background-color: rgba(34, 212, 138, 0.15); }
-  100% { background-color: transparent; }
+  0% {
+    background-color: rgba(34, 212, 138, 0.15);
+  }
+  100% {
+    background-color: transparent;
+  }
 }
 
 .dd-correct-flash {
@@ -1429,11 +1638,22 @@ If the shake animation fails, show a static badge. If the stagger fails, show al
 
 /* Error shake */
 @keyframes dd-shake-error {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-4px); }
-  40% { transform: translateX(4px); }
-  60% { transform: translateX(-4px); }
-  80% { transform: translateX(4px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-4px);
+  }
+  40% {
+    transform: translateX(4px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
 }
 
 .dd-shake-error {
@@ -1442,6 +1662,7 @@ If the shake animation fails, show a static badge. If the stagger fails, show al
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <div className={cn(
   "border border-dd-border rounded-xl p-4 transition-all",
@@ -1462,39 +1683,43 @@ If the shake animation fails, show a static badge. If the stagger fails, show al
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useQuizCard.ts
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 
 export function useQuizCard(quizId: string) {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [completed, setCompleted] = useState(false);
 
-  const submitAnswer = useCallback(async (answer: string) => {
-    setSelectedAnswer(answer);
+  const submitAnswer = useCallback(
+    async (answer: string) => {
+      setSelectedAnswer(answer);
 
-    try {
-      const res = await fetch(`/api/quizzes/${quizId}/answer`, {
-        method: 'POST',
-        body: JSON.stringify({ answer }),
-      });
+      try {
+        const res = await fetch(`/api/quizzes/${quizId}/answer`, {
+          method: 'POST',
+          body: JSON.stringify({ answer }),
+        });
 
-      if (res.ok) {
-        const data = await res.json();
-        setIsCorrect(data.correct);
-        setCompleted(true);
-        
-        if (data.correct) {
-          // Trigger XP float
+        if (res.ok) {
+          const data = await res.json();
+          setIsCorrect(data.correct);
+          setCompleted(true);
+
+          if (data.correct) {
+            // Trigger XP float
+          }
         }
+      } catch (error) {
+        console.error('Quiz answer failed:', error);
       }
-    } catch (error) {
-      console.error('Quiz answer failed:', error);
-    }
-  }, [quizId]);
+    },
+    [quizId]
+  );
 
   return { selectedAnswer, isCorrect, completed, submitAnswer };
 }
@@ -1511,6 +1736,7 @@ If the answer submission fails, the card resets to allow retry. The glow ring is
 ### 5.2 Trilhas por Linguagem
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Liquid fill animation */
 .dd-liquid-track {
@@ -1519,7 +1745,7 @@ If the answer submission fails, the card resets to allow retry. The glow ring is
 }
 
 .dd-liquid-track::after {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   background: linear-gradient(
@@ -1541,9 +1767,10 @@ If the answer submission fails, the card resets to allow retry. The glow ring is
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <div className="dd-liquid-track h-2 bg-dd-border rounded-full overflow-hidden">
-  <div 
+  <div
     className="dd-liquid-fill h-full bg-dd-accent rounded-full"
     style={{ transform: `scaleX(${progress / 100})` }}
   />
@@ -1551,11 +1778,12 @@ If the answer submission fails, the card resets to allow retry. The glow ring is
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useLanguageTrail.ts
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 export function useLanguageTrail(language: string) {
   const [progress, setProgress] = useState(0);
@@ -1563,17 +1791,17 @@ export function useLanguageTrail(language: string) {
   const [milestone, setMilestone] = useState<number | null>(null);
 
   const addXP = useCallback((amount: number) => {
-    setXP(prev => {
+    setXP((prev) => {
       const newXP = prev + amount;
       const newProgress = (newXP % 1000) / 10; // Assuming 1000 XP per level
-      
+
       setProgress(newProgress);
-      
+
       // Check for milestone
       if (newXP % 1000 === 0 && newXP > 0) {
         setMilestone(Math.floor(newXP / 1000));
       }
-      
+
       return newXP;
     });
   }, []);
@@ -1593,53 +1821,87 @@ If the animation fails, the progress bar updates instantly. The milestone badge 
 ### 5.3 Leaderboard
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Top 3 special borders */
-.rank-1 { border: 2px solid #ffd700; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); }
-.rank-2 { border: 2px solid #c0c0c0; box-shadow: 0 0 15px rgba(192, 192, 192, 0.15); }
-.rank-3 { border: 2px solid #cd7f32; box-shadow: 0 0 10px rgba(205, 127, 50, 0.15); }
+.rank-1 {
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+}
+.rank-2 {
+  border: 2px solid #c0c0c0;
+  box-shadow: 0 0 15px rgba(192, 192, 192, 0.15);
+}
+.rank-3 {
+  border: 2px solid #cd7f32;
+  box-shadow: 0 0 10px rgba(205, 127, 50, 0.15);
+}
 
 /* Position change animation */
 @keyframes dd-rank-up {
-  from { transform: translateY(8px); opacity: 0.5; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(8px);
+    opacity: 0.5;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes dd-rank-down {
-  from { transform: translateY(-8px); opacity: 0.5; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-8px);
+    opacity: 0.5;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
-.rank-up { animation: dd-rank-up 300ms ease-out; }
-.rank-down { animation: dd-rank-down 300ms ease-out; }
+.rank-up {
+  animation: dd-rank-up 300ms ease-out;
+}
+.rank-down {
+  animation: dd-rank-down 300ms ease-out;
+}
 ```
 
 **Tailwind Classes:**
-```tsx
-<div className={cn(
-  "border border-dd-border rounded-xl p-4 transition-all",
-  rank === 1 && "rank-1",
-  rank === 2 && "rank-2",
-  rank === 3 && "rank-3"
-)}>
-  {/* Leaderboard item */}
-</div>
 
-{/* User's position (sticky if not in top 10) */}
-<div className={cn(
-  "border border-dd-accent rounded-xl p-4 bg-dd-accent/5",
-  !isInTop10 && "sticky bottom-0"
-)}>
+```tsx
+<div
+  className={cn(
+    'border border-dd-border rounded-xl p-4 transition-all',
+    rank === 1 && 'rank-1',
+    rank === 2 && 'rank-2',
+    rank === 3 && 'rank-3'
+  )}
+>
+  {/* Leaderboard item */}
+</div>;
+
+{
+  /* User's position (sticky if not in top 10) */
+}
+<div
+  className={cn(
+    'border border-dd-accent rounded-xl p-4 bg-dd-accent/5',
+    !isInTop10 && 'sticky bottom-0'
+  )}
+>
   {/* User's rank */}
-</div>
+</div>;
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useLeaderboard.ts
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 export function useLeaderboard() {
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
@@ -1651,14 +1913,14 @@ export function useLeaderboard() {
       const res = await fetch('/api/leaderboard');
       if (res.ok) {
         const data = await res.json();
-        
+
         // Track position changes
         const newPreviousRanks = new Map(previousRanks);
         data.forEach((item: any) => {
           newPreviousRanks.set(item.id, item.rank);
         });
         setPreviousRanks(newPreviousRanks);
-        
+
         setLeaderboard(data);
       }
     };
@@ -1691,10 +1953,13 @@ If the leaderboard fails to update, show the last known state. Position change a
 ### 6.1 Página Explorar
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Masonry grid with hover effects */
 .explore-card {
-  transition: transform 200ms var(--motion-ease-out), border-color 200ms;
+  transition:
+    transform 200ms var(--motion-ease-out),
+    border-color 200ms;
 }
 
 .explore-card:hover {
@@ -1704,8 +1969,12 @@ If the leaderboard fails to update, show the last known state. Position change a
 
 /* Crossfade for grid filter */
 @keyframes grid-crossfade {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .grid-crossfade {
@@ -1714,10 +1983,14 @@ If the leaderboard fails to update, show the last known state. Position change a
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
   {developers.map((dev) => (
-    <div key={dev.id} className="explore-card border border-dd-border rounded-xl p-4 cursor-pointer">
+    <div
+      key={dev.id}
+      className="explore-card border border-dd-border rounded-xl p-4 cursor-pointer"
+    >
       <img src={dev.avatar_url} className="w-12 h-12 rounded-full mb-3" />
       <h3 className="text-sm font-bold text-dd-text">{dev.username}</h3>
       <p className="text-xs text-dd-muted">Nível {dev.level}</p>
@@ -1725,33 +1998,36 @@ If the leaderboard fails to update, show the last known state. Position change a
       <p className="text-xs text-dd-accent font-mono mt-2">{dev.totalXP} XP</p>
     </div>
   ))}
-</div>
+</div>;
 
-{/* Language filter pills */}
+{
+  /* Language filter pills */
+}
 <div className="flex gap-2 flex-wrap mb-6">
   {languages.map((lang) => (
     <button
       key={lang}
       onClick={() => setFilter(lang)}
       className={cn(
-        "px-3 py-1 rounded-full text-xs font-bold transition-all",
-        filter === lang 
-          ? "bg-dd-accent text-white" 
-          : "bg-dd-surface text-dd-muted hover:text-dd-text"
+        'px-3 py-1 rounded-full text-xs font-bold transition-all',
+        filter === lang
+          ? 'bg-dd-accent text-white'
+          : 'bg-dd-surface text-dd-muted hover:text-dd-text'
       )}
     >
       {lang}
     </button>
   ))}
-</div>
+</div>;
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useExploreGrid.ts
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 
 export function useExploreGrid() {
   const [filter, setFilter] = useState<string | null>(null);
@@ -1759,11 +2035,9 @@ export function useExploreGrid() {
 
   const filterByLanguage = useCallback(async (language: string | null) => {
     setFilter(language);
-    
+
     try {
-      const url = language 
-        ? `/api/explore?language=${language}`
-        : '/api/explore';
+      const url = language ? `/api/explore?language=${language}` : '/api/explore';
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
@@ -1789,32 +2063,46 @@ If the filter fails, show all developers. The hover effects are disabled if redu
 ### 6.2 Trending Topics
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Vertical swap animation for reordering */
 @keyframes swap-up {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 @keyframes swap-down {
-  from { transform: translateY(-100%); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
-.swap-up { animation: swap-up 300ms ease-out; }
-.swap-down { animation: swap-down 300ms ease-out; }
+.swap-up {
+  animation: swap-up 300ms ease-out;
+}
+.swap-down {
+  animation: swap-down 300ms ease-out;
+}
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <div className="space-y-2">
   {trendingTopics.map((topic, index) => (
-    <div 
+    <div
       key={topic.id}
       className={cn(
-        "flex items-center justify-between p-2 rounded-lg hover:bg-dd-surface transition-colors cursor-pointer",
-        topic.positionChange > 0 && "swap-up",
-        topic.positionChange < 0 && "swap-down"
+        'flex items-center justify-between p-2 rounded-lg hover:bg-dd-surface transition-colors cursor-pointer',
+        topic.positionChange > 0 && 'swap-up',
+        topic.positionChange < 0 && 'swap-down'
       )}
       onClick={() => filterFeedByTopic(topic.name)}
     >
@@ -1826,11 +2114,12 @@ If the filter fails, show all developers. The hover effects are disabled if redu
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useTrendingTopics.ts
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 export function useTrendingTopics() {
   const [topics, setTopics] = useState<any[]>([]);
@@ -1864,12 +2153,21 @@ If the trending update fails, keep the last known order. Swap animations are ski
 ### 6.3 Comunidades por Linguagem
 
 **CSS Classes & Keyframes:**
+
 ```css
 /* Language-derived theme colors */
-.theme-js { --theme-color: #f5a623; }
-.theme-python { --theme-color: #5ba3f5; }
-.theme-rust { --theme-color: #f97316; }
-.theme-go { --theme-color: #22d48a; }
+.theme-js {
+  --theme-color: #f5a623;
+}
+.theme-python {
+  --theme-color: #5ba3f5;
+}
+.theme-rust {
+  --theme-color: #f97316;
+}
+.theme-go {
+  --theme-color: #22d48a;
+}
 
 .community-card {
   border-color: var(--theme-color);
@@ -1881,14 +2179,17 @@ If the trending update fails, keep the last known order. Swap animations are ski
 ```
 
 **Tailwind Classes:**
+
 ```tsx
-<div className={cn(
-  "community-card border border-dd-border rounded-xl p-4 transition-all",
-  language === 'JavaScript' && 'theme-js',
-  language === 'Python' && 'theme-python',
-  language === 'Rust' && 'theme-rust',
-  language === 'Go' && 'theme-go'
-)}>
+<div
+  className={cn(
+    'community-card border border-dd-border rounded-xl p-4 transition-all',
+    language === 'JavaScript' && 'theme-js',
+    language === 'Python' && 'theme-python',
+    language === 'Rust' && 'theme-rust',
+    language === 'Go' && 'theme-go'
+  )}
+>
   <h3 className="text-sm font-bold text-dd-text">{language} Community</h3>
   <p className="text-xs text-dd-muted">{memberCount} membros</p>
   <button
@@ -1902,11 +2203,12 @@ If the trending update fails, keep the last known order. Swap animations are ski
 ```
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useCommunityJoin.ts
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 
 export function useCommunityJoin(communityId: string) {
   const [isMember, setIsMember] = useState(false);
@@ -1916,7 +2218,7 @@ export function useCommunityJoin(communityId: string) {
     // Optimistic update
     const newMember = !isMember;
     setIsMember(newMember);
-    setMemberCount(prev => newMember ? prev + 1 : prev - 1);
+    setMemberCount((prev) => (newMember ? prev + 1 : prev - 1));
 
     try {
       const res = await fetch(`/api/communities/${communityId}/join`, {
@@ -1926,11 +2228,11 @@ export function useCommunityJoin(communityId: string) {
       if (!res.ok) {
         // Revert
         setIsMember(!newMember);
-        setMemberCount(prev => newMember ? prev - 1 : prev + 1);
+        setMemberCount((prev) => (newMember ? prev - 1 : prev + 1));
       }
     } catch (error) {
       setIsMember(!newMember);
-      setMemberCount(prev => newMember ? prev - 1 : prev + 1);
+      setMemberCount((prev) => (newMember ? prev - 1 : prev + 1));
     }
   }, [isMember, communityId]);
 
@@ -1950,67 +2252,70 @@ If joining fails, the button reverts to its previous state. Theme colors fall ba
 
 ### Copy Constants File
 
-```typescript
+````typescript
 // src/lib/copy.ts
 
 export const COPY = {
   // Empty States
-  EMPTY_FEED: "Nenhum post ainda. Seja o primeiro a quebrar o silêncio.",
-  EMPTY_SEARCH: (term: string) => `Nenhum resultado para '${term}'. Você pode ser o primeiro a falar sobre isso.`,
+  EMPTY_FEED: 'Nenhum post ainda. Seja o primeiro a quebrar o silêncio.',
+  EMPTY_SEARCH: (term: string) =>
+    `Nenhum resultado para '${term}'. Você pode ser o primeiro a falar sobre isso.`,
   EMPTY_DM: "Nenhuma mensagem ainda. Manda um 'Hello, World!'",
-  EMPTY_NOTIFICATIONS: "Tudo lido. Hora de fazer algo que valha uma notificação.",
-  EMPTY_COMMUNITY: "Nenhum post nesta comunidade ainda. Seja o pioneiro!",
-  
+  EMPTY_NOTIFICATIONS: 'Tudo lido. Hora de fazer algo que valha uma notificação.',
+  EMPTY_COMMUNITY: 'Nenhum post nesta comunidade ainda. Seja o pioneiro!',
+
   // Error States
-  ERROR_POST: "Algo deu errado. Seu rascunho foi salvo automaticamente.",
-  ERROR_FOLLOW: "Não foi possível seguir. Tente novamente.",
-  ERROR_BOOKMARK: "Não foi possível salvar. Tente novamente.",
-  ERROR_REPOST: "Não foi possível repostar. Tente novamente.",
-  ERROR_QUIZ: "Não foi possível enviar sua resposta. Tente novamente.",
-  ERROR_NETWORK: "Erro de conexão. Verifique sua internet.",
-  
+  ERROR_POST: 'Algo deu errado. Seu rascunho foi salvo automaticamente.',
+  ERROR_FOLLOW: 'Não foi possível seguir. Tente novamente.',
+  ERROR_BOOKMARK: 'Não foi possível salvar. Tente novamente.',
+  ERROR_REPOST: 'Não foi possível repostar. Tente novamente.',
+  ERROR_QUIZ: 'Não foi possível enviar sua resposta. Tente novamente.',
+  ERROR_NETWORK: 'Erro de conexão. Verifique sua internet.',
+
   // Success States
-  SUCCESS_POST: "Post publicado com sucesso!",
-  SUCCESS_FOLLOW: "Agora você está seguindo este usuário.",
-  SUCCESS_BOOKMARK: "Salvo nos seus bookmarks",
-  SUCCESS_REPOST: "Repostado com sucesso!",
-  SUCCESS_QUIZ_CORRECT: "Resposta correta! +XP ganho.",
-  SUCCESS_QUIZ_WRONG: "Resposta incorreta. A resposta correta foi revelada.",
-  
+  SUCCESS_POST: 'Post publicado com sucesso!',
+  SUCCESS_FOLLOW: 'Agora você está seguindo este usuário.',
+  SUCCESS_BOOKMARK: 'Salvo nos seus bookmarks',
+  SUCCESS_REPOST: 'Repostado com sucesso!',
+  SUCCESS_QUIZ_CORRECT: 'Resposta correta! +XP ganho.',
+  SUCCESS_QUIZ_WRONG: 'Resposta incorreta. A resposta correta foi revelada.',
+
   // Special Events
-  FIRST_POST: "+50 XP — Primeira postagem! Bem-vindo ao DevDeck.",
-  LEVEL_UP: (level: number, title: string) => `Level ${level} desbloqueado! Você agora é um ${title}.`,
+  FIRST_POST: '+50 XP — Primeira postagem! Bem-vindo ao DevDeck.',
+  LEVEL_UP: (level: number, title: string) =>
+    `Level ${level} desbloqueado! Você agora é um ${title}.`,
   MILESTONE_XP: (amount: number) => `Milestone alcançado! +${amount} XP.`,
   STREAK_DAY: (days: number) => `${days} dias seguidos! Continue assim!`,
-  
+
   // Loading States
-  LOADING_FEED: "Carregando posts...",
-  LOADING_SEARCH: "Buscando...",
-  LOADING_PROFILE: "Carregando perfil...",
-  LOADING_LEADERBOARD: "Carregando classificação...",
-  
+  LOADING_FEED: 'Carregando posts...',
+  LOADING_SEARCH: 'Buscando...',
+  LOADING_PROFILE: 'Carregando perfil...',
+  LOADING_LEADERBOARD: 'Carregando classificação...',
+
   // Confirmations
-  CONFIRM_DISCARD_DRAFT: "Descartar rascunho?",
-  CONFIRM_UNFOLLOW: "Deixar de seguir este usuário?",
-  CONFIRM_DELETE_POST: "Excluir este post?",
-  CONFIRM_LEAVE_COMMUNITY: "Sair desta comunidade?",
-  
+  CONFIRM_DISCARD_DRAFT: 'Descartar rascunho?',
+  CONFIRM_UNFOLLOW: 'Deixar de seguir este usuário?',
+  CONFIRM_DELETE_POST: 'Excluir este post?',
+  CONFIRM_LEAVE_COMMUNITY: 'Sair desta comunidade?',
+
   // Hints
-  HINT_MENTION: "Digite @ para mencionar outros desenvolvedores.",
-  HINT_CODE_BLOCK: "Use ``` para adicionar blocos de código.",
-  HINT_MARKDOWN: "Markdown é suportado para formatação.",
-  HINT_EMOJI: "Use :emoji: para adicionar emojis.",
-  
+  HINT_MENTION: 'Digite @ para mencionar outros desenvolvedores.',
+  HINT_CODE_BLOCK: 'Use ``` para adicionar blocos de código.',
+  HINT_MARKDOWN: 'Markdown é suportado para formatação.',
+  HINT_EMOJI: 'Use :emoji: para adicionar emojis.',
+
   // Accessibility
-  ARIA_POST_BUTTON: "Criar novo post",
-  ARIA_LIKE_BUTTON: "Curtir post",
-  ARIA_BOOKMARK_BUTTON: "Salvar post",
-  ARIA_SHARE_BUTTON: "Compartilhar post",
-  ARIA_FOLLOW_BUTTON: (isFollowing: boolean) => isFollowing ? "Deixar de seguir" : "Seguir usuário",
-  ARIA_NOTIFICATION_BELL: "Notificações",
-  ARIA_SEARCH_INPUT: "Buscar posts e usuários",
+  ARIA_POST_BUTTON: 'Criar novo post',
+  ARIA_LIKE_BUTTON: 'Curtir post',
+  ARIA_BOOKMARK_BUTTON: 'Salvar post',
+  ARIA_SHARE_BUTTON: 'Compartilhar post',
+  ARIA_FOLLOW_BUTTON: (isFollowing: boolean) =>
+    isFollowing ? 'Deixar de seguir' : 'Seguir usuário',
+  ARIA_NOTIFICATION_BELL: 'Notificações',
+  ARIA_SEARCH_INPUT: 'Buscar posts e usuários',
 } as const;
-```
+````
 
 **User Experience:**
 Every empty state and error message is specific and speaks in the developer's voice. No generic "Something went wrong" messages. The copy is concise, helpful, and maintains the platform's technical identity.
@@ -2025,6 +2330,7 @@ If copy fails to load, fall back to generic English messages. Ensure all copy is
 ### 8.1 Reduced Motion Support
 
 **CSS:**
+
 ```css
 /* Already defined in globals.css */
 @media (prefers-reduced-motion: reduce) {
@@ -2044,33 +2350,40 @@ If copy fails to load, fall back to generic English messages. Ensure all copy is
     animation: none;
     opacity: 0.6;
   }
-  
+
   .dd-dot-pulse::after {
     animation: none;
   }
-  
+
   .dd-glow-ring {
     animation: none;
     box-shadow: 0 0 8px 2px rgba(249, 115, 22, 0.15);
   }
-  
-  .dd-typing-dot { 
-    animation: none; 
-    opacity: 0.6; 
+
+  .dd-typing-dot {
+    animation: none;
+    opacity: 0.6;
   }
-  .dd-typing-dot:nth-child(2) { opacity: 0.4; }
-  .dd-typing-dot:nth-child(3) { opacity: 0.2; }
+  .dd-typing-dot:nth-child(2) {
+    opacity: 0.4;
+  }
+  .dd-typing-dot:nth-child(3) {
+    opacity: 0.2;
+  }
 }
 ```
 
 **React Hook:**
+
 ```tsx
 // Already exists: src/hooks/useReducedMotion.ts
 // Usage in all animated components
 const reduced = useReducedMotion();
 
 // Conditionally apply animations
-{!reduced && <motion.div variants={variants} />}
+{
+  !reduced && <motion.div variants={variants} />;
+}
 ```
 
 **User Experience:**
@@ -2084,6 +2397,7 @@ If the media query fails to detect, default to reduced motion for safety. Provid
 ### 8.2 Touch Targets
 
 **CSS:**
+
 ```css
 /* Already defined in globals.css */
 .dd-touch {
@@ -2100,6 +2414,7 @@ If the media query fails to detect, default to reduced motion for safety. Provid
 ```
 
 **Tailwind Classes:**
+
 ```tsx
 <button className="dd-touch dd-focus-ring p-1.5 rounded-md">
   <Icon className="w-4 h-4" />
@@ -2117,6 +2432,7 @@ If the touch target is too small, add padding to meet the 44×44px minimum. Test
 ### 8.3 GPU-Composited Animations
 
 **CSS:**
+
 ```css
 /* Already defined in globals.css */
 .dd-gpu {
@@ -2126,13 +2442,13 @@ If the touch target is too small, add padding to meet the 44×44px minimum. Test
 ```
 
 **Tailwind Classes:**
+
 ```tsx
-<motion.div className="dd-gpu">
-  {/* Animated content */}
-</motion.div>
+<motion.div className="dd-gpu">{/* Animated content */}</motion.div>
 ```
 
 **Guidelines:**
+
 - Only animate `transform` and `opacity` properties
 - Never animate `width`, `height`, `top`, `left` directly
 - Use `will-change` sparingly for elements that will animate
@@ -2150,71 +2466,75 @@ If animations cause jank, reduce complexity or disable specific animations. Prov
 ### 8.4 Optional Sound System
 
 **React Hook:**
+
 ```tsx
 // src/hooks/useSoundEffects.ts
-"use client";
+'use client';
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from 'react';
 
 export function useSoundEffects(enabled: boolean = false) {
   const audioContextRef = useRef<AudioContext | null>(null);
 
   useEffect(() => {
     if (!enabled) return;
-    
+
     audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-    
+
     return () => {
       audioContextRef.current?.close();
     };
   }, [enabled]);
 
-  const playSound = useCallback((type: 'post' | 'like' | 'levelup') => {
-    if (!enabled || !audioContextRef.current) return;
+  const playSound = useCallback(
+    (type: 'post' | 'like' | 'levelup') => {
+      if (!enabled || !audioContextRef.current) return;
 
-    const ctx = audioContextRef.current;
-    const oscillator = ctx.createOscillator();
-    const gainNode = ctx.createGain();
+      const ctx = audioContextRef.current;
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
 
-    oscillator.connect(gainNode);
-    gainNode.connect(ctx.destination);
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
 
-    // Volume max 30%
-    gainNode.gain.value = 0.3;
+      // Volume max 30%
+      gainNode.gain.value = 0.3;
 
-    switch (type) {
-      case 'post':
-        // Whoosh sound
-        oscillator.frequency.setValueAtTime(400, ctx.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.2);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
-        oscillator.start(ctx.currentTime);
-        oscillator.stop(ctx.currentTime + 0.2);
-        break;
-      case 'like':
-        // Pop sound
-        oscillator.frequency.setValueAtTime(600, ctx.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.1);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-        oscillator.start(ctx.currentTime);
-        oscillator.stop(ctx.currentTime + 0.1);
-        break;
-      case 'levelup':
-        // 3 ascending notes
-        [440, 554, 659].forEach((freq, i) => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          gain.gain.value = 0.3;
-          osc.frequency.value = freq;
-          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3 + i * 0.15);
-          osc.start(ctx.currentTime + i * 0.15);
-          osc.stop(ctx.currentTime + 0.3 + i * 0.15);
-        });
-        break;
-    }
-  }, [enabled]);
+      switch (type) {
+        case 'post':
+          // Whoosh sound
+          oscillator.frequency.setValueAtTime(400, ctx.currentTime);
+          oscillator.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.2);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+          oscillator.start(ctx.currentTime);
+          oscillator.stop(ctx.currentTime + 0.2);
+          break;
+        case 'like':
+          // Pop sound
+          oscillator.frequency.setValueAtTime(600, ctx.currentTime);
+          oscillator.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.1);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+          oscillator.start(ctx.currentTime);
+          oscillator.stop(ctx.currentTime + 0.1);
+          break;
+        case 'levelup':
+          // 3 ascending notes
+          [440, 554, 659].forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            gain.gain.value = 0.3;
+            osc.frequency.value = freq;
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3 + i * 0.15);
+            osc.start(ctx.currentTime + i * 0.15);
+            osc.stop(ctx.currentTime + 0.3 + i * 0.15);
+          });
+          break;
+      }
+    },
+    [enabled]
+  );
 
   return { playSound };
 }

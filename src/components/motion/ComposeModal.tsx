@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { ReactNode, useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { X } from "lucide-react";
-import { modalContentVariants, fadeVariants, bottomSheetVariants } from "@/lib/motion";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { ReactNode, useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { X } from 'lucide-react';
+import { modalContentVariants, fadeVariants, bottomSheetVariants } from '@/lib/motion';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 interface ComposeModalProps {
   open: boolean;
@@ -38,13 +38,13 @@ export function ComposeModal({
   useEffect(() => {
     if (!open) return;
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === 'Escape') {
         event.preventDefault();
         handleClose();
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [open, hasDraft, onClose]);
 
   const handleDiscard = () => {

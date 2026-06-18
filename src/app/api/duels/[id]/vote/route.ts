@@ -1,13 +1,13 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getAuthUser } from "@/lib/auth";
-import { duelVoteSchema } from "@/lib/validators";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth';
+import { duelVoteSchema } from '@/lib/validators';
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getAuthUser();
     if (!user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     const { id: duelId } = await params;
@@ -18,12 +18,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     });
 
     if (!duel) {
-      return NextResponse.json({ error: "Duelo não encontrado" }, { status: 404 });
+      return NextResponse.json({ error: 'Duelo não encontrado' }, { status: 404 });
     }
 
     // Participantes não podem votar no próprio duelo
     if (duel.challenger_id === user.id || duel.opponent_id === user.id) {
-      return NextResponse.json({ error: "Você não pode votar no seu próprio duelo" }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Você não pode votar no seu próprio duelo' },
+        { status: 400 }
+      );
     }
 
     const body = await request.json();
@@ -40,7 +43,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     });
 
     if (!solution) {
-      return NextResponse.json({ error: "Solução não encontrada neste duelo" }, { status: 404 });
+      return NextResponse.json({ error: 'Solução não encontrada neste duelo' }, { status: 404 });
     }
 
     // Verificar se o usuário já votou neste duelo
@@ -54,7 +57,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     });
 
     if (existingVote) {
-      return NextResponse.json({ error: "Você já votou neste duelo" }, { status: 400 });
+      return NextResponse.json({ error: 'Você já votou neste duelo' }, { status: 400 });
     }
 
     // Registrar o voto e incrementar o contador da solução
@@ -81,7 +84,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     return NextResponse.json(voteResult);
   } catch (error) {
-    console.error("Error voting on duel solution:", error);
-    return NextResponse.json({ error: "Erro ao votar" }, { status: 500 });
+    console.error('Error voting on duel solution:', error);
+    return NextResponse.json({ error: 'Erro ao votar' }, { status: 500 });
   }
 }

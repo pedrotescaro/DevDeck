@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Sidebar } from "@/components/Sidebar";
-import { DuelCard } from "@/components/DuelCard";
-import { Footer } from "@/components/Footer";
-import { Language } from "@prisma/client";
-import { Swords, Plus, ChevronRight, Sparkles, HelpCircle, Code, ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { useState } from 'react';
+import { Sidebar } from '@/components/Sidebar';
+import { DuelCard } from '@/components/DuelCard';
+import { Footer } from '@/components/Footer';
+import { Language } from '@prisma/client';
+import { Swords, Plus, ChevronRight, Sparkles, HelpCircle, Code, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 interface DuelsContentProps {
   user: {
@@ -22,14 +22,14 @@ interface DuelsContentProps {
 export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
   const [duels, setDuels] = useState<any[]>(initialDuels);
   const [showDuelForm, setShowDuelForm] = useState(false);
-  const [duelTitle, setDuelTitle] = useState("");
-  const [duelBody, setDuelBody] = useState("");
-  const [duelLanguage, setDuelLanguage] = useState<Language>("TS");
+  const [duelTitle, setDuelTitle] = useState('');
+  const [duelBody, setDuelBody] = useState('');
+  const [duelLanguage, setDuelLanguage] = useState<Language>('TS');
   const [creating, setCreating] = useState(false);
 
   const refreshDuels = async () => {
     try {
-      const res = await fetch("/api/duels");
+      const res = await fetch('/api/duels');
       if (res.ok) {
         const data = await res.json();
         setDuels(data);
@@ -44,9 +44,9 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
     setCreating(true);
 
     try {
-      const res = await fetch("/api/duels", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/duels', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           problem_title: duelTitle,
           problem_body: duelBody,
@@ -55,8 +55,8 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
       });
 
       if (res.ok) {
-        setDuelTitle("");
-        setDuelBody("");
+        setDuelTitle('');
+        setDuelBody('');
         setShowDuelForm(false);
         await refreshDuels();
       }
@@ -100,7 +100,7 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
               className="bg-orange-500 text-white font-bold py-2.5 px-5 rounded-lg text-xs transition-colors hover:bg-orange-600 whitespace-nowrap cursor-pointer shadow-[0_0_15px_rgba(249,115,22,0.15)] flex items-center gap-1.5 self-start sm:self-auto"
             >
               <Plus className="w-4 h-4" />
-              {showDuelForm ? "Fechar Formulário" : "Lançar Duelo (+20 XP)"}
+              {showDuelForm ? 'Fechar Formulário' : 'Lançar Duelo (+20 XP)'}
             </button>
           </div>
 
@@ -165,7 +165,7 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
                     disabled={creating}
                     className="bg-orange-500 text-white text-xs font-bold px-6 py-2.5 rounded-lg transition-colors hover:bg-orange-600 disabled:opacity-50 cursor-pointer shadow-md shadow-orange-500/10"
                   >
-                    {creating ? "Lançando..." : "Lançar Desafio"}
+                    {creating ? 'Lançando...' : 'Lançar Desafio'}
                   </button>
                 </div>
               </form>

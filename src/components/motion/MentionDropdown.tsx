@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { mentionDropdownVariants } from "@/lib/motion";
+import { useEffect, useState, useCallback } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { mentionDropdownVariants } from '@/lib/motion';
 
 interface MentionUser {
   id: string;
@@ -79,22 +79,14 @@ export function MentionDropdown({ query, visible, onSelect, onClose }: MentionDr
                 </div>
               )}
               <div className="text-left min-w-0">
-                <p className="text-xs font-bold text-dd-text truncate">
-                  {user.username}
-                </p>
+                <p className="text-xs font-bold text-dd-text truncate">{user.username}</p>
                 {user.full_name && (
-                  <p className="text-[10px] text-dd-muted truncate">
-                    {user.full_name}
-                  </p>
+                  <p className="text-[10px] text-dd-muted truncate">{user.full_name}</p>
                 )}
               </div>
             </button>
           ))}
-          {loading && (
-            <div className="px-3 py-2 text-[10px] text-dd-muted">
-              Buscando...
-            </div>
-          )}
+          {loading && <div className="px-3 py-2 text-[10px] text-dd-muted">Buscando...</div>}
         </motion.div>
       )}
     </AnimatePresence>

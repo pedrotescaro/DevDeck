@@ -1,21 +1,21 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getAuthUser } from "@/lib/auth";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth';
 
 // PATCH /api/messages/[id] - Edit a message
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getAuthUser();
     if (!user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     const { id } = await params;
     const body = await request.json();
     const { content } = body;
 
-    if (!content || content.trim() === "") {
-      return NextResponse.json({ error: "O conteúdo é obrigatório" }, { status: 400 });
+    if (!content || content.trim() === '') {
+      return NextResponse.json({ error: 'O conteúdo é obrigatório' }, { status: 400 });
     }
 
     // Find the message
@@ -24,13 +24,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     });
 
     if (!message) {
-      return NextResponse.json({ error: "Mensagem não encontrada" }, { status: 404 });
+      return NextResponse.json({ error: 'Mensagem não encontrada' }, { status: 404 });
     }
 
     // Check ownership
     if (message.sender_id !== user.id) {
       return NextResponse.json(
-        { error: "Você não tem permissão para editar esta mensagem" },
+        { error: 'Você não tem permissão para editar esta mensagem' },
         { status: 403 }
       );
     }
@@ -47,8 +47,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     return NextResponse.json(updatedMessage);
   } catch (error) {
-    console.error("Error editing message:", error);
-    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
+    console.error('Error editing message:', error);
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }
 
@@ -57,7 +57,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   try {
     const user = await getAuthUser();
     if (!user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     const { id } = await params;
@@ -68,13 +68,13 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     });
 
     if (!message) {
-      return NextResponse.json({ error: "Mensagem não encontrada" }, { status: 404 });
+      return NextResponse.json({ error: 'Mensagem não encontrada' }, { status: 404 });
     }
 
     // Check ownership
     if (message.sender_id !== user.id) {
       return NextResponse.json(
-        { error: "Você não tem permissão para excluir esta mensagem" },
+        { error: 'Você não tem permissão para excluir esta mensagem' },
         { status: 403 }
       );
     }
@@ -86,7 +86,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting message:", error);
-    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
+    console.error('Error deleting message:', error);
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }

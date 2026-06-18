@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-"use client";
+'use client';
 
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { LanguageTag } from "./LanguageTag";
-import { Flag, Heart, MessageSquare, BarChart2, Trash2 } from "lucide-react";
-import { ExpandedReactionButton } from "./motion/ExpandedReactions";
-import { BookmarkButton } from "./motion/BookmarkButton";
-import { RepostMenu } from "./motion/RepostMenu";
-import { cn } from "@/lib/cn";
-import { parseMentions } from "@/lib/mentions";
-import { formatRelativeTime } from "@/lib/date";
+import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { LanguageTag } from './LanguageTag';
+import { Flag, Heart, MessageSquare, BarChart2, Trash2 } from 'lucide-react';
+import { ExpandedReactionButton } from './motion/ExpandedReactions';
+import { BookmarkButton } from './motion/BookmarkButton';
+import { RepostMenu } from './motion/RepostMenu';
+import { cn } from '@/lib/cn';
+import { parseMentions } from '@/lib/mentions';
+import { formatRelativeTime } from '@/lib/date';
 
 interface PostAuthor {
   username: string;
@@ -68,7 +68,7 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
   const router = useRouter();
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [reportReason, setReportReason] = useState("");
+  const [reportReason, setReportReason] = useState('');
   const [reporting, setReporting] = useState(false);
   const [reported, setReported] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -76,11 +76,11 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
   const handleCardClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (
-      target.closest("button") ||
-      target.closest("a") ||
-      target.closest("select") ||
-      target.closest("input") ||
-      target.closest("textarea") ||
+      target.closest('button') ||
+      target.closest('a') ||
+      target.closest('select') ||
+      target.closest('input') ||
+      target.closest('textarea') ||
       window.getSelection()?.toString()
     ) {
       return;
@@ -90,19 +90,19 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
 
   // Estados interativos locais
   const EMOJI_TO_TYPE: Record<string, string> = {
-    "🔥": "FIRE",
-    "❤️": "HEART",
-    "😂": "LAUGH",
-    "👏": "CLAP",
-    "💡": "BULB",
+    '🔥': 'FIRE',
+    '❤️': 'HEART',
+    '😂': 'LAUGH',
+    '👏': 'CLAP',
+    '💡': 'BULB',
   };
 
   const TYPE_TO_EMOJI: Record<string, string> = {
-    FIRE: "🔥",
-    HEART: "❤️",
-    LAUGH: "😂",
-    CLAP: "👏",
-    BULB: "💡",
+    FIRE: '🔥',
+    HEART: '❤️',
+    LAUGH: '😂',
+    CLAP: '👏',
+    BULB: '💡',
   };
 
   const getInitialReaction = () => {
@@ -110,7 +110,7 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
       return TYPE_TO_EMOJI[post.reactions[0].type] || null;
     }
     if (post.votes && post.votes.length > 0 && post.votes[0].value === 1) {
-      return "❤️";
+      return '❤️';
     }
     return null;
   };
@@ -128,7 +128,7 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
   const handleReact = async (reactionEmoji?: string | null) => {
     let targetEmoji: string | null = null;
     if (reactionEmoji === undefined || reactionEmoji === null) {
-      targetEmoji = activeReaction ? null : "❤️";
+      targetEmoji = activeReaction ? null : '❤️';
     } else {
       targetEmoji = reactionEmoji;
     }
@@ -151,13 +151,13 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
     try {
       const typeToSend = targetEmoji ? EMOJI_TO_TYPE[targetEmoji] : null;
       const res = await fetch(`/api/posts/${post.id}/react`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: typeToSend }),
       });
 
       if (!res.ok) {
-        throw new Error("Falha ao registrar reação");
+        throw new Error('Falha ao registrar reação');
       }
 
       const data = await res.json();
@@ -166,7 +166,7 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
       setActiveReaction(serverEmoji);
       setLiked(!!serverEmoji);
     } catch (err) {
-      console.error("Error toggling reaction:", err);
+      console.error('Error toggling reaction:', err);
       setActiveReaction(previousReaction);
       setLiked(wasActive);
       setLikesCount(likesCount);
@@ -179,11 +179,11 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
 
     try {
       const res = await fetch(`/api/posts/${post.id}/bookmark`, {
-        method: "POST",
+        method: 'POST',
       });
 
       if (!res.ok) {
-        throw new Error("Falha ao salvar bookmark");
+        throw new Error('Falha ao salvar bookmark');
       }
     } catch (err) {
       console.error(err);
@@ -203,8 +203,8 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
     setReporting(true);
     try {
       const res = await fetch(`/api/posts/${post.id}/report`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason: reportReason.trim() }),
       });
       if (res.ok) {
@@ -212,10 +212,10 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
         setTimeout(() => {
           setReportModalOpen(false);
           setReported(false);
-          setReportReason("");
+          setReportReason('');
         }, 1500);
       } else {
-        alert("Falha ao enviar denúncia.");
+        alert('Falha ao enviar denúncia.');
       }
     } catch (err) {
       console.error(err);
@@ -228,17 +228,17 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
     setDeleting(true);
     try {
       const res = await fetch(`/api/posts/${post.id}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
       if (res.ok) {
         setDeleteModalOpen(false);
         onDelete?.(post.id);
       } else {
-        alert("Falha ao deletar post.");
+        alert('Falha ao deletar post.');
       }
     } catch (err) {
       console.error(err);
-      alert("Erro ao deletar post.");
+      alert('Erro ao deletar post.');
     } finally {
       setDeleting(false);
     }
@@ -246,12 +246,12 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
 
   const highlightCode = (code: string) => {
     if (!code) return null;
-    const lines = code.split("\n");
+    const lines = code.split('\n');
     return (
       <pre className="font-mono text-[11px] leading-relaxed text-dd-text">
         <code>
           {lines.map((line, idx) => {
-            let html = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            let html = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
             // Highlight keywords
             const keywords =
@@ -264,20 +264,20 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
             html = html.replace(types, '<span class="text-cyan-400 font-medium">$1</span>');
 
             // Highlight comments
-            if (html.includes("//")) {
-              const parts = html.split("//");
+            if (html.includes('//')) {
+              const parts = html.split('//');
               html =
                 parts[0] +
                 '<span class="text-dd-muted italic">//' +
-                parts.slice(1).join("//") +
-                "</span>";
-            } else if (html.startsWith("#") || html.includes(" #")) {
-              const parts = html.split("#");
+                parts.slice(1).join('//') +
+                '</span>';
+            } else if (html.startsWith('#') || html.includes(' #')) {
+              const parts = html.split('#');
               html =
                 parts[0] +
                 '<span class="text-dd-muted italic">#' +
-                parts.slice(1).join("#") +
-                "</span>";
+                parts.slice(1).join('#') +
+                '</span>';
             }
 
             return (
@@ -310,8 +310,8 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
               </span>
             </div>
             <span className="text-dd-muted text-[10px] block mt-0.5 font-medium">
-              {formatRelativeTime(post.created_at) === "agora"
-                ? "Postado há pouco"
+              {formatRelativeTime(post.created_at) === 'agora'
+                ? 'Postado há pouco'
                 : `Postado ${formatRelativeTime(post.created_at)}`}
             </span>
           </div>
@@ -338,7 +338,7 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
               alt={post.title}
               className="w-full h-full object-cover max-h-80"
               onError={(e) => {
-                (e.target as HTMLElement).style.display = "none";
+                (e.target as HTMLElement).style.display = 'none';
               }}
             />
           </div>
@@ -390,8 +390,8 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
             />
             <span
               className={cn(
-                "px-1 font-semibold text-[10px] transition-colors",
-                liked ? "text-orange-500" : "text-dd-muted group-hover/likes:text-orange-500"
+                'px-1 font-semibold text-[10px] transition-colors',
+                liked ? 'text-orange-500' : 'text-dd-muted group-hover/likes:text-orange-500'
               )}
             >
               {likesCount}
@@ -504,7 +504,7 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
                     disabled={reporting || !reportReason}
                     className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2 px-5 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
                   >
-                    {reporting ? "Enviando..." : "Denunciar"}
+                    {reporting ? 'Enviando...' : 'Denunciar'}
                   </button>
                 </div>
               </form>
@@ -558,7 +558,7 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
                 disabled={deleting}
                 className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2 px-5 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
               >
-                {deleting ? "Deletando..." : "Deletar"}
+                {deleting ? 'Deletando...' : 'Deletar'}
               </button>
             </div>
           </div>

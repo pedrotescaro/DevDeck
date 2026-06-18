@@ -1,18 +1,18 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/feed";
+  const code = searchParams.get('code');
+  const next = searchParams.get('next') ?? '/feed';
 
   if (code) {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-    
+
     if (error) {
-      console.error("OAuth Code Exchange Error:", error);
+      console.error('OAuth Code Exchange Error:', error);
       return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`);
     }
 
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
               avatar_url:
                 data.user.user_metadata?.avatar_url ||
                 `https://api.dicebear.com/9.x/pixel-art/svg?seed=${username}`,
-              bio: "Novo desenvolvedor no DevDeck via GitHub! 🚀",
+              bio: 'Novo desenvolvedor no DevDeck via GitHub! 🚀',
               github_username: username,
               total_xp: 0,
             },
@@ -47,15 +47,15 @@ export async function GET(request: Request) {
 
           // Inicializar trilhas de linguagem padrões para o usuário do GitHub
           const defaultLanguages = [
-            "TS",
-            "JS",
-            "PYTHON",
-            "RUST",
-            "GO",
-            "CPP",
-            "JAVA",
-            "KOTLIN",
-            "SWIFT",
+            'TS',
+            'JS',
+            'PYTHON',
+            'RUST',
+            'GO',
+            'CPP',
+            'JAVA',
+            'KOTLIN',
+            'SWIFT',
           ];
           await prisma.languageTrail.createMany({
             data: defaultLanguages.map((lang) => ({
@@ -68,8 +68,10 @@ export async function GET(request: Request) {
           });
         }
       } catch (dbError) {
-        console.error("Database sync error during OAuth signup:", dbError);
-        return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent("Erro ao sincronizar dados com o banco de dados.")}`);
+        console.error('Database sync error during OAuth signup:', dbError);
+        return NextResponse.redirect(
+          `${origin}/login?error=${encodeURIComponent('Erro ao sincronizar dados com o banco de dados.')}`
+        );
       }
     }
   }

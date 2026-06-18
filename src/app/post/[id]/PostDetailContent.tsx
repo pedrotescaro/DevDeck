@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import { useState, useRef, useEffect } from "react";
-import Link from "next/link";
-import { Sidebar } from "@/components/Sidebar";
-import { LanguageTag } from "@/components/LanguageTag";
-import { QuizWidget } from "@/components/QuizWidget";
-import { AnswerCard } from "@/components/AnswerCard";
-import { CodeEditor } from "@/components/CodeEditor";
-import { Footer } from "@/components/Footer";
-import { useSoundEffects } from "@/hooks/useSoundEffects";
-import { Sparkles, MessageSquare, ArrowLeft, Flag, MapPin, X } from "lucide-react";
-import { RepostMenu } from "@/components/motion/RepostMenu";
-import { BookmarkButton } from "@/components/motion/BookmarkButton";
-import { LikeButton } from "@/components/motion/LikeButton";
-import { PostComposerExtras } from "@/components/PostComposerExtras";
-import { ReplyAudience } from "@/lib/post-composer";
+import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
+import { Sidebar } from '@/components/Sidebar';
+import { LanguageTag } from '@/components/LanguageTag';
+import { QuizWidget } from '@/components/QuizWidget';
+import { AnswerCard } from '@/components/AnswerCard';
+import { CodeEditor } from '@/components/CodeEditor';
+import { Footer } from '@/components/Footer';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
+import { Sparkles, MessageSquare, ArrowLeft, Flag, MapPin, X } from 'lucide-react';
+import { RepostMenu } from '@/components/motion/RepostMenu';
+import { BookmarkButton } from '@/components/motion/BookmarkButton';
+import { LikeButton } from '@/components/motion/LikeButton';
+import { PostComposerExtras } from '@/components/PostComposerExtras';
+import { ReplyAudience } from '@/lib/post-composer';
 
 interface PostDetailContentProps {
   user: {
@@ -38,34 +38,34 @@ export function PostDetailContent({
 
   useEffect(() => {
     const updateSoundState = () => {
-      setSoundEnabled(localStorage.getItem("devdeck-sound") !== "false");
+      setSoundEnabled(localStorage.getItem('devdeck-sound') !== 'false');
     };
 
     updateSoundState();
 
-    window.addEventListener("storage", updateSoundState);
-    window.addEventListener("devdeck-sound-changed", updateSoundState);
+    window.addEventListener('storage', updateSoundState);
+    window.addEventListener('devdeck-sound-changed', updateSoundState);
 
     return () => {
-      window.removeEventListener("storage", updateSoundState);
-      window.removeEventListener("devdeck-sound-changed", updateSoundState);
+      window.removeEventListener('storage', updateSoundState);
+      window.removeEventListener('devdeck-sound-changed', updateSoundState);
     };
   }, []);
 
   const { playSound } = useSoundEffects(soundEnabled);
-  const [answerBody, setAnswerBody] = useState("");
-  const [answerCode, setAnswerCode] = useState("");
+  const [answerBody, setAnswerBody] = useState('');
+  const [answerCode, setAnswerCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [toastXp, setToastXp] = useState<{ amount: number; language: string } | null>(null);
 
   // States to match the main post composer extra options
-  const [postType, setPostType] = useState<"question" | "discussion">("discussion");
-  const [answerLanguage, setAnswerLanguage] = useState<string>("TS");
-  const [replyAudience, setReplyAudience] = useState<ReplyAudience>("everyone");
+  const [postType, setPostType] = useState<'question' | 'discussion'>('discussion');
+  const [answerLanguage, setAnswerLanguage] = useState<string>('TS');
+  const [replyAudience, setReplyAudience] = useState<ReplyAudience>('everyone');
   const [scheduledAt, setScheduledAt] = useState<string | null>(null);
-  const [answerLocation, setAnswerLocation] = useState("");
+  const [answerLocation, setAnswerLocation] = useState('');
   const [isSensitive, setIsSensitive] = useState(false);
-  const [answerImage, setAnswerImage] = useState("");
+  const [answerImage, setAnswerImage] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
   const answerBodyTextareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -80,20 +80,20 @@ export function PostDetailContent({
     setIsSaved(nextSaved);
     try {
       const res = await fetch(`/api/posts/${post.id}/bookmark`, {
-        method: "POST",
+        method: 'POST',
       });
       if (!res.ok) {
         setIsSaved(!nextSaved);
       }
     } catch (err) {
-      console.error("Failed to toggle bookmark:", err);
+      console.error('Failed to toggle bookmark:', err);
       setIsSaved(!nextSaved);
     }
   };
 
   // Report post state
   const [reportModalOpen, setReportModalOpen] = useState(false);
-  const [reportReason, setReportReason] = useState("");
+  const [reportReason, setReportReason] = useState('');
   const [reporting, setReporting] = useState(false);
   const [reported, setReported] = useState(false);
   const [showQuiz, setShowQuiz] = useState(true);
@@ -104,8 +104,8 @@ export function PostDetailContent({
     setReporting(true);
     try {
       const res = await fetch(`/api/posts/${post.id}/report`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason: reportReason.trim() }),
       });
       if (res.ok) {
@@ -113,10 +113,10 @@ export function PostDetailContent({
         setTimeout(() => {
           setReportModalOpen(false);
           setReported(false);
-          setReportReason("");
+          setReportReason('');
         }, 1500);
       } else {
-        alert("Falha ao enviar denúncia.");
+        alert('Falha ao enviar denúncia.');
       }
     } catch (err) {
       console.error(err);
@@ -133,31 +133,31 @@ export function PostDetailContent({
   };
 
   const handleQuotePost = () => {
-    alert("Citação mockada no detalhe do post!");
+    alert('Citação mockada no detalhe do post!');
   };
 
   const postUserVote =
-    post.votes?.[0]?.value === 1 ? "up" : post.votes?.[0]?.value === -1 ? "down" : null;
+    post.votes?.[0]?.value === 1 ? 'up' : post.votes?.[0]?.value === -1 ? 'down' : null;
   const postVotesCount = post.upvotes;
 
-  const handlePostVote = async (type: "up" | "down") => {
+  const handlePostVote = async (type: 'up' | 'down') => {
     const currentVote = postUserVote;
     const currentCount = postVotesCount;
     let newValue = 0;
 
-    if (type === "up") {
-      newValue = currentVote === "up" ? 0 : 1;
+    if (type === 'up') {
+      newValue = currentVote === 'up' ? 0 : 1;
     } else {
-      newValue = currentVote === "down" ? 0 : -1;
+      newValue = currentVote === 'down' ? 0 : -1;
     }
 
     if (newValue === -1) {
       const justification = prompt(
-        "No DevDeck, o downvote exige uma justificativa construtiva. Escreva seu motivo para o autor melhorar:"
+        'No DevDeck, o downvote exige uma justificativa construtiva. Escreva seu motivo para o autor melhorar:'
       );
       if (!justification || justification.trim().length <= 3) {
         alert(
-          "O downvote foi cancelado. É necessária uma justificativa construtiva de pelo menos 4 caracteres."
+          'O downvote foi cancelado. É necessária uma justificativa construtiva de pelo menos 4 caracteres.'
         );
         return;
       }
@@ -165,46 +165,46 @@ export function PostDetailContent({
 
     // Optimistic UI update
     let diff = 0;
-    let newUserVote: "up" | "down" | null = null;
-    if (type === "up") {
-      if (currentVote === "up") {
+    let newUserVote: 'up' | 'down' | null = null;
+    if (type === 'up') {
+      if (currentVote === 'up') {
         diff = -1;
         newUserVote = null;
-      } else if (currentVote === "down") {
+      } else if (currentVote === 'down') {
         diff = 2;
-        newUserVote = "up";
+        newUserVote = 'up';
       } else {
         diff = 1;
-        newUserVote = "up";
+        newUserVote = 'up';
       }
     } else {
-      if (currentVote === "down") {
+      if (currentVote === 'down') {
         diff = 1;
         newUserVote = null;
-      } else if (currentVote === "up") {
+      } else if (currentVote === 'up') {
         diff = -2;
-        newUserVote = "down";
+        newUserVote = 'down';
       } else {
         diff = -1;
-        newUserVote = "down";
+        newUserVote = 'down';
       }
     }
 
     setPost((prev: any) => ({
       ...prev,
       upvotes: currentCount + diff,
-      votes: newUserVote ? [{ value: newUserVote === "up" ? 1 : -1 }] : [],
+      votes: newUserVote ? [{ value: newUserVote === 'up' ? 1 : -1 }] : [],
     }));
 
     try {
       const res = await fetch(`/api/posts/${post.id}/vote`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ value: newValue }),
       });
 
       if (!res.ok) {
-        throw new Error("Erro ao registrar voto");
+        throw new Error('Erro ao registrar voto');
       }
 
       const data = await res.json();
@@ -217,7 +217,7 @@ export function PostDetailContent({
       setPost((prev: any) => ({
         ...prev,
         upvotes: currentCount,
-        votes: currentVote ? [{ value: currentVote === "up" ? 1 : -1 }] : [],
+        votes: currentVote ? [{ value: currentVote === 'up' ? 1 : -1 }] : [],
       }));
     }
   };
@@ -231,13 +231,13 @@ export function PostDetailContent({
         setPost(data);
       }
     } catch (err) {
-      console.error("Error reloading post:", err);
+      console.error('Error reloading post:', err);
     }
   };
 
   const showXPToast = (amount: number, language: string) => {
     setToastXp({ amount, language });
-    playSound("xpgain");
+    playSound('xpgain');
     setTimeout(() => {
       setToastXp(null);
     }, 4000);
@@ -250,9 +250,9 @@ export function PostDetailContent({
     setUploadingImage(true);
     try {
       const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/upload", {
-        method: "POST",
+      formData.append('file', file);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
         body: formData,
       });
       if (res.ok) {
@@ -260,7 +260,7 @@ export function PostDetailContent({
         setAnswerImage(data.url);
       }
     } catch (err) {
-      console.error("Image upload failed:", err);
+      console.error('Image upload failed:', err);
     } finally {
       setUploadingImage(false);
     }
@@ -272,9 +272,9 @@ export function PostDetailContent({
 
     try {
       const res = await fetch(`/api/posts/${post.id}/answer`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           body: answerBody,
@@ -284,13 +284,13 @@ export function PostDetailContent({
 
       if (res.ok) {
         const data = await res.json();
-        setAnswerBody("");
-        setAnswerCode("");
-        setAnswerImage("");
-        setPostType("discussion");
-        setReplyAudience("everyone");
+        setAnswerBody('');
+        setAnswerCode('');
+        setAnswerImage('');
+        setPostType('discussion');
+        setReplyAudience('everyone');
         setScheduledAt(null);
-        setAnswerLocation("");
+        setAnswerLocation('');
         setIsSensitive(false);
         await reloadPost();
 
@@ -308,7 +308,7 @@ export function PostDetailContent({
   const handleAcceptAnswer = async (answerId: string) => {
     try {
       const res = await fetch(`/api/answers/${answerId}/accept`, {
-        method: "POST",
+        method: 'POST',
       });
 
       if (res.ok) {
@@ -320,19 +320,19 @@ export function PostDetailContent({
         }
       }
     } catch (err) {
-      console.error("Error accepting answer:", err);
+      console.error('Error accepting answer:', err);
     }
   };
 
   // Simulated syntax highlighter for code snippets
   const highlightCode = (code: string) => {
     if (!code) return null;
-    const lines = code.split("\n");
+    const lines = code.split('\n');
     return (
       <pre className="font-mono text-[11px] leading-relaxed text-dd-text">
         <code>
           {lines.map((line, idx) => {
-            let html = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            let html = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
             // Highlight keywords
             const keywords =
@@ -345,20 +345,20 @@ export function PostDetailContent({
             html = html.replace(types, '<span class="text-cyan-400 font-medium">$1</span>');
 
             // Highlight comments
-            if (html.includes("//")) {
-              const parts = html.split("//");
+            if (html.includes('//')) {
+              const parts = html.split('//');
               html =
                 parts[0] +
                 '<span class="text-dd-muted italic">//' +
-                parts.slice(1).join("//") +
-                "</span>";
-            } else if (html.startsWith("#") || html.includes(" #")) {
-              const parts = html.split("#");
+                parts.slice(1).join('//') +
+                '</span>';
+            } else if (html.startsWith('#') || html.includes(' #')) {
+              const parts = html.split('#');
               html =
                 parts[0] +
                 '<span class="text-dd-muted italic">#' +
-                parts.slice(1).join("#") +
-                "</span>";
+                parts.slice(1).join('#') +
+                '</span>';
             }
 
             return (
@@ -440,17 +440,17 @@ export function PostDetailContent({
             {/* Metadata Row: Time, Date, Views (Twitter style) */}
             <div className="text-[11px] text-dd-muted font-medium pt-3 border-t border-dd-border/30 flex flex-wrap items-center gap-1.5 select-none">
               <span>
-                {new Date(post.created_at).toLocaleTimeString("pt-BR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
+                {new Date(post.created_at).toLocaleTimeString('pt-BR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
                 })}
               </span>
               <span>·</span>
               <span>
-                {new Date(post.created_at).toLocaleDateString("pt-BR", {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
+                {new Date(post.created_at).toLocaleDateString('pt-BR', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
                 })}
               </span>
               {post.location && (
@@ -500,8 +500,8 @@ export function PostDetailContent({
               {/* 3. Heart/Like button */}
               <LikeButton
                 count={postVotesCount}
-                isActive={postUserVote === "up"}
-                onToggle={() => handlePostVote("up")}
+                isActive={postUserVote === 'up'}
+                onToggle={() => handlePostVote('up')}
                 title="Curtir post"
               />
 
@@ -528,7 +528,7 @@ export function PostDetailContent({
                   className="flex items-center gap-1.5 rounded-lg bg-orange-500 px-3.5 py-1.5 font-bold text-white transition-colors hover:bg-orange-600 shadow-sm cursor-pointer text-xs"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>{showQuiz ? "Ocultar Quiz" : "Resolver como Quiz"}</span>
+                  <span>{showQuiz ? 'Ocultar Quiz' : 'Resolver como Quiz'}</span>
                 </button>
               </div>
 
@@ -552,13 +552,13 @@ export function PostDetailContent({
               <button
                 type="button"
                 onClick={() => {
-                  setAnswerBody("");
-                  setAnswerCode("");
-                  setAnswerImage("");
-                  setPostType("discussion");
-                  setReplyAudience("everyone");
+                  setAnswerBody('');
+                  setAnswerCode('');
+                  setAnswerImage('');
+                  setPostType('discussion');
+                  setReplyAudience('everyone');
                   setScheduledAt(null);
-                  setAnswerLocation("");
+                  setAnswerLocation('');
                   setIsSensitive(false);
                 }}
                 className="p-1 text-dd-muted hover:text-dd-text hover:bg-dd-border/30 rounded-full transition-colors cursor-pointer"
@@ -568,7 +568,7 @@ export function PostDetailContent({
               </button>
               <button
                 type="button"
-                onClick={() => alert("Rascunhos salvos localmente (Mock)! ")}
+                onClick={() => alert('Rascunhos salvos localmente (Mock)! ')}
                 className="text-xs font-bold text-orange-500 hover:text-orange-400 cursor-pointer"
               >
                 Rascunhos
@@ -604,7 +604,7 @@ export function PostDetailContent({
                 </div>
 
                 {/* Support fields for questions */}
-                {postType === "question" && (
+                {postType === 'question' && (
                   <div className="space-y-2 animate-slide-down">
                     <div className="flex items-center gap-3">
                       <span className="text-[10px] font-bold text-dd-muted uppercase">
@@ -641,7 +641,7 @@ export function PostDetailContent({
                     <img src={answerImage} alt="Preview" className="w-full h-full object-cover" />
                     <button
                       type="button"
-                      onClick={() => setAnswerImage("")}
+                      onClick={() => setAnswerImage('')}
                       className="absolute top-2 right-2 p-1 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors"
                     >
                       <X className="w-3.5 h-3.5" />
@@ -696,11 +696,11 @@ export function PostDetailContent({
                     <button
                       type="button"
                       onClick={() =>
-                        setPostType(postType === "question" ? "discussion" : "question")
+                        setPostType(postType === 'question' ? 'discussion' : 'question')
                       }
                       className="rounded-full border border-dd-border bg-dd-bg hover:bg-dd-border/30 hover:text-dd-text px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-dd-muted transition-colors cursor-pointer"
                     >
-                      {postType === "question" ? "Duvida tecnica +10 XP" : "Discussao geral +5 XP"}
+                      {postType === 'question' ? 'Duvida tecnica +10 XP' : 'Discussao geral +5 XP'}
                     </button>
 
                     <PostComposerExtras
@@ -731,7 +731,7 @@ export function PostDetailContent({
                       disabled={submitting || !answerBody.trim() || uploadingImage}
                       className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-xs font-bold px-5 py-2 rounded-full transition-colors cursor-pointer shadow-md shadow-orange-500/10"
                     >
-                      {submitting ? "Postando..." : "Postar"}
+                      {submitting ? 'Postando...' : 'Postar'}
                     </button>
                   </div>
                 </div>
@@ -841,7 +841,7 @@ export function PostDetailContent({
                     disabled={reporting || !reportReason}
                     className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2 px-5 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
                   >
-                    {reporting ? "Enviando..." : "Denunciar"}
+                    {reporting ? 'Enviando...' : 'Denunciar'}
                   </button>
                 </div>
               </form>

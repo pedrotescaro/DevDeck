@@ -1,7 +1,7 @@
-import { redirect, notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
-import { getAuthUser } from "@/lib/auth";
-import { ProfileContent } from "./ProfileContent";
+import { redirect, notFound } from 'next/navigation';
+import { prisma } from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth';
+import { ProfileContent } from './ProfileContent';
 
 export const revalidate = 0; // Desabilitar cache para dados dinâmicos do perfil
 
@@ -9,19 +9,19 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   const user = await getAuthUser();
 
   if (!user) {
-    redirect("/login");
+    redirect('/login');
   }
 
   const { username } = await params;
 
   // Buscar usuário dono do perfil
   const profileUser = await prisma.user.findFirst({
-    where: { 
-      username: { equals: username, mode: 'insensitive' } 
+    where: {
+      username: { equals: username, mode: 'insensitive' },
     },
     include: {
       trails: {
-        orderBy: { xp: "desc" },
+        orderBy: { xp: 'desc' },
       },
       badges: {
         include: {
@@ -37,7 +37,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
 
   // Buscar todos os badges cadastrados no sistema
   const allBadges = await prisma.badge.findMany({
-    orderBy: { slug: "asc" },
+    orderBy: { slug: 'asc' },
   });
 
   // Calcular estatísticas
@@ -88,14 +88,16 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   }));
 
   // Verificar se o usuário atual segue este perfil
-  const isFollowing = user ? await prisma.follow.findUnique({
-    where: {
-      follower_id_following_id: {
-        follower_id: user.id,
-        following_id: profileUser.id,
-      }
-    }
-  }) !== null : false;
+  const isFollowing = user
+    ? (await prisma.follow.findUnique({
+        where: {
+          follower_id_following_id: {
+            follower_id: user.id,
+            following_id: profileUser.id,
+          },
+        },
+      })) !== null
+    : false;
 
   // Calcular contagem de seguidores e seguindo
   const followersCount = await prisma.follow.count({

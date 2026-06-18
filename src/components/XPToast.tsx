@@ -41,9 +41,7 @@ export function XPToast({ amount, language, visible, onClose }: XPToastProps) {
         <div className="w-1 h-8 bg-orange-500 rounded-full" />
 
         <div className="flex items-center gap-3">
-          <span className="text-orange-400 font-bold text-lg">
-            +{amount} XP
-          </span>
+          <span className="text-orange-400 font-bold text-lg">+{amount} XP</span>
           <LanguageTag language={language} size="sm" />
         </div>
 

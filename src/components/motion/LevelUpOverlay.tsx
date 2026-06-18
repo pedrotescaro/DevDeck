@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { AnimatePresence, motion } from "framer-motion";
-import { levelUpOverlayVariants, levelUpBadgeVariants } from "@/lib/motion";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { fadeVariants } from "@/lib/motion";
+import { AnimatePresence, motion } from 'framer-motion';
+import { levelUpOverlayVariants, levelUpBadgeVariants } from '@/lib/motion';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { fadeVariants } from '@/lib/motion';
 
 interface LevelUpOverlayProps {
   visible: boolean;
@@ -13,16 +13,16 @@ interface LevelUpOverlayProps {
 }
 
 const LEVEL_TITLES: Record<number, string> = {
-  1: "Iniciante",
-  2: "Aprendiz",
-  3: "Praticante",
-  5: "Desenvolvedor",
-  8: "Veterano",
-  10: "Especialista",
-  15: "Mestre",
-  20: "Lenda",
-  25: "Arquiteto",
-  30: "Visionario",
+  1: 'Iniciante',
+  2: 'Aprendiz',
+  3: 'Praticante',
+  5: 'Desenvolvedor',
+  8: 'Veterano',
+  10: 'Especialista',
+  15: 'Mestre',
+  20: 'Lenda',
+  25: 'Arquiteto',
+  30: 'Visionario',
 };
 
 function getTitleForLevel(level: number): string {
@@ -32,7 +32,7 @@ function getTitleForLevel(level: number): string {
   for (const key of keys) {
     if (level >= key) return LEVEL_TITLES[key];
   }
-  return "Iniciante";
+  return 'Iniciante';
 }
 
 export function LevelUpOverlay({ visible, level, title, onDone }: LevelUpOverlayProps) {
@@ -61,9 +61,7 @@ export function LevelUpOverlay({ visible, level, title, onDone }: LevelUpOverlay
               <span className="text-3xl font-black text-white">{level}</span>
             </div>
             <div className="text-center space-y-1">
-              <p className="text-lg font-black text-dd-text">
-                Level {level} desbloqueado!
-              </p>
+              <p className="text-lg font-black text-dd-text">Level {level} desbloqueado!</p>
               <p className="text-sm text-dd-muted font-medium">
                 Voce agora e um <span className="text-orange-400 font-bold">{displayTitle}</span>
               </p>

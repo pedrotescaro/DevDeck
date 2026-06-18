@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { X, Users } from "lucide-react";
-import { modalContentVariants, fadeVariants } from "@/lib/motion";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { FollowButton } from "./FollowButton";
-import Link from "next/link";
+import { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { X, Users } from 'lucide-react';
+import { modalContentVariants, fadeVariants } from '@/lib/motion';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { FollowButton } from './FollowButton';
+import Link from 'next/link';
 
 interface UserListItem {
   id: string;
@@ -21,7 +21,7 @@ interface FollowersModalProps {
   onClose: () => void;
   userId: string;
   currentUserId: string;
-  type: "followers" | "following";
+  type: 'followers' | 'following';
   title: string;
 }
 
@@ -49,7 +49,7 @@ export function FollowersModal({
           setUsers(data);
         }
       } catch (err) {
-        console.error("Error fetching users list:", err);
+        console.error('Error fetching users list:', err);
       } finally {
         setLoading(false);
       }
@@ -61,13 +61,13 @@ export function FollowersModal({
   useEffect(() => {
     if (!open) return;
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === 'Escape') {
         event.preventDefault();
         onClose();
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [open, onClose]);
 
   const handleToggleUserFollow = async (targetUserId: string) => {
@@ -83,7 +83,7 @@ export function FollowersModal({
 
     try {
       const res = await fetch(`/api/users/${targetUserId}/follow`, {
-        method: "POST",
+        method: 'POST',
       });
       if (res.ok) {
         const data = await res.json();
@@ -96,7 +96,7 @@ export function FollowersModal({
           })
         );
       } else {
-        throw new Error("Erro na requisição");
+        throw new Error('Erro na requisição');
       }
     } catch (err) {
       console.error(err);
@@ -167,9 +167,9 @@ export function FollowersModal({
                 // Empty State with dev-voice
                 <div className="text-center py-8 px-4 border border-dashed border-dd-border rounded-xl bg-dd-surface/5">
                   <p className="text-xs text-dd-muted italic">
-                    {type === "followers"
-                      ? "Nenhum seguidor ainda. Compartilhe seus códigos e responda perguntas para ser notado!"
-                      : "Você não segue ninguém ainda. Hora de quebrar o gelo e explorar o feed!"}
+                    {type === 'followers'
+                      ? 'Nenhum seguidor ainda. Compartilhe seus códigos e responda perguntas para ser notado!'
+                      : 'Você não segue ninguém ainda. Hora de quebrar o gelo e explorar o feed!'}
                   </p>
                 </div>
               ) : (
@@ -203,7 +203,7 @@ export function FollowersModal({
                               @{itemUser.username}
                             </p>
                             <p className="text-[10px] text-orange-400 font-mono">
-                              {itemUser.total_xp.toLocaleString("pt-BR")} XP
+                              {itemUser.total_xp.toLocaleString('pt-BR')} XP
                             </p>
                           </div>
                         </Link>

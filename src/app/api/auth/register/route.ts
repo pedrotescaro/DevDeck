@@ -1,17 +1,17 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { registerSchema } from "@/lib/validators";
-import { rateLimit } from "@/lib/ratelimit";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
+import { registerSchema } from '@/lib/validators';
+import { rateLimit } from '@/lib/ratelimit';
 
 export async function POST(request: Request) {
   try {
-    const ip = request.headers.get("x-forwarded-for") || "127.0.0.1";
-    const rateLimitResult = await rateLimit(`register:${ip}`, 5, "1 h");
+    const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
+    const rateLimitResult = await rateLimit(`register:${ip}`, 5, '1 h');
     if (!rateLimitResult.success) {
       return NextResponse.json(
         {
-          error: "Muitas tentativas de cadastro a partir deste IP. Limite de 5 por hora excedido.",
+          error: 'Muitas tentativas de cadastro a partir deste IP. Limite de 5 por hora excedido.',
         },
         { status: 429 }
       );
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     });
 
     if (existingUsername) {
-      return NextResponse.json({ error: "Nome de usuário já está em uso" }, { status: 400 });
+      return NextResponse.json({ error: 'Nome de usuário já está em uso' }, { status: 400 });
     }
 
     // Verificar se o e-mail já está sendo usado no Prisma
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     });
 
     if (existingEmail) {
-      return NextResponse.json({ error: "Endereço de e-mail já está em uso" }, { status: 400 });
+      return NextResponse.json({ error: 'Endereço de e-mail já está em uso' }, { status: 400 });
     }
 
     // Criar cliente Supabase do lado do servidor
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
 
     const authUser = authData.user;
     if (!authUser) {
-      return NextResponse.json({ error: "Erro ao criar conta de autenticação" }, { status: 500 });
+      return NextResponse.json({ error: 'Erro ao criar conta de autenticação' }, { status: 500 });
     }
 
     // 2. Criar registro do usuário no banco PostgreSQL via Prisma
@@ -75,13 +75,13 @@ export async function POST(request: Request) {
         username,
         email,
         avatar_url: `https://api.dicebear.com/9.x/pixel-art/svg?seed=${username}`,
-        bio: "Novo desenvolvedor no DevDeck! 🚀",
+        bio: 'Novo desenvolvedor no DevDeck! 🚀',
         total_xp: 0,
       },
     });
 
     // 3. Inicializar as LanguageTrails padrões para o novo usuário com 0 XP
-    const defaultLanguages = ["TS", "JS", "PYTHON", "RUST", "GO", "CPP", "JAVA", "KOTLIN", "SWIFT"];
+    const defaultLanguages = ['TS', 'JS', 'PYTHON', 'RUST', 'GO', 'CPP', 'JAVA', 'KOTLIN', 'SWIFT'];
     await prisma.languageTrail.createMany({
       data: defaultLanguages.map((lang) => ({
         user_id: dbUser.id,
@@ -94,9 +94,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, user: dbUser });
   } catch (error: any) {
-    console.error("Error in registration endpoint:", error);
+    console.error('Error in registration endpoint:', error);
     return NextResponse.json(
-      { error: error.message || "Erro interno ao cadastrar" },
+      { error: error.message || 'Erro interno ao cadastrar' },
       { status: 500 }
     );
   }

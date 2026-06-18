@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
-import { Sidebar } from "@/components/Sidebar";
-import { PostCard } from "@/components/PostCard";
-import { FollowButton } from "@/components/motion/FollowButton";
-import { EmptyState } from "@/components/motion/EmptyState";
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { createClient } from '@/lib/supabase/client';
+import { Sidebar } from '@/components/Sidebar';
+import { PostCard } from '@/components/PostCard';
+import { FollowButton } from '@/components/motion/FollowButton';
+import { EmptyState } from '@/components/motion/EmptyState';
 import {
   Search as SearchIcon,
   Settings,
   MoreHorizontal,
   ChevronRight,
   ArrowLeft,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface SuggestedUser {
   id: string;
@@ -28,11 +28,11 @@ export default function ExplorePage() {
   const [user, setUser] = useState<any>(null);
   const [suggestions, setSuggestions] = useState<SuggestedUser[]>([]);
   const [activeTab, setActiveTab] = useState<
-    "para_voce" | "assuntos" | "noticias" | "open_source" | "carreira"
-  >("para_voce");
+    'para_voce' | 'assuntos' | 'noticias' | 'open_source' | 'carreira'
+  >('para_voce');
 
   // Search state
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -49,24 +49,24 @@ export default function ExplorePage() {
         } = await supabase.auth.getUser();
 
         if (!authUser) {
-          router.push("/login");
+          router.push('/login');
           return;
         }
 
-        const resUser = await fetch("/api/users/me");
+        const resUser = await fetch('/api/users/me');
         if (resUser.ok) {
           const userData = await resUser.json();
           setUser(userData);
         }
 
         // Fetch user suggestions
-        const resSuggestions = await fetch("/api/users/suggestions");
+        const resSuggestions = await fetch('/api/users/suggestions');
         if (resSuggestions.ok) {
           const data = await resSuggestions.json();
           setSuggestions(data);
         }
       } catch (err) {
-        console.error("Error fetching explore data:", err);
+        console.error('Error fetching explore data:', err);
       }
     };
 
@@ -85,7 +85,7 @@ export default function ExplorePage() {
           setSearchResults(data);
         }
       } catch (err) {
-        console.error("Search failed:", err);
+        console.error('Search failed:', err);
       } finally {
         setSearching(false);
       }
@@ -106,14 +106,14 @@ export default function ExplorePage() {
         setSearchResults(data);
       }
     } catch (err) {
-      console.error("Search failed:", err);
+      console.error('Search failed:', err);
     } finally {
       setSearching(false);
     }
   };
 
   const handleClearSearch = () => {
-    setSearchQuery("");
+    setSearchQuery('');
     setSearchResults([]);
     setHasSearched(false);
   };
@@ -130,10 +130,10 @@ export default function ExplorePage() {
 
     try {
       const res = await fetch(`/api/users/${targetUserId}/follow`, {
-        method: "POST",
+        method: 'POST',
       });
       if (!res.ok) {
-        throw new Error("Failed to toggle follow status");
+        throw new Error('Failed to toggle follow status');
       }
       const data = await res.json();
       setFollowingMap((prev) => ({
@@ -144,7 +144,7 @@ export default function ExplorePage() {
       if (data.following) {
         // Refetch suggestions to fill spaces if followed
         setTimeout(async () => {
-          const resSuggestions = await fetch("/api/users/suggestions");
+          const resSuggestions = await fetch('/api/users/suggestions');
           if (resSuggestions.ok) {
             const data = await resSuggestions.json();
             setSuggestions(data);
@@ -152,7 +152,7 @@ export default function ExplorePage() {
         }, 1000);
       }
     } catch (err) {
-      console.error("Failed to follow/unfollow:", err);
+      console.error('Failed to follow/unfollow:', err);
       // Rollback
       setFollowingMap((prev) => ({
         ...prev,
@@ -164,41 +164,41 @@ export default function ExplorePage() {
   const trends = [
     {
       rank: 1,
-      language: "TS",
-      languageLabel: "TypeScript",
-      title: "Server Components vs Client Components no Next.js 16",
+      language: 'TS',
+      languageLabel: 'TypeScript',
+      title: 'Server Components vs Client Components no Next.js 16',
       views: 91,
       answers: 0,
     },
     {
       rank: 2,
-      language: "RUST",
-      languageLabel: "Rust",
+      language: 'RUST',
+      languageLabel: 'Rust',
       title: "Ownership e lifetimes em Rust: quando usar &'static?",
       views: 55,
       answers: 1,
     },
     {
       rank: 3,
-      language: "TS",
-      languageLabel: "TypeScript",
-      title: "Como tipar corretamente generics com constraints em TypeScript?",
+      language: 'TS',
+      languageLabel: 'TypeScript',
+      title: 'Como tipar corretamente generics com constraints em TypeScript?',
       views: 43,
       answers: 2,
     },
     {
       rank: 4,
-      language: "GO",
-      languageLabel: "Go",
-      title: "Goroutines vazando memória — como debugar?",
+      language: 'GO',
+      languageLabel: 'Go',
+      title: 'Goroutines vazando memória — como debugar?',
       views: 34,
       answers: 1,
     },
     {
       rank: 5,
-      language: "PYTHON",
-      languageLabel: "Python",
-      title: "Melhor forma de lidar com async generators em Python 3.12?",
+      language: 'PYTHON',
+      languageLabel: 'Python',
+      title: 'Melhor forma de lidar com async generators em Python 3.12?',
       views: 38,
       answers: 0,
     },
@@ -282,7 +282,7 @@ export default function ExplorePage() {
             <>
               {/* Navigation Tabs */}
               <div className="flex border-b border-dd-border/40 bg-dd-bg overflow-x-auto scrollbar-none">
-                {(["para_voce", "assuntos", "noticias", "open_source", "carreira"] as const).map(
+                {(['para_voce', 'assuntos', 'noticias', 'open_source', 'carreira'] as const).map(
                   (tab) => (
                     <button
                       key={tab}
@@ -291,18 +291,18 @@ export default function ExplorePage() {
                     >
                       <span
                         className={
-                          activeTab === tab ? "text-dd-text font-black" : "text-dd-muted font-bold"
+                          activeTab === tab ? 'text-dd-text font-black' : 'text-dd-muted font-bold'
                         }
                       >
-                        {tab === "para_voce"
-                          ? "Para você"
-                          : tab === "assuntos"
-                            ? "Assuntos do Momento"
-                            : tab === "noticias"
-                              ? "Notícias"
-                              : tab === "open_source"
-                                ? "Open Source"
-                                : "Carreira"}
+                        {tab === 'para_voce'
+                          ? 'Para você'
+                          : tab === 'assuntos'
+                            ? 'Assuntos do Momento'
+                            : tab === 'noticias'
+                              ? 'Notícias'
+                              : tab === 'open_source'
+                                ? 'Open Source'
+                                : 'Carreira'}
                       </span>
                       {activeTab === tab && (
                         <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 rounded-full bg-orange-500" />
@@ -344,7 +344,7 @@ export default function ExplorePage() {
                         <span>{trend.views} visualizações</span>
                         <span>·</span>
                         <span>
-                          {trend.answers} {trend.answers === 1 ? "resposta" : "respostas"}
+                          {trend.answers} {trend.answers === 1 ? 'resposta' : 'respostas'}
                         </span>
                       </div>
                     </div>

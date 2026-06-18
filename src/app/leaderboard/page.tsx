@@ -1,7 +1,7 @@
-import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
-import { getAuthUser } from "@/lib/auth";
-import { LeaderboardClient } from "./LeaderboardClient";
+import { redirect } from 'next/navigation';
+import { prisma } from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth';
+import { LeaderboardClient } from './LeaderboardClient';
 
 export const revalidate = 0; // Desabilitar cache para ranking dinâmico
 
@@ -9,12 +9,12 @@ export default async function LeaderboardPage() {
   const user = await getAuthUser();
 
   if (!user) {
-    redirect("/login");
+    redirect('/login');
   }
 
   // Buscar ranking global inicial (Top 10)
   const leaders = await prisma.user.findMany({
-    orderBy: { total_xp: "desc" },
+    orderBy: { total_xp: 'desc' },
     take: 10,
     select: {
       username: true,

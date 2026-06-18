@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from 'react';
 
 interface UseInfiniteScrollOptions {
   onLoadMore: () => void | Promise<void>;
@@ -13,7 +13,7 @@ export function useInfiniteScroll({
   onLoadMore,
   hasMore,
   loading,
-  rootMargin = "0px 0px 600px 0px",
+  rootMargin = '0px 0px 600px 0px',
 }: UseInfiniteScrollOptions) {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadingRef = useRef(loading);

@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: Request, { params }: { params: Promise<{ username: string }> }) {
   try {
@@ -7,11 +7,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
 
     const user = await prisma.user.findFirst({
       where: {
-        username: { equals: username, mode: "insensitive" },
+        username: { equals: username, mode: 'insensitive' },
       },
       include: {
         trails: {
-          orderBy: { xp: "desc" },
+          orderBy: { xp: 'desc' },
         },
         badges: {
           include: {
@@ -22,7 +22,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
     });
 
     if (!user) {
-      return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
+      return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 });
     }
 
     // Calcular estatísticas do usuário
@@ -47,13 +47,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
 
     // Fetch author posts with cursor-based pagination (10 per page)
     const { searchParams } = new URL(request.url);
-    const cursor = searchParams.get("cursor") || undefined;
+    const cursor = searchParams.get('cursor') || undefined;
     const limit = 10;
 
     let cursorTime: Date | null = null;
     let cursorId: string | null = null;
     if (cursor) {
-      const parts = cursor.split("_");
+      const parts = cursor.split('_');
       if (parts.length === 2) {
         cursorTime = new Date(parseInt(parts[0], 10));
         cursorId = parts[1];
@@ -70,7 +70,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
 
     const posts = await prisma.post.findMany({
       where: postWhereClause,
-      orderBy: [{ created_at: "desc" }, { id: "desc" }],
+      orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
       take: limit + 1,
       include: {
         author: {
@@ -127,7 +127,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
       },
     });
   } catch (error) {
-    console.error("Error fetching user profile stats:", error);
-    return NextResponse.json({ error: "Erro ao buscar perfil" }, { status: 500 });
+    console.error('Error fetching user profile stats:', error);
+    return NextResponse.json({ error: 'Erro ao buscar perfil' }, { status: 500 });
   }
 }

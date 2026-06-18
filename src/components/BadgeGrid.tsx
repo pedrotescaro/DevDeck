@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
 
 interface Badge {
   slug: string;
@@ -27,90 +27,90 @@ interface BadgeDesign {
 
 export const badgeDesigns: Record<string, BadgeDesign> = {
   hello_world: {
-    bgGradient: "bg-gradient-to-br from-amber-400/20 via-yellow-600/10 to-zinc-950/40",
-    borderColor: "border-amber-500/80 dark:border-amber-400 border-b-amber-700",
-    textColor: "text-amber-600 dark:text-amber-400",
-    glowColor: "shadow-amber-500/30",
-    shapeClass: "rounded-full border-[3px] ring-4 ring-zinc-950/10 dark:ring-white/5",
-    innerBg: "bg-gradient-to-br from-amber-500/10 to-transparent",
-    ribbonText: "ACADEMY",
+    bgGradient: 'bg-gradient-to-br from-amber-400/20 via-yellow-600/10 to-zinc-950/40',
+    borderColor: 'border-amber-500/80 dark:border-amber-400 border-b-amber-700',
+    textColor: 'text-amber-600 dark:text-amber-400',
+    glowColor: 'shadow-amber-500/30',
+    shapeClass: 'rounded-full border-[3px] ring-4 ring-zinc-950/10 dark:ring-white/5',
+    innerBg: 'bg-gradient-to-br from-amber-500/10 to-transparent',
+    ribbonText: 'ACADEMY',
   },
   segfault_survivor: {
-    bgGradient: "bg-gradient-to-br from-slate-400/20 via-slate-600/10 to-zinc-950/40",
-    borderColor: "border-slate-400/80 dark:border-slate-400 border-b-slate-600",
-    textColor: "text-dd-muted dark:text-dd-muted",
-    glowColor: "shadow-slate-500/30",
+    bgGradient: 'bg-gradient-to-br from-slate-400/20 via-slate-600/10 to-zinc-950/40',
+    borderColor: 'border-slate-400/80 dark:border-slate-400 border-b-slate-600',
+    textColor: 'text-dd-muted dark:text-dd-muted',
+    glowColor: 'shadow-slate-500/30',
     shapeClass:
-      "rounded-lg border-[3px] [clip-path:polygon(50%_0%,_100%_20%,_100%_80%,_50%_100%,_0%_80%,_0%_20%)]",
-    innerBg: "bg-gradient-to-b from-slate-500/10 to-transparent",
-    ribbonText: "PRO",
+      'rounded-lg border-[3px] [clip-path:polygon(50%_0%,_100%_20%,_100%_80%,_50%_100%,_0%_80%,_0%_20%)]',
+    innerBg: 'bg-gradient-to-b from-slate-500/10 to-transparent',
+    ribbonText: 'PRO',
   },
   git_push_force: {
-    bgGradient: "bg-gradient-to-br from-blue-500/20 via-blue-700/10 to-zinc-950/40",
-    borderColor: "border-blue-500/80 dark:border-blue-500 border-b-blue-700",
-    textColor: "text-blue-600 dark:text-blue-400",
-    glowColor: "shadow-blue-500/30",
-    shapeClass: "rounded-[24px_8px] border-[3px] ring-2 ring-zinc-950/10 dark:ring-white/5",
-    innerBg: "bg-gradient-to-br from-blue-500/10 to-transparent",
-    ribbonText: "EXPERT",
+    bgGradient: 'bg-gradient-to-br from-blue-500/20 via-blue-700/10 to-zinc-950/40',
+    borderColor: 'border-blue-500/80 dark:border-blue-500 border-b-blue-700',
+    textColor: 'text-blue-600 dark:text-blue-400',
+    glowColor: 'shadow-blue-500/30',
+    shapeClass: 'rounded-[24px_8px] border-[3px] ring-2 ring-zinc-950/10 dark:ring-white/5',
+    innerBg: 'bg-gradient-to-br from-blue-500/10 to-transparent',
+    ribbonText: 'EXPERT',
   },
   typescript_wizard: {
-    bgGradient: "bg-gradient-to-br from-purple-500/20 via-purple-700/10 to-zinc-950/40",
-    borderColor: "border-purple-500/80 dark:border-purple-500 border-b-purple-800",
-    textColor: "text-purple-600 dark:text-purple-400",
-    glowColor: "shadow-purple-500/30",
+    bgGradient: 'bg-gradient-to-br from-purple-500/20 via-purple-700/10 to-zinc-950/40',
+    borderColor: 'border-purple-500/80 dark:border-purple-500 border-b-purple-800',
+    textColor: 'text-purple-600 dark:text-purple-400',
+    glowColor: 'shadow-purple-500/30',
     shapeClass:
-      "rounded-full border-[3px] outline-double outline-[3px] outline-zinc-950/10 dark:outline-white/5",
-    innerBg: "bg-gradient-to-br from-purple-500/10 to-transparent",
-    ribbonText: "MASTER",
+      'rounded-full border-[3px] outline-double outline-[3px] outline-zinc-950/10 dark:outline-white/5',
+    innerBg: 'bg-gradient-to-br from-purple-500/10 to-transparent',
+    ribbonText: 'MASTER',
   },
   rustacean_approved: {
-    bgGradient: "bg-gradient-to-br from-orange-500/20 via-orange-700/10 to-zinc-950/40",
-    borderColor: "border-orange-500/80 dark:border-orange-500 border-b-orange-800",
-    textColor: "text-orange-600 dark:text-orange-400",
-    glowColor: "shadow-orange-500/30",
+    bgGradient: 'bg-gradient-to-br from-orange-500/20 via-orange-700/10 to-zinc-950/40',
+    borderColor: 'border-orange-500/80 dark:border-orange-500 border-b-orange-800',
+    textColor: 'text-orange-600 dark:text-orange-400',
+    glowColor: 'shadow-orange-500/30',
     shapeClass:
-      "rounded-lg border-[3px] [clip-path:polygon(25%_0%,_75%_0%,_100%_50%,_75%_100%,_25%_100%,_0%_50%)]",
-    innerBg: "bg-gradient-to-br from-orange-500/10 to-transparent",
-    ribbonText: "ELITE",
+      'rounded-lg border-[3px] [clip-path:polygon(25%_0%,_75%_0%,_100%_50%,_75%_100%,_25%_100%,_0%_50%)]',
+    innerBg: 'bg-gradient-to-br from-orange-500/10 to-transparent',
+    ribbonText: 'ELITE',
   },
   stack_overflow_ban: {
-    bgGradient: "bg-gradient-to-br from-rose-600/20 via-rose-800/10 to-zinc-950/40",
-    borderColor: "border-rose-500/80 dark:border-rose-500 border-b-rose-800",
-    textColor: "text-rose-600 dark:text-rose-400",
-    glowColor: "shadow-rose-600/30",
-    shapeClass: "rounded-[30%_70%_70%_30%_/_30%_30%_70%_70%] border-[3px]",
-    innerBg: "bg-gradient-to-br from-rose-500/10 to-transparent",
-    ribbonText: "VETERAN",
+    bgGradient: 'bg-gradient-to-br from-rose-600/20 via-rose-800/10 to-zinc-950/40',
+    borderColor: 'border-rose-500/80 dark:border-rose-500 border-b-rose-800',
+    textColor: 'text-rose-600 dark:text-rose-400',
+    glowColor: 'shadow-rose-600/30',
+    shapeClass: 'rounded-[30%_70%_70%_30%_/_30%_30%_70%_70%] border-[3px]',
+    innerBg: 'bg-gradient-to-br from-rose-500/10 to-transparent',
+    ribbonText: 'VETERAN',
   },
   speed_coder: {
-    bgGradient: "bg-gradient-to-br from-emerald-500/20 via-emerald-700/10 to-zinc-950/40",
-    borderColor: "border-emerald-500/80 dark:border-emerald-500 border-b-emerald-800",
-    textColor: "text-emerald-600 dark:text-emerald-500",
-    glowColor: "shadow-emerald-500/30",
+    bgGradient: 'bg-gradient-to-br from-emerald-500/20 via-emerald-700/10 to-zinc-950/40',
+    borderColor: 'border-emerald-500/80 dark:border-emerald-500 border-b-emerald-800',
+    textColor: 'text-emerald-600 dark:text-emerald-500',
+    glowColor: 'shadow-emerald-500/30',
     shapeClass:
-      "rounded-xl border-[3px] [clip-path:polygon(50%_0%,_100%_38%,_82%_100%,_18%_100%,_0%_38%)]",
-    innerBg: "bg-gradient-to-br from-emerald-500/10 to-transparent",
-    ribbonText: "AGILE",
+      'rounded-xl border-[3px] [clip-path:polygon(50%_0%,_100%_38%,_82%_100%,_18%_100%,_0%_38%)]',
+    innerBg: 'bg-gradient-to-br from-emerald-500/10 to-transparent',
+    ribbonText: 'AGILE',
   },
   debug_ninja: {
-    bgGradient: "bg-gradient-to-br from-zinc-500/20 via-zinc-700/10 to-zinc-950/40",
-    borderColor: "border-zinc-500/80 dark:border-zinc-500 border-b-zinc-800",
-    textColor: "text-zinc-700 dark:text-zinc-400",
-    glowColor: "shadow-zinc-500/30",
-    shapeClass: "border-[3px] rounded-full",
-    innerBg: "bg-gradient-to-br from-zinc-500/10 to-transparent",
-    ribbonText: "NINJA",
+    bgGradient: 'bg-gradient-to-br from-zinc-500/20 via-zinc-700/10 to-zinc-950/40',
+    borderColor: 'border-zinc-500/80 dark:border-zinc-500 border-b-zinc-800',
+    textColor: 'text-zinc-700 dark:text-zinc-400',
+    glowColor: 'shadow-zinc-500/30',
+    shapeClass: 'border-[3px] rounded-full',
+    innerBg: 'bg-gradient-to-br from-zinc-500/10 to-transparent',
+    ribbonText: 'NINJA',
   },
   coffee_overflow: {
-    bgGradient: "bg-gradient-to-br from-amber-600/20 via-amber-800/10 to-zinc-950/40",
-    borderColor: "border-amber-600/80 dark:border-amber-600 border-b-amber-900",
-    textColor: "text-amber-700 dark:text-amber-500",
-    glowColor: "shadow-amber-600/30",
+    bgGradient: 'bg-gradient-to-br from-amber-600/20 via-amber-800/10 to-zinc-950/40',
+    borderColor: 'border-amber-600/80 dark:border-amber-600 border-b-amber-900',
+    textColor: 'text-amber-700 dark:text-amber-500',
+    glowColor: 'shadow-amber-600/30',
     shapeClass:
-      "border-[3px] [clip-path:polygon(50%_0%,_100%_25%,_100%_75%,_50%_100%,_0%_75%,_0%_25%)]",
-    innerBg: "bg-gradient-to-br from-amber-600/10 to-transparent",
-    ribbonText: "SUPREME",
+      'border-[3px] [clip-path:polygon(50%_0%,_100%_25%,_100%_75%,_50%_100%,_0%_75%,_0%_25%)]',
+    innerBg: 'bg-gradient-to-br from-amber-600/10 to-transparent',
+    ribbonText: 'SUPREME',
   },
 };
 
@@ -118,35 +118,35 @@ export function BadgeEmblem({
   slug,
   icon,
   label,
-  size = "md",
+  size = 'md',
   earned = true,
 }: {
   slug: string;
   icon: string;
   label: string;
-  size?: "sm" | "md";
+  size?: 'sm' | 'md';
   earned?: boolean;
 }) {
   const sizeClasses = {
     sm: {
-      outer: "w-14 h-14",
-      inner: "w-11 h-11",
-      icon: "text-lg",
-      ribbon: "text-[7px] py-0.5",
+      outer: 'w-14 h-14',
+      inner: 'w-11 h-11',
+      icon: 'text-lg',
+      ribbon: 'text-[7px] py-0.5',
     },
     md: {
-      outer: "w-20 h-20",
-      inner: "w-16 h-16",
-      icon: "text-2xl",
-      ribbon: "text-[8px] py-0.5 px-1.5",
+      outer: 'w-20 h-20',
+      inner: 'w-16 h-16',
+      icon: 'text-2xl',
+      ribbon: 'text-[8px] py-0.5 px-1.5',
     },
   }[size];
 
   const realBadgeImages: Record<string, string> = {
-    code_streak: "/badge_streak.png",
-    python_master: "/badge_python.png",
-    rust_practitioner: "/badge_rust.png",
-    community_educator: "/badge_educator.png",
+    code_streak: '/badge_streak.png',
+    python_master: '/badge_python.png',
+    rust_practitioner: '/badge_rust.png',
+    community_educator: '/badge_educator.png',
   };
 
   const imageSrc = realBadgeImages[slug];
@@ -156,7 +156,7 @@ export function BadgeEmblem({
       <div className="flex flex-col items-center justify-center select-none">
         <div
           className={`relative flex items-center justify-center ${sizeClasses.outer} ${
-            earned ? "shadow-lg shadow-orange-500/20" : "opacity-35 grayscale"
+            earned ? 'shadow-lg shadow-orange-500/20' : 'opacity-35 grayscale'
           } transition-all duration-300 hover:scale-[1.04]`}
         >
           <img
@@ -175,13 +175,13 @@ export function BadgeEmblem({
   }
 
   const design = badgeDesigns[slug] || {
-    bgGradient: "from-slate-500/10 via-slate-600/5 to-transparent",
-    borderColor: "border-slate-400/40",
-    textColor: "text-dd-muted",
-    glowColor: "shadow-slate-500/10",
-    shapeClass: "rounded-xl border-2",
-    innerBg: "bg-slate-50",
-    ribbonText: "BADGE",
+    bgGradient: 'from-slate-500/10 via-slate-600/5 to-transparent',
+    borderColor: 'border-slate-400/40',
+    textColor: 'text-dd-muted',
+    glowColor: 'shadow-slate-500/10',
+    shapeClass: 'rounded-xl border-2',
+    innerBg: 'bg-slate-50',
+    ribbonText: 'BADGE',
   };
 
   return (
@@ -190,20 +190,20 @@ export function BadgeEmblem({
         className={`relative flex items-center justify-center ${sizeClasses.outer} ${
           earned
             ? design.bgGradient
-            : "bg-gradient-to-b from-slate-900/5 via-slate-950/2 to-transparent"
-        } ${earned ? design.borderColor : "border-dd-border border-dashed border-2"} ${
-          earned ? design.shapeClass : "rounded-xl"
-        } ${earned ? `shadow-lg ${design.glowColor}` : "opacity-35 grayscale"} transition-all duration-300 hover:scale-[1.04]`}
+            : 'bg-gradient-to-b from-slate-900/5 via-slate-950/2 to-transparent'
+        } ${earned ? design.borderColor : 'border-dd-border border-dashed border-2'} ${
+          earned ? design.shapeClass : 'rounded-xl'
+        } ${earned ? `shadow-lg ${design.glowColor}` : 'opacity-35 grayscale'} transition-all duration-300 hover:scale-[1.04]`}
       >
         <div
-          className={`flex items-center justify-center ${sizeClasses.inner} rounded-inherit ${earned ? design.innerBg : "bg-dd-surface/40"} border border-dd-border/10 backdrop-blur-[1px]`}
+          className={`flex items-center justify-center ${sizeClasses.inner} rounded-inherit ${earned ? design.innerBg : 'bg-dd-surface/40'} border border-dd-border/10 backdrop-blur-[1px]`}
         >
           <span
             className={`${sizeClasses.icon} transform transition-transform duration-300 hover:scale-110 drop-shadow-md`}
             role="img"
             aria-label={label}
           >
-            {earned ? icon : "🔒"}
+            {earned ? icon : '🔒'}
           </span>
         </div>
 
@@ -233,13 +233,13 @@ function BadgeItem({ badge }: { badge: Badge }) {
 
       <div className="text-center mt-1">
         <span
-          className={`text-[11px] font-bold block truncate max-w-[120px] ${earned ? "text-dd-text" : "text-dd-muted font-normal"}`}
+          className={`text-[11px] font-bold block truncate max-w-[120px] ${earned ? 'text-dd-text' : 'text-dd-muted font-normal'}`}
         >
           {badge.label}
         </span>
         {earned && badge.earned_at && (
           <span className="text-dd-muted text-[9px] font-semibold block mt-0.5">
-            {new Date(badge.earned_at).toLocaleDateString("pt-BR")}
+            {new Date(badge.earned_at).toLocaleDateString('pt-BR')}
           </span>
         )}
       </div>

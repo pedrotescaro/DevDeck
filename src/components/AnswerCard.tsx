@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { AlertTriangle, MessageSquare, BarChart2, Share } from "lucide-react";
-import { formatRelativeTime } from "@/lib/date";
-import { LikeButton } from "@/components/motion/LikeButton";
-import { BookmarkButton } from "@/components/motion/BookmarkButton";
-import { RepostMenu } from "@/components/motion/RepostMenu";
+import { useState } from 'react';
+import { AlertTriangle, MessageSquare, BarChart2, Share } from 'lucide-react';
+import { formatRelativeTime } from '@/lib/date';
+import { LikeButton } from '@/components/motion/LikeButton';
+import { BookmarkButton } from '@/components/motion/BookmarkButton';
+import { RepostMenu } from '@/components/motion/RepostMenu';
 
 interface AnswerAuthor {
   username: string;
@@ -42,9 +42,9 @@ export function AnswerCard({
   postId,
 }: AnswerCardProps) {
   const initialUserVote =
-    answer.votes?.[0]?.value === 1 ? "up" : answer.votes?.[0]?.value === -1 ? "down" : null;
+    answer.votes?.[0]?.value === 1 ? 'up' : answer.votes?.[0]?.value === -1 ? 'down' : null;
   const [voteCount, setVoteCount] = useState(answer.upvotes);
-  const [userVote, setUserVote] = useState<"up" | "down" | null>(initialUserVote);
+  const [userVote, setUserVote] = useState<'up' | 'down' | null>(initialUserVote);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [reposted, setReposted] = useState(false);
   const [repostCount, setRepostCount] = useState(0);
@@ -62,13 +62,13 @@ export function AnswerCard({
 
     try {
       const res = await fetch(`/api/posts/${targetPostId}/answer`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ body: replyText }),
       });
 
       if (!res.ok) {
-        throw new Error("Erro ao responder comentário");
+        throw new Error('Erro ao responder comentário');
       }
 
       const data = await res.json();
@@ -80,38 +80,38 @@ export function AnswerCard({
       setShowReplyBox(false);
     } catch (err) {
       console.error(err);
-      alert("Não foi possível enviar sua resposta agora.");
+      alert('Não foi possível enviar sua resposta agora.');
     } finally {
       setReplySubmitting(false);
     }
   };
 
   const handleShare = () => {
-    const link = `${window.location.origin}/post/${answer.post_id || ""}#answer-${answer.id}`;
+    const link = `${window.location.origin}/post/${answer.post_id || ''}#answer-${answer.id}`;
     navigator.clipboard.writeText(link);
-    alert("Link da resposta copiado para a área de transferência!");
+    alert('Link da resposta copiado para a área de transferência!');
   };
 
   const [accepting, setAccepting] = useState(false);
 
-  const handleVote = async (type: "up" | "down") => {
+  const handleVote = async (type: 'up' | 'down') => {
     const currentVote = userVote;
     const currentCount = voteCount;
     let newValue = 0;
 
-    if (type === "up") {
-      newValue = currentVote === "up" ? 0 : 1;
+    if (type === 'up') {
+      newValue = currentVote === 'up' ? 0 : 1;
     } else {
-      newValue = currentVote === "down" ? 0 : -1;
+      newValue = currentVote === 'down' ? 0 : -1;
     }
 
     if (newValue === -1) {
       const justification = prompt(
-        "No DevDeck, o downvote exige uma justificativa construtiva. Escreva seu motivo para o autor melhorar:"
+        'No DevDeck, o downvote exige uma justificativa construtiva. Escreva seu motivo para o autor melhorar:'
       );
       if (!justification || justification.trim().length <= 3) {
         alert(
-          "O downvote foi cancelado. É necessária uma justificativa construtiva de pelo menos 4 caracteres."
+          'O downvote foi cancelado. É necessária uma justificativa construtiva de pelo menos 4 caracteres.'
         );
         return;
       }
@@ -119,28 +119,28 @@ export function AnswerCard({
 
     // Optimistic UI update
     let diff = 0;
-    let newUserVote: "up" | "down" | null = null;
-    if (type === "up") {
-      if (currentVote === "up") {
+    let newUserVote: 'up' | 'down' | null = null;
+    if (type === 'up') {
+      if (currentVote === 'up') {
         diff = -1;
         newUserVote = null;
-      } else if (currentVote === "down") {
+      } else if (currentVote === 'down') {
         diff = 2;
-        newUserVote = "up";
+        newUserVote = 'up';
       } else {
         diff = 1;
-        newUserVote = "up";
+        newUserVote = 'up';
       }
     } else {
-      if (currentVote === "down") {
+      if (currentVote === 'down') {
         diff = 1;
         newUserVote = null;
-      } else if (currentVote === "up") {
+      } else if (currentVote === 'up') {
         diff = -2;
-        newUserVote = "down";
+        newUserVote = 'down';
       } else {
         diff = -1;
-        newUserVote = "down";
+        newUserVote = 'down';
       }
     }
 
@@ -149,13 +149,13 @@ export function AnswerCard({
 
     try {
       const res = await fetch(`/api/answers/${answer.id}/vote`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ value: newValue }),
       });
 
       if (!res.ok) {
-        throw new Error("Erro ao registrar voto");
+        throw new Error('Erro ao registrar voto');
       }
 
       const data = await res.json();
@@ -182,7 +182,7 @@ export function AnswerCard({
   return (
     <article
       className={`bg-dd-card border rounded-xl p-5 ${
-        answer.is_accepted ? "border-dd-green/40" : "border-dd-border"
+        answer.is_accepted ? 'border-dd-green/40' : 'border-dd-border'
       }`}
     >
       {/* Accepted badge */}
@@ -253,14 +253,14 @@ export function AnswerCard({
               setReposted(!reposted);
               setRepostCount((prev) => (reposted ? prev - 1 : prev + 1));
             }}
-            onQuote={() => alert("Citação de resposta mockada!")}
+            onQuote={() => alert('Citação de resposta mockada!')}
           />
 
           {/* 3. Heart/Like button */}
           <LikeButton
             count={voteCount}
-            isActive={userVote === "up"}
-            onToggle={() => handleVote("up")}
+            isActive={userVote === 'up'}
+            onToggle={() => handleVote('up')}
             title="Curtir resposta"
           />
 
@@ -325,7 +325,7 @@ export function AnswerCard({
               />
             ) : (
               <div className="w-8 h-8 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold border border-orange-500/10">
-                {currentUser?.username?.slice(0, 2).toUpperCase() || "ME"}
+                {currentUser?.username?.slice(0, 2).toUpperCase() || 'ME'}
               </div>
             )}
           </div>
@@ -359,7 +359,7 @@ export function AnswerCard({
                 }
                 className="px-3 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-xs font-bold text-white transition-all duration-200 active:scale-[0.97] cursor-pointer disabled:opacity-50"
               >
-                {replySubmitting ? "Enviando..." : "Responder"}
+                {replySubmitting ? 'Enviando...' : 'Responder'}
               </button>
             </div>
           </div>

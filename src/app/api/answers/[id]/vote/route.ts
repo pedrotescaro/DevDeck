@@ -1,15 +1,12 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getAuthUser } from "@/lib/auth";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth';
 
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getAuthUser();
     if (!user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     const { id: answerId } = await params;
@@ -17,21 +14,23 @@ export async function POST(
     const { value } = body; // 1 (upvote), -1 (downvote), ou 0 (remover voto)
 
     if (value !== 1 && value !== -1 && value !== 0) {
-      return NextResponse.json({ error: "Valor de voto inválido" }, { status: 400 });
+      return NextResponse.json({ error: 'Valor de voto inválido' }, { status: 400 });
     }
 
     // 1. Atualizar ou deletar o AnswerVote
     if (value === 0) {
-      await prisma.answerVote.delete({
-        where: {
-          answer_id_user_id: {
-            answer_id: answerId,
-            user_id: user.id,
+      await prisma.answerVote
+        .delete({
+          where: {
+            answer_id_user_id: {
+              answer_id: answerId,
+              user_id: user.id,
+            },
           },
-        },
-      }).catch(() => {
-        // Silenciar erro se o voto não existir
-      });
+        })
+        .catch(() => {
+          // Silenciar erro se o voto não existir
+        });
     } else {
       await prisma.answerVote.upsert({
         where: {
@@ -65,7 +64,7 @@ export async function POST(
 
     return NextResponse.json({ success: true, upvotes: newUpvotes });
   } catch (error: any) {
-    console.error("Error casting answer vote:", error);
-    return NextResponse.json({ error: error.message || "Erro ao votar" }, { status: 500 });
+    console.error('Error casting answer vote:', error);
+    return NextResponse.json({ error: error.message || 'Erro ao votar' }, { status: 500 });
   }
 }

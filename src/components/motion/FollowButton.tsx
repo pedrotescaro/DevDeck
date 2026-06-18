@@ -1,24 +1,19 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Check } from "lucide-react";
-import { cn } from "@/lib/cn";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Check } from 'lucide-react';
+import { cn } from '@/lib/cn';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 interface FollowButtonProps {
   isFollowing: boolean;
   onToggle: () => Promise<void> | void;
-  size?: "sm" | "md";
+  size?: 'sm' | 'md';
   className?: string;
 }
 
-export function FollowButton({
-  isFollowing,
-  onToggle,
-  size = "md",
-  className,
-}: FollowButtonProps) {
+export function FollowButton({ isFollowing, onToggle, size = 'md', className }: FollowButtonProps) {
   const reduced = useReducedMotion();
   const [optimistic, setOptimistic] = useState(isFollowing);
   const [hovered, setHovered] = useState(false);
@@ -40,11 +35,7 @@ export function FollowButton({
     }
   };
 
-  const label = following
-    ? hovered
-      ? "Deixar de seguir"
-      : "Seguindo"
-    : "Seguir";
+  const label = following ? (hovered ? 'Deixar de seguir' : 'Seguindo') : 'Seguir';
 
   return (
     <motion.button
@@ -55,14 +46,14 @@ export function FollowButton({
       disabled={loading}
       data-following={following}
       className={cn(
-        "dd-focus-ring dd-touch font-black rounded-full transition-all cursor-pointer",
-        size === "sm" ? "text-[10px] px-3 py-1" : "text-xs px-4 py-1.5",
+        'dd-focus-ring dd-touch font-black rounded-full transition-all cursor-pointer',
+        size === 'sm' ? 'text-[10px] px-3 py-1' : 'text-xs px-4 py-1.5',
         following
           ? hovered
-            ? "bg-red-500/10 border-red-500/30 text-red-400"
-            : "bg-dd-surface border border-dd-border text-dd-text"
-          : "bg-dd-accent text-white hover:bg-orange-600",
-        loading && "opacity-70 cursor-wait",
+            ? 'bg-red-500/10 border-red-500/30 text-red-400'
+            : 'bg-dd-surface border border-dd-border text-dd-text'
+          : 'bg-dd-accent text-white hover:bg-orange-600',
+        loading && 'opacity-70 cursor-wait',
         className
       )}
       whileTap={reduced ? undefined : { scale: 0.95 }}

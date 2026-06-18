@@ -1,5 +1,5 @@
-import { createServerClient } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -39,30 +39,30 @@ export async function updateSession(request: NextRequest) {
     } = await supabase.auth.getUser();
     user = supabaseUser;
   } catch (error) {
-    console.error("Supabase auth error in middleware:", error);
+    console.error('Supabase auth error in middleware:', error);
   }
 
   const pathname = request.nextUrl.pathname;
 
   // List of protected routes
   const isProtectedRoute =
-    pathname.startsWith("/feed") ||
-    pathname.startsWith("/post") ||
-    pathname.startsWith("/quiz") ||
-    pathname.startsWith("/duels") ||
-    pathname.startsWith("/profile") ||
-    pathname.startsWith("/settings");
+    pathname.startsWith('/feed') ||
+    pathname.startsWith('/post') ||
+    pathname.startsWith('/quiz') ||
+    pathname.startsWith('/duels') ||
+    pathname.startsWith('/profile') ||
+    pathname.startsWith('/settings');
 
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
+    url.pathname = '/login';
     return NextResponse.redirect(url);
   }
 
   // Redirect authenticated users trying to access auth pages to the feed
-  if (user && (pathname === "/login" || pathname === "/register")) {
+  if (user && (pathname === '/login' || pathname === '/register')) {
     const url = request.nextUrl.clone();
-    url.pathname = "/feed";
+    url.pathname = '/feed';
     return NextResponse.redirect(url);
   }
 

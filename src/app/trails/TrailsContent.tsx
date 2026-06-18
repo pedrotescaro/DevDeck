@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { Sidebar } from "@/components/Sidebar";
-import { Footer } from "@/components/Footer";
-import { TRAILS_DATA, TrailLevel, TrailQuestion } from "@/lib/trailsData";
-import { useSoundEffects } from "@/hooks/useSoundEffects";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from 'react';
+import { Sidebar } from '@/components/Sidebar';
+import { Footer } from '@/components/Footer';
+import { TRAILS_DATA, TrailLevel, TrailQuestion } from '@/lib/trailsData';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   BookOpen,
   Lock,
@@ -18,7 +18,7 @@ import {
   Sparkles,
   ArrowLeft,
   ChevronDown,
-} from "lucide-react";
+} from 'lucide-react';
 function getLevelFromXp(xp: number) {
   return Math.max(1, Math.floor(xp / 1000) + 1);
 }
@@ -26,18 +26,18 @@ function getLevelFromXp(xp: number) {
 function getLearnSlidesForLevel(level: TrailLevel) {
   return level.questions.map((q, idx) => {
     let title = `Conceito ${idx + 1}: ${level.title}`;
-    let concept = "";
-    let code = "";
-    let tip = "";
+    let concept = '';
+    let code = '';
+    let tip = '';
 
-    if (q.id === "js-l1-q1") {
+    if (q.id === 'js-l1-q1') {
       title = "Escopo de Bloco com 'let'";
       concept =
         "Em JavaScript moderno, declaramos variáveis reatribuíveis com escopo de bloco usando a palavra-chave 'let'. Diferente do antigo 'var', que tem escopo de função e sofre com hoisting indesejado, o 'let' respeita as chaves em que foi criado.";
       code =
         "{\n  let blockScoped = 'disponível apenas aqui';\n  var functionScoped = 'vaza para fora';\n}\nconsole.log(functionScoped); // Funciona!\nconsole.log(blockScoped); // Erro!";
       tip = "Use sempre 'const' por padrão, e 'let' apenas se precisar reatribuir a variável.";
-    } else if (q.id === "js-l1-q2") {
+    } else if (q.id === 'js-l1-q2') {
       title = "O Tipo Oculto de 'null'";
       concept =
         "O operador 'typeof' retorna uma string indicando o tipo do operando. No entanto, por razões históricas e de compatibilidade com versões antigas do JavaScript, 'typeof null' retorna a string 'object'. Isso é considerado um bug de design na linguagem, mas nunca foi alterado para não quebrar a web legada.";
@@ -45,23 +45,23 @@ function getLearnSlidesForLevel(level: TrailLevel) {
         "console.log(typeof null); // 'object'\nconsole.log(typeof undefined); // 'undefined'\nconsole.log(null === null); // true";
       tip =
         "Para verificar se um valor é nulo, compare diretamente usando 'val === null' em vez de usar 'typeof'.";
-    } else if (q.id === "js-l1-q3") {
+    } else if (q.id === 'js-l1-q3') {
       title = "Conversão de Tipos com 'parseInt()'";
       concept =
         "A função global 'parseInt()' analisa um argumento do tipo string e retorna um número inteiro da base especificada (radix). Ela é útil para extrair números de strings de texto mistas.";
       code =
         "const larguraStr = '120px';\nconst largura = parseInt(larguraStr, 10);\nconsole.log(largura); // 120 (como number)\nconsole.log(parseInt('abc')); // NaN (Not a Number)";
       tip =
-        "Sempre passe o segundo argumento (radix, geralmente 10) para o parseInt() para evitar interpretações incorretas em bases antigas (como octal).";
-    } else if (q.id === "js-l2-q1") {
-      title = "Igualdade Estrita (===)";
+        'Sempre passe o segundo argumento (radix, geralmente 10) para o parseInt() para evitar interpretações incorretas em bases antigas (como octal).';
+    } else if (q.id === 'js-l2-q1') {
+      title = 'Igualdade Estrita (===)';
       concept =
         "O operador '===' (identidade ou igualdade estrita) compara tanto o valor quanto o tipo dos dois operandos. Já o operador '==' realiza coerção automática de tipo antes de comparar, o que pode levar a comportamentos inesperados.";
       code =
         "console.log(5 == '5');   // true (faz coerção de tipo)\nconsole.log(5 === '5');  // false (tipos diferentes: number vs string)\nconsole.log(0 == false);  // true\nconsole.log(0 === false); // false";
       tip =
-        "Use sempre o operador de igualdade estrita (===) para evitar bugs silenciosos de coerção de tipo.";
-    } else if (q.id === "js-l2-q2") {
+        'Use sempre o operador de igualdade estrita (===) para evitar bugs silenciosos de coerção de tipo.';
+    } else if (q.id === 'js-l2-q2') {
       title = "Tratamento de Erros com 'try...catch'";
       concept =
         "A instrução 'try...catch' marca um bloco de declarações para testar (try) e especifica uma resposta, caso uma exceção seja lançada (catch). Isso previne que um erro interrompa totalmente a execução da sua aplicação.";
@@ -69,7 +69,7 @@ function getLearnSlidesForLevel(level: TrailLevel) {
         "try {\n  const res = executarFuncaoPerigosa();\n} catch (error) {\n  console.error('Um erro ocorreu:', error.message);\n  // A aplicação continua rodando de forma estável\n}";
       tip =
         "Você pode usar um bloco 'finally' opcional que roda independente de ter ocorrido erro ou não.";
-    } else if (q.id === "js-l2-q3") {
+    } else if (q.id === 'js-l2-q3') {
       title = "Garantindo Execução com 'do...while'";
       concept =
         "O loop 'do...while' repete uma instrução até que a condição de teste avalie como falsa. A principal característica do 'do...while' é que o bloco de código dentro do 'do' sempre roda pelo menos uma vez antes de avaliar a condição.";
@@ -77,14 +77,14 @@ function getLearnSlidesForLevel(level: TrailLevel) {
         "let contador = 10;\ndo {\n  console.log('Executou pelo menos uma vez!');\n} while (contador < 5);";
       tip =
         "Use 'do...while' quando a primeira interação precisa acontecer antes de fazer a checagem lógica.";
-    } else if (q.id === "ts-l1-q1") {
+    } else if (q.id === 'ts-l1-q1') {
       title = "O Tipo 'never' no TypeScript";
       concept =
         "No TypeScript, o tipo 'never' representa valores que nunca ocorrem. É usado para tipar funções que sempre lançam exceções ou loops infinitos de onde a execução nunca retorna, garantindo segurança de tipos estrita.";
       code =
-        "function lancarErro(msg: string): never {\n  throw new Error(msg);\n}\n\nfunction loopInfinito(): never {\n  while (true) {}\n}";
+        'function lancarErro(msg: string): never {\n  throw new Error(msg);\n}\n\nfunction loopInfinito(): never {\n  while (true) {}\n}';
       tip = "O tipo 'never' é ideal para análise exaustiva em switch statements (type narrowing).";
-    } else if (q.id === "ts-l1-q2") {
+    } else if (q.id === 'ts-l1-q2') {
       title = "Diferença entre 'any' e 'unknown'";
       concept =
         "Tanto 'any' quanto 'unknown' aceitam qualquer valor. No entanto, 'unknown' é o tipo seguro correspondente. Você não pode chamar métodos ou acessar propriedades de uma variável 'unknown' sem antes realizar uma checagem de tipo (type guard) ou asserção.";
@@ -92,8 +92,8 @@ function getLearnSlidesForLevel(level: TrailLevel) {
         "let valor1: any = 'olá';\nvalor1.falar(); // Compila (mas pode dar erro em runtime)\n\nlet valor2: unknown = 'olá';\n// valor2.falar(); // Erro de Compilação!\n\nif (typeof valor2 === 'string') {\n  console.log(valor2.toUpperCase()); // Seguro e permitido!\n}";
       tip =
         "Prefira sempre usar 'unknown' no lugar de 'any' para manter a segurança estática de tipo.";
-    } else if (q.id === "ts-l1-q3") {
-      title = "Type Assertion (Asserção de Tipo)";
+    } else if (q.id === 'ts-l1-q3') {
+      title = 'Type Assertion (Asserção de Tipo)';
       concept =
         "A asserção de tipo informa ao compilador do TypeScript que você sabe mais sobre o tipo da variável do que ele. É uma conversão puramente em tempo de compilação. Pode ser declarada usando a sintaxe 'as Tipo' ou '<Tipo>'.";
       code =
@@ -102,7 +102,7 @@ function getLearnSlidesForLevel(level: TrailLevel) {
         "A sintaxe '<Tipo>' pode conflitar com JSX/TSX em React, portanto, prefira usar a palavra-chave 'as'.";
     } else {
       const correctAnswer = q.options[q.correctIndex];
-      title = `Lição: ${q.question.replace(/\?$/, "").replace(/^Qual\s+|^O que\s+|^Qual é o\s+/, "")}`;
+      title = `Lição: ${q.question.replace(/\?$/, '').replace(/^Qual\s+|^O que\s+|^Qual é o\s+/, '')}`;
       concept = `Para dominar este tema, entenda o seguinte: no contexto de "${level.title}", a pergunta principal é: "${q.question}"\n\nNesta situação, a resposta correta e mais performática é "${correctAnswer}". Ao projetar sistemas e escrever códigos, lembre-se de que essa convenção ou abordagem ajuda a otimizar a legibilidade, a evitar erros lógicos e a seguir as melhores práticas recomendadas para a linguagem.`;
       if (q.options.length > 0) {
         code = `// Exemplo prático do conceito de ${level.title}\n// O valor esperado/correto para esta lógica é:\nconst resultado = "${correctAnswer}";\nconsole.log(resultado); // Atende ao comportamento esperado`;
@@ -135,36 +135,36 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
 
   useEffect(() => {
     const updateSoundState = () => {
-      setSoundEnabled(localStorage.getItem("devdeck-sound") !== "false");
+      setSoundEnabled(localStorage.getItem('devdeck-sound') !== 'false');
     };
 
     updateSoundState();
 
-    window.addEventListener("storage", updateSoundState);
-    window.addEventListener("devdeck-sound-changed", updateSoundState);
+    window.addEventListener('storage', updateSoundState);
+    window.addEventListener('devdeck-sound-changed', updateSoundState);
 
     return () => {
-      window.removeEventListener("storage", updateSoundState);
-      window.removeEventListener("devdeck-sound-changed", updateSoundState);
+      window.removeEventListener('storage', updateSoundState);
+      window.removeEventListener('devdeck-sound-changed', updateSoundState);
     };
   }, []);
 
   const { playSound } = useSoundEffects(soundEnabled);
 
   // Estados principais
-  const [activeLang, setActiveLang] = useState<string>("JS");
+  const [activeLang, setActiveLang] = useState<string>('JS');
   const [attempts, setAttempts] = useState<Record<string, boolean>>(initialAttempts);
   const [trails, setTrails] = useState(initialTrails);
   const [userXp, setUserXp] = useState(user.total_xp);
 
   // Estados para as Seções e Unidades (Dropdown)
   const defaultSection = () => {
-    const levels = TRAILS_DATA["JS"] || [];
+    const levels = TRAILS_DATA['JS'] || [];
     const firstIncompleteLevel = levels.find((level) => {
       const completedCount = level.questions.filter((q) => initialAttempts[q.id] === true).length;
       return completedCount < 3;
     });
-    return firstIncompleteLevel ? firstIncompleteLevel.sectionName : levels[0]?.sectionName || "";
+    return firstIncompleteLevel ? firstIncompleteLevel.sectionName : levels[0]?.sectionName || '';
   };
 
   const [activeSection, setActiveSection] = useState<string>(defaultSection);
@@ -198,15 +198,15 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
   const [quizError, setQuizError] = useState<string | null>(null);
 
   // Estados das etapas (Aprender, Praticar, Desafio)
-  const [currentStage, setCurrentStage] = useState<"learn" | "practice" | "challenge" | "summary">(
-    "learn"
+  const [currentStage, setCurrentStage] = useState<'learn' | 'practice' | 'challenge' | 'summary'>(
+    'learn'
   );
   const [learnStep, setLearnStep] = useState(0);
   const [practiceStep, setPracticeStep] = useState(0);
 
   // Estado do LevelUp
   const [levelUpVisible, setLevelUpVisible] = useState(false);
-  const [unlockedTitle, setUnlockedTitle] = useState("");
+  const [unlockedTitle, setUnlockedTitle] = useState('');
   const [newLevelNumber, setNewLevelNumber] = useState(1);
 
   // Obter nível e XP da linguagem atual
@@ -252,14 +252,14 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
 
   const handleLevelClick = (level: TrailLevel, unlocked: boolean) => {
     if (!unlocked) {
-      playSound("notification"); // Som de aviso de bloqueado
+      playSound('notification'); // Som de aviso de bloqueado
       alert(
-        "Esta fase está bloqueada! Complete pelo menos um exercício da fase anterior para liberá-la."
+        'Esta fase está bloqueada! Complete pelo menos um exercício da fase anterior para liberá-la.'
       );
       return;
     }
     setActiveLevel(level);
-    setCurrentStage("learn");
+    setCurrentStage('learn');
     setLearnStep(0);
     setPracticeStep(0);
     setCurrentQuestionIndex(0);
@@ -274,54 +274,54 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
   const handleNextStageOrStep = () => {
     if (!activeLevel) return;
 
-    if (currentStage === "learn") {
+    if (currentStage === 'learn') {
       if (learnStep < 2) {
         setLearnStep((prev) => prev + 1);
       } else {
-        setCurrentStage("practice");
+        setCurrentStage('practice');
         setPracticeStep(0);
         setCurrentQuestionIndex(0);
         setSelectedOption(null);
         setAnswered(false);
       }
-    } else if (currentStage === "practice") {
+    } else if (currentStage === 'practice') {
       if (practiceStep < 1) {
         setPracticeStep((prev) => prev + 1);
         setCurrentQuestionIndex(1);
         setSelectedOption(null);
         setAnswered(false);
       } else {
-        setCurrentStage("challenge");
+        setCurrentStage('challenge');
         setCurrentQuestionIndex(2);
         setSelectedOption(null);
         setAnswered(false);
       }
-    } else if (currentStage === "challenge") {
-      setCurrentStage("summary");
+    } else if (currentStage === 'challenge') {
+      setCurrentStage('summary');
     }
   };
 
   const handlePrevStageOrStep = () => {
     if (!activeLevel) return;
 
-    if (currentStage === "learn") {
+    if (currentStage === 'learn') {
       if (learnStep > 0) {
         setLearnStep((prev) => prev - 1);
       }
-    } else if (currentStage === "practice") {
+    } else if (currentStage === 'practice') {
       if (practiceStep > 0) {
         setPracticeStep((prev) => prev - 1);
         setCurrentQuestionIndex(0);
         setSelectedOption(null);
         setAnswered(false);
       } else {
-        setCurrentStage("learn");
+        setCurrentStage('learn');
         setLearnStep(2);
         setSelectedOption(null);
         setAnswered(false);
       }
-    } else if (currentStage === "challenge") {
-      setCurrentStage("practice");
+    } else if (currentStage === 'challenge') {
+      setCurrentStage('practice');
       setPracticeStep(1);
       setCurrentQuestionIndex(1);
       setSelectedOption(null);
@@ -343,17 +343,17 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
     const isCorrect = selectedOption === question.correctIndex;
 
     if (isCorrect) {
-      playSound("quiz_correct"); // Som de acerto
+      playSound('quiz_correct'); // Som de acerto
       setCorrectCount((prev) => prev + 1);
       setXpEarned((prev) => prev + 15);
     } else {
-      playSound("quiz_incorrect"); // Som de erro
+      playSound('quiz_incorrect'); // Som de erro
     }
 
     try {
       const res = await fetch(`/api/quiz/${question.id}/attempt`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ selected_index: selectedOption }),
       });
 
@@ -403,30 +403,30 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
             setNewLevelNumber(newLevel);
             setUnlockedTitle(getLevelTitle(newLevel));
             setLevelUpVisible(true);
-            playSound("levelup");
+            playSound('levelup');
           }
         }
       } else {
         const data = await res.json();
         // Se já respondeu antes, não impede o avanço no wizard
-        if (data.error !== "Você já respondeu a este quiz") {
-          setQuizError(data.error || "Erro ao registrar resposta.");
+        if (data.error !== 'Você já respondeu a este quiz') {
+          setQuizError(data.error || 'Erro ao registrar resposta.');
         }
       }
     } catch (err) {
-      console.error("Error checking answer:", err);
+      console.error('Error checking answer:', err);
     } finally {
       setSubmittingAttempt(false);
     }
   };
 
   const getLevelTitle = (lvl: number) => {
-    if (lvl >= 10) return "Arquiteto Lendário";
-    if (lvl >= 8) return "Engenheiro Principal";
-    if (lvl >= 6) return "Desenvolvedor Sênior";
-    if (lvl >= 4) return "Desenvolvedor Pleno";
-    if (lvl >= 2) return "Desenvolvedor Júnior";
-    return "Estagiário de Código";
+    if (lvl >= 10) return 'Arquiteto Lendário';
+    if (lvl >= 8) return 'Engenheiro Principal';
+    if (lvl >= 6) return 'Desenvolvedor Sênior';
+    if (lvl >= 4) return 'Desenvolvedor Pleno';
+    if (lvl >= 2) return 'Desenvolvedor Júnior';
+    return 'Estagiário de Código';
   };
 
   const getOffsetStyle = (index: number) => {
@@ -457,19 +457,19 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
 
           {/* Seletor de Linguagens */}
           <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-            {["JS", "TS", "PYTHON", "RUST", "GO"].map((lang) => {
-              const langCode = lang === "PYTHON" ? "PYTHON" : lang;
-              const isSelected = activeLang === (lang === "PYTHON" ? "PYTHON" : lang);
+            {['JS', 'TS', 'PYTHON', 'RUST', 'GO'].map((lang) => {
+              const langCode = lang === 'PYTHON' ? 'PYTHON' : lang;
+              const isSelected = activeLang === (lang === 'PYTHON' ? 'PYTHON' : lang);
               const label = lang.toUpperCase();
 
               return (
                 <button
                   key={lang}
-                  onClick={() => setActiveLang(lang === "PYTHON" ? "PYTHON" : lang)}
+                  onClick={() => setActiveLang(lang === 'PYTHON' ? 'PYTHON' : lang)}
                   className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer border ${
                     isSelected
-                      ? "bg-dd-accent border-orange-500 text-white shadow-md shadow-orange-500/10"
-                      : "bg-dd-surface border-dd-border text-dd-muted hover:text-dd-text hover:bg-dd-border/40"
+                      ? 'bg-dd-accent border-orange-500 text-white shadow-md shadow-orange-500/10'
+                      : 'bg-dd-surface border-dd-border text-dd-muted hover:text-dd-text hover:bg-dd-border/40'
                   }`}
                 >
                   {label}
@@ -487,7 +487,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
               <div>
                 <h3 className="text-sm font-black text-dd-text">Trilha de {activeLang}</h3>
                 <p className="text-xs text-dd-muted uppercase tracking-wider font-bold mt-0.5">
-                  Nível {activeTrail.level} • {activeTrail.xp.toLocaleString("pt-BR")} XP
+                  Nível {activeTrail.level} • {activeTrail.xp.toLocaleString('pt-BR')} XP
                 </p>
               </div>
             </div>
@@ -517,7 +517,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
               >
                 <span>Nível: {activeSection}</span>
                 <ChevronDown
-                  className={`w-4 h-4 text-orange-500 transition-transform ${sectionDropdownOpen ? "rotate-180" : ""}`}
+                  className={`w-4 h-4 text-orange-500 transition-transform ${sectionDropdownOpen ? 'rotate-180' : ''}`}
                 />
               </button>
 
@@ -546,8 +546,8 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                             }}
                             className={`w-full text-left px-4 py-3 text-xs font-bold transition-all cursor-pointer flex items-center justify-between ${
                               isSelected
-                                ? "bg-orange-500/10 text-orange-400 font-black"
-                                : "text-dd-muted hover:text-dd-text hover:bg-dd-border/30"
+                                ? 'bg-orange-500/10 text-orange-400 font-black'
+                                : 'text-dd-muted hover:text-dd-text hover:bg-dd-border/30'
                             }`}
                           >
                             <span>{sec}</span>
@@ -616,17 +616,17 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                             const isStarEarned = attempts[level.questions[starIdx]?.id] === true;
                             const isMiddle = starIdx === 1;
                             const starClass = isMiddle
-                              ? "w-5.5 h-5.5 -translate-y-0.5 scale-110"
-                              : "w-5 h-5 translate-y-0.5 " +
-                                (starIdx === 0 ? "rotate-[-12deg]" : "rotate-[12deg]");
+                              ? 'w-5.5 h-5.5 -translate-y-0.5 scale-110'
+                              : 'w-5 h-5 translate-y-0.5 ' +
+                                (starIdx === 0 ? 'rotate-[-12deg]' : 'rotate-[12deg]');
 
                             return (
                               <Star
                                 key={starIdx}
                                 className={`transition-all ${starClass} ${
                                   isStarEarned
-                                    ? "text-yellow-500 fill-yellow-500"
-                                    : "text-dd-border/70"
+                                    ? 'text-yellow-500 fill-yellow-500'
+                                    : 'text-dd-border/70'
                                 }`}
                               />
                             );
@@ -639,9 +639,9 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                           className={`w-20 h-20 rounded-[22px] flex items-center justify-center transition-all transform cursor-pointer ${
                             unlocked
                               ? isCompleted
-                                ? "bg-orange-500 text-white border-x-2 border-t-2 border-b-[7px] border-orange-600 hover:bg-orange-400 active:border-b-0 active:translate-y-[7px]"
-                                : "bg-dd-surface text-orange-500 border-x-2 border-t-2 border-b-[7px] border-orange-500 hover:bg-dd-border/30 active:border-b-0 active:translate-y-[7px]"
-                              : "bg-dd-surface/40 text-dd-muted/30 border-x-2 border-t-2 border-b-[7px] border-dd-border/40 cursor-not-allowed"
+                                ? 'bg-orange-500 text-white border-x-2 border-t-2 border-b-[7px] border-orange-600 hover:bg-orange-400 active:border-b-0 active:translate-y-[7px]'
+                                : 'bg-dd-surface text-orange-500 border-x-2 border-t-2 border-b-[7px] border-orange-500 hover:bg-dd-border/30 active:border-b-0 active:translate-y-[7px]'
+                              : 'bg-dd-surface/40 text-dd-muted/30 border-x-2 border-t-2 border-b-[7px] border-dd-border/40 cursor-not-allowed'
                           }`}
                         >
                           {unlocked ? (
@@ -675,7 +675,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 30 }}
-                transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                transition={{ type: 'spring', stiffness: 350, damping: 25 }}
                 className="sticky bottom-6 left-0 right-0 z-30 flex justify-center px-4 pointer-events-none"
               >
                 <div className="pointer-events-auto bg-dd-surface/90 backdrop-blur-md border border-orange-500/30 rounded-2xl px-6 py-5 shadow-xl max-w-lg w-full flex items-center justify-between gap-5">
@@ -717,9 +717,9 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
               exit="exit"
               className="fixed inset-0 bg-black/60 backdrop-blur-[8px]"
               onClick={() => {
-                if (currentStage !== "summary" && !submittingAttempt) {
+                if (currentStage !== 'summary' && !submittingAttempt) {
                   if (
-                    confirm("Quer realmente sair do quiz? Seu progresso nesta sessão será perdido.")
+                    confirm('Quer realmente sair do quiz? Seu progresso nesta sessão será perdido.')
                   ) {
                     setQuizModalOpen(false);
                   }
@@ -742,10 +742,10 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                 <div className="flex items-center justify-between w-full">
                   <button
                     onClick={() => {
-                      if (currentStage !== "summary" && !submittingAttempt) {
+                      if (currentStage !== 'summary' && !submittingAttempt) {
                         if (
                           confirm(
-                            "Quer realmente sair do quiz? Seu progresso nesta sessão será perdido."
+                            'Quer realmente sair do quiz? Seu progresso nesta sessão será perdido.'
                           )
                         ) {
                           setQuizModalOpen(false);
@@ -762,13 +762,13 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
 
                   <h2 className="text-xs font-black uppercase tracking-wider text-center flex-grow pr-8 text-white">
                     {(() => {
-                      if (currentStage === "learn") {
+                      if (currentStage === 'learn') {
                         return `Etapa 1: Aprender ${learnStep + 1} de 3`;
                       }
-                      if (currentStage === "practice") {
+                      if (currentStage === 'practice') {
                         return `Etapa 2: Prática ${practiceStep + 1} de 2`;
                       }
-                      if (currentStage === "challenge") {
+                      if (currentStage === 'challenge') {
                         return `Etapa 3: Desafio Final`;
                       }
                       return `Fase Concluída!`;
@@ -780,23 +780,23 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                 <div className="flex gap-2 w-full mt-1">
                   {[0, 1, 2].map((segIdx) => {
                     let fillPercent = 0;
-                    if (currentStage === "learn") {
+                    if (currentStage === 'learn') {
                       if (segIdx === 0) {
                         fillPercent = ((learnStep + 1) / 3) * 100;
                       }
-                    } else if (currentStage === "practice") {
+                    } else if (currentStage === 'practice') {
                       if (segIdx === 0) fillPercent = 100;
                       if (segIdx === 1) {
                         fillPercent = (practiceStep / 2) * 100;
                         if (answered && practiceStep === 0) fillPercent = 50;
                         if (answered && practiceStep === 1) fillPercent = 100;
                       }
-                    } else if (currentStage === "challenge") {
+                    } else if (currentStage === 'challenge') {
                       if (segIdx === 0 || segIdx === 1) fillPercent = 100;
                       if (segIdx === 2) {
                         fillPercent = answered ? 100 : 0;
                       }
-                    } else if (currentStage === "summary") {
+                    } else if (currentStage === 'summary') {
                       fillPercent = 100;
                     }
 
@@ -817,7 +817,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
 
               {/* Overlapping Content Container */}
               <div className="relative -mt-4 rounded-t-2xl bg-dd-surface p-6 flex-grow flex flex-col overflow-y-auto min-h-[350px]">
-                {currentStage === "learn" &&
+                {currentStage === 'learn' &&
                   (() => {
                     const slides = getLearnSlidesForLevel(activeLevel);
                     const slide = slides[learnStep];
@@ -857,12 +857,12 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                     );
                   })()}
 
-                {(currentStage === "practice" || currentStage === "challenge") &&
+                {(currentStage === 'practice' || currentStage === 'challenge') &&
                   (() => {
                     const question = activeLevel.questions[currentQuestionIndex];
                     return (
                       <div className="space-y-6 py-2">
-                        {currentStage === "challenge" && (
+                        {currentStage === 'challenge' && (
                           <div className="flex items-center gap-2">
                             <span className="px-2 py-0.5 rounded bg-orange-500/10 text-[9px] font-black text-orange-500 uppercase tracking-wider">
                               Desafio Final
@@ -880,20 +880,20 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                             const isCorrectAnswer = oIdx === question.correctIndex;
 
                             let btnClasses =
-                              "border border-dd-border bg-dd-surface text-dd-text hover:bg-dd-border/20";
+                              'border border-dd-border bg-dd-surface text-dd-text hover:bg-dd-border/20';
 
                             if (answered) {
                               if (isCorrectAnswer) {
                                 btnClasses =
-                                  "border-emerald-500 bg-emerald-500/10 text-emerald-400";
+                                  'border-emerald-500 bg-emerald-500/10 text-emerald-400';
                               } else if (isSelected) {
-                                btnClasses = "border-red-500 bg-red-500/10 text-red-400";
+                                btnClasses = 'border-red-500 bg-red-500/10 text-red-400';
                               } else {
                                 btnClasses =
-                                  "border-dd-border opacity-50 bg-dd-surface text-dd-muted";
+                                  'border-dd-border opacity-50 bg-dd-surface text-dd-muted';
                               }
                             } else if (isSelected) {
-                              btnClasses = "border-orange-500 bg-orange-500/5 text-orange-400";
+                              btnClasses = 'border-orange-500 bg-orange-500/5 text-orange-400';
                             }
 
                             return (
@@ -924,7 +924,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                     );
                   })()}
 
-                {currentStage === "summary" && (
+                {currentStage === 'summary' && (
                   <div className="text-center py-6 space-y-6">
                     <div className="w-16 h-16 bg-orange-500/10 border border-orange-500/20 rounded-full flex items-center justify-center text-orange-400 mx-auto animate-bounce">
                       <Trophy className="w-8 h-8" />
@@ -955,18 +955,18 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
 
               {/* Navigation Footer */}
               <div className="p-4 border-t border-dd-border flex justify-between items-center bg-dd-surface">
-                {currentStage !== "summary" ? (
+                {currentStage !== 'summary' ? (
                   <>
                     <button
                       onClick={handlePrevStageOrStep}
-                      disabled={currentStage === "learn" && learnStep === 0}
+                      disabled={currentStage === 'learn' && learnStep === 0}
                       className="px-6 py-2.5 bg-transparent border border-dd-border hover:bg-dd-border/20 text-dd-text rounded-full text-xs font-bold transition-all cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed"
                     >
                       Anterior
                     </button>
 
                     {(() => {
-                      if (currentStage === "learn") {
+                      if (currentStage === 'learn') {
                         return (
                           <button
                             onClick={handleNextStageOrStep}
@@ -985,13 +985,13 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                             disabled={selectedOption === null || submittingAttempt}
                             className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5"
                           >
-                            {submittingAttempt ? "Processando..." : "Verificar"}
+                            {submittingAttempt ? 'Processando...' : 'Verificar'}
                             <ChevronRight className="w-4 h-4" />
                           </button>
                         );
                       }
 
-                      if (currentStage === "practice") {
+                      if (currentStage === 'practice') {
                         return (
                           <button
                             onClick={handleNextStageOrStep}
@@ -1047,7 +1047,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
               initial={{ scale: 0.5, rotate: -10, opacity: 0 }}
               animate={{ scale: 1, rotate: 0, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
               className="relative w-full max-w-sm bg-dd-surface border border-dd-border p-8 rounded-2xl shadow-2xl z-10 text-center space-y-6"
             >
               <div className="w-20 h-20 bg-orange-500/10 border border-orange-500/20 text-orange-400 rounded-full flex items-center justify-center text-4xl mx-auto shadow-lg shadow-orange-500/10">
@@ -1060,7 +1060,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                 </p>
                 <h2 className="text-2xl font-black text-dd-text">Subiu de Nível!</h2>
                 <p className="text-xs text-dd-muted">
-                  Você agora atingiu o nível{" "}
+                  Você agora atingiu o nível{' '}
                   <strong className="text-dd-text">{newLevelNumber}</strong> geral no DevDeck.
                 </p>
               </div>
@@ -1101,7 +1101,7 @@ const modalContentVariants = {
     opacity: 1,
     scale: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 450, damping: 26 },
+    transition: { type: 'spring', stiffness: 450, damping: 26 },
   },
   exit: {
     opacity: 0,

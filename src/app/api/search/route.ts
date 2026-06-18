@@ -1,30 +1,30 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getAuthUser } from "@/lib/auth";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth';
 
 export async function GET(request: Request) {
   try {
     const user = await getAuthUser();
     if (!user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
-    const q = searchParams.get("q") || "";
-    const type = searchParams.get("type") || "posts";
-    const cursor = searchParams.get("cursor") || undefined;
-    const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const q = searchParams.get('q') || '';
+    const type = searchParams.get('type') || 'posts';
+    const cursor = searchParams.get('cursor') || undefined;
+    const limit = parseInt(searchParams.get('limit') || '10', 10);
 
     if (q.trim().length < 2) {
       return NextResponse.json({ items: [], nextCursor: null });
     }
 
-    if (type === "users") {
+    if (type === 'users') {
       const users = await prisma.user.findMany({
         where: {
           username: {
             contains: q,
-            mode: "insensitive",
+            mode: 'insensitive',
           },
           id: cursor ? { gt: cursor } : undefined,
         },
@@ -34,7 +34,7 @@ export async function GET(request: Request) {
           avatar_url: true,
           total_xp: true,
         },
-        orderBy: { id: "asc" },
+        orderBy: { id: 'asc' },
         take: limit + 1,
       });
 
@@ -47,7 +47,7 @@ export async function GET(request: Request) {
       let cursorTime: Date | null = null;
       let cursorId: string | null = null;
       if (cursor) {
-        const parts = cursor.split("_");
+        const parts = cursor.split('_');
         if (parts.length === 2) {
           cursorTime = new Date(parseInt(parts[0], 10));
           cursorId = parts[1];
@@ -121,7 +121,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ items: formattedItems, nextCursor });
     }
   } catch (error) {
-    console.error("Search API error:", error);
-    return NextResponse.json({ error: "Erro interno de busca" }, { status: 500 });
+    console.error('Search API error:', error);
+    return NextResponse.json({ error: 'Erro interno de busca' }, { status: 500 });
   }
 }

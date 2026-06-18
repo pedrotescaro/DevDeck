@@ -1,14 +1,14 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getAuthUser } from "@/lib/auth";
-import { createDuelSchema } from "@/lib/validators";
-import { DuelStatus } from "@prisma/client";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth';
+import { createDuelSchema } from '@/lib/validators';
+import { DuelStatus } from '@prisma/client';
 
 // GET /api/duels
 export async function GET(request: Request) {
   try {
     const duels = await prisma.duel.findMany({
-      orderBy: { created_at: "desc" },
+      orderBy: { created_at: 'desc' },
       include: {
         challenger: {
           select: { username: true, avatar_url: true },
@@ -27,8 +27,8 @@ export async function GET(request: Request) {
 
     return NextResponse.json(duels);
   } catch (error) {
-    console.error("Error fetching duels:", error);
-    return NextResponse.json({ error: "Erro ao buscar duelos" }, { status: 500 });
+    console.error('Error fetching duels:', error);
+    return NextResponse.json({ error: 'Erro ao buscar duelos' }, { status: 500 });
   }
 }
 
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
   try {
     const user = await getAuthUser();
     if (!user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -72,7 +72,7 @@ export async function POST(request: Request) {
       });
 
       return NextResponse.json({
-        message: "Você entrou no duelo!",
+        message: 'Você entrou no duelo!',
         duel: updatedDuel,
       });
     }
@@ -92,11 +92,11 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({
-      message: "Duelo criado, aguardando oponente!",
+      message: 'Duelo criado, aguardando oponente!',
       duel: newDuel,
     });
   } catch (error) {
-    console.error("Error matching or creating duel:", error);
-    return NextResponse.json({ error: "Erro ao processar duelo" }, { status: 500 });
+    console.error('Error matching or creating duel:', error);
+    return NextResponse.json({ error: 'Erro ao processar duelo' }, { status: 500 });
   }
 }

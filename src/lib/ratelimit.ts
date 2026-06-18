@@ -1,5 +1,5 @@
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
 
 const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
 const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -14,11 +14,11 @@ if (redisUrl && redisToken) {
       token: redisToken,
     });
   } catch (error) {
-    console.warn("⚠️ Failed to initialize Upstash Redis client:", error);
+    console.warn('⚠️ Failed to initialize Upstash Redis client:', error);
   }
 } else {
   console.warn(
-    "⚠️ UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN are missing. Rate limiting is disabled (graceful fallback)."
+    '⚠️ UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN are missing. Rate limiting is disabled (graceful fallback).'
   );
 }
 
@@ -43,7 +43,7 @@ export async function rateLimit(
       redis: redisClient,
       limiter: Ratelimit.slidingWindow(limit, window),
       analytics: true,
-      prefix: "@upstash/ratelimit/devdeck",
+      prefix: '@upstash/ratelimit/devdeck',
     });
     limiters.set(key, limiter);
   }
@@ -52,7 +52,7 @@ export async function rateLimit(
     const { success, remaining, reset } = await limiter.limit(identifier);
     return { success, remaining, reset };
   } catch (error) {
-    console.error("⚠️ Rate limiting execution error, allowing request through fallback:", error);
+    console.error('⚠️ Rate limiting execution error, allowing request through fallback:', error);
     return {
       success: true,
       remaining: limit,

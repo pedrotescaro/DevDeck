@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
-import { useReducedMotion } from "./useReducedMotion";
+import { useState, useCallback } from 'react';
+import { useReducedMotion } from './useReducedMotion';
 
 interface LevelUpOptions {
   newLevel: number;

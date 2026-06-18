@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -13,12 +13,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     });
 
     if (!quiz) {
-      return NextResponse.json({ error: "Quiz não encontrado" }, { status: 404 });
+      return NextResponse.json({ error: 'Quiz não encontrado' }, { status: 404 });
     }
 
     return NextResponse.json(quiz);
   } catch (error) {
-    console.error("Error fetching quiz:", error);
-    return NextResponse.json({ error: "Erro ao buscar quiz" }, { status: 500 });
+    console.error('Error fetching quiz:', error);
+    return NextResponse.json({ error: 'Erro ao buscar quiz' }, { status: 500 });
   }
 }

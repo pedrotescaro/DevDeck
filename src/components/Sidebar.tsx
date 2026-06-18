@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 import {
   BookOpen,
   Swords,
@@ -25,15 +25,15 @@ import {
   Bookmark,
   BadgeCheck,
   MoreHorizontal,
-} from "lucide-react";
-import { PostComposerExtras } from "@/components/PostComposerExtras";
-import { ComposeModal } from "@/components/motion/ComposeModal";
-import { NotificationBellIcon } from "@/components/motion/NotificationBellIcon";
-import { PublishButton, PublishState } from "@/components/motion/PublishButton";
-import { CharCounter } from "@/components/motion/CharCounter";
-import { MentionDropdown } from "@/components/motion/MentionDropdown";
-import { appendPostExtras, ReplyAudience, resetPostComposerExtras } from "@/lib/post-composer";
-import { POST_CHAR_LIMIT } from "@/lib/motion";
+} from 'lucide-react';
+import { PostComposerExtras } from '@/components/PostComposerExtras';
+import { ComposeModal } from '@/components/motion/ComposeModal';
+import { NotificationBellIcon } from '@/components/motion/NotificationBellIcon';
+import { PublishButton, PublishState } from '@/components/motion/PublishButton';
+import { CharCounter } from '@/components/motion/CharCounter';
+import { MentionDropdown } from '@/components/motion/MentionDropdown';
+import { appendPostExtras, ReplyAudience, resetPostComposerExtras } from '@/lib/post-composer';
+import { POST_CHAR_LIMIT } from '@/lib/motion';
 
 interface SidebarUser {
   id: string;
@@ -51,9 +51,9 @@ interface SidebarProps {
 let inMemoryUser: SidebarUser | null = null;
 let isInitiallyMounted = false;
 
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
   try {
-    const cached = sessionStorage.getItem("devdeck_user");
+    const cached = sessionStorage.getItem('devdeck_user');
     if (cached) {
       inMemoryUser = JSON.parse(cached);
     }
@@ -72,7 +72,7 @@ export function Sidebar({ user }: SidebarProps) {
   const [activeUser, setActiveUser] = useState<SidebarUser | null>(() => {
     // If we're on the server or performing the very first client hydration render,
     // we must return the user prop to match the server HTML representation exactly.
-    if (typeof window === "undefined" || !isInitiallyMounted) {
+    if (typeof window === 'undefined' || !isInitiallyMounted) {
       return user;
     }
     // Otherwise, we are rendering client-side (e.g. client-side page transition),
@@ -84,7 +84,7 @@ export function Sidebar({ user }: SidebarProps) {
     isInitiallyMounted = true;
     if (!activeUser) {
       try {
-        const cached = sessionStorage.getItem("devdeck_user");
+        const cached = sessionStorage.getItem('devdeck_user');
         if (cached) {
           const parsed = JSON.parse(cached);
           setActiveUser(parsed);
@@ -98,12 +98,12 @@ export function Sidebar({ user }: SidebarProps) {
     if (user) {
       setActiveUser(user);
       inMemoryUser = user;
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem("devdeck_user", JSON.stringify(user));
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('devdeck_user', JSON.stringify(user));
       }
     } else {
-      if (typeof window !== "undefined") {
-        const cached = sessionStorage.getItem("devdeck_user");
+      if (typeof window !== 'undefined') {
+        const cached = sessionStorage.getItem('devdeck_user');
         if (cached) {
           try {
             const parsed = JSON.parse(cached);
@@ -116,50 +116,50 @@ export function Sidebar({ user }: SidebarProps) {
       }
 
       // Async background fetch
-      fetch("/api/users/me")
+      fetch('/api/users/me')
         .then((res) => {
           if (res.ok) return res.json();
-          throw new Error("Not logged in");
+          throw new Error('Not logged in');
         })
         .then((data) => {
           setActiveUser(data);
           inMemoryUser = data;
-          if (typeof window !== "undefined") {
-            sessionStorage.setItem("devdeck_user", JSON.stringify(data));
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('devdeck_user', JSON.stringify(data));
           }
         })
         .catch(() => {
           setActiveUser(null);
           inMemoryUser = null;
-          if (typeof window !== "undefined") {
-            sessionStorage.removeItem("devdeck_user");
+          if (typeof window !== 'undefined') {
+            sessionStorage.removeItem('devdeck_user');
           }
         });
     }
   }, [user]);
 
   // Theme state & toggler
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const isDark =
-      document.documentElement.classList.contains("dark") ||
-      localStorage.getItem("theme") === "dark";
-    setTheme(isDark ? "dark" : "light");
+      document.documentElement.classList.contains('dark') ||
+      localStorage.getItem('theme') === 'dark';
+    setTheme(isDark ? 'dark' : 'light');
   }, []);
 
   useEffect(() => {
     if (!activeUser) return;
     const fetchUnreadCount = async () => {
       try {
-        const res = await fetch("/api/notifications/unread-count");
+        const res = await fetch('/api/notifications/unread-count');
         if (res.ok) {
           const data = await res.json();
           setUnreadCount(data.count);
         }
       } catch (err) {
-        console.error("Failed to fetch unread count:", err);
+        console.error('Failed to fetch unread count:', err);
       }
     };
     fetchUnreadCount();
@@ -168,32 +168,32 @@ export function Sidebar({ user }: SidebarProps) {
   }, [activeUser, pathname]);
 
   const toggleTheme = () => {
-    const nextTheme = theme === "dark" ? "light" : "dark";
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme);
-    if (nextTheme === "dark") {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
+    if (nextTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
     } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
   };
 
   // Post creation modal state
-  const [postTitle, setPostTitle] = useState("");
-  const [postBody, setPostBody] = useState("");
-  const [postLanguage, setPostLanguage] = useState("TS");
-  const [postCode, setPostCode] = useState("");
+  const [postTitle, setPostTitle] = useState('');
+  const [postBody, setPostBody] = useState('');
+  const [postLanguage, setPostLanguage] = useState('TS');
+  const [postCode, setPostCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [publishState, setPublishState] = useState<PublishState>("idle");
+  const [publishState, setPublishState] = useState<PublishState>('idle');
   const [postError, setPostError] = useState<string | null>(null);
-  const [postType, setPostType] = useState<"question" | "discussion">("question");
-  const [postImage, setPostImage] = useState("");
+  const [postType, setPostType] = useState<'question' | 'discussion'>('question');
+  const [postImage, setPostImage] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
   const postBodyTextareaRef = useRef<HTMLTextAreaElement>(null);
-  const [replyAudience, setReplyAudience] = useState<ReplyAudience>("everyone");
+  const [replyAudience, setReplyAudience] = useState<ReplyAudience>('everyone');
   const [scheduledAt, setScheduledAt] = useState<string | null>(null);
-  const [postLocation, setPostLocation] = useState("");
+  const [postLocation, setPostLocation] = useState('');
   const [isSensitive, setIsSensitive] = useState(false);
 
   // Custom sidebar item states
@@ -229,7 +229,7 @@ export function Sidebar({ user }: SidebarProps) {
     const hrs = Math.floor(totalSeconds / 3600);
     const mins = Math.floor((totalSeconds % 3600) / 60);
     const secs = totalSeconds % 60;
-    return `${hrs.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   const handleSignOut = async () => {
@@ -237,13 +237,13 @@ export function Sidebar({ user }: SidebarProps) {
       const supabase = createClient();
       await supabase.auth.signOut();
       inMemoryUser = null;
-      if (typeof window !== "undefined") {
-        sessionStorage.removeItem("devdeck_user");
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('devdeck_user');
       }
-      router.push("/");
+      router.push('/');
       router.refresh();
     } catch (err) {
-      console.error("Error signing out:", err);
+      console.error('Error signing out:', err);
     }
   };
 
@@ -254,7 +254,7 @@ export function Sidebar({ user }: SidebarProps) {
     setPostBody(val);
     const words = val.split(/\s+/);
     const lastWord = words[words.length - 1];
-    if (lastWord.startsWith("@") && lastWord.length >= 1) {
+    if (lastWord.startsWith('@') && lastWord.length >= 1) {
       const q = lastWord.slice(1);
       try {
         const res = await fetch(`/api/users/search?q=${q}`);
@@ -273,16 +273,16 @@ export function Sidebar({ user }: SidebarProps) {
   const handleSelectMention = (username: string) => {
     const words = postBody.split(/\s+/);
     words[words.length - 1] = `@${username} `;
-    setPostBody(words.join(" "));
+    setPostBody(words.join(' '));
     setShowMentionSuggestions(false);
   };
 
   const resetCompose = () => {
-    setPostTitle("");
-    setPostBody("");
-    setPostCode("");
-    setPostImage("");
-    setPostType("question");
+    setPostTitle('');
+    setPostBody('');
+    setPostCode('');
+    setPostImage('');
+    setPostType('question');
     setShowMentionSuggestions(false);
     setPostError(null);
     const resetExtras = resetPostComposerExtras();
@@ -296,27 +296,27 @@ export function Sidebar({ user }: SidebarProps) {
     e.preventDefault();
     if (!postBody.trim()) return;
 
-    const titleToSubmit = postTitle.trim() || postBody.trim().substring(0, 40) || "Discussão Geral";
+    const titleToSubmit = postTitle.trim() || postBody.trim().substring(0, 40) || 'Discussão Geral';
 
     // Client-side validation
     if (postTitle.trim() && postTitle.trim().length < 5) {
-      setPostError("O título deve ter pelo menos 5 caracteres");
+      setPostError('O título deve ter pelo menos 5 caracteres');
       return;
     }
 
     if (postBody.trim().length < 10) {
-      setPostError("O conteúdo deve ter pelo menos 10 caracteres");
+      setPostError('O conteúdo deve ter pelo menos 10 caracteres');
       return;
     }
 
     setSubmitting(true);
-    setPublishState("submitting");
+    setPublishState('submitting');
     setPostError(null);
 
     try {
-      const res = await fetch("/api/posts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: titleToSubmit,
           body: appendPostExtras(postBody, {
@@ -326,31 +326,31 @@ export function Sidebar({ user }: SidebarProps) {
             isSensitive,
           }),
           language:
-            postType === "question" ? postLanguage : postLanguage === "" ? null : postLanguage,
-          code_snippet: postType === "question" ? postCode || null : null,
-          image_url: postType === "discussion" ? postImage || null : null,
+            postType === 'question' ? postLanguage : postLanguage === '' ? null : postLanguage,
+          code_snippet: postType === 'question' ? postCode || null : null,
+          image_url: postType === 'discussion' ? postImage || null : null,
         }),
       });
 
       if (res.ok) {
         resetCompose();
-        setPublishState("success");
+        setPublishState('success');
         setTimeout(() => {
-          setPublishState("idle");
+          setPublishState('idle');
           setModalOpen(false);
         }, 1500);
         router.refresh();
-        if (pathname !== "/feed") {
-          router.push("/feed");
+        if (pathname !== '/feed') {
+          router.push('/feed');
         }
       } else {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || "Erro ao postar");
+        throw new Error(errorData.error || 'Erro ao postar');
       }
     } catch (err: any) {
-      console.error("Error creating post from sidebar:", err);
-      setPostError(err.message || "Algo deu errado ao postar. Seu texto foi salvo como rascunho.");
-      setPublishState("idle");
+      console.error('Error creating post from sidebar:', err);
+      setPostError(err.message || 'Algo deu errado ao postar. Seu texto foi salvo como rascunho.');
+      setPublishState('idle');
     } finally {
       setSubmitting(false);
     }
@@ -370,9 +370,9 @@ export function Sidebar({ user }: SidebarProps) {
     setUploadingImage(true);
     try {
       const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/upload", {
-        method: "POST",
+      formData.append('file', file);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
         body: formData,
       });
       if (res.ok) {
@@ -380,13 +380,13 @@ export function Sidebar({ user }: SidebarProps) {
         setPostImage(data.url);
       }
     } catch (err) {
-      console.error("Image upload failed:", err);
+      console.error('Image upload failed:', err);
     } finally {
       setUploadingImage(false);
     }
   };
 
-  const initials = activeUser?.username.slice(0, 2).toUpperCase() || "DV";
+  const initials = activeUser?.username.slice(0, 2).toUpperCase() || 'DV';
 
   const DuckyIcon = ({ className }: { className?: string }) => (
     <svg
@@ -413,62 +413,62 @@ export function Sidebar({ user }: SidebarProps) {
 
   const navItems = [
     {
-      label: "Página Inicial",
-      href: "/feed",
+      label: 'Página Inicial',
+      href: '/feed',
       icon: Home,
-      active: pathname === "/feed",
-      badge: "dot" as const,
+      active: pathname === '/feed',
+      badge: 'dot' as const,
     },
     {
-      label: "Explorar",
-      href: "/explore",
+      label: 'Explorar',
+      href: '/explore',
       icon: Search,
-      active: pathname === "/explore",
+      active: pathname === '/explore',
     },
     {
-      label: "Trilhas",
-      href: "/trails",
+      label: 'Trilhas',
+      href: '/trails',
       icon: BookOpen,
-      active: pathname.startsWith("/trails"),
+      active: pathname.startsWith('/trails'),
     },
     {
-      label: "Notificações",
-      href: "/notifications",
+      label: 'Notificações',
+      href: '/notifications',
       icon: Bell,
-      active: pathname === "/notifications",
+      active: pathname === '/notifications',
     },
     {
-      label: "Bate-papo",
-      href: "/messages",
+      label: 'Bate-papo',
+      href: '/messages',
       icon: MessageCircle,
-      active: pathname === "/messages",
+      active: pathname === '/messages',
     },
     {
-      label: "Ducky",
-      href: "/ducky",
+      label: 'Ducky',
+      href: '/ducky',
       icon: DuckyIcon,
-      active: pathname === "/ducky",
+      active: pathname === '/ducky',
     },
     {
-      label: "Itens salvos",
-      href: "/bookmarks",
+      label: 'Itens salvos',
+      href: '/bookmarks',
       icon: Bookmark,
-      active: pathname === "/bookmarks",
+      active: pathname === '/bookmarks',
     },
     {
-      label: "Premium",
+      label: 'Premium',
       onClick: () => setPremiumModalOpen(true),
       icon: BadgeCheck,
-      badge: "timer" as const,
+      badge: 'timer' as const,
     },
     {
-      label: "Perfil",
-      href: activeUser ? `/profile/${activeUser.username}` : "#",
+      label: 'Perfil',
+      href: activeUser ? `/profile/${activeUser.username}` : '#',
       icon: UserIcon,
       active: activeUser ? pathname === `/profile/${activeUser.username}` : false,
     },
     {
-      label: "Mais",
+      label: 'Mais',
       onClick: () => setMoreMenuOpen(!moreMenuOpen),
       icon: MoreHorizontal,
       isMore: true,
@@ -505,21 +505,21 @@ export function Sidebar({ user }: SidebarProps) {
               // Standard link style (tightened padding)
               const linkClasses = `flex items-center gap-3.5 py-2.5 px-3.5 rounded-xl text-sm font-semibold transition-all duration-200 group border w-full text-left cursor-pointer ${
                 item.active
-                  ? "bg-transparent text-dd-text font-black border-transparent"
-                  : "text-dd-muted border-transparent hover:bg-dd-surface/60 hover:text-dd-text"
+                  ? 'bg-transparent text-dd-text font-black border-transparent'
+                  : 'text-dd-muted border-transparent hover:bg-dd-surface/60 hover:text-dd-text'
               }`;
 
               // Icon container with relative for badges
               const iconEl = (
                 <div className="relative flex items-center justify-center w-5 h-5">
-                  {item.label === "Notificações" ? (
+                  {item.label === 'Notificações' ? (
                     <NotificationBellIcon unreadCount={unreadCount} active={item.active} />
                   ) : (
                     <Icon
-                      className={`w-5 h-5 transition-transform group-hover:scale-105 duration-200 ${item.active ? "text-dd-text fill-current" : "text-dd-muted"}`}
+                      className={`w-5 h-5 transition-transform group-hover:scale-105 duration-200 ${item.active ? 'text-dd-text fill-current' : 'text-dd-muted'}`}
                     />
                   )}
-                  {item.badge === "dot" && (
+                  {item.badge === 'dot' && (
                     <span className="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-orange-500 ring-2 ring-dd-bg animate-pulse" />
                   )}
                 </div>
@@ -530,7 +530,7 @@ export function Sidebar({ user }: SidebarProps) {
                 <>
                   {iconEl}
                   <span>{item.label}</span>
-                  {item.badge === "timer" && (
+                  {item.badge === 'timer' && (
                     <span className="ml-auto text-[9px] font-bold bg-[#f5a623] text-black px-1.5 py-0.5 rounded-full font-mono">
                       {formatTime(secondsLeft)}
                     </span>
@@ -638,7 +638,7 @@ export function Sidebar({ user }: SidebarProps) {
                 </div>
               </div>
               <ChevronDown
-                className={`w-4 h-4 text-dd-muted transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`}
+                className={`w-4 h-4 text-dd-muted transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`}
               />
             </button>
 
@@ -766,23 +766,23 @@ export function Sidebar({ user }: SidebarProps) {
           {navItems
             .filter(
               (item) =>
-                item.label === "Página Inicial" ||
-                item.label === "Explorar" ||
-                item.label === "Trilhas" ||
-                item.label === "Notificações" ||
-                item.label === "Perfil"
+                item.label === 'Página Inicial' ||
+                item.label === 'Explorar' ||
+                item.label === 'Trilhas' ||
+                item.label === 'Notificações' ||
+                item.label === 'Perfil'
             )
             .map((item) => {
               const Icon = item.icon;
 
               const iconEl = (
                 <div className="relative flex items-center justify-center">
-                  {item.label === "Notificações" ? (
+                  {item.label === 'Notificações' ? (
                     <NotificationBellIcon unreadCount={unreadCount} active={item.active} />
                   ) : (
                     <>
-                      <Icon className={`w-5.5 h-5.5 ${item.active ? "fill-current" : ""}`} />
-                      {item.badge === "dot" && (
+                      <Icon className={`w-5.5 h-5.5 ${item.active ? 'fill-current' : ''}`} />
+                      {item.badge === 'dot' && (
                         <span className="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-orange-500 ring-2 ring-dd-bg" />
                       )}
                     </>
@@ -791,7 +791,7 @@ export function Sidebar({ user }: SidebarProps) {
               );
 
               const classes = `flex flex-col items-center justify-center p-1.5 transition-colors duration-150 ${
-                item.active ? "text-dd-text font-black" : "text-dd-muted hover:text-dd-text"
+                item.active ? 'text-dd-text font-black' : 'text-dd-muted hover:text-dd-text'
               }`;
 
               if (item.href) {
@@ -831,7 +831,7 @@ export function Sidebar({ user }: SidebarProps) {
         headerExtra={
           <button
             type="button"
-            onClick={() => showToast("Rascunhos salvos localmente!")}
+            onClick={() => showToast('Rascunhos salvos localmente!')}
             className="text-xs font-black text-orange-500 hover:text-orange-400 transition-colors cursor-pointer"
           >
             Rascunhos
@@ -863,9 +863,9 @@ export function Sidebar({ user }: SidebarProps) {
                 rows={4}
                 maxLength={POST_CHAR_LIMIT}
                 placeholder={
-                  postType === "question"
-                    ? "Qual a sua duvida tecnica? Compartilhe seu codigo abaixo..."
-                    : "O que esta acontecendo? Compartilhe ideias, artigos ou links..."
+                  postType === 'question'
+                    ? 'Qual a sua duvida tecnica? Compartilhe seu codigo abaixo...'
+                    : 'O que esta acontecendo? Compartilhe ideias, artigos ou links...'
                 }
                 className="w-full bg-transparent text-sm text-dd-text placeholder-dd-muted/65 focus:outline-none resize-none"
               />
@@ -875,7 +875,7 @@ export function Sidebar({ user }: SidebarProps) {
 
               {/* Mention Suggestions Popup */}
               <MentionDropdown
-                query={postBody.split(/\s+/).at(-1)?.replace(/^@/, "") || ""}
+                query={postBody.split(/\s+/).at(-1)?.replace(/^@/, '') || ''}
                 visible={showMentionSuggestions}
                 onSelect={handleSelectMention}
                 onClose={() => {
@@ -884,7 +884,7 @@ export function Sidebar({ user }: SidebarProps) {
               />
 
               {/* Support fields for questions */}
-              {postType === "question" && (
+              {postType === 'question' && (
                 <div className="space-y-2 animate-slide-down">
                   <div className="flex items-center gap-3">
                     <span className="text-[10px] font-bold text-dd-muted uppercase">
@@ -922,7 +922,7 @@ export function Sidebar({ user }: SidebarProps) {
                   <img src={postImage} alt="Preview" className="w-full h-full object-cover" />
                   <button
                     type="button"
-                    onClick={() => setPostImage("")}
+                    onClick={() => setPostImage('')}
                     className="absolute top-2 right-2 p-1 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -978,10 +978,10 @@ export function Sidebar({ user }: SidebarProps) {
               {/* GIF/Toggle Mode */}
               <button
                 type="button"
-                onClick={() => setPostType(postType === "question" ? "discussion" : "question")}
+                onClick={() => setPostType(postType === 'question' ? 'discussion' : 'question')}
                 className="rounded-full border border-dd-border bg-dd-bg hover:bg-dd-border/30 hover:text-dd-text px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-dd-muted transition-colors cursor-pointer"
               >
-                {postType === "question" ? "Duvida tecnica +10 XP" : "Discussao geral +5 XP"}
+                {postType === 'question' ? 'Duvida tecnica +10 XP' : 'Discussao geral +5 XP'}
               </button>
 
               <PostComposerExtras
@@ -1004,7 +1004,7 @@ export function Sidebar({ user }: SidebarProps) {
             <PublishButton
               disabled={!postBody.trim() || uploadingImage || postBody.length >= POST_CHAR_LIMIT}
               state={publishState}
-              xpReward={postType === "question" ? 10 : 5}
+              xpReward={postType === 'question' ? 10 : 5}
             />
           </div>
           {postError && <p className="text-[11px] text-red-400 font-medium">{postError}</p>}
@@ -1071,7 +1071,7 @@ export function Sidebar({ user }: SidebarProps) {
 
             <button
               onClick={() => {
-                showToast("Assinatura premium processada com sucesso! Parabéns!");
+                showToast('Assinatura premium processada com sucesso! Parabéns!');
                 setPremiumModalOpen(false);
               }}
               className="w-full bg-orange-500 hover:bg-orange-600 text-white font-extrabold py-3 px-4 rounded-xl text-sm transition-all duration-200 active:scale-[0.98] shadow-lg shadow-orange-500/10 cursor-pointer"

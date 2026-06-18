@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
-import { Sidebar } from "@/components/Sidebar";
-import { Footer } from "@/components/Footer";
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
+import { Sidebar } from '@/components/Sidebar';
+import { Footer } from '@/components/Footer';
 import {
   Settings,
   User,
@@ -15,37 +15,37 @@ import {
   AlertCircle,
   Sun,
   Moon,
-} from "lucide-react";
+} from 'lucide-react';
 
 export default function SettingsPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
-  const [bio, setBio] = useState("");
-  const [institution, setInstitution] = useState("");
-  const [githubUsername, setGithubUsername] = useState("");
+  const [bio, setBio] = useState('');
+  const [institution, setInstitution] = useState('');
+  const [githubUsername, setGithubUsername] = useState('');
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   // Theme preference state & handler
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
 
   useEffect(() => {
     const isDark =
-      document.documentElement.classList.contains("dark") ||
-      localStorage.getItem("theme") === "dark";
-    setTheme(isDark ? "dark" : "light");
+      document.documentElement.classList.contains('dark') ||
+      localStorage.getItem('theme') === 'dark';
+    setTheme(isDark ? 'dark' : 'light');
   }, []);
 
-  const changeTheme = (newTheme: "light" | "dark") => {
+  const changeTheme = (newTheme: 'light' | 'dark') => {
     setTheme(newTheme);
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
+    if (newTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
     } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
   };
 
@@ -53,14 +53,14 @@ export default function SettingsPage() {
   const [soundEnabled, setSoundEnabled] = useState(true);
 
   useEffect(() => {
-    setSoundEnabled(localStorage.getItem("devdeck-sound") !== "false");
+    setSoundEnabled(localStorage.getItem('devdeck-sound') !== 'false');
   }, []);
 
   const toggleSound = () => {
     const newVal = !soundEnabled;
     setSoundEnabled(newVal);
-    localStorage.setItem("devdeck-sound", String(newVal));
-    window.dispatchEvent(new Event("devdeck-sound-changed"));
+    localStorage.setItem('devdeck-sound', String(newVal));
+    window.dispatchEvent(new Event('devdeck-sound-changed'));
   };
 
   useEffect(() => {
@@ -72,12 +72,12 @@ export default function SettingsPage() {
         } = await supabase.auth.getUser();
 
         if (!authUser) {
-          router.push("/login");
+          router.push('/login');
           return;
         }
 
         const res = await fetch(
-          `/api/profile/${authUser.user_metadata?.username || authUser.email?.split("@")[0]}`
+          `/api/profile/${authUser.user_metadata?.username || authUser.email?.split('@')[0]}`
         );
         if (res.ok) {
           const profileData = await res.json();
@@ -85,12 +85,12 @@ export default function SettingsPage() {
             ...profileData.user,
             id: authUser.id,
           });
-          setBio(profileData.user.bio || "");
-          setInstitution(profileData.user.institution || "");
-          setGithubUsername(profileData.user.github_username || "");
+          setBio(profileData.user.bio || '');
+          setInstitution(profileData.user.institution || '');
+          setGithubUsername(profileData.user.github_username || '');
         }
       } catch (err) {
-        console.error("Error fetching settings user:", err);
+        console.error('Error fetching settings user:', err);
       } finally {
         setLoading(false);
       }
@@ -106,10 +106,10 @@ export default function SettingsPage() {
     setSuccess(false);
 
     try {
-      const res = await fetch("/api/profile/update", {
-        method: "POST",
+      const res = await fetch('/api/profile/update', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ bio, institution, github_username: githubUsername }),
       });
@@ -118,11 +118,11 @@ export default function SettingsPage() {
         setSuccess(true);
       } else {
         const data = await res.json();
-        setError(data.error || "Erro ao atualizar dados.");
+        setError(data.error || 'Erro ao atualizar dados.');
       }
     } catch (err) {
       console.error(err);
-      setError("Erro interno no servidor.");
+      setError('Erro interno no servidor.');
     } finally {
       setUpdating(false);
     }
@@ -132,10 +132,10 @@ export default function SettingsPage() {
     try {
       const supabase = createClient();
       await supabase.auth.signOut();
-      router.push("/");
+      router.push('/');
       router.refresh();
     } catch (err) {
-      console.error("Error signing out:", err);
+      console.error('Error signing out:', err);
     }
   };
 
@@ -205,7 +205,7 @@ export default function SettingsPage() {
                     id="username"
                     type="text"
                     disabled
-                    value={user?.username || ""}
+                    value={user?.username || ''}
                     className="w-full rounded-lg border border-dd-border bg-dd-bg/40 px-4 py-2 text-xs text-dd-muted cursor-not-allowed focus:outline-none"
                   />
                 </div>
@@ -243,7 +243,7 @@ export default function SettingsPage() {
                   id="githubUsername"
                   type="text"
                   value={githubUsername}
-                  onChange={(e) => setGithubUsername(e.target.value.replace(/[^a-zA-Z0-9-]/g, ""))}
+                  onChange={(e) => setGithubUsername(e.target.value.replace(/[^a-zA-Z0-9-]/g, ''))}
                   className="w-full rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-xs text-dd-text focus:border-orange-500/60 focus:outline-none transition-colors"
                   placeholder="Ex: seu-usuario-github"
                 />
@@ -273,7 +273,7 @@ export default function SettingsPage() {
                   disabled={updating}
                   className="bg-orange-500 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-colors hover:bg-orange-600 disabled:opacity-50 cursor-pointer shadow-md shadow-orange-500/10"
                 >
-                  {updating ? "Salvando..." : "Salvar Alterações"}
+                  {updating ? 'Salvando...' : 'Salvar Alterações'}
                 </button>
               </div>
             </form>
@@ -295,18 +295,18 @@ export default function SettingsPage() {
               {/* Dark Theme Card */}
               <button
                 type="button"
-                onClick={() => changeTheme("dark")}
+                onClick={() => changeTheme('dark')}
                 className={`flex flex-col items-center gap-3 p-4 rounded-xl border transition-all duration-200 text-left cursor-pointer ${
-                  theme === "dark"
-                    ? "border-orange-500 bg-orange-500/[0.03] text-dd-text shadow-[0_0_15px_rgba(249,115,22,0.05)]"
-                    : "border-dd-border bg-dd-bg/40 text-dd-muted hover:border-dd-border/80 hover:text-dd-text"
+                  theme === 'dark'
+                    ? 'border-orange-500 bg-orange-500/[0.03] text-dd-text shadow-[0_0_15px_rgba(249,115,22,0.05)]'
+                    : 'border-dd-border bg-dd-bg/40 text-dd-muted hover:border-dd-border/80 hover:text-dd-text'
                 }`}
               >
                 <div className="flex items-center justify-between w-full">
                   <Moon
-                    className={`w-5 h-5 ${theme === "dark" ? "text-orange-400" : "text-dd-muted"}`}
+                    className={`w-5 h-5 ${theme === 'dark' ? 'text-orange-400' : 'text-dd-muted'}`}
                   />
-                  {theme === "dark" && <span className="w-2 h-2 rounded-full bg-orange-500" />}
+                  {theme === 'dark' && <span className="w-2 h-2 rounded-full bg-orange-500" />}
                 </div>
                 <div className="w-full">
                   <p className="text-xs font-bold">Modo Escuro</p>
@@ -319,18 +319,18 @@ export default function SettingsPage() {
               {/* Light Theme Card */}
               <button
                 type="button"
-                onClick={() => changeTheme("light")}
+                onClick={() => changeTheme('light')}
                 className={`flex flex-col items-center gap-3 p-4 rounded-xl border transition-all duration-200 text-left cursor-pointer ${
-                  theme === "light"
-                    ? "border-orange-500 bg-orange-500/[0.03] text-dd-text shadow-[0_0_15px_rgba(249,115,22,0.05)]"
-                    : "border-dd-border bg-dd-bg/40 text-dd-muted hover:border-dd-border/80 hover:text-dd-text"
+                  theme === 'light'
+                    ? 'border-orange-500 bg-orange-500/[0.03] text-dd-text shadow-[0_0_15px_rgba(249,115,22,0.05)]'
+                    : 'border-dd-border bg-dd-bg/40 text-dd-muted hover:border-dd-border/80 hover:text-dd-text'
                 }`}
               >
                 <div className="flex items-center justify-between w-full">
                   <Sun
-                    className={`w-5 h-5 ${theme === "light" ? "text-amber-500" : "text-dd-muted"}`}
+                    className={`w-5 h-5 ${theme === 'light' ? 'text-amber-500' : 'text-dd-muted'}`}
                   />
-                  {theme === "light" && <span className="w-2 h-2 rounded-full bg-orange-500" />}
+                  {theme === 'light' && <span className="w-2 h-2 rounded-full bg-orange-500" />}
                 </div>
                 <div className="w-full">
                   <p className="text-xs font-bold">Modo Claro</p>
@@ -402,11 +402,11 @@ export default function SettingsPage() {
                 onClick={toggleSound}
                 className={`px-4 py-2 rounded-lg border text-[11px] font-extrabold uppercase tracking-wider transition-all duration-200 active:scale-[0.97] cursor-pointer ${
                   soundEnabled
-                    ? "bg-orange-500 border-orange-600 text-white shadow-md shadow-orange-500/10 hover:bg-orange-600"
-                    : "bg-dd-surface border-dd-border text-dd-muted hover:text-dd-text hover:bg-dd-border/30"
+                    ? 'bg-orange-500 border-orange-600 text-white shadow-md shadow-orange-500/10 hover:bg-orange-600'
+                    : 'bg-dd-surface border-dd-border text-dd-muted hover:text-dd-text hover:bg-dd-border/30'
                 }`}
               >
-                {soundEnabled ? "LIGADO" : "DESLIGADO"}
+                {soundEnabled ? 'LIGADO' : 'DESLIGADO'}
               </button>
             </div>
           </div>

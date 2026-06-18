@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { Sidebar } from "@/components/Sidebar";
-import { ProfileHeader } from "@/components/ProfileHeader";
-import { BadgeGrid } from "@/components/BadgeGrid";
-import { PostCard } from "@/components/PostCard";
-import { Footer } from "@/components/Footer";
-import { FollowersModal } from "@/components/motion/FollowersModal";
-import { Award, Sparkles } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { Sidebar } from '@/components/Sidebar';
+import { ProfileHeader } from '@/components/ProfileHeader';
+import { BadgeGrid } from '@/components/BadgeGrid';
+import { PostCard } from '@/components/PostCard';
+import { Footer } from '@/components/Footer';
+import { FollowersModal } from '@/components/motion/FollowersModal';
+import { Award, Sparkles } from 'lucide-react';
 
 interface ProfileContentProps {
   user: {
@@ -54,15 +54,15 @@ export function ProfileContent({
   const [following, setFollowing] = useState(isFollowing);
   const [followers, setFollowers] = useState(followersCount);
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalType, setModalType] = useState<"followers" | "following">("followers");
+  const [modalType, setModalType] = useState<'followers' | 'following'>('followers');
 
   const showFollowersModal = () => {
-    setModalType("followers");
+    setModalType('followers');
     setModalOpen(true);
   };
 
   const showFollowingModal = () => {
-    setModalType("following");
+    setModalType('following');
     setModalOpen(true);
   };
 
@@ -76,10 +76,10 @@ export function ProfileContent({
 
     try {
       const res = await fetch(`/api/users/${profileUser.id}/follow`, {
-        method: "POST",
+        method: 'POST',
       });
       if (!res.ok) {
-        throw new Error("Erro ao seguir/deixar de seguir usuário");
+        throw new Error('Erro ao seguir/deixar de seguir usuário');
       }
       const data = await res.json();
       setFollowing(data.following);
@@ -89,7 +89,7 @@ export function ProfileContent({
         setFollowers((prev) => (data.following ? prev + 1 : prev - 1));
       }
     } catch (err) {
-      console.error("Erro no follow/unfollow:", err);
+      console.error('Erro no follow/unfollow:', err);
       // Reverte o estado em caso de erro
       setFollowing(previousFollowing);
       setFollowers(followersCount);
@@ -100,7 +100,7 @@ export function ProfileContent({
   const fetchUserPosts = async (currentCursor: string | null, isInitial: boolean) => {
     setLoading(true);
     try {
-      const url = `/api/posts?author=${profileUser.username}&useCursor=true&limit=10${currentCursor ? `&cursor=${currentCursor}` : ""}`;
+      const url = `/api/posts?author=${profileUser.username}&useCursor=true&limit=10${currentCursor ? `&cursor=${currentCursor}` : ''}`;
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
@@ -114,7 +114,7 @@ export function ProfileContent({
         setHasMore(!!data.nextCursor);
       }
     } catch (err) {
-      console.error("Error fetching user posts:", err);
+      console.error('Error fetching user posts:', err);
     } finally {
       setLoading(false);
     }
@@ -281,7 +281,7 @@ export function ProfileContent({
         userId={profileUser.id}
         currentUserId={user.id}
         type={modalType}
-        title={modalType === "followers" ? "Seguidores" : "Seguindo"}
+        title={modalType === 'followers' ? 'Seguidores' : 'Seguindo'}
       />
     </div>
   );

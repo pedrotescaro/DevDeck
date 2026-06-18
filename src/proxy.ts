@@ -1,16 +1,16 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { updateSession } from "@/lib/supabase/middleware";
+import { NextResponse, type NextRequest } from 'next/server';
+import { updateSession } from '@/lib/supabase/middleware';
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // Handle hybrid app / tracking actions from browser extensions to prevent console errors and 500s
-  if (pathname.startsWith("/hybridaction/")) {
-    const callback = request.nextUrl.searchParams.get("__callback__");
+  if (pathname.startsWith('/hybridaction/')) {
+    const callback = request.nextUrl.searchParams.get('__callback__');
     if (callback) {
       return new NextResponse(`${callback}({});`, {
         headers: {
-          "Content-Type": "application/javascript; charset=utf-8",
+          'Content-Type': 'application/javascript; charset=utf-8',
         },
         status: 200,
       });
@@ -30,6 +30,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - images/assets or public assets
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

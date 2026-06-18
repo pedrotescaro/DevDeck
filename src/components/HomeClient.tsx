@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { ScreenshotCarousel } from "@/components/ScreenshotCarousel";
-import { Sparkles, Terminal, Swords, Trophy, Award, MessageSquare, ArrowRight } from "lucide-react";
+import Link from 'next/link';
+import { ScreenshotCarousel } from '@/components/ScreenshotCarousel';
+import { Sparkles, Terminal, Swords, Trophy, Award, MessageSquare, ArrowRight } from 'lucide-react';
 
 interface HomeClientProps {
   initialUser: any;
@@ -10,10 +10,10 @@ interface HomeClientProps {
 
 export default function HomeClient({ initialUser }: HomeClientProps) {
   // Best copywriting option hardcoded as requested
-  const headline = "Cursos não geram XP. DevDeck gera.";
+  const headline = 'Cursos não geram XP. DevDeck gera.';
   const subHeadline =
-    "Onde suas dúvidas reais de Next.js 16 e Supabase viram quizzes por IA e disputas de código em tempo real. Codifique, ajude a comunidade e acumule XP por tecnologia.";
-  const primaryCta = "Entrar na Arena";
+    'Onde suas dúvidas reais de Next.js 16 e Supabase viram quizzes por IA e disputas de código em tempo real. Codifique, ajude a comunidade e acumule XP por tecnologia.';
+  const primaryCta = 'Entrar na Arena';
 
   return (
     <div className="flex flex-col min-h-screen bg-dd-bg text-dd-text antialiased selection:bg-dd-accent/35 selection:text-white">
@@ -128,7 +128,7 @@ export function useCalculatedXP(xp: number) {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
               <Link
-                href={initialUser ? "/feed" : "/register"}
+                href={initialUser ? '/feed' : '/register'}
                 className="w-full sm:w-auto rounded-xl bg-dd-accent px-8 h-12 flex items-center justify-center text-sm font-bold text-white transition-all duration-200 hover:opacity-90 shadow-lg shadow-dd-accent/15 hover:shadow-dd-accent/25 active:scale-[0.98] gap-2 group"
               >
                 {primaryCta}
@@ -168,9 +168,9 @@ export function useCalculatedXP(xp: number) {
               <div
                 className="w-full max-w-4xl rounded-2xl border border-dd-border bg-dd-surface/30 p-2 shadow-2xl backdrop-blur-md transition-transform duration-700 hover:rotate-0"
                 style={{
-                  perspective: "1000px",
-                  transform: "perspective(1000px) rotateX(8deg) translateY(-10px)",
-                  transformStyle: "preserve-3d",
+                  perspective: '1000px',
+                  transform: 'perspective(1000px) rotateX(8deg) translateY(-10px)',
+                  transformStyle: 'preserve-3d',
                 }}
               >
                 {/* Mock Browser Header */}
@@ -424,7 +424,7 @@ export function useCalculatedXP(xp: number) {
             <div className="space-y-6">
               <div className="pt-2">
                 <Link
-                  href={initialUser ? "/feed" : "/register"}
+                  href={initialUser ? '/feed' : '/register'}
                   className="inline-flex rounded-xl bg-dd-accent px-10 h-13 items-center justify-center text-sm font-black text-white transition-all duration-200 hover:opacity-90 shadow-xl shadow-dd-accent/20 active:scale-[0.98] gap-2 group"
                 >
                   {primaryCta}

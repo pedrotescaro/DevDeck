@@ -1,22 +1,22 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getAuthUser } from "@/lib/auth";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth';
 
 export async function GET(request: Request) {
   try {
     const user = await getAuthUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
-    const cursor = searchParams.get("cursor");
-    const limit = parseInt(searchParams.get("limit") || "10", 10);
-    const useCursor = searchParams.get("useCursor") === "true" || !!cursor;
+    const cursor = searchParams.get('cursor');
+    const limit = parseInt(searchParams.get('limit') || '10', 10);
+    const useCursor = searchParams.get('useCursor') === 'true' || !!cursor;
 
     const whereClause: any = { user_id: user.id };
     if (cursor) {
-      const parts = cursor.split("_");
+      const parts = cursor.split('_');
       if (parts.length === 2) {
         const cursorTime = new Date(parseInt(parts[0], 10));
         const cursorId = parts[1];
@@ -31,7 +31,7 @@ export async function GET(request: Request) {
 
     let notifications = await prisma.notification.findMany({
       where: whereClause,
-      orderBy: [{ created_at: "desc" }, { id: "desc" }],
+      orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
       take: takeVal,
     });
 
@@ -41,28 +41,28 @@ export async function GET(request: Request) {
         data: [
           {
             user_id: user.id,
-            type: "SYSTEM",
-            title: "Bem-vindo ao DevDeck! 🚀",
+            type: 'SYSTEM',
+            title: 'Bem-vindo ao DevDeck! 🚀',
             content:
-              "Explore o feed, tire dúvidas com outros programadores e suba no ranking global!",
-            link: "/feed",
+              'Explore o feed, tire dúvidas com outros programadores e suba no ranking global!',
+            link: '/feed',
             is_read: false,
           },
           {
             user_id: user.id,
-            type: "XP",
-            title: "Bônus de Cadastro Concedido ⚡",
-            content: "Você ganhou +100 XP extras por completar seu perfil na plataforma DevDeck.",
+            type: 'XP',
+            title: 'Bônus de Cadastro Concedido ⚡',
+            content: 'Você ganhou +100 XP extras por completar seu perfil na plataforma DevDeck.',
             link: `/profile/${user.username}`,
             is_read: false,
           },
           {
             user_id: user.id,
-            type: "DUEL",
-            title: "Duelos Disponíveis ⚔️",
+            type: 'DUEL',
+            title: 'Duelos Disponíveis ⚔️',
             content:
-              "Vários desenvolvedores criaram duelos na aba Classificação. Aceite um desafio para testar suas habilidades!",
-            link: "/duels",
+              'Vários desenvolvedores criaram duelos na aba Classificação. Aceite um desafio para testar suas habilidades!',
+            link: '/duels',
             is_read: false,
           },
         ],
@@ -70,15 +70,15 @@ export async function GET(request: Request) {
 
       notifications = await prisma.notification.findMany({
         where: { user_id: user.id },
-        orderBy: [{ created_at: "desc" }, { id: "desc" }],
+        orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
         take: takeVal,
       });
     }
 
     const enhancedNotifications = await Promise.all(
       notifications.map(async (notif) => {
-        if (notif.type === "LIKE" && notif.link && notif.link.startsWith("/post/")) {
-          const postId = notif.link.split("/").pop();
+        if (notif.type === 'LIKE' && notif.link && notif.link.startsWith('/post/')) {
+          const postId = notif.link.split('/').pop();
           if (postId) {
             try {
               const post = await prisma.post.findUnique({
@@ -96,7 +96,7 @@ export async function GET(request: Request) {
                         },
                       },
                     },
-                    orderBy: { created_at: "desc" },
+                    orderBy: { created_at: 'desc' },
                   },
                 },
               });
@@ -111,7 +111,7 @@ export async function GET(request: Request) {
                 };
               }
             } catch (err) {
-              console.error("Error enhancing like notification:", err);
+              console.error('Error enhancing like notification:', err);
             }
           }
         }
@@ -135,8 +135,8 @@ export async function GET(request: Request) {
 
     return NextResponse.json(enhancedNotifications);
   } catch (error) {
-    console.error("Error fetching notifications:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error('Error fetching notifications:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
@@ -145,7 +145,7 @@ export async function POST() {
   try {
     const user = await getAuthUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     await prisma.notification.updateMany({
@@ -160,7 +160,7 @@ export async function POST() {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error marking notifications as read:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error('Error marking notifications as read:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { Sidebar } from "@/components/Sidebar";
-import { CodeEditor } from "@/components/CodeEditor";
-import { LanguageTag } from "@/components/LanguageTag";
-import { Footer } from "@/components/Footer";
-import { useSoundEffects } from "@/hooks/useSoundEffects";
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { Sidebar } from '@/components/Sidebar';
+import { CodeEditor } from '@/components/CodeEditor';
+import { LanguageTag } from '@/components/LanguageTag';
+import { Footer } from '@/components/Footer';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
 import {
   Swords,
   Code,
@@ -17,7 +17,7 @@ import {
   CheckCircle,
   HelpCircle,
   Send,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface DuelDetailContentProps {
   user: {
@@ -31,7 +31,7 @@ interface DuelDetailContentProps {
 
 export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps) {
   const [duel, setDuel] = useState<any>(initialDuel);
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [voting, setVoting] = useState(false);
   const [toastXp, setToastXp] = useState<{ amount: number; language: string } | null>(null);
@@ -39,17 +39,17 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
 
   useEffect(() => {
     const updateSoundState = () => {
-      setSoundEnabled(localStorage.getItem("devdeck-sound") !== "false");
+      setSoundEnabled(localStorage.getItem('devdeck-sound') !== 'false');
     };
 
     updateSoundState();
 
-    window.addEventListener("storage", updateSoundState);
-    window.addEventListener("devdeck-sound-changed", updateSoundState);
+    window.addEventListener('storage', updateSoundState);
+    window.addEventListener('devdeck-sound-changed', updateSoundState);
 
     return () => {
-      window.removeEventListener("storage", updateSoundState);
-      window.removeEventListener("devdeck-sound-changed", updateSoundState);
+      window.removeEventListener('storage', updateSoundState);
+      window.removeEventListener('devdeck-sound-changed', updateSoundState);
     };
   }, []);
 
@@ -57,27 +57,27 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
 
   const showXPToast = (amount: number, language: string) => {
     setToastXp({ amount, language });
-    playSound("xpgain");
+    playSound('xpgain');
     setTimeout(() => {
       setToastXp(null);
     }, 4000);
   };
 
   const handleSubmitSolution = async () => {
-    if (code.trim() === "") return;
+    if (code.trim() === '') return;
     setSubmitting(true);
 
     try {
       const res = await fetch(`/api/duels/${duel.id}/solution`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code }),
       });
 
       if (res.ok) {
         const data = await res.json();
-        alert("Solução enviada com sucesso!");
-        setCode("");
+        alert('Solução enviada com sucesso!');
+        setCode('');
         window.location.reload();
 
         if (data.xpResult?.xpEarned) {
@@ -85,7 +85,7 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
         }
       } else {
         const data = await res.json();
-        alert(data.error || "Erro ao enviar solução.");
+        alert(data.error || 'Erro ao enviar solução.');
       }
     } catch (err) {
       console.error(err);
@@ -99,17 +99,17 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
 
     try {
       const res = await fetch(`/api/duels/${duel.id}/vote`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ solution_id: solutionId }),
       });
 
       const data = await res.json();
       if (res.ok) {
-        alert("Voto registrado com sucesso!");
+        alert('Voto registrado com sucesso!');
         window.location.reload();
       } else {
-        alert(data.error || "Erro ao registrar voto.");
+        alert(data.error || 'Erro ao registrar voto.');
       }
     } catch (err) {
       console.error(err);
@@ -121,12 +121,12 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
   // Simulated syntax highlighter for code snippets
   const highlightCode = (code: string) => {
     if (!code) return null;
-    const lines = code.split("\n");
+    const lines = code.split('\n');
     return (
       <pre className="font-mono text-[10px] leading-relaxed text-dd-text">
         <code>
           {lines.map((line, idx) => {
-            let html = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            let html = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
             const keywords =
               /\b(const|let|var|function|return|fn|impl|pub|use|import|from|def|class|async|await|struct|enum|if|else|for|while|match)\b/g;
@@ -136,13 +136,13 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
               /\b(string|number|boolean|any|void|User|Post|Language|int|float|str|char)\b/g;
             html = html.replace(types, '<span class="text-cyan-400 font-medium">$1</span>');
 
-            if (html.includes("//")) {
-              const parts = html.split("//");
+            if (html.includes('//')) {
+              const parts = html.split('//');
               html =
                 parts[0] +
                 '<span class="text-dd-muted italic">//' +
-                parts.slice(1).join("//") +
-                "</span>";
+                parts.slice(1).join('//') +
+                '</span>';
             }
             return (
               <div key={idx} className="table-row">
@@ -214,7 +214,7 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
               </h1>
               <p className="text-dd-muted text-xs mt-1 font-semibold flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-dd-muted" />
-                Status: {duel.status === "PENDING" ? "Aguardando oponente..." : "Combate Ativo"}
+                Status: {duel.status === 'PENDING' ? 'Aguardando oponente...' : 'Combate Ativo'}
               </p>
             </div>
 
@@ -230,7 +230,7 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
           </div>
 
           {/* Duel Sandbox editor for participants */}
-          {duel.status === "ACTIVE" && isParticipant && (
+          {duel.status === 'ACTIVE' && isParticipant && (
             <div className="bg-dd-surface border border-dd-border rounded-xl p-6 space-y-4 backdrop-blur-sm shadow-sm">
               <div className="flex items-center gap-2 border-b border-dd-border pb-3">
                 <Code className="w-4.5 h-4.5 text-orange-500/85" />
@@ -247,18 +247,18 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
               <div className="flex justify-end pt-2 border-t border-dd-border">
                 <button
                   onClick={handleSubmitSolution}
-                  disabled={submitting || code.trim() === ""}
+                  disabled={submitting || code.trim() === ''}
                   className="bg-orange-500 text-white text-xs font-bold px-6 py-2.5 rounded-lg transition-colors hover:bg-orange-600 disabled:opacity-50 cursor-pointer shadow-md shadow-orange-500/10 flex items-center gap-1.5"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  {submitting ? "Enviando..." : "Submeter Solução (+25 XP)"}
+                  {submitting ? 'Enviando...' : 'Submeter Solução (+25 XP)'}
                 </button>
               </div>
             </div>
           )}
 
           {/* Voting Arena (visible when duel is active/voting) */}
-          {duel.status === "ACTIVE" && (
+          {duel.status === 'ACTIVE' && (
             <div className="bg-dd-surface border border-dd-border rounded-xl p-6 space-y-6 backdrop-blur-sm shadow-sm">
               <div className="flex items-center gap-2 border-b border-dd-border pb-3">
                 <Vote className="w-4.5 h-4.5 text-orange-500/85" />
@@ -275,7 +275,7 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
                       Desafiante: @{duel.challenger.username}
                     </span>
                     <span className="text-[10px] text-dd-muted font-semibold">
-                      {challengerSolution ? "Código enviado ✅" : "Codificando... ⏳"}
+                      {challengerSolution ? 'Código enviado ✅' : 'Codificando... ⏳'}
                     </span>
                   </div>
 
@@ -305,14 +305,14 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="font-bold text-xs text-dd-text">
-                      Oponente: {duel.opponent ? `@${duel.opponent.username}` : "Aguardando..."}
+                      Oponente: {duel.opponent ? `@${duel.opponent.username}` : 'Aguardando...'}
                     </span>
                     <span className="text-[10px] text-dd-muted font-semibold">
                       {duel.opponent
                         ? opponentSolution
-                          ? "Código enviado ✅"
-                          : "Codificando... ⏳"
-                        : "Matchmaking..."}
+                          ? 'Código enviado ✅'
+                          : 'Codificando... ⏳'
+                        : 'Matchmaking...'}
                     </span>
                   </div>
 
@@ -334,8 +334,8 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
                   ) : (
                     <div className="bg-dd-bg/40 border border-dd-border rounded-lg p-12 text-center text-xs text-dd-muted italic">
                       {duel.opponent
-                        ? "Aguardando envio do código..."
-                        : "Buscando oponente na arena..."}
+                        ? 'Aguardando envio do código...'
+                        : 'Buscando oponente na arena...'}
                     </div>
                   )}
                 </div>
@@ -354,7 +354,7 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
                       @{duel.challenger.username} ({challengerPercent}%)
                     </span>
                     <span>
-                      {duel.opponent ? `@${duel.opponent.username}` : "Oponente"} ({opponentPercent}
+                      {duel.opponent ? `@${duel.opponent.username}` : 'Oponente'} ({opponentPercent}
                       %)
                     </span>
                   </div>

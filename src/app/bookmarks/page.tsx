@@ -1,7 +1,7 @@
-import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
-import { getAuthUser } from "@/lib/auth";
-import { BookmarksContent } from "./BookmarksContent";
+import { redirect } from 'next/navigation';
+import { prisma } from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth';
+import { BookmarksContent } from './BookmarksContent';
 
 export const revalidate = 0; // Desabilitar cache para refletir itens salvos instantaneamente
 
@@ -9,13 +9,13 @@ export default async function BookmarksPage() {
   const user = await getAuthUser();
 
   if (!user) {
-    redirect("/login");
+    redirect('/login');
   }
 
   // Buscar todos os bookmarks do usuário com os posts completos correspondentes
   const bookmarks = await prisma.bookmark.findMany({
     where: { user_id: user.id },
-    orderBy: { created_at: "desc" },
+    orderBy: { created_at: 'desc' },
     include: {
       post: {
         include: {
@@ -58,10 +58,5 @@ export default async function BookmarksPage() {
     total_xp: user.total_xp,
   };
 
-  return (
-    <BookmarksContent
-      user={serializedUser}
-      initialPosts={serializedPosts}
-    />
-  );
+  return <BookmarksContent user={serializedUser} initialPosts={serializedPosts} />;
 }

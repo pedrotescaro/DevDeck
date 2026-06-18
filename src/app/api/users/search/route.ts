@@ -1,22 +1,22 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getAuthUser } from "@/lib/auth";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth';
 
 export async function GET(request: Request) {
   try {
     const user = await getAuthUser();
     if (!user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
-    const query = searchParams.get("q");
+    const query = searchParams.get('q');
 
     const whereClause: any = {};
     if (query && query.trim().length > 0) {
       whereClause.username = {
         contains: query,
-        mode: "insensitive",
+        mode: 'insensitive',
       };
     }
 
@@ -32,7 +32,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(users);
   } catch (error) {
-    console.error("Search users error:", error);
-    return NextResponse.json({ error: "Erro ao buscar usuários" }, { status: 500 });
+    console.error('Search users error:', error);
+    return NextResponse.json({ error: 'Erro ao buscar usuários' }, { status: 500 });
   }
 }

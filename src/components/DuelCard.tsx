@@ -32,8 +32,7 @@ export function DuelCard({ duel }: DuelCardProps) {
   const challengerVotes = duel.solutions[0]?.vote_count ?? 0;
   const opponentVotes = duel.solutions[1]?.vote_count ?? 0;
 
-  const challengerPercent =
-    totalVotes > 0 ? Math.round((challengerVotes / totalVotes) * 100) : 50;
+  const challengerPercent = totalVotes > 0 ? Math.round((challengerVotes / totalVotes) * 100) : 50;
   const opponentPercent = totalVotes > 0 ? 100 - challengerPercent : 50;
 
   const langColor = getLanguageColor(duel.language);
@@ -69,9 +68,7 @@ export function DuelCard({ duel }: DuelCardProps) {
       </div>
 
       {/* Title */}
-      <h3 className="text-dd-text font-semibold text-base mb-4">
-        {duel.problem_title}
-      </h3>
+      <h3 className="text-dd-text font-semibold text-base mb-4">{duel.problem_title}</h3>
 
       {/* Competitors */}
       <div className="space-y-3">
@@ -139,9 +136,7 @@ export function DuelCard({ duel }: DuelCardProps) {
             <div className="w-7 h-7 rounded-full border border-dashed border-dd-border flex items-center justify-center shrink-0">
               <span className="text-dd-muted text-lg leading-none">?</span>
             </div>
-            <span className="text-dd-muted text-sm italic">
-              Aguardando oponente...
-            </span>
+            <span className="text-dd-muted text-sm italic">Aguardando oponente...</span>
           </div>
         )}
       </div>

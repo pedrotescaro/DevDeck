@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/cn";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/cn';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 interface TrendingTopic {
   id: string;
@@ -29,11 +29,17 @@ export function TrendingTopics({ topics, onTopicClick }: TrendingTopicsProps) {
             initial={{ opacity: 0, y: topic.positionChange && topic.positionChange > 0 ? 20 : -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: topic.positionChange && topic.positionChange < 0 ? -20 : 20 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
             className={cn(
-              "flex items-center justify-between p-2 rounded-lg hover:bg-dd-surface transition-colors cursor-pointer",
-              !reduced && topic.positionChange !== undefined && topic.positionChange > 0 && "swap-up",
-              !reduced && topic.positionChange !== undefined && topic.positionChange < 0 && "swap-down"
+              'flex items-center justify-between p-2 rounded-lg hover:bg-dd-surface transition-colors cursor-pointer',
+              !reduced &&
+                topic.positionChange !== undefined &&
+                topic.positionChange > 0 &&
+                'swap-up',
+              !reduced &&
+                topic.positionChange !== undefined &&
+                topic.positionChange < 0 &&
+                'swap-down'
             )}
             onClick={() => onTopicClick?.(topic.name)}
           >

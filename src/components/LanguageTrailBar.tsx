@@ -9,12 +9,7 @@ interface LanguageTrailBarProps {
   maxXp: number;
 }
 
-export function LanguageTrailBar({
-  language,
-  xp,
-  level,
-  maxXp,
-}: LanguageTrailBarProps) {
+export function LanguageTrailBar({ language, xp, level, maxXp }: LanguageTrailBarProps) {
   const color = getLanguageColor(language);
   const label = getLanguageLabel(language);
   const percent = maxXp > 0 ? Math.min((xp / maxXp) * 100, 100) : 0;
@@ -22,10 +17,7 @@ export function LanguageTrailBar({
   return (
     <div className="flex items-center gap-4">
       {/* Language name */}
-      <span
-        className="text-xs font-bold w-24 shrink-0 truncate"
-        style={{ color }}
-      >
+      <span className="text-xs font-bold w-24 shrink-0 truncate" style={{ color }}>
         {label}
       </span>
 
@@ -51,7 +43,7 @@ export function LanguageTrailBar({
         style={{
           backgroundColor: `${color}1A`,
           color: color,
-          border: `1px solid ${color}33`
+          border: `1px solid ${color}33`,
         }}
       >
         Lv.{level}

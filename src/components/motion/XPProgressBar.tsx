@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/cn";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/cn';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 interface XPProgressBarProps {
   percent: number;
@@ -12,12 +12,7 @@ interface XPProgressBarProps {
   onLevelUp?: () => void;
 }
 
-export function XPProgressBar({
-  percent,
-  colorClass,
-  level,
-  onLevelUp,
-}: XPProgressBarProps) {
+export function XPProgressBar({ percent, colorClass, level, onLevelUp }: XPProgressBarProps) {
   const reduced = useReducedMotion();
   const prevLevel = useRef(level);
   const [showFlash, setShowFlash] = useState(false);
@@ -44,21 +39,17 @@ export function XPProgressBar({
       {showFlash && !reduced && <div className="dd-level-flash" aria-hidden />}
       <div className="dd-liquid-track h-1.5 w-full rounded-full bg-dd-surface">
         <motion.div
-          className={cn("dd-liquid-fill h-full w-full rounded-full", colorClass)}
+          className={cn('dd-liquid-fill h-full w-full rounded-full', colorClass)}
           initial={false}
           animate={{ scaleX: Math.min(1, Math.max(0, percent / 100)) }}
-          transition={
-            reduced
-              ? { duration: 0.01 }
-              : { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
-          }
+          transition={reduced ? { duration: 0.01 } : { duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         />
       </div>
       {level != null && badgePop && !reduced && (
         <motion.span
           initial={{ scale: 0.5, rotate: -8, opacity: 0 }}
           animate={{ scale: [0.5, 1.15, 1], rotate: [-8, 4, 0], opacity: 1 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
           className="sr-only"
         >
           Nível {level}

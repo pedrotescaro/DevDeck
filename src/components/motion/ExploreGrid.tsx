@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { cn } from "@/lib/cn";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/cn';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 interface Developer {
   id: string;
@@ -19,20 +19,20 @@ interface ExploreGridProps {
 }
 
 const LANGUAGE_COLORS: Record<string, string> = {
-  JavaScript: "#f5a623",
-  TypeScript: "#3178c6",
-  Python: "#5ba3f5",
-  Rust: "#f97316",
-  Go: "#22d48a",
-  "C++": "#f59e0b",
-  Java: "#ef4444",
-  Kotlin: "#7f52ff",
-  Swift: "#f05138",
+  JavaScript: '#f5a623',
+  TypeScript: '#3178c6',
+  Python: '#5ba3f5',
+  Rust: '#f97316',
+  Go: '#22d48a',
+  'C++': '#f59e0b',
+  Java: '#ef4444',
+  Kotlin: '#7f52ff',
+  Swift: '#f05138',
 };
 
 export function ExploreGrid({ developers, filter }: ExploreGridProps) {
   const reduced = useReducedMotion();
-  
+
   const filteredDevelopers = filter
     ? developers.filter((dev) => dev.mainLanguage === filter)
     : developers;
@@ -46,8 +46,8 @@ export function ExploreGrid({ developers, filter }: ExploreGridProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.05, duration: 0.2 }}
           className={cn(
-            "explore-card border border-dd-border rounded-xl p-4 cursor-pointer transition-all",
-            !reduced && "hover:scale-[1.02] hover:border-dd-accent"
+            'explore-card border border-dd-border rounded-xl p-4 cursor-pointer transition-all',
+            !reduced && 'hover:scale-[1.02] hover:border-dd-accent'
           )}
         >
           <div className="flex items-center gap-3 mb-3">
@@ -67,19 +67,19 @@ export function ExploreGrid({ developers, filter }: ExploreGridProps) {
               <p className="text-xs text-dd-muted">Nível {dev.level}</p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2 mb-3">
             <span
               className="text-[10px] font-bold px-2 py-0.5 rounded-full"
               style={{
-                backgroundColor: `${LANGUAGE_COLORS[dev.mainLanguage] || "#f97316"}20`,
-                color: LANGUAGE_COLORS[dev.mainLanguage] || "#f97316",
+                backgroundColor: `${LANGUAGE_COLORS[dev.mainLanguage] || '#f97316'}20`,
+                color: LANGUAGE_COLORS[dev.mainLanguage] || '#f97316',
               }}
             >
               {dev.mainLanguage}
             </span>
           </div>
-          
+
           <p className="text-xs text-dd-accent font-mono">{dev.totalXP.toLocaleString()} XP</p>
         </motion.div>
       ))}

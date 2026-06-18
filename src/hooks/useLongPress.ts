@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useCallback, useRef } from "react";
+import { useCallback, useRef } from 'react';
 
 interface UseLongPressOptions {
   onLongPress: () => void;
@@ -8,11 +8,7 @@ interface UseLongPressOptions {
   threshold?: number;
 }
 
-export function useLongPress({
-  onLongPress,
-  onPress,
-  threshold = 400,
-}: UseLongPressOptions) {
+export function useLongPress({ onLongPress, onPress, threshold = 400 }: UseLongPressOptions) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const didLongPress = useRef(false);
 

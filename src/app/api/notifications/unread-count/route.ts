@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getAuthUser } from "@/lib/auth";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth';
 
 export async function GET() {
   try {
@@ -20,29 +20,31 @@ export async function GET() {
         data: [
           {
             user_id: user.id,
-            type: "SYSTEM",
-            title: "Bem-vindo ao DevDeck! 🚀",
-            content: "Explore o feed, tire dúvidas com outros programadores e suba no ranking global!",
-            link: "/feed",
+            type: 'SYSTEM',
+            title: 'Bem-vindo ao DevDeck! 🚀',
+            content:
+              'Explore o feed, tire dúvidas com outros programadores e suba no ranking global!',
+            link: '/feed',
             is_read: false,
           },
           {
             user_id: user.id,
-            type: "XP",
-            title: "Bônus de Cadastro Concedido ⚡",
-            content: "Você ganhou +100 XP extras por completar seu perfil na plataforma DevDeck.",
+            type: 'XP',
+            title: 'Bônus de Cadastro Concedido ⚡',
+            content: 'Você ganhou +100 XP extras por completar seu perfil na plataforma DevDeck.',
             link: `/profile/${user.username}`,
             is_read: false,
           },
           {
             user_id: user.id,
-            type: "DUEL",
-            title: "Duelos Disponíveis ⚔️",
-            content: "Vários desenvolvedores criaram duelos na aba Classificação. Aceite um desafio para testar suas habilidades!",
-            link: "/duels",
+            type: 'DUEL',
+            title: 'Duelos Disponíveis ⚔️',
+            content:
+              'Vários desenvolvedores criaram duelos na aba Classificação. Aceite um desafio para testar suas habilidades!',
+            link: '/duels',
             is_read: false,
-          }
-        ]
+          },
+        ],
       });
     }
 
@@ -55,7 +57,7 @@ export async function GET() {
 
     return NextResponse.json({ count });
   } catch (error) {
-    console.error("Error fetching unread notification count:", error);
+    console.error('Error fetching unread notification count:', error);
     return NextResponse.json({ count: 0 });
   }
 }

@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { Bookmark } from "lucide-react";
-import { cn } from "@/lib/cn";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { useSoundEffects } from "@/hooks/useSoundEffects";
+import { useState, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Bookmark } from 'lucide-react';
+import { cn } from '@/lib/cn';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
 
 interface BookmarkButtonProps {
   isSaved: boolean;
@@ -22,17 +22,17 @@ export function BookmarkButton({ isSaved, onToggle, className, onViewAll }: Book
 
   useEffect(() => {
     const updateSoundState = () => {
-      setSoundEnabled(localStorage.getItem("devdeck-sound") !== "false");
+      setSoundEnabled(localStorage.getItem('devdeck-sound') !== 'false');
     };
 
     updateSoundState();
 
-    window.addEventListener("storage", updateSoundState);
-    window.addEventListener("devdeck-sound-changed", updateSoundState);
+    window.addEventListener('storage', updateSoundState);
+    window.addEventListener('devdeck-sound-changed', updateSoundState);
 
     return () => {
-      window.removeEventListener("storage", updateSoundState);
-      window.removeEventListener("devdeck-sound-changed", updateSoundState);
+      window.removeEventListener('storage', updateSoundState);
+      window.removeEventListener('devdeck-sound-changed', updateSoundState);
     };
   }, []);
 
@@ -45,7 +45,7 @@ export function BookmarkButton({ isSaved, onToggle, className, onViewAll }: Book
     if (willSave) {
       setShowToast(true);
       setTimeout(() => setShowToast(false), 2000);
-      playSound("bookmark");
+      playSound('bookmark');
     }
   };
 
@@ -55,17 +55,17 @@ export function BookmarkButton({ isSaved, onToggle, className, onViewAll }: Book
         type="button"
         onClick={handleClick}
         className={cn(
-          "dd-touch dd-focus-ring w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer shrink-0",
+          'dd-touch dd-focus-ring w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer shrink-0',
           saved
-            ? "text-orange-500 hover:bg-orange-500/10"
-            : "text-dd-muted hover:text-dd-text hover:bg-orange-500/10",
+            ? 'text-orange-500 hover:bg-orange-500/10'
+            : 'text-dd-muted hover:text-dd-text hover:bg-orange-500/10',
           className
         )}
         whileTap={reduced ? undefined : { scale: [1, 1.2, 1] }}
         transition={{ duration: 0.3 }}
-        title={saved ? "Remover dos salvos" : "Salvar"}
+        title={saved ? 'Remover dos salvos' : 'Salvar'}
       >
-        <Bookmark className={cn("w-4 h-4", saved && "fill-current")} />
+        <Bookmark className={cn('w-4 h-4', saved && 'fill-current')} />
       </motion.button>
 
       <AnimatePresence>

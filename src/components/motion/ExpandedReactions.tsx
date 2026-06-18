@@ -1,28 +1,25 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { ArrowBigUp } from "lucide-react";
-import { cn } from "@/lib/cn";
-import { AnimatedCounter } from "./AnimatedCounter";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { useLongPress } from "@/hooks/useLongPress";
-import {
-  reactionPickerVariants,
-  reactionItemVariants,
-} from "@/lib/motion";
+import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ArrowBigUp } from 'lucide-react';
+import { cn } from '@/lib/cn';
+import { AnimatedCounter } from './AnimatedCounter';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { useLongPress } from '@/hooks/useLongPress';
+import { reactionPickerVariants, reactionItemVariants } from '@/lib/motion';
 
 const PARTICLE_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
 
 const REACTIONS = [
-  { emoji: "\u{1F525}", label: "Fogo", color: "#f97316" },
-  { emoji: "\u2764\uFE0F", label: "Curtir", color: "#ef4444" },
-  { emoji: "\u{1F602}", label: "Haha", color: "#f5a623" },
-  { emoji: "\u{1F44F}", label: "Aplausos", color: "#22d48a" },
-  { emoji: "\u{1F4A1}", label: "Insight", color: "#5ba3f5" },
+  { emoji: '\u{1F525}', label: 'Fogo', color: '#f97316' },
+  { emoji: '\u2764\uFE0F', label: 'Curtir', color: '#ef4444' },
+  { emoji: '\u{1F602}', label: 'Haha', color: '#f5a623' },
+  { emoji: '\u{1F44F}', label: 'Aplausos', color: '#22d48a' },
+  { emoji: '\u{1F4A1}', label: 'Insight', color: '#5ba3f5' },
 ] as const;
 
-type ReactionType = typeof REACTIONS[number]["emoji"] | null;
+type ReactionType = (typeof REACTIONS)[number]['emoji'] | null;
 
 interface ExpandedReactionButtonProps {
   isActive: boolean;
@@ -39,7 +36,7 @@ export function ExpandedReactionButton({
 }: ExpandedReactionButtonProps) {
   const [bursting, setBursting] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [particleColor, setParticleColor] = useState("#f97316");
+  const [particleColor, setParticleColor] = useState('#f97316');
   const reduced = useReducedMotion();
 
   const handleQuickReact = () => {
@@ -47,13 +44,13 @@ export function ExpandedReactionButton({
     const willActivate = !isActive;
     if (willActivate && !reduced) {
       setBursting(true);
-      setParticleColor("#f97316");
+      setParticleColor('#f97316');
       setTimeout(() => setBursting(false), 400);
     }
     onReact(null);
   };
 
-  const handlePickerReact = (reaction: typeof REACTIONS[number]) => {
+  const handlePickerReact = (reaction: (typeof REACTIONS)[number]) => {
     setPickerOpen(false);
     if (!reduced) {
       setBursting(true);
@@ -69,9 +66,7 @@ export function ExpandedReactionButton({
     threshold: 400,
   });
 
-  const activeEmoji = activeReaction
-    ? REACTIONS.find((r) => r.emoji === activeReaction)
-    : null;
+  const activeEmoji = activeReaction ? REACTIONS.find((r) => r.emoji === activeReaction) : null;
 
   return (
     <div className="relative flex items-center">
@@ -80,8 +75,10 @@ export function ExpandedReactionButton({
         {...longPressHandlers}
         title={title}
         className={cn(
-          "dd-touch dd-focus-ring dd-gpu relative p-1.5 rounded-md transition-colors cursor-pointer select-none",
-          isActive ? "text-orange-500 hover:bg-orange-500/10" : "text-dd-muted hover:text-dd-text hover:bg-orange-500/10"
+          'dd-touch dd-focus-ring dd-gpu relative p-1.5 rounded-md transition-colors cursor-pointer select-none',
+          isActive
+            ? 'text-orange-500 hover:bg-orange-500/10'
+            : 'text-dd-muted hover:text-dd-text hover:bg-orange-500/10'
         )}
         whileTap={reduced ? undefined : { scale: [1, 1.35, 1.1, 1] }}
         transition={{ duration: 0.3, times: [0, 0.35, 0.7, 1] }}
@@ -98,10 +95,10 @@ export function ExpandedReactionButton({
               key={i}
               className="absolute top-1/2 left-1/2 w-1.5 h-1.5 -ml-[3px] -mt-[3px] rounded-full pointer-events-none"
               style={{
-                backgroundColor: isActive ? "#a1a1aa" : particleColor,
-                ["--tx" as string]: `${Math.cos((deg * Math.PI) / 180) * 16}px`,
-                ["--ty" as string]: `${Math.sin((deg * Math.PI) / 180) * 16}px`,
-                animation: "dd-particle 400ms ease-out forwards",
+                backgroundColor: isActive ? '#a1a1aa' : particleColor,
+                ['--tx' as string]: `${Math.cos((deg * Math.PI) / 180) * 16}px`,
+                ['--ty' as string]: `${Math.sin((deg * Math.PI) / 180) * 16}px`,
+                animation: 'dd-particle 400ms ease-out forwards',
               }}
             />
           ))}
@@ -110,10 +107,7 @@ export function ExpandedReactionButton({
       <AnimatePresence>
         {pickerOpen && (
           <>
-            <div
-              className="fixed inset-0 z-40"
-              onClick={() => setPickerOpen(false)}
-            />
+            <div className="fixed inset-0 z-40" onClick={() => setPickerOpen(false)} />
             <motion.div
               className="absolute bottom-full left-0 mb-2 z-50 flex gap-1 bg-dd-surface border border-dd-border rounded-full px-2 py-1.5 shadow-xl"
               variants={reactionPickerVariants}

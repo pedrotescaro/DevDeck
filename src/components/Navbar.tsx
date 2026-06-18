@@ -51,10 +51,10 @@ export function Navbar({ user }: NavbarProps) {
     try {
       const supabase = createClient();
       await supabase.auth.signOut();
-      router.push("/");
+      router.push('/');
       router.refresh();
     } catch (err) {
-      console.error("Error signing out:", err);
+      console.error('Error signing out:', err);
     }
   };
 
@@ -63,19 +63,22 @@ export function Navbar({ user }: NavbarProps) {
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* Left: Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <img src="/logo.png" alt="DevDeck Logo" className="w-5 h-5 object-contain hidden dark:block" />
-          <img src="/logo-light.png" alt="DevDeck Logo" className="w-5 h-5 object-contain block dark:hidden" />
-          <span className="text-dd-text font-semibold text-lg tracking-tight">
-            DevDeck
-          </span>
+          <img
+            src="/logo.png"
+            alt="DevDeck Logo"
+            className="w-5 h-5 object-contain hidden dark:block"
+          />
+          <img
+            src="/logo-light.png"
+            alt="DevDeck Logo"
+            className="w-5 h-5 object-contain block dark:hidden"
+          />
+          <span className="text-dd-text font-semibold text-lg tracking-tight">DevDeck</span>
         </Link>
 
         {/* Desktop right section */}
         <div className="hidden md:flex items-center gap-4">
-          <Link
-            href="/feed"
-            className="text-dd-muted hover:text-dd-text text-sm transition-colors"
-          >
+          <Link href="/feed" className="text-dd-muted hover:text-dd-text text-sm transition-colors">
             Feed
           </Link>
           <Link
@@ -93,36 +96,34 @@ export function Navbar({ user }: NavbarProps) {
 
           {user ? (
             <div className="flex items-center gap-3 relative">
-              {user.streak != null && user.streak > 0 && (
-                <StreakBadge streak={user.streak} />
-              )}
+              {user.streak != null && user.streak > 0 && <StreakBadge streak={user.streak} />}
               <div className="relative">
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                   className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer focus:outline-none"
                 >
                   <UserAvatar user={user} size={32} />
-                  <span className="text-dd-text text-sm font-medium">
-                    {user.username}
-                  </span>
+                  <span className="text-dd-text text-sm font-medium">{user.username}</span>
                   <svg
                     className={`w-4 h-4 text-dd-muted transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`}
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </button>
 
                 {dropdownOpen && (
                   <>
                     {/* Backdrop to close dropdown */}
-                    <div
-                      className="fixed inset-0 z-10"
-                      onClick={() => setDropdownOpen(false)}
-                    />
-                    
+                    <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)} />
+
                     <div className="absolute right-0 mt-2 w-48 rounded-lg border border-dd-border bg-dd-surface shadow-xl z-20 py-1 font-sans">
                       <Link
                         href={`/profile/${user.username}`}
@@ -233,9 +234,7 @@ export function Navbar({ user }: NavbarProps) {
           {user ? (
             <div className="pt-2 border-t border-dd-border flex flex-col gap-2">
               <div className="flex items-center gap-3">
-                {user.streak != null && user.streak > 0 && (
-                  <StreakBadge streak={user.streak} />
-                )}
+                {user.streak != null && user.streak > 0 && <StreakBadge streak={user.streak} />}
                 <Link
                   href={`/profile/${user.username}`}
                   className="flex items-center gap-2"

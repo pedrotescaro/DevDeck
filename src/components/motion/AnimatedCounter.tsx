@@ -1,23 +1,23 @@
-"use client";
-import { AnimatePresence, motion } from "framer-motion";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
+'use client';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 interface AnimatedCounterProps {
   value: number;
   className?: string;
 }
 
-export function AnimatedCounter({ value, className = "" }: AnimatedCounterProps) {
+export function AnimatedCounter({ value, className = '' }: AnimatedCounterProps) {
   const reduced = useReducedMotion();
 
   if (reduced) {
-    return (
-      <span className={`tabular-nums font-mono ${className}`}>{value}</span>
-    );
+    return <span className={`tabular-nums font-mono ${className}`}>{value}</span>;
   }
 
   return (
-    <span className={`relative inline-flex overflow-hidden h-4 items-center tabular-nums font-mono ${className}`}>
+    <span
+      className={`relative inline-flex overflow-hidden h-4 items-center tabular-nums font-mono ${className}`}
+    >
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.span
           key={value}

@@ -1,8 +1,12 @@
-import { prisma } from "@/lib/prisma";
-import { Language } from "@prisma/client";
+import { prisma } from '@/lib/prisma';
+import { Language } from '@prisma/client';
 
 // Mapeamento de níveis baseado nas faixas de XP do seed do banco de dados
-export function calculateLevel(xp: number): { level: number; nextLevelXp: number; prevLevelXp: number } {
+export function calculateLevel(xp: number): {
+  level: number;
+  nextLevelXp: number;
+  prevLevelXp: number;
+} {
   if (xp < 500) return { level: 1, nextLevelXp: 500, prevLevelXp: 0 };
   if (xp < 800) return { level: 2, nextLevelXp: 800, prevLevelXp: 500 };
   if (xp < 1100) return { level: 3, nextLevelXp: 1100, prevLevelXp: 800 };
@@ -28,7 +32,11 @@ export function calculateLevel(xp: number): { level: number; nextLevelXp: number
 }
 
 // Função para conceder XP e atualizar dados de gamificação
-export async function awardXP(userId: string, language: Language | null | undefined, amount: number) {
+export async function awardXP(
+  userId: string,
+  language: Language | null | undefined,
+  amount: number
+) {
   if (!language) {
     const updatedUser = await prisma.user.update({
       where: { id: userId },
@@ -77,11 +85,15 @@ export async function awardXP(userId: string, language: Language | null | undefi
       // Calcular Streak
       if (trail.last_activity_at) {
         const lastActivity = new Date(trail.last_activity_at);
-        
+
         // Formatar datas para comparação sem horas
-        const lastDate = new Date(lastActivity.getFullYear(), lastActivity.getMonth(), lastActivity.getDate());
+        const lastDate = new Date(
+          lastActivity.getFullYear(),
+          lastActivity.getMonth(),
+          lastActivity.getDate()
+        );
         const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        
+
         const diffTime = Math.abs(currentDate.getTime() - lastDate.getTime());
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -150,42 +162,42 @@ async function checkBadgeEligibility(tx: any, userId: string, currentStreak: num
   const badgesToAward: string[] = [];
 
   // 1. Badge: Streak de 7 dias
-  if (currentStreak >= 7 && !earnedSlugs.has("streak_7")) {
-    badgesToAward.push("streak_7");
+  if (currentStreak >= 7 && !earnedSlugs.has('streak_7')) {
+    badgesToAward.push('streak_7');
   }
 
   // 2. Badge: Streak de 30 dias
-  if (currentStreak >= 30 && !earnedSlugs.has("streak_30")) {
-    badgesToAward.push("streak_30");
+  if (currentStreak >= 30 && !earnedSlugs.has('streak_30')) {
+    badgesToAward.push('streak_30');
   }
 
   // 3. Badge: Primeira Resposta (primeira resposta no fórum)
-  if (!earnedSlugs.has("first_answer")) {
+  if (!earnedSlugs.has('first_answer')) {
     const answerCount = await tx.answer.count({
       where: { author_id: userId },
     });
     if (answerCount > 0) {
-      badgesToAward.push("first_answer");
+      badgesToAward.push('first_answer');
     }
   }
 
   // 4. Badge: 5 Respostas Aceitas
-  if (!earnedSlugs.has("accepted_5")) {
+  if (!earnedSlugs.has('accepted_5')) {
     const acceptedCount = await tx.answer.count({
       where: { author_id: userId, is_accepted: true },
     });
     if (acceptedCount >= 5) {
-      badgesToAward.push("accepted_5");
+      badgesToAward.push('accepted_5');
     }
   }
 
   // 5. Badge: Quiz Master (5 acertos em quizzes)
-  if (!earnedSlugs.has("quiz_master")) {
+  if (!earnedSlugs.has('quiz_master')) {
     const correctAttempts = await tx.quizAttempt.count({
       where: { user_id: userId, is_correct: true },
     });
     if (correctAttempts >= 5) {
-      badgesToAward.push("quiz_master");
+      badgesToAward.push('quiz_master');
     }
   }
 

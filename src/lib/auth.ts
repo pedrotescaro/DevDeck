@@ -1,5 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
-import { prisma } from "@/lib/prisma";
+import { createClient } from '@/lib/supabase/server';
+import { prisma } from '@/lib/prisma';
 
 export async function getAuthUser() {
   try {
@@ -23,14 +23,16 @@ export async function getAuthUser() {
     });
 
     if (!dbUser) {
-      console.warn(`Orphaned Supabase session detected for user ${supabaseUser.id}. Signing out...`);
+      console.warn(
+        `Orphaned Supabase session detected for user ${supabaseUser.id}. Signing out...`
+      );
       await supabase.auth.signOut();
       return null;
     }
 
     return dbUser;
   } catch (error) {
-    console.error("Error in getAuthUser:", error);
+    console.error('Error in getAuthUser:', error);
     return null;
   }
 }
