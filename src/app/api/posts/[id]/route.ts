@@ -28,6 +28,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
           },
         },
         answers: {
+          // Only top-level answers here; nested replies come embedded via `replies`.
+          where: { parent_id: null },
           orderBy: { created_at: 'asc' },
           include: {
             author: {
@@ -37,6 +39,28 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
               },
             },
             votes: user ? { where: { user_id: user.id } } : { where: { id: 'none' } },
+            // Nested replies up to 3 levels deep (matches the UI indent cap).
+            replies: {
+              orderBy: { created_at: 'asc' },
+              include: {
+                author: { select: { username: true, avatar_url: true } },
+                votes: user ? { where: { user_id: user.id } } : { where: { id: 'none' } },
+                replies: {
+                  orderBy: { created_at: 'asc' },
+                  include: {
+                    author: { select: { username: true, avatar_url: true } },
+                    votes: user ? { where: { user_id: user.id } } : { where: { id: 'none' } },
+                    replies: {
+                      orderBy: { created_at: 'asc' },
+                      include: {
+                        author: { select: { username: true, avatar_url: true } },
+                        votes: user ? { where: { user_id: user.id } } : { where: { id: 'none' } },
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
         quizzes: {

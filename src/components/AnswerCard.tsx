@@ -1,42 +1,31 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle, MessageSquare, BarChart2, Share } from 'lucide-react';
+import { MessageSquare, BarChart2, Share } from 'lucide-react';
 import { formatRelativeTime } from '@/lib/date';
 import { LikeButton } from '@/components/motion/LikeButton';
 import { BookmarkButton } from '@/components/motion/BookmarkButton';
 import { RepostMenu } from '@/components/motion/RepostMenu';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { MarkdownEditor } from '@/components/MarkdownEditor';
-
-interface AnswerAuthor {
-  username: string;
-  total_xp?: number;
-}
-
-interface Answer {
-  id: string;
-  post_id?: string;
-  body: string;
-  code_snippet?: string | null;
-  is_accepted: boolean;
-  upvotes: number;
-  created_at: string;
-  author: AnswerAuthor;
-  votes?: { value: number }[];
-}
+import { AuthorAvatar } from '@/components/AuthorAvatar';
+import type { AnswerNode } from '@/components/answer-types';
+import { MAX_ANSWER_DEPTH } from '@/components/answer-types';
 
 interface AnswerCardProps {
-  answer: Answer;
+  answer: AnswerNode;
+  /** Indentation depth: 0 = top-level reply to the post, 1 = reply to a top-level answer, etc. */
+  depth: number;
   isPostAuthor: boolean;
   onAccept?: (id: string) => void;
-  currentUser?: { username: string; avatar_url?: string | null };
-  onAnswerAdded?: (newAnswer: any) => void;
+  currentUser?: { id?: string; username: string; avatar_url?: string | null };
+  onAnswerAdded?: (parentAnswerId: string | null, newAnswer: AnswerNode) => void;
   postId?: string;
 }
 
 export function AnswerCard({
   answer,
+  depth,
   isPostAuthor,
   onAccept,
   currentUser,
@@ -66,7 +55,10 @@ export function AnswerCard({
       const res = await fetch(`/api/posts/${targetPostId}/answer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ body: replyText }),
+        body: JSON.stringify({
+          body: replyText,
+          parent_answer_id: answer.id,
+        }),
       });
 
       if (!res.ok) {
@@ -75,7 +67,8 @@ export function AnswerCard({
 
       const data = await res.json();
       if (onAnswerAdded) {
-        onAnswerAdded(data.answer);
+        // Pass the parent answer id so the tree can insert the reply in the right place.
+        onAnswerAdded(answer.id, data.answer as AnswerNode);
       }
 
       setReplyText(`@${answer.author.username} `);
@@ -180,126 +173,26 @@ export function AnswerCard({
   };
 
   const relativeTime = formatRelativeTime(answer.created_at);
+  const replies = answer.replies ?? [];
+  const hasReplies = replies.length > 0;
+
+  // Beyond the indent cap, replies are rendered flat and get a "replying to" badge.
+  const childDepth = depth + 1;
+  const shouldIndentChildren = childDepth <= MAX_ANSWER_DEPTH;
 
   return (
-    <article
-      className={`bg-dd-card border rounded-xl p-5 ${
-        answer.is_accepted ? 'border-dd-green/40' : 'border-dd-border'
-      }`}
-    >
-      {/* Accepted badge */}
-      {answer.is_accepted && (
-        <div className="flex items-center gap-1.5 text-dd-green text-xs font-medium mb-3">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M20 6L9 17l-5-5" />
-          </svg>
-          Resposta aceita
-        </div>
-      )}
-
-      {/* Header */}
-      <div className="flex items-center gap-2 mb-3">
-        <div className="w-6 h-6 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-semibold">
-          {answer.author.username.slice(0, 2).toUpperCase()}
-        </div>
-        <span className="text-dd-text text-sm font-medium">{answer.author.username}</span>
-        <span className="text-dd-muted text-xs">{relativeTime}</span>
-      </div>
-
-      {/* Body */}
-      <div className="mb-3">
-        <MarkdownRenderer content={answer.body} compact={false} />
-      </div>
-
-      {/* Legacy code snippet fallback */}
-      {answer.code_snippet && !answer.body.includes('```') && (
-        <div className="bg-dd-bg rounded-lg p-3 mb-3 overflow-x-auto">
-          <pre className="text-dd-text text-xs font-mono whitespace-pre">{answer.code_snippet}</pre>
-        </div>
-      )}
-
-      {/* Footer */}
-      <div className="flex items-center justify-between pt-3 border-t border-dd-border w-full select-none text-xs gap-3">
-        <div className="flex items-center justify-between flex-grow max-w-xl">
-          {/* 1. Comment bubble */}
-          <button
-            type="button"
-            onClick={() => {
-              setShowReplyBox(!showReplyBox);
-              if (!showReplyBox) {
-                setReplyText(`@${answer.author.username} `);
-              }
-            }}
-            className="flex items-center gap-0.5 text-dd-muted select-none hover:text-orange-400 cursor-pointer group/comment border-none bg-transparent active:scale-[0.95] transition-transform"
-            title="Responder a este comentário"
-          >
-            <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-500/10 transition-colors animate-none">
-              <MessageSquare className="w-3.5 h-3.5 text-dd-muted group-hover/comment:text-orange-400" />
-            </div>
-          </button>
-
-          {/* 2. Repost Menu */}
-          <RepostMenu
-            count={repostCount}
-            isReposted={reposted}
-            onRepost={() => {
-              setReposted(!reposted);
-              setRepostCount((prev) => (reposted ? prev - 1 : prev + 1));
-            }}
-            onQuote={() => alert('Citação de resposta mockada!')}
-          />
-
-          {/* 3. Heart/Like button */}
-          <LikeButton
-            count={voteCount}
-            isActive={userVote === 'up'}
-            onToggle={() => handleVote('up')}
-            title="Curtir resposta"
-          />
-
-          {/* 4. Views BarChart */}
-          <div className="flex items-center gap-0.5 text-dd-muted select-none group/views">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-500/10 hover:text-orange-400 transition-colors animate-none">
-              <BarChart2 className="w-4 h-4 text-dd-muted group-hover/views:text-orange-400" />
-            </div>
-            <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/views:text-orange-400">
-              {Math.abs(voteCount) * 4 + 12}
-            </span>
-          </div>
-
-          {/* 5. BookmarkButton */}
-          <BookmarkButton isSaved={isBookmarked} onToggle={() => setIsBookmarked(!isBookmarked)} />
-
-          {/* 6. Share button */}
-          <button
-            type="button"
-            onClick={handleShare}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-dd-muted hover:text-orange-500 hover:bg-orange-500/10 transition-colors cursor-pointer shrink-0"
-            title="Compartilhar"
-          >
-            <Share className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {/* 7. Accept Button */}
-        {isPostAuthor && !answer.is_accepted && (
-          <button
-            onClick={handleAccept}
-            disabled={accepting}
-            className="flex items-center gap-1 text-[10px] font-bold text-dd-green bg-dd-green/10 hover:bg-dd-green/20 px-2.5 py-1.5 rounded-full transition-colors disabled:opacity-50 shrink-0"
-          >
+    <article className="space-y-1">
+      <div
+        className={`bg-dd-card border rounded-xl p-5 ${
+          answer.is_accepted ? 'border-dd-green/40' : 'border-dd-border'
+        }`}
+      >
+        {/* Accepted badge */}
+        {answer.is_accepted && (
+          <div className="flex items-center gap-1.5 text-dd-green text-xs font-medium mb-3">
             <svg
-              width="12"
-              height="12"
+              width="16"
+              height="16"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -309,61 +202,219 @@ export function AnswerCard({
             >
               <path d="M20 6L9 17l-5-5" />
             </svg>
-            Aceitar
-          </button>
+            Resposta aceita
+          </div>
+        )}
+
+        {/* Header */}
+        <div className="flex items-center gap-2 mb-3">
+          <AuthorAvatar
+            username={answer.author.username}
+            avatar_url={answer.author.avatar_url}
+            size="sm"
+          />
+          <span className="text-dd-text text-sm font-medium">{answer.author.username}</span>
+          <span className="text-dd-muted text-xs">{relativeTime}</span>
+        </div>
+
+        {/* Body */}
+        <div className="mb-3">
+          <MarkdownRenderer content={answer.body} compact={false} />
+        </div>
+
+        {/* Legacy code snippet fallback */}
+        {answer.code_snippet && !answer.body.includes('```') && (
+          <div className="bg-dd-bg rounded-lg p-3 mb-3 overflow-x-auto">
+            <pre className="text-dd-text text-xs font-mono whitespace-pre">
+              {answer.code_snippet}
+            </pre>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="flex items-center justify-between pt-3 border-t border-dd-border w-full select-none text-xs gap-3">
+          <div className="flex items-center justify-between flex-grow max-w-xl">
+            {/* 1. Comment bubble */}
+            <button
+              type="button"
+              onClick={() => {
+                setShowReplyBox(!showReplyBox);
+                if (!showReplyBox) {
+                  setReplyText(`@${answer.author.username} `);
+                }
+              }}
+              className="flex items-center gap-0.5 text-dd-muted select-none hover:text-orange-400 cursor-pointer group/comment border-none bg-transparent active:scale-[0.95] transition-transform"
+              title="Responder a este comentário"
+            >
+              <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-500/10 transition-colors animate-none">
+                <MessageSquare className="w-3.5 h-3.5 text-dd-muted group-hover/comment:text-orange-400" />
+              </div>
+            </button>
+
+            {/* 2. Repost Menu */}
+            <RepostMenu
+              count={repostCount}
+              isReposted={reposted}
+              onRepost={() => {
+                setReposted(!reposted);
+                setRepostCount((prev) => (reposted ? prev - 1 : prev + 1));
+              }}
+              onQuote={() => alert('Citação de resposta mockada!')}
+            />
+
+            {/* 3. Heart/Like button */}
+            <LikeButton
+              count={voteCount}
+              isActive={userVote === 'up'}
+              onToggle={() => handleVote('up')}
+              title="Curtir resposta"
+            />
+
+            {/* 4. Views BarChart */}
+            <div className="flex items-center gap-0.5 text-dd-muted select-none group/views">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-500/10 hover:text-orange-400 transition-colors animate-none">
+                <BarChart2 className="w-4 h-4 text-dd-muted group-hover/views:text-orange-400" />
+              </div>
+              <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/views:text-orange-400">
+                {Math.abs(voteCount) * 4 + 12}
+              </span>
+            </div>
+
+            {/* 5. BookmarkButton */}
+            <BookmarkButton
+              isSaved={isBookmarked}
+              onToggle={() => setIsBookmarked(!isBookmarked)}
+            />
+
+            {/* 6. Share button */}
+            <button
+              type="button"
+              onClick={handleShare}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-dd-muted hover:text-orange-500 hover:bg-orange-500/10 transition-colors cursor-pointer shrink-0"
+              title="Compartilhar"
+            >
+              <Share className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* 7. Accept Button */}
+          {isPostAuthor && !answer.is_accepted && (
+            <button
+              onClick={handleAccept}
+              disabled={accepting}
+              className="flex items-center gap-1 text-[10px] font-bold text-dd-green bg-dd-green/10 hover:bg-dd-green/20 px-2.5 py-1.5 rounded-full transition-colors disabled:opacity-50 shrink-0"
+            >
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+              Aceitar
+            </button>
+          )}
+        </div>
+        {showReplyBox && (
+          <form
+            onSubmit={handleReplySubmit}
+            className="mt-4 pt-4 border-t border-dd-border/60 flex gap-3"
+          >
+            <div className="shrink-0">
+              {currentUser?.avatar_url ? (
+                <img
+                  src={currentUser.avatar_url}
+                  alt={currentUser.username}
+                  className="w-8 h-8 rounded-full object-cover border border-dd-border"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold border border-orange-500/10">
+                  {currentUser?.username?.slice(0, 2).toUpperCase() || 'ME'}
+                </div>
+              )}
+            </div>
+            <div className="flex-grow space-y-2">
+              <MarkdownEditor
+                value={replyText}
+                onChange={setReplyText}
+                maxLength={280}
+                minHeight="5rem"
+                placeholder={`Responder a @${answer.author.username}...`}
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowReplyBox(false);
+                    setReplyText(`@${answer.author.username} `);
+                  }}
+                  className="px-3 py-1.5 rounded-lg border border-dd-border text-xs font-bold text-dd-muted hover:text-dd-text hover:bg-dd-border/30 transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={
+                    replySubmitting ||
+                    !replyText.trim() ||
+                    replyText.trim() === `@${answer.author.username}`
+                  }
+                  className="px-3 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-xs font-bold text-white transition-all duration-200 active:scale-[0.97] cursor-pointer disabled:opacity-50"
+                >
+                  {replySubmitting ? 'Enviando...' : 'Responder'}
+                </button>
+              </div>
+            </div>
+          </form>
         )}
       </div>
-      {showReplyBox && (
-        <form
-          onSubmit={handleReplySubmit}
-          className="mt-4 pt-4 border-t border-dd-border/60 flex gap-3"
+
+      {/* Nested replies */}
+      {hasReplies && (
+        <div
+          className={
+            shouldIndentChildren
+              ? 'pl-4 sm:pl-6 ml-3 sm:ml-5 border-l border-dd-border/50 space-y-1'
+              : 'space-y-1'
+          }
         >
-          <div className="shrink-0">
-            {currentUser?.avatar_url ? (
-              <img
-                src={currentUser.avatar_url}
-                alt={currentUser.username}
-                className="w-8 h-8 rounded-full object-cover border border-dd-border"
+          {replies.map((reply) =>
+            shouldIndentChildren ? (
+              <AnswerCard
+                key={reply.id}
+                answer={reply}
+                depth={childDepth}
+                isPostAuthor={isPostAuthor}
+                onAccept={onAccept}
+                currentUser={currentUser}
+                postId={postId}
+                onAnswerAdded={onAnswerAdded}
               />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold border border-orange-500/10">
-                {currentUser?.username?.slice(0, 2).toUpperCase() || 'ME'}
+              <div key={reply.id} className="pt-2">
+                {/* Beyond the indent cap: flat list with a "replying to" badge to keep context. */}
+                <div className="flex items-center gap-1.5 px-2 mb-0.5 text-dd-muted text-[10px] font-semibold">
+                  <span>↳</span>
+                  <span>respondendo a @{answer.author.username}</span>
+                </div>
+                <AnswerCard
+                  answer={reply}
+                  depth={childDepth}
+                  isPostAuthor={isPostAuthor}
+                  onAccept={onAccept}
+                  currentUser={currentUser}
+                  postId={postId}
+                  onAnswerAdded={onAnswerAdded}
+                />
               </div>
-            )}
-          </div>
-          <div className="flex-grow space-y-2">
-            <MarkdownEditor
-              value={replyText}
-              onChange={setReplyText}
-              maxLength={280}
-              minHeight="5rem"
-              placeholder={`Responder a @${answer.author.username}...`}
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowReplyBox(false);
-                  setReplyText(`@${answer.author.username} `);
-                }}
-                className="px-3 py-1.5 rounded-lg border border-dd-border text-xs font-bold text-dd-muted hover:text-dd-text hover:bg-dd-border/30 transition-colors cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={
-                  replySubmitting ||
-                  !replyText.trim() ||
-                  replyText.trim() === `@${answer.author.username}`
-                }
-                className="px-3 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-xs font-bold text-white transition-all duration-200 active:scale-[0.97] cursor-pointer disabled:opacity-50"
-              >
-                {replySubmitting ? 'Enviando...' : 'Responder'}
-              </button>
-            </div>
-          </div>
-        </form>
+            )
+          )}
+        </div>
       )}
     </article>
   );

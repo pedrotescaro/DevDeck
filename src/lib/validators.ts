@@ -107,6 +107,7 @@ export const createAnswerSchema = z.object({
     .trim()
     .pipe(mentionSchema),
   code_snippet: z.string().optional().nullable(),
+  parent_answer_id: z.string().uuid().optional().nullable(),
 });
 
 export const quizAttemptSchema = z.object({

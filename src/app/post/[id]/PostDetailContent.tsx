@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { Sidebar } from '@/components/Sidebar';
 import { LanguageTag } from '@/components/LanguageTag';
 import { QuizWidget } from '@/components/QuizWidget';
-import { AnswerCard } from '@/components/AnswerCard';
+import { AnswerThread } from '@/components/AnswerThread';
+import type { AnswerNode } from '@/components/answer-types';
 import { MarkdownEditor, type NotionEditorRef } from '@/components/MarkdownEditor';
 import { Footer } from '@/components/Footer';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
@@ -28,6 +29,40 @@ interface PostDetailContentProps {
   };
   post: any;
   initialIsSaved?: boolean;
+}
+
+/**
+ * Recursively inserts a new reply into the answer tree under the answer whose
+ * id matches `parentId`. Returns a new tree (does not mutate the input).
+ * If the parent cannot be found (e.g. its level wasn't fetched from the server
+ * because it was beyond the include depth), the reply is appended to the
+ * nearest ancestor that was found, so it still surfaces in the UI.
+ */
+function insertReplyIntoTree(
+  answers: AnswerNode[],
+  parentId: string,
+  newReply: AnswerNode
+): AnswerNode[] {
+  const insert = (node: AnswerNode): AnswerNode => {
+    if (node.id === parentId) {
+      return { ...node, replies: [...(node.replies ?? []), newReply] };
+    }
+    if (node.replies && node.replies.length > 0) {
+      return { ...node, replies: node.replies.map(insert) };
+    }
+    return node;
+  };
+
+  const next = answers.map(insert);
+  return next.some((node) => node.id === parentId || containsId(node.replies, parentId))
+    ? next
+    : [...next, newReply];
+}
+
+/** Returns true if the given id exists anywhere in the answer subtree. */
+function containsId(answers: AnswerNode[] | undefined, id: string): boolean {
+  if (!answers) return false;
+  return answers.some((node) => node.id === id || containsId(node.replies, id));
 }
 
 export function PostDetailContent({
@@ -687,39 +722,26 @@ export function PostDetailContent({
           </div>
 
           {/* Answers List Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <MessageSquare className="w-4.5 h-4.5 text-orange-500/85" />
-              <h2 className="text-sm font-extrabold text-dd-text">
-                Respostas ({post.answers?.length || 0})
-              </h2>
-            </div>
-
-            {post.answers?.length === 0 ? (
-              <div className="rounded-xl border border-dd-border bg-dd-surface/10 p-8 text-center text-dd-muted text-xs">
-                Nenhuma resposta publicada ainda. Seja o primeiro a ajudar o autor!
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {post.answers.map((answer: any) => (
-                  <AnswerCard
-                    key={answer.id}
-                    answer={answer}
-                    isPostAuthor={isPostAuthor}
-                    onAccept={handleAcceptAnswer}
-                    currentUser={user}
-                    postId={post.id}
-                    onAnswerAdded={(newAnswer) => {
-                      setPost((prev: any) => ({
-                        ...prev,
-                        answers: [...(prev.answers || []), newAnswer],
-                      }));
-                    }}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+          <AnswerThread
+            answers={post.answers ?? []}
+            isPostAuthor={isPostAuthor}
+            currentUser={{
+              id: user.id,
+              username: user.username,
+              avatar_url: user.avatar_url,
+            }}
+            postId={post.id}
+            onAccept={handleAcceptAnswer}
+            onAnswerAdded={(parentAnswerId, newAnswer) => {
+              setPost((prev: any) => {
+                const roots: AnswerNode[] = prev.answers ?? [];
+                const next = parentAnswerId
+                  ? insertReplyIntoTree(roots, parentAnswerId, newAnswer)
+                  : [...roots, newAnswer];
+                return { ...prev, answers: next };
+              });
+            }}
+          />
         </main>
         <Footer />
       </div>

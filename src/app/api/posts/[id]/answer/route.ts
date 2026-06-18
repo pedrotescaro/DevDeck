@@ -23,11 +23,35 @@ export const POST = apiHandler(async (req, { params }) => {
   const body = await req.json();
   const parsed = createAnswerSchema.parse(body);
 
+  // If replying to another answer, validate the parent exists and belongs to the same post.
+  // This prevents orphan/cross-post replies and keeps the thread consistent.
+  let parentId: string | null = null;
+  if (parsed.parent_answer_id) {
+    const parentAnswer = await prisma.answer.findUnique({
+      where: { id: parsed.parent_answer_id },
+      select: { id: true, post_id: true, author_id: true },
+    });
+
+    if (!parentAnswer) {
+      throw new NotFoundError('PARENT_ANSWER_NOT_FOUND', 'Comentário pai não encontrado');
+    }
+
+    if (parentAnswer.post_id !== postId) {
+      throw new NotFoundError(
+        'PARENT_ANSWER_MISMATCH',
+        'O comentário pai não pertence a este post'
+      );
+    }
+
+    parentId = parentAnswer.id;
+  }
+
   // Create answer
   const answer = await prisma.answer.create({
     data: {
       post_id: postId,
       author_id: user.id,
+      parent_id: parentId,
       body: parsed.body,
       code_snippet: parsed.code_snippet || null,
     },

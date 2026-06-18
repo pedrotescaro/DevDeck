@@ -39,6 +39,8 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
         },
       },
       answers: {
+        // Only top-level answers here; nested replies come embedded via `replies`.
+        where: { parent_id: null },
         orderBy: { created_at: 'asc' },
         include: {
           author: {
@@ -49,6 +51,28 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
           },
           votes: {
             where: { user_id: user.id },
+          },
+          // Nested replies up to 3 levels deep (matches the UI indent cap).
+          replies: {
+            orderBy: { created_at: 'asc' },
+            include: {
+              author: { select: { username: true, avatar_url: true } },
+              votes: { where: { user_id: user.id } },
+              replies: {
+                orderBy: { created_at: 'asc' },
+                include: {
+                  author: { select: { username: true, avatar_url: true } },
+                  votes: { where: { user_id: user.id } },
+                  replies: {
+                    orderBy: { created_at: 'asc' },
+                    include: {
+                      author: { select: { username: true, avatar_url: true } },
+                      votes: { where: { user_id: user.id } },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },

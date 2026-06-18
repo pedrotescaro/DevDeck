@@ -103,15 +103,20 @@ model Answer {
   id           String   @id @default(uuid())
   post_id      String
   author_id    String
+  parent_id    String?
   body         String
   code_snippet String?
   is_accepted  Boolean  @default(false)
   upvotes      Int      @default(0)
   created_at   DateTime @default(now())
 
-  post   Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
-  author User @relation(fields: [author_id], references: [id], onDelete: Cascade)
-  votes  AnswerVote[]
+  post    Post     @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  author  User     @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  parent  Answer?  @relation("AnswerReplies", fields: [parent_id], references: [id], onDelete: Cascade)
+  replies Answer[] @relation("AnswerReplies")
+  votes   AnswerVote[]
+
+  @@index([parent_id])
 }
 
 model Quiz {
