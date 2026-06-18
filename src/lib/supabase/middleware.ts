@@ -32,9 +32,15 @@ export async function updateSession(request: NextRequest) {
 
   // IMPORTANT: DO NOT remove getUser().
   // It is required to refresh the session and prevent random logouts.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const {
+      data: { user: supabaseUser },
+    } = await supabase.auth.getUser();
+    user = supabaseUser;
+  } catch (error) {
+    console.error("Supabase auth error in middleware:", error);
+  }
 
   const pathname = request.nextUrl.pathname;
 

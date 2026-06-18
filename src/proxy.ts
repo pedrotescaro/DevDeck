@@ -1,7 +1,23 @@
-import { type NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
 export async function proxy(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  // Handle hybrid app / tracking actions from browser extensions to prevent console errors and 500s
+  if (pathname.startsWith("/hybridaction/")) {
+    const callback = request.nextUrl.searchParams.get("__callback__");
+    if (callback) {
+      return new NextResponse(`${callback}({});`, {
+        headers: {
+          "Content-Type": "application/javascript; charset=utf-8",
+        },
+        status: 200,
+      });
+    }
+    return NextResponse.json({ success: true });
+  }
+
   return await updateSession(request);
 }
 

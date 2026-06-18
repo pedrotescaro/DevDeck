@@ -238,7 +238,10 @@ model Message {
   sender_id   String
   receiver_id String
   content     String
+  image_url   String?
+  is_edited   Boolean  @default(false)
   created_at  DateTime @default(now())
+  updated_at  DateTime?
 
   sender   User @relation("sent_messages", fields: [sender_id], references: [id], onDelete: Cascade)
   receiver User @relation("received_messages", fields: [receiver_id], references: [id], onDelete: Cascade)

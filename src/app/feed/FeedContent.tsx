@@ -800,6 +800,7 @@ export function FeedContent({
   const showXPToast = (amount: number, language: string) => {
     setToastXp({ amount, language });
     setCurrentXp((prevXp) => prevXp + amount);
+    playSound("xpgain");
     setTimeout(() => {
       setToastXp(null);
     }, 4000);

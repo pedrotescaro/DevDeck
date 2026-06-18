@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bookmark } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 
 interface BookmarkButtonProps {
   isSaved: boolean;
@@ -17,6 +18,25 @@ export function BookmarkButton({ isSaved, onToggle, className, onViewAll }: Book
   const reduced = useReducedMotion();
   const [saved, setSaved] = useState(isSaved);
   const [showToast, setShowToast] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+
+  useEffect(() => {
+    const updateSoundState = () => {
+      setSoundEnabled(localStorage.getItem("devdeck-sound") !== "false");
+    };
+
+    updateSoundState();
+
+    window.addEventListener("storage", updateSoundState);
+    window.addEventListener("devdeck-sound-changed", updateSoundState);
+
+    return () => {
+      window.removeEventListener("storage", updateSoundState);
+      window.removeEventListener("devdeck-sound-changed", updateSoundState);
+    };
+  }, []);
+
+  const { playSound } = useSoundEffects(soundEnabled);
 
   const handleClick = () => {
     const willSave = !saved;
@@ -25,6 +45,7 @@ export function BookmarkButton({ isSaved, onToggle, className, onViewAll }: Book
     if (willSave) {
       setShowToast(true);
       setTimeout(() => setShowToast(false), 2000);
+      playSound("bookmark");
     }
   };
 
@@ -50,6 +71,7 @@ export function BookmarkButton({ isSaved, onToggle, className, onViewAll }: Book
       <AnimatePresence>
         {showToast && (
           <motion.div
+            key="bookmark-toast"
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}

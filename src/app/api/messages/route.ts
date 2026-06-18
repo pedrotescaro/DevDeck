@@ -45,11 +45,14 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { receiver_id, content } = body;
+    const { receiver_id, content, image_url } = body;
 
-    if (!receiver_id || !content || content.trim() === "") {
+    const hasContent = content && content.trim() !== "";
+    const hasImage = image_url && image_url.trim() !== "";
+
+    if (!receiver_id || (!hasContent && !hasImage)) {
       return NextResponse.json(
-        { error: "Destinatário e conteúdo são obrigatórios" },
+        { error: "Destinatário e conteúdo ou imagem são obrigatórios" },
         { status: 400 }
       );
     }
@@ -67,7 +70,8 @@ export async function POST(request: Request) {
       data: {
         sender_id: user.id,
         receiver_id,
-        content: content.trim(),
+        content: content ? content.trim() : "",
+        image_url: image_url || null,
       },
     });
 

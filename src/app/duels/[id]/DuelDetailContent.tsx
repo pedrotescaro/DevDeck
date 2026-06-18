@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Sidebar } from "@/components/Sidebar";
 import { CodeEditor } from "@/components/CodeEditor";
 import { LanguageTag } from "@/components/LanguageTag";
 import { Footer } from "@/components/Footer";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 import {
   Swords,
   Code,
@@ -34,9 +35,29 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
   const [submitting, setSubmitting] = useState(false);
   const [voting, setVoting] = useState(false);
   const [toastXp, setToastXp] = useState<{ amount: number; language: string } | null>(null);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+
+  useEffect(() => {
+    const updateSoundState = () => {
+      setSoundEnabled(localStorage.getItem("devdeck-sound") !== "false");
+    };
+
+    updateSoundState();
+
+    window.addEventListener("storage", updateSoundState);
+    window.addEventListener("devdeck-sound-changed", updateSoundState);
+
+    return () => {
+      window.removeEventListener("storage", updateSoundState);
+      window.removeEventListener("devdeck-sound-changed", updateSoundState);
+    };
+  }, []);
+
+  const { playSound } = useSoundEffects(soundEnabled);
 
   const showXPToast = (amount: number, language: string) => {
     setToastXp({ amount, language });
+    playSound("xpgain");
     setTimeout(() => {
       setToastXp(null);
     }, 4000);

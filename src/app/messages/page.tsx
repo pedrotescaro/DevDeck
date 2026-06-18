@@ -8,7 +8,25 @@ import { EMOJI_CATEGORIES, insertAtCursor } from "@/lib/post-composer";
 import { Sidebar } from "@/components/Sidebar";
 import { EmptyState } from "@/components/motion/EmptyState";
 import { TypingIndicator } from "@/components/motion/TypingIndicator";
-import { Search, Settings, Send, Plus, X, Smile, Image as ImageIcon } from "lucide-react";
+import {
+  Search,
+  Settings,
+  Send,
+  Plus,
+  X,
+  Smile,
+  Image as ImageIcon,
+  MoreHorizontal,
+  Reply,
+  Share2,
+  Pencil,
+  Copy,
+  Info,
+  Sparkles,
+  Trash2,
+  Heart,
+} from "lucide-react";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 
 function useClickOutside(
   ref: React.RefObject<HTMLElement | null>,
@@ -48,6 +66,8 @@ interface Message {
   content: string;
   created_at: string;
   image_url?: string | null;
+  is_edited?: boolean;
+  updated_at?: string | null;
 }
 
 interface UserListItem {
@@ -80,12 +100,44 @@ export default function MessagesPage() {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [usersSearchQuery, setUsersSearchQuery] = useState("");
   const [emojiPanelOpen, setEmojiPanelOpen] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+
+  // Edit / Delete states
+  const [editingMessage, setEditingMessage] = useState<Message | null>(null);
+  const [editContent, setEditContent] = useState("");
+  const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
+  const [activeMenuMessageId, setActiveMenuMessageId] = useState<string | null>(null);
+  const [replyingToMessage, setReplyingToMessage] = useState<Message | null>(null);
+  const [forwardingMessage, setForwardingMessage] = useState<Message | null>(null);
+  const [infoMessage, setInfoMessage] = useState<Message | null>(null);
+  const [grokMessage, setGrokMessage] = useState<Message | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const messageInputRef = useRef<HTMLInputElement | null>(null);
   const emojiPickerRef = useRef<HTMLDivElement | null>(null);
+  const messageMenuRef = useRef<HTMLDivElement | null>(null);
 
   useClickOutside(emojiPickerRef, () => setEmojiPanelOpen(false), emojiPanelOpen);
+  useClickOutside(messageMenuRef, () => setActiveMenuMessageId(null), activeMenuMessageId !== null);
+
+  useEffect(() => {
+    const updateSoundState = () => {
+      setSoundEnabled(localStorage.getItem("devdeck-sound") !== "false");
+    };
+
+    updateSoundState();
+
+    window.addEventListener("storage", updateSoundState);
+    window.addEventListener("devdeck-sound-changed", updateSoundState);
+
+    return () => {
+      window.removeEventListener("storage", updateSoundState);
+      window.removeEventListener("devdeck-sound-changed", updateSoundState);
+    };
+  }, []);
+
+  const { playSound } = useSoundEffects(soundEnabled);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -156,6 +208,159 @@ export default function MessagesPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loadingMessages]);
 
+  // Setup Supabase Realtime for instant messaging, editing, and deletion
+  useEffect(() => {
+    if (!user) return;
+
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`chat-room:${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "Message",
+          filter: `receiver_id=eq.${user.id}`,
+        },
+        async (payload) => {
+          const newMsg = payload.new as Message;
+          // Only append if it's from the active chat partner
+          if (activeChat && newMsg.sender_id === activeChat.partnerId) {
+            setMessages((prev) => {
+              if (prev.some((m) => m.id === newMsg.id)) return prev;
+              return [...prev, newMsg];
+            });
+            playSound("notification");
+          }
+
+          // Refetch active chats to update list/order
+          const resChats = await fetch("/api/messages/chats");
+          if (resChats.ok) {
+            const data = await resChats.json();
+            setChats(data);
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "Message",
+        },
+        (payload) => {
+          const updatedMsg = payload.new as Message;
+          if (
+            activeChat &&
+            ((updatedMsg.sender_id === user.id &&
+              updatedMsg.receiver_id === activeChat.partnerId) ||
+              (updatedMsg.sender_id === activeChat.partnerId && updatedMsg.receiver_id === user.id))
+          ) {
+            setMessages((prev) => prev.map((msg) => (msg.id === updatedMsg.id ? updatedMsg : msg)));
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "DELETE",
+          schema: "public",
+          table: "Message",
+        },
+        (payload) => {
+          const deletedId = (payload.old as any).id;
+          setMessages((prev) => prev.filter((msg) => msg.id !== deletedId));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, activeChat, playSound]);
+
+  const handleEditMessage = async (msgId: string, newContent: string) => {
+    if (!newContent.trim()) return;
+
+    // Optimistic UI update
+    setMessages((prev) =>
+      prev.map((msg) => (msg.id === msgId ? { ...msg, content: newContent, is_edited: true } : msg))
+    );
+    setEditingMessage(null);
+
+    try {
+      const res = await fetch(`/api/messages/${msgId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: newContent }),
+      });
+
+      if (!res.ok) {
+        console.error("Failed to edit message");
+      }
+    } catch (err) {
+      console.error("Error editing message:", err);
+    }
+  };
+
+  const handleDeleteMessage = async (msgId: string) => {
+    // Optimistic UI update
+    setMessages((prev) => prev.filter((msg) => msg.id !== msgId));
+    setDeletingMessageId(null);
+
+    try {
+      const res = await fetch(`/api/messages/${msgId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        console.error("Failed to delete message");
+      }
+    } catch (err) {
+      console.error("Error deleting message:", err);
+    }
+  };
+
+  const handleForwardMessage = async (receiverId: string) => {
+    if (!forwardingMessage) return;
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          receiver_id: receiverId,
+          content: forwardingMessage.content,
+          image_url: forwardingMessage.image_url,
+        }),
+      });
+      if (res.ok) {
+        setToastMessage("Mensagem encaminhada!");
+        setTimeout(() => setToastMessage(null), 2500);
+
+        // Refetch active chats to update list/order
+        const resChats = await fetch("/api/messages/chats");
+        if (resChats.ok) {
+          const data = await resChats.json();
+          setChats(data);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to forward message:", err);
+    } finally {
+      setForwardingMessage(null);
+    }
+  };
+
+  const handleToggleMenu = (e: React.MouseEvent, msgId: string) => {
+    e.stopPropagation();
+    if (activeMenuMessageId === msgId) {
+      setActiveMenuMessageId(null);
+    } else {
+      setActiveMenuMessageId(msgId);
+    }
+  };
+
   const insertEmoji = (emoji: string) => {
     if (messageInputRef.current) {
       insertAtCursor(messageInputRef.current, emoji, newMessageText, setNewMessageText);
@@ -191,7 +396,13 @@ export default function MessagesPage() {
     e.preventDefault();
     if (!activeChat || (!newMessageText.trim() && !messageImage) || !user || uploadingImage) return;
 
-    const textToSend = newMessageText.trim();
+    let textToSend = newMessageText.trim();
+    if (replyingToMessage) {
+      textToSend =
+        `⤷ Em resposta a @${replyingToMessage.sender_id === user.id ? "você" : activeChat.partner.username}: "${replyingToMessage.content}"\n\n` +
+        textToSend;
+      setReplyingToMessage(null);
+    }
     const imageToSend = messageImage;
     setNewMessageText("");
     setMessageImage("");
@@ -206,6 +417,7 @@ export default function MessagesPage() {
       created_at: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, tempMessage]);
+    playSound("send_dm");
 
     try {
       const res = await fetch("/api/messages", {
@@ -468,6 +680,26 @@ export default function MessagesPage() {
                       {messages.map((msg, index) => {
                         const isCurrentUser = msg.sender_id === user?.id;
 
+                        // Parse reply prefix if any
+                        const replyPrefix = "⤷ Em resposta a @";
+                        let replyUser = "";
+                        let replyText = "";
+                        let displayContent = msg.content;
+
+                        if (msg.content && msg.content.startsWith(replyPrefix)) {
+                          const firstLineEnd = msg.content.indexOf("\n\n");
+                          if (firstLineEnd !== -1) {
+                            const replyLine = msg.content.substring(0, firstLineEnd);
+                            displayContent = msg.content.substring(firstLineEnd + 2);
+
+                            const match = replyLine.match(/⤷ Em resposta a @([^:]+): "([\s\S]+)"/);
+                            if (match) {
+                              replyUser = match[1];
+                              replyText = match[2];
+                            }
+                          }
+                        }
+
                         return (
                           <motion.div
                             key={msg.id}
@@ -478,31 +710,192 @@ export default function MessagesPage() {
                               duration: 0.2,
                               ease: [0.22, 1, 0.36, 1],
                             }}
-                            className={`flex flex-col max-w-[75%] space-y-1 ${
+                            className={`flex flex-col max-w-[75%] space-y-1 group relative ${
                               isCurrentUser ? "ml-auto items-end" : "mr-auto items-start"
                             }`}
                           >
                             <div
-                              className={`rounded-2xl px-4 py-2 text-xs leading-relaxed font-semibold shadow-sm ${
-                                isCurrentUser
-                                  ? "bg-orange-500 text-white rounded-br-none"
-                                  : "bg-dd-surface text-dd-text rounded-bl-none border border-dd-border/60"
-                              }`}
+                              className={`flex items-center gap-2 max-w-full relative ${isCurrentUser ? "flex-row-reverse" : "flex-row"}`}
                             >
-                              {msg.image_url && (
-                                <img
-                                  src={msg.image_url}
-                                  alt="Anexo"
-                                  className={`rounded-xl object-cover max-h-48 max-w-full ${msg.content ? "mb-2" : ""}`}
-                                />
-                              )}
-                              {msg.content && (
-                                <p className="break-words whitespace-pre-wrap">{msg.content}</p>
+                              <div
+                                className={`rounded-2xl px-4 py-2 text-xs leading-relaxed font-semibold shadow-sm max-w-full ${
+                                  isCurrentUser
+                                    ? "bg-orange-500 text-white rounded-br-none"
+                                    : "bg-dd-surface text-dd-text rounded-bl-none border border-dd-border/60"
+                                }`}
+                              >
+                                {msg.image_url && (
+                                  <img
+                                    src={msg.image_url}
+                                    alt="Anexo"
+                                    className={`rounded-xl object-cover max-h-48 max-w-full ${msg.content ? "mb-2" : ""}`}
+                                  />
+                                )}
+                                {replyText && (
+                                  <div className="bg-black/10 dark:bg-white/10 rounded-lg p-2 mb-1.5 border-l-2 border-orange-500/80 text-[10px] opacity-80 max-w-full truncate">
+                                    <span className="font-extrabold text-orange-400 block mb-0.5">
+                                      Em resposta a @{replyUser}
+                                    </span>
+                                    <span className="line-clamp-2">{replyText}</span>
+                                  </div>
+                                )}
+                                {displayContent && (
+                                  <p className="break-words whitespace-pre-wrap">
+                                    {displayContent}
+                                  </p>
+                                )}
+                              </div>
+
+                              <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center gap-1 shrink-0 relative">
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleToggleMenu(e, msg.id)}
+                                  className={`p-1.5 hover:bg-dd-surface/85 text-dd-muted hover:text-dd-text rounded-full transition-colors cursor-pointer ${
+                                    activeMenuMessageId === msg.id
+                                      ? "bg-dd-surface/85 text-dd-text"
+                                      : ""
+                                  }`}
+                                  title="Mais opções"
+                                >
+                                  <MoreHorizontal className="w-3.5 h-3.5" />
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    playSound("bookmark");
+                                    setToastMessage("Reação adicionada!");
+                                    setTimeout(() => setToastMessage(null), 2000);
+                                  }}
+                                  className="p-1.5 hover:bg-dd-surface/85 text-dd-muted hover:text-red-500 rounded-full transition-colors cursor-pointer"
+                                  title="Curtir"
+                                >
+                                  <Heart className="w-3.5 h-3.5" />
+                                </button>
+
+                                <AnimatePresence>
+                                  {activeMenuMessageId === msg.id && (
+                                    <motion.div
+                                      ref={messageMenuRef}
+                                      initial={{ opacity: 0, scale: 0.95, y: index < 2 ? -10 : 10 }}
+                                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                                      exit={{ opacity: 0, scale: 0.95, y: index < 2 ? -10 : 10 }}
+                                      transition={{ duration: 0.15, ease: "easeOut" }}
+                                      className={`absolute z-[90] min-w-[230px] bg-dd-surface/95 backdrop-blur-md border border-dd-border/80 rounded-2xl shadow-2xl p-1 flex flex-col gap-0.5 font-sans text-xs ${
+                                        index < 2 ? "top-full mt-2" : "bottom-full mb-2"
+                                      } ${isCurrentUser ? "right-0" : "left-0"}`}
+                                    >
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setReplyingToMessage(msg);
+                                          setActiveMenuMessageId(null);
+                                        }}
+                                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-dd-text hover:bg-dd-surface-hover/80 transition-colors text-left font-semibold cursor-pointer"
+                                      >
+                                        <Reply className="w-3.5 h-3.5 text-dd-muted" />
+                                        <span>Responder</span>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setForwardingMessage(msg);
+                                          setActiveMenuMessageId(null);
+                                        }}
+                                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-dd-text hover:bg-dd-surface-hover/80 transition-colors text-left font-semibold cursor-pointer"
+                                      >
+                                        <Share2 className="w-3.5 h-3.5 text-dd-muted" />
+                                        <span>Encaminhar</span>
+                                      </button>
+                                      {isCurrentUser && (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setEditingMessage(msg);
+                                            setEditContent(displayContent);
+                                            setActiveMenuMessageId(null);
+                                          }}
+                                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-dd-text hover:bg-dd-surface-hover/80 transition-colors text-left font-semibold cursor-pointer"
+                                        >
+                                          <Pencil className="w-3.5 h-3.5 text-dd-muted" />
+                                          <span>Editar mensagem</span>
+                                        </button>
+                                      )}
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          navigator.clipboard.writeText(displayContent);
+                                          setToastMessage("Copiado!");
+                                          setTimeout(() => setToastMessage(null), 2000);
+                                          setActiveMenuMessageId(null);
+                                        }}
+                                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-dd-text hover:bg-dd-surface-hover/80 transition-colors text-left font-semibold cursor-pointer"
+                                      >
+                                        <Copy className="w-3.5 h-3.5 text-dd-muted" />
+                                        <span>Copiar texto de mensagem</span>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setInfoMessage(msg);
+                                          setActiveMenuMessageId(null);
+                                        }}
+                                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-dd-text hover:bg-dd-surface-hover/80 transition-colors text-left font-semibold cursor-pointer"
+                                      >
+                                        <Info className="w-3.5 h-3.5 text-dd-muted" />
+                                        <span>Informações</span>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setGrokMessage(msg);
+                                          setActiveMenuMessageId(null);
+                                        }}
+                                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-dd-text hover:bg-dd-surface-hover/80 transition-colors text-left font-semibold cursor-pointer border-b border-dd-border/30 pb-2.5 mb-1"
+                                      >
+                                        <Sparkles className="w-3.5 h-3.5 text-orange-400" />
+                                        <span>Perguntar ao Grok</span>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setMessages((prev) =>
+                                            prev.filter((m) => m.id !== msg.id)
+                                          );
+                                          setToastMessage("Mensagem excluída para você");
+                                          setTimeout(() => setToastMessage(null), 2000);
+                                          setActiveMenuMessageId(null);
+                                        }}
+                                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-red-500 hover:bg-red-500/10 transition-colors text-left font-semibold cursor-pointer"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                                        <span>Excluir para mim</span>
+                                      </button>
+                                      {isCurrentUser && (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setDeletingMessageId(msg.id);
+                                            setActiveMenuMessageId(null);
+                                          }}
+                                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-red-500 hover:bg-red-500/10 transition-colors text-left font-semibold cursor-pointer"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                                          <span>Excluir para todos</span>
+                                        </button>
+                                      )}
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 text-[9px] text-dd-muted px-1.5 font-medium">
+                              <span>{formatMessageTime(msg.created_at)}</span>
+                              {msg.is_edited && (
+                                <span className="italic opacity-80">(editada)</span>
                               )}
                             </div>
-                            <span className="text-[9px] text-dd-muted px-1.5 font-medium">
-                              {formatMessageTime(msg.created_at)}
-                            </span>
                           </motion.div>
                         );
                       })}
@@ -516,6 +909,37 @@ export default function MessagesPage() {
 
                 {/* Messages Input Bar */}
                 <div className="border-t border-dd-border/60 bg-dd-bg flex flex-col">
+                  {/* Reply Preview Area */}
+                  {replyingToMessage && (
+                    <div className="flex items-center justify-between px-4 py-2.5 bg-dd-surface/60 border-b border-dd-border/40 text-xs font-semibold text-dd-muted">
+                      <div className="flex items-center gap-1.5 truncate">
+                        <Reply className="w-3.5 h-3.5 text-orange-400" />
+                        <span>
+                          Respondendo a{" "}
+                          <strong className="text-dd-text">
+                            @
+                            {replyingToMessage.sender_id === user?.id
+                              ? "você"
+                              : activeChat.partner.username}
+                          </strong>
+                          : &quot;
+                          {replyingToMessage.content.replace(
+                            /^⤷ Em resposta a @.+: "[\s\S]+"\n\n/,
+                            ""
+                          )}
+                          &quot;
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setReplyingToMessage(null)}
+                        className="p-1.5 hover:bg-dd-surface hover:text-dd-text rounded-md transition-colors cursor-pointer"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+
                   {/* Image Preview Area */}
                   {messageImage && (
                     <div className="p-3 pb-0">
@@ -720,6 +1144,300 @@ export default function MessagesPage() {
           </div>
         </div>
       )}
+
+      {/* Edit Message Modal */}
+      <AnimatePresence>
+        {editingMessage && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setEditingMessage(null)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-xs"
+            />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative w-full max-w-md bg-dd-surface border border-dd-border rounded-2xl p-5 shadow-2xl z-10"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="edit-modal-title"
+            >
+              <h3 id="edit-modal-title" className="text-sm font-black text-dd-text mb-3">
+                Editar mensagem
+              </h3>
+              <textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                className="w-full bg-dd-bg border border-dd-border/80 focus:border-orange-500 rounded-xl p-3 text-xs font-semibold text-dd-text outline-none resize-none min-h-[100px]"
+                placeholder="Edite sua mensagem..."
+                autoFocus
+              />
+              <div className="flex justify-end gap-2.5 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setEditingMessage(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-dd-muted hover:bg-dd-surface-hover hover:text-dd-text transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleEditMessage(editingMessage.id, editContent)}
+                  disabled={!editContent.trim()}
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-50 transition-colors cursor-pointer"
+                >
+                  Salvar
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Message Confirmation Modal */}
+      <AnimatePresence>
+        {deletingMessageId && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setDeletingMessageId(null)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-xs"
+            />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative w-full max-w-sm bg-dd-surface border border-dd-border rounded-2xl p-5 shadow-2xl z-10"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="delete-modal-title"
+            >
+              <h3 id="delete-modal-title" className="text-sm font-black text-dd-text mb-2">
+                Excluir mensagem
+              </h3>
+              <p className="text-xs font-semibold text-dd-muted mb-4">
+                Tem certeza que deseja excluir esta mensagem? Esta ação não pode ser desfeita.
+              </p>
+              <div className="flex justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setDeletingMessageId(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-dd-muted hover:bg-dd-surface-hover hover:text-dd-text transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteMessage(deletingMessageId)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-red-500 hover:bg-red-600 text-white transition-colors cursor-pointer"
+                >
+                  Excluir
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Forward Message Modal */}
+      {forwardingMessage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setForwardingMessage(null)}
+          />
+
+          <div className="relative w-full max-w-sm bg-dd-surface border border-dd-border rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[80vh]">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-dd-border">
+              <h3 className="font-extrabold text-sm text-dd-text">Encaminhar mensagem</h3>
+              <button
+                onClick={() => setForwardingMessage(null)}
+                className="p-1 text-dd-muted hover:text-dd-text rounded-md transition-colors"
+              >
+                <X className="w-4.5 h-4.5" />
+              </button>
+            </div>
+
+            <div className="p-4 bg-dd-bg/50 border-b border-dd-border text-xs text-dd-muted italic max-h-24 overflow-y-auto font-semibold">
+              &quot;{forwardingMessage.content}&quot;
+            </div>
+
+            <div className="flex-1 overflow-y-auto divide-y divide-dd-border/30 p-2">
+              {chats.length <= 1 ? (
+                <div className="text-center py-8 text-xs text-dd-muted font-semibold">
+                  Nenhuma outra conversa ativa para encaminhar.
+                </div>
+              ) : (
+                chats
+                  .filter((c) => c.partnerId !== activeChat?.partnerId)
+                  .map((item) => (
+                    <button
+                      key={item.partnerId}
+                      onClick={() => handleForwardMessage(item.partnerId)}
+                      className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-dd-bg text-left transition-colors"
+                    >
+                      {item.partner.avatar_url ? (
+                        <img
+                          src={item.partner.avatar_url}
+                          alt={item.partner.username}
+                          className="w-9 h-9 rounded-full object-cover border border-dd-border"
+                        />
+                      ) : (
+                        <div className="w-9 h-9 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold border border-orange-500/10">
+                          {item.partner.username.slice(0, 2).toUpperCase()}
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-xs font-extrabold text-dd-text">
+                          @{item.partner.username}
+                        </p>
+                      </div>
+                    </button>
+                  ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Message Info Modal */}
+      {infoMessage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setInfoMessage(null)}
+          />
+
+          <div className="relative w-full max-w-xs bg-dd-surface border border-dd-border rounded-2xl p-5 shadow-2xl z-10 font-sans">
+            <h3 className="text-sm font-black text-dd-text mb-4">Informações da Mensagem</h3>
+
+            <div className="space-y-3.5 text-xs">
+              <div className="flex justify-between border-b border-dd-border/40 pb-2">
+                <span className="text-dd-muted font-semibold">Enviada por:</span>
+                <span className="text-dd-text font-bold">
+                  {infoMessage.sender_id === user?.id ? "Você" : `@${activeChat?.partner.username}`}
+                </span>
+              </div>
+
+              <div className="flex justify-between border-b border-dd-border/40 pb-2">
+                <span className="text-dd-muted font-semibold">Enviada em:</span>
+                <span className="text-dd-text font-bold">
+                  {new Date(infoMessage.created_at).toLocaleString("pt-BR")}
+                </span>
+              </div>
+
+              <div className="flex justify-between border-b border-dd-border/40 pb-2">
+                <span className="text-dd-muted font-semibold">Editada:</span>
+                <span className="text-dd-text font-bold">
+                  {infoMessage.is_edited ? "Sim" : "Não"}
+                </span>
+              </div>
+
+              <div className="flex justify-between border-b border-dd-border/40 pb-2">
+                <span className="text-dd-muted font-semibold">Tamanho:</span>
+                <span className="text-dd-text font-bold">
+                  {infoMessage.content.replace(/^⤷ Em resposta a @.+: "[\s\S]+"\n\n/, "").length}{" "}
+                  caracteres
+                </span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setInfoMessage(null)}
+              className="mt-5 w-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold py-2 px-4 rounded-xl transition-colors cursor-pointer"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Grok AI Modal */}
+      {grokMessage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setGrokMessage(null)}
+          />
+
+          <div className="relative w-full max-w-md bg-dd-surface border border-dd-border rounded-2xl p-5 shadow-2xl z-10 font-sans">
+            <div className="flex items-center gap-2 mb-4 text-orange-400">
+              <Sparkles className="w-5 h-5 animate-pulse" />
+              <h3 className="text-sm font-black text-dd-text">Análise do Grok AI</h3>
+            </div>
+
+            <div className="bg-dd-bg/40 border border-dd-border/80 rounded-xl p-3.5 text-xs leading-relaxed space-y-3.5">
+              <div>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-orange-400 block mb-1">
+                  Mensagem analisada
+                </span>
+                <p className="text-dd-text font-semibold italic">
+                  &quot;{grokMessage.content.replace(/^⤷ Em resposta a @.+: "[\s\S]+"\n\n/, "")}
+                  &quot;
+                </p>
+              </div>
+
+              <div className="border-t border-dd-border/30 pt-3">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-dd-muted block mb-1">
+                  Sentimento / Tom
+                </span>
+                <p className="text-dd-text font-bold flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-ping" />
+                  Amigável e Colaborativo (98%)
+                </p>
+              </div>
+
+              <div>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-dd-muted block mb-1">
+                  Intenção do Desenvolvedor
+                </span>
+                <p className="text-dd-text font-semibold">
+                  O emissor quer fazer networking e colaboração técnica (pair programming).
+                </p>
+              </div>
+
+              <div>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-orange-400 block mb-1">
+                  Sugestão de Resposta
+                </span>
+                <p className="text-dd-text font-extrabold bg-orange-500/10 text-orange-400 p-2.5 rounded-lg border border-orange-500/25">
+                  &quot;Opa! Com certeza, bora marcar sim! Qual o melhor dia e horário para
+                  você?&quot;
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setGrokMessage(null)}
+              className="mt-5 w-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold py-2 px-4 rounded-xl transition-colors cursor-pointer"
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            key="dm-toast"
+            initial={{ opacity: 0, y: 15, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 15, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="fixed bottom-6 right-6 z-[200] bg-dd-surface border border-dd-border text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5"
+          >
+            <span className="w-2 h-2 bg-orange-500 rounded-full animate-ping" />
+            <span className="text-dd-text">{toastMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

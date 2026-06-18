@@ -12,6 +12,11 @@ export const metadata: Metadata = {
   title: "DevDeck — Rede Social Gamificada para Programadores",
   description:
     "Suba de nível respondendo perguntas, fazendo duelos de código e conquistando badges.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({
