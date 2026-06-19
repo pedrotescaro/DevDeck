@@ -200,9 +200,11 @@ function CodeBlock({
   const [error, setError] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
   const code = extractText(children).replace(/\n$/, '');
-  const language = className?.match(/language-([^\s]+)/)?.[1] ?? 'text';
+  const rawLanguage = className?.match(/language-([^\s]+)/)?.[1] ?? 'text';
+  const isStatic = rawLanguage.endsWith('-static');
+  const language = isStatic ? rawLanguage.slice(0, -7) : rawLanguage;
   const collapsed = compact && !expanded;
-  const canRun = isRunnableLanguage(language);
+  const canRun = !isStatic && isRunnableLanguage(language);
 
   const handleCopy = async (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
@@ -236,7 +238,11 @@ function CodeBlock({
               disabled={running}
               className="inline-flex shrink-0 items-center gap-1 rounded-md bg-dd-accent px-2.5 py-1 text-[10px] font-bold text-white transition-colors hover:bg-dd-accent/90 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
             >
-              {running ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}
+              {running ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Play className="h-3 w-3" />
+              )}
               Executar
             </button>
           )}
@@ -257,7 +263,7 @@ function CodeBlock({
             collapsed && 'max-h-24 overflow-hidden'
           )}
         >
-          <code className={cn('hljs', className)}>{children}</code>
+          <code className={cn('hljs', `language-${language}`)}>{children}</code>
         </pre>
 
         {collapsed && (
@@ -278,7 +284,9 @@ function CodeBlock({
 
       {(output || error) && (
         <div className="border-t border-dd-border bg-dd-surface/40 px-3 py-2">
-          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-dd-muted">Output</p>
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-dd-muted">
+            Output
+          </p>
           {error ? (
             <pre className="whitespace-pre-wrap font-mono text-xs text-red-400">{error}</pre>
           ) : (

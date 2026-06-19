@@ -109,8 +109,13 @@ export const slashCommandItems = {
   heading: { title: 'Título', description: 'Seção com destaque', icon: Heading2 },
   inlineCode: { title: 'Código inline', description: 'Trecho curto de código', icon: Code },
   codeBlock: {
-    title: 'Bloco de código',
+    title: 'Bloco de código funcional',
     description: 'Editor com syntax highlight e execução',
     icon: SquareCode,
+  },
+  staticCodeBlock: {
+    title: 'Bloco de código comum',
+    description: 'Editor com syntax highlight sem interpretador',
+    icon: Code,
   },
 } as const;

@@ -61,30 +61,25 @@ function serializeBlock(node: JSONContent): string {
       return (node.content ?? []).map(serializeBlock).join('\n');
     case 'codeBlock': {
       const language = node.attrs?.language || 'typescript';
+      const isExecutable = node.attrs?.isExecutable !== false;
+      const suffix = isExecutable ? '' : '-static';
       const code = node.content?.map((child) => child.text ?? '').join('') ?? '';
-      return `\`\`\`${language}\n${code}\n\`\`\``;
+      return `\`\`\`${language}${suffix}\n${code}\n\`\`\``;
     }
     case 'blockquote':
-      return (node.content ?? [])
-        .map((child) => `> ${serializeBlock(child)}`)
-        .join('\n');
+      return (node.content ?? []).map((child) => `> ${serializeBlock(child)}`).join('\n');
     default:
       return '';
   }
 }
 
 export function docToMarkdown(doc: JSONContent): string {
-  return (doc.content ?? [])
-    .map(serializeBlock)
-    .filter(Boolean)
-    .join('\n\n')
-    .trim();
+  return (doc.content ?? []).map(serializeBlock).filter(Boolean).join('\n\n').trim();
 }
 
 function parseInline(text: string): JSONContent[] {
   const nodes: JSONContent[] = [];
-  const pattern =
-    /(\*\*([^*]+)\*\*)|(\*([^*]+)\*)|(`([^`]+)`)|(\[([^\]]+)\]\(([^)]+)\))/g;
+  const pattern = /(\*\*([^*]+)\*\*)|(\*([^*]+)\*)|(`([^`]+)`)|(\[([^\]]+)\]\(([^)]+)\))/g;
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 
@@ -129,7 +124,9 @@ export function markdownToDoc(markdown: string): JSONContent {
     const line = lines[index];
 
     if (line.startsWith('```')) {
-      const language = line.slice(3).trim() || 'typescript';
+      const rawLanguage = line.slice(3).trim() || 'typescript';
+      const isExecutable = !rawLanguage.endsWith('-static');
+      const language = isExecutable ? rawLanguage : rawLanguage.slice(0, -7);
       const codeLines: string[] = [];
       index += 1;
       while (index < lines.length && !lines[index].startsWith('```')) {
@@ -138,7 +135,7 @@ export function markdownToDoc(markdown: string): JSONContent {
       }
       blocks.push({
         type: 'codeBlock',
-        attrs: { language },
+        attrs: { language, isExecutable },
         content: codeLines.length ? [{ type: 'text', text: codeLines.join('\n') }] : [],
       });
       index += 1;
