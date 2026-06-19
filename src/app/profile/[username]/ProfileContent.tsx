@@ -1,13 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Sidebar } from '@/components/Sidebar';
-import { ProfileHeader } from '@/components/ProfileHeader';
 import { BadgeGrid } from '@/components/BadgeGrid';
 import { PostCard } from '@/components/PostCard';
-import { Footer } from '@/components/Footer';
 import { FollowersModal } from '@/components/motion/FollowersModal';
-import { Award, Sparkles } from 'lucide-react';
+import { LanguageTrailBar } from '@/components/LanguageTrailBar';
+import { MarkdownRenderer } from '@/components/MarkdownRenderer';
+import { FollowButton } from '@/components/motion/FollowButton';
+import { ArrowLeft, GraduationCap, BookOpen, Award, Check, Sparkles } from 'lucide-react';
 
 interface ProfileContentProps {
   user: {
@@ -22,6 +25,7 @@ interface ProfileContentProps {
     avatar_url?: string | null;
     bio?: string | null;
     institution?: string | null;
+    github_username?: string | null;
     total_xp: number;
     badges: any[];
   };
@@ -47,6 +51,7 @@ export function ProfileContent({
   followersCount,
   followingCount,
 }: ProfileContentProps) {
+  const router = useRouter();
   const [posts, setPosts] = useState<any[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -55,6 +60,7 @@ export function ProfileContent({
   const [followers, setFollowers] = useState(followersCount);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'followers' | 'following'>('followers');
+  const [activeTab, setActiveTab] = useState<'posts' | 'stats' | 'trails' | 'badges'>('posts');
 
   const showFollowersModal = () => {
     setModalType('followers');
@@ -70,7 +76,6 @@ export function ProfileContent({
     const previousFollowing = following;
     const newFollowing = !previousFollowing;
 
-    // Atualização otimista do estado de seguindo e do número de seguidores
     setFollowing(newFollowing);
     setFollowers((prev) => (newFollowing ? prev + 1 : prev - 1));
 
@@ -84,16 +89,14 @@ export function ProfileContent({
       const data = await res.json();
       setFollowing(data.following);
 
-      // Sincroniza caso o resultado do servidor seja diferente do otimista
       if (data.following !== newFollowing) {
         setFollowers((prev) => (data.following ? prev + 1 : prev - 1));
       }
     } catch (err) {
       console.error('Erro no follow/unfollow:', err);
-      // Reverte o estado em caso de erro
       setFollowing(previousFollowing);
       setFollowers(followersCount);
-      throw err; // Permite que o FollowButton reverta seu estado otimista
+      throw err;
     }
   };
 
@@ -129,7 +132,6 @@ export function ProfileContent({
     fetchUserPosts(nextCursor, false);
   };
 
-  // Mapear todas as conquistas do sistema marcando quais foram ganhas por este usuário
   const userEarnedSlugs = new Map<string, string>(
     profileUser.badges.map((ub) => [ub.slug, ub.earned_at])
   );
@@ -146,7 +148,6 @@ export function ProfileContent({
     };
   });
 
-  // Mapear as trilhas para o formato esperado pelo ProfileHeader
   const mappedTrails = trails.map((t) => {
     let nextXpThreshold = 500;
     if (t.level === 2) nextXpThreshold = 800;
@@ -167,112 +168,271 @@ export function ProfileContent({
     <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased">
       <Sidebar user={user} />
 
-      <div className="flex-grow flex flex-col min-w-0">
-        <main className="flex-grow max-w-4xl w-full mx-auto px-4 py-8 pb-24 md:pb-8 flex flex-col min-w-0 space-y-8">
-          {/* Cabeçalho do Perfil (Com estatísticas e trilhas de XP) */}
-          <ProfileHeader
-            user={profileUser}
-            stats={stats}
-            trails={mappedTrails}
-            isFollowing={following}
-            onFollowToggle={handleFollowToggle}
-            showFollowButton={user.id !== profileUser.id}
-            followersCount={followers}
-            followingCount={followingCount}
-            onShowFollowers={showFollowersModal}
-            onShowFollowing={showFollowingModal}
-          />
-
-          {/* Quadro de Badges/Conquistas */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-dd-border pb-3">
-              <div>
-                <h2 className="text-base font-extrabold text-dd-text uppercase tracking-wider text-[11px] text-dd-muted flex items-center gap-2">
-                  <Award className="w-4 h-4 text-orange-500" />
-                  Coleção de Badges & Conquistas
-                </h2>
-                <p className="text-dd-muted text-xs mt-0.5">
-                  Complete tarefas na comunidade para desbloquear conquistas exclusivas.
-                </p>
-              </div>
-              <Sparkles className="w-4 h-4 text-orange-500/60" />
+      <div className="flex-grow flex flex-col md:flex-row min-w-0">
+        <main className="flex-grow max-w-2xl w-full border-r border-dd-border/80 min-h-screen bg-dd-bg pb-24 md:pb-8 flex flex-col">
+          {/* Header (Twitter style: Back arrow + User name + post count) */}
+          <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60 px-4 py-3 flex items-center gap-4">
+            <button
+              onClick={() => router.back()}
+              className="p-2 border border-dd-border bg-dd-surface hover:bg-dd-border/50 text-dd-muted hover:text-dd-text rounded-xl transition-all cursor-pointer"
+              title="Voltar"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+            <div>
+              <h1 className="text-dd-text text-base font-extrabold tracking-tight">
+                {profileUser.username}
+              </h1>
+              <p className="text-dd-muted text-[10px] uppercase font-bold tracking-wider">
+                {posts.length} {posts.length === 1 ? 'publicação' : 'publicações'}
+              </p>
             </div>
-
-            <BadgeGrid badges={mappedBadges} />
           </div>
 
-          {/* Histórico de Postagens */}
-          <div className="space-y-4 pt-4 border-t border-dd-border">
-            <div className="flex items-center justify-between border-b border-dd-border pb-3">
-              <div>
-                <h2 className="text-base font-extrabold text-dd-text uppercase tracking-wider text-[11px] text-dd-muted flex items-center gap-2">
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="text-orange-500"
-                  >
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <line x1="16" y1="13" x2="8" y2="13" />
-                    <line x1="16" y1="17" x2="8" y2="17" />
-                    <polyline points="10 9 9 9 8 9" />
-                  </svg>
-                  Postagens de @{profileUser.username}
-                </h2>
-                <p className="text-dd-muted text-xs mt-0.5">
-                  Todas as dúvidas e discussões publicadas pelo desenvolvedor.
-                </p>
-              </div>
-            </div>
+          {/* Profile Banner (Twitter style gradient) */}
+          <div className="h-32 sm:h-44 bg-gradient-to-r from-orange-500/20 via-amber-500/10 to-transparent relative border-b border-dd-border/40" />
 
-            <div className="space-y-4">
-              {posts.length === 0 && !loading ? (
-                <p className="text-xs text-dd-muted italic py-4 text-center border border-dd-border border-dashed rounded-xl bg-dd-surface/5">
-                  Nenhuma publicação encontrada.
-                </p>
+          {/* Avatar and Edit Profile/Follow Button flex alignment */}
+          <div className="flex justify-between items-end px-4">
+            <div className="-mt-12 sm:-mt-16 relative">
+              {profileUser.avatar_url ? (
+                <img
+                  src={profileUser.avatar_url}
+                  alt={profileUser.username}
+                  className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-dd-bg object-cover bg-dd-surface ring-2 ring-slate-800/10"
+                />
               ) : (
-                <div className="space-y-4">
-                  {posts.map((post) => (
-                    <PostCard
-                      key={post.id}
-                      post={post}
-                      isOwner={post.author_id === user.id}
-                      onDelete={(postId) => {
-                        setPosts((prev) => prev.filter((p) => p.id !== postId));
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {loading && (
-                <div className="text-center py-4">
-                  <span className="text-xs text-dd-muted animate-pulse font-semibold">
-                    Carregando postagens...
-                  </span>
-                </div>
-              )}
-
-              {hasMore && !loading && (
-                <div className="flex justify-center pt-2">
-                  <button
-                    onClick={loadMorePosts}
-                    className="px-5 py-2.5 bg-dd-surface hover:bg-dd-border border border-dd-border text-dd-text rounded-xl text-xs font-bold transition-all cursor-pointer hover:border-orange-500/20 active:scale-95"
-                  >
-                    Carregar Mais
-                  </button>
+                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-dd-bg bg-orange-500/10 text-orange-400 flex items-center justify-center text-3xl font-black shadow-[0_0_15px_rgba(249,115,22,0.05)]">
+                  {profileUser.username.slice(0, 2).toUpperCase()}
                 </div>
               )}
             </div>
+            <div className="pb-3 flex gap-2">
+              {user.id === profileUser.id ? (
+                <button
+                  onClick={() => router.push('/settings')}
+                  className="px-4.5 py-2 border border-dd-border bg-dd-surface hover:bg-dd-border/60 text-dd-text rounded-full text-xs font-black transition-all cursor-pointer active:scale-95"
+                >
+                  Editar perfil
+                </button>
+              ) : (
+                <FollowButton isFollowing={following} onToggle={handleFollowToggle} />
+              )}
+            </div>
+          </div>
+
+          {/* User Bio and Info section */}
+          <div className="px-4 mt-3 space-y-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-dd-text text-lg sm:text-xl font-extrabold tracking-tight">
+                  {profileUser.username}
+                </h2>
+                <span className="text-xs text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2.5 py-0.5 rounded-full font-bold">
+                  {profileUser.total_xp.toLocaleString('pt-BR')} XP Total
+                </span>
+              </div>
+              <p className="text-xs text-dd-muted">@{profileUser.username}</p>
+            </div>
+
+            {profileUser.bio ? (
+              <div className="text-xs text-dd-text leading-relaxed">
+                <MarkdownRenderer content={profileUser.bio} compact />
+              </div>
+            ) : (
+              <p className="text-xs text-dd-muted italic">Sem biografia fornecida.</p>
+            )}
+
+            {/* Institution and Github items with icons */}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-bold text-dd-muted uppercase tracking-wider">
+              {profileUser.institution && (
+                <div className="flex items-center gap-1.5">
+                  <GraduationCap className="w-4 h-4 text-orange-500/80" />
+                  <span>{profileUser.institution}</span>
+                </div>
+              )}
+              {profileUser.github_username && (
+                <a
+                  href={`https://github.com/${profileUser.github_username}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 hover:text-orange-500 transition-colors cursor-pointer"
+                >
+                  <svg
+                    className="h-4 w-4 fill-current text-dd-muted hover:text-orange-500 transition-colors"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.579.688.481C19.137 20.164 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
+                  </svg>
+                  <span>@{profileUser.github_username}</span>
+                </a>
+              )}
+            </div>
+
+            {/* Followers and Following counters (Twitter style) */}
+            <div className="flex items-center gap-4 text-xs">
+              <span onClick={showFollowingModal} className="hover:underline cursor-pointer">
+                <strong className="text-dd-text font-bold">{followingCount}</strong>{' '}
+                <span className="text-dd-muted">Seguindo</span>
+              </span>
+              <span onClick={showFollowersModal} className="hover:underline cursor-pointer">
+                <strong className="text-dd-text font-bold">{followers}</strong>{' '}
+                <span className="text-dd-muted">Seguidores</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Tab Selector (Twitter/X style) */}
+          <div className="border-b border-dd-border/60 flex select-none mt-5">
+            {[
+              { id: 'posts', label: 'Postagens' },
+              { id: 'stats', label: 'Estatísticas' },
+              { id: 'trails', label: 'Trilhas' },
+              { id: 'badges', label: 'Conquistas' },
+            ].map((tab) => {
+              const isSelected = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`relative flex-1 py-3 text-xs font-bold transition-colors cursor-pointer text-center ${
+                    isSelected
+                      ? 'text-dd-text'
+                      : 'text-dd-muted hover:text-dd-text hover:bg-dd-surface/30'
+                  }`}
+                >
+                  {tab.label}
+                  {isSelected && (
+                    <motion.div
+                      layoutId="profileTabIndicator"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full"
+                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Conditional Content Rendering */}
+          <div className="flex-grow flex flex-col">
+            {activeTab === 'posts' && (
+              <div className="flex flex-col">
+                {posts.length === 0 && !loading ? (
+                  <p className="text-xs text-dd-muted italic py-12 text-center border-b border-dd-border/40">
+                    Nenhuma publicação encontrada.
+                  </p>
+                ) : (
+                  posts.map((post) => (
+                    <div key={post.id} className="border-b border-dd-border/50 last:border-b-0">
+                      <PostCard
+                        post={post}
+                        isOwner={post.author_id === user.id}
+                        flat={true}
+                        onDelete={(postId) => {
+                          setPosts((prev) => prev.filter((p) => p.id !== postId));
+                        }}
+                      />
+                    </div>
+                  ))
+                )}
+
+                {loading && (
+                  <div className="text-center py-6 border-b border-dd-border/40">
+                    <span className="text-xs text-dd-muted animate-pulse font-semibold">
+                      Carregando postagens...
+                    </span>
+                  </div>
+                )}
+
+                {hasMore && !loading && (
+                  <div className="flex justify-center py-6 border-b border-dd-border/40">
+                    <button
+                      onClick={loadMorePosts}
+                      className="px-5 py-2.5 bg-dd-surface hover:bg-dd-border border border-dd-border text-dd-text rounded-full text-xs font-bold transition-all cursor-pointer hover:border-orange-500/20 active:scale-95"
+                    >
+                      Carregar Mais
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'stats' && (
+              <div className="p-6 space-y-6 animate-fade-in">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="bg-dd-surface/40 border border-dd-border/60 rounded-2xl p-5 text-center shadow-sm">
+                    <div className="text-dd-text text-2xl font-black font-mono">
+                      {stats.answers_count}
+                    </div>
+                    <div className="text-dd-muted text-[10px] uppercase font-bold tracking-wider mt-1.5 flex items-center justify-center gap-1.5">
+                      <BookOpen className="w-3.5 h-3.5 text-orange-500" />
+                      <span>Respostas</span>
+                    </div>
+                  </div>
+                  <div className="bg-dd-surface/40 border border-dd-border/60 rounded-2xl p-5 text-center shadow-sm">
+                    <div className="text-dd-text text-2xl font-black font-mono">
+                      {stats.accuracy}%
+                    </div>
+                    <div className="text-dd-muted text-[10px] uppercase font-bold tracking-wider mt-1.5 flex items-center justify-center gap-1.5">
+                      <Award className="w-3.5 h-3.5 text-orange-500" />
+                      <span>Precisão</span>
+                    </div>
+                  </div>
+                  <div className="bg-dd-surface/40 border border-dd-border/60 rounded-2xl p-5 text-center shadow-sm">
+                    <div className="text-dd-text text-2xl font-black font-mono">
+                      {stats.accepted_count}
+                    </div>
+                    <div className="text-dd-muted text-[10px] uppercase font-bold tracking-wider mt-1.5 flex items-center justify-center gap-1.5">
+                      <Check className="w-3.5 h-3.5 text-orange-500" />
+                      <span>Aceitas</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'trails' && (
+              <div className="p-6 space-y-4 animate-fade-in">
+                {mappedTrails.length === 0 ? (
+                  <p className="text-xs text-dd-muted italic text-center py-6">
+                    Nenhuma trilha iniciada.
+                  </p>
+                ) : (
+                  <div className="space-y-4">
+                    {mappedTrails.map((trail) => (
+                      <LanguageTrailBar
+                        key={trail.language}
+                        language={trail.language}
+                        xp={trail.xp}
+                        level={trail.level}
+                        maxXp={trail.maxXp}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'badges' && (
+              <div className="p-6 space-y-6 animate-fade-in">
+                <div className="flex items-center justify-between border-b border-dd-border/60 pb-3">
+                  <div>
+                    <h3 className="text-xs font-bold text-dd-text uppercase tracking-wider flex items-center gap-2">
+                      <Award className="w-4 h-4 text-orange-500" />
+                      Coleção de Conquistas
+                    </h3>
+                    <p className="text-dd-muted text-[11px] mt-0.5">
+                      Tarefas concluídas na comunidade e emblemas desbloqueados.
+                    </p>
+                  </div>
+                  <Sparkles className="w-4 h-4 text-orange-500/60" />
+                </div>
+                <BadgeGrid badges={mappedBadges} />
+              </div>
+            )}
           </div>
         </main>
-        <Footer />
       </div>
 
       <FollowersModal
