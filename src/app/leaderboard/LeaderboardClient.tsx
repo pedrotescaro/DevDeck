@@ -73,95 +73,101 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
     <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased selection:bg-orange-500/35 selection:text-white">
       <Sidebar user={initialUser} />
 
-      <div className="flex-grow flex flex-col min-w-0">
-        <main className="flex-grow max-w-5xl w-full mx-auto px-4 py-8 pb-24 md:pb-8 flex flex-col min-w-0">
-          {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-            <div>
-              <h1 className="text-3xl font-extrabold tracking-tight flex items-center gap-3">
-                🏆{' '}
-                <span className="bg-gradient-to-r from-white via-dd-text to-dd-muted bg-clip-text text-transparent">
-                  Quadro de Líderes
-                </span>
-              </h1>
-              <p className="text-dd-muted text-sm mt-1">
-                Descubra os desenvolvedores mais ativos e com maior nível de habilidade.
-              </p>
+      <div className="flex-grow flex flex-col md:flex-row min-w-0">
+        {/* Coluna Central */}
+        <main className="flex-grow max-w-2xl w-full border-r border-dd-border/80 min-h-screen pb-24 md:pb-8 flex flex-col min-w-0 bg-dd-bg">
+          {/* Header Fixo */}
+          <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60 p-3.5 flex items-center justify-between gap-3 shrink-0">
+            <div className="flex items-center gap-3">
+              <Link
+                href="/feed"
+                className="p-2 hover:bg-dd-surface rounded-full transition-colors text-dd-text"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
+                </svg>
+              </Link>
+              <div>
+                <h1 className="text-sm font-black text-dd-text">Quadro de Líderes</h1>
+                <p className="text-[10px] text-dd-muted font-semibold mt-0.5">
+                  Classificação {language === 'GLOBAL' ? 'Global' : language}
+                </p>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-dd-muted font-semibold uppercase tracking-wider">
-                Trilha:
-              </span>
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="text-sm rounded-lg border border-dd-border bg-dd-surface px-4 py-2 text-dd-text focus:border-orange-500 focus:outline-none transition-all active:scale-[0.98] font-medium cursor-pointer"
-              >
-                <option value="GLOBAL">Geral / Global</option>
-                <option value="TS">TypeScript</option>
-                <option value="JS">JavaScript</option>
-                <option value="PYTHON">Python</option>
-                <option value="RUST">Rust</option>
-                <option value="GO">Go</option>
-                <option value="CPP">C++</option>
-                <option value="JAVA">Java</option>
-                <option value="KOTLIN">Kotlin</option>
-                <option value="SWIFT">Swift</option>
-              </select>
-            </div>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              className="text-xs rounded-full border border-dd-border bg-dd-surface px-3.5 py-1.5 text-dd-text focus:border-orange-500 focus:outline-none transition-all font-bold cursor-pointer"
+            >
+              <option value="GLOBAL">Geral / Global</option>
+              <option value="TS">TypeScript</option>
+              <option value="JS">JavaScript</option>
+              <option value="PYTHON">Python</option>
+              <option value="RUST">Rust</option>
+              <option value="GO">Go</option>
+              <option value="CPP">C++</option>
+              <option value="JAVA">Java</option>
+              <option value="KOTLIN">Kotlin</option>
+              <option value="SWIFT">Swift</option>
+            </select>
           </div>
 
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-20">
+            <div className="flex flex-col items-center justify-center py-32">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-orange-500 border-t-transparent mb-4" />
-              <p className="text-dd-muted text-sm">Carregando classificação...</p>
+              <p className="text-dd-muted text-xs font-semibold">Carregando classificação...</p>
             </div>
           ) : (
-            <>
+            <div className="p-4.5 space-y-6">
               {/* Podium Top 3 */}
               {top3.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end mb-12 max-w-3xl mx-auto">
-                  {displayPodium.map((user) => {
-                    const isFirst = user.rank === 1;
-                    const isSecond = user.rank === 2;
-                    const isThird = user.rank === 3;
+                <div className="grid grid-cols-3 gap-3 items-end max-w-xl mx-auto pt-2">
+                  {displayPodium.map((row) => {
+                    const isFirst = row.rank === 1;
+                    const isSecond = row.rank === 2;
+                    const isThird = row.rank === 3;
 
-                    // Cores e estilos baseados na classificação
-                    let cardStyle = 'border-dd-border bg-dd-surface/40';
+                    let cardStyle = 'border-dd-border bg-dd-sidebar-bg/60';
                     let medalColor = 'text-dd-muted';
                     let rankTitle = '';
                     let heightClass = '';
 
                     if (isFirst) {
-                      cardStyle = 'rank-1 bg-dd-surface shadow-[0_0_20px_rgba(255,215,0,0.2)]';
-                      medalColor = 'text-[#ffd700]';
-                      rankTitle = '👑 Mestre Dev';
-                      heightClass = 'md:h-64 order-1 md:order-2 z-10 scale-105 md:scale-110';
+                      cardStyle =
+                        'border-orange-500/30 bg-dd-sidebar-bg shadow-[0_0_20px_rgba(249,115,22,0.15)]';
+                      medalColor = 'text-orange-400';
+                      rankTitle = '👑 Mestre';
+                      heightClass = 'h-52 z-10 scale-[1.03]';
                     } else if (isSecond) {
-                      cardStyle = 'rank-2 bg-dd-surface shadow-[0_0_15px_rgba(192,192,192,0.15)]';
+                      cardStyle = 'border-dd-border bg-dd-sidebar-bg/60';
                       medalColor = 'text-[#c0c0c0]';
-                      rankTitle = '🥈 Vice-Líder';
-                      heightClass = 'md:h-56 order-2 md:order-1';
+                      rankTitle = '🥈 Vice';
+                      heightClass = 'h-44';
                     } else if (isThird) {
-                      cardStyle = 'rank-3 bg-dd-surface shadow-[0_0_10px_rgba(205,127,50,0.15)]';
+                      cardStyle = 'border-dd-border bg-dd-sidebar-bg/60';
                       medalColor = 'text-[#cd7f32]';
                       rankTitle = '🥉 Bronze';
-                      heightClass = 'md:h-48 order-3';
+                      heightClass = 'h-38';
                     }
 
                     return (
                       <div
-                        key={user.username}
-                        className={`flex flex-col items-center justify-center border rounded-xl p-6 transition-all duration-300 hover:translate-y-[-4px] ${cardStyle} ${heightClass}`}
+                        key={row.username}
+                        className={`flex flex-col items-center justify-center border rounded-2xl p-3 transition-all duration-300 hover:translate-y-[-2px] ${cardStyle} ${heightClass}`}
                       >
-                        <span className="text-xs font-bold text-dd-muted tracking-widest uppercase mb-3 block">
+                        <span className="text-[8px] font-black text-dd-muted tracking-wider uppercase mb-1.5 block">
                           {rankTitle}
                         </span>
 
-                        <div className="relative mb-3">
+                        <div className="relative mb-2 shrink-0">
                           <div
-                            className={`w-16 h-16 rounded-full flex items-center justify-center font-bold text-lg select-none ${
+                            className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-xs select-none ${
                               isFirst
                                 ? 'bg-orange-500/20 text-orange-400 ring-2 ring-orange-500/40'
                                 : isSecond
@@ -169,28 +175,28 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
                                   : 'bg-[#c5844a]/20 text-[#c5844a] ring-2 ring-[#c5844a]/30'
                             }`}
                           >
-                            {user.username.slice(0, 2).toUpperCase()}
+                            {row.username.slice(0, 2).toUpperCase()}
                           </div>
                           <span
-                            className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full border border-dd-border bg-dd-card flex items-center justify-center font-bold text-xs ${medalColor}`}
+                            className={`absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full border border-dd-border bg-dd-bg flex items-center justify-center font-black text-[9px] ${medalColor}`}
                           >
-                            {user.rank}
+                            {row.rank}
                           </span>
                         </div>
 
                         <Link
-                          href={`/profile/${user.username}`}
-                          className="text-dd-text font-bold hover:text-orange-400 transition-colors text-base"
+                          href={`/profile/${row.username}`}
+                          className="text-dd-text font-black hover:text-orange-400 transition-colors text-xs truncate w-full text-center"
                         >
-                          {user.username}
+                          @{row.username}
                         </Link>
 
-                        <div className="mt-2 text-center">
-                          <span className="text-dd-amber text-xs font-semibold uppercase font-mono block">
-                            Nível {user.level}
+                        <div className="mt-1 text-center shrink-0">
+                          <span className="text-dd-amber text-[9px] font-bold uppercase font-mono block">
+                            Lvl {row.level}
                           </span>
-                          <span className="text-dd-text text-sm font-bold font-mono">
-                            {user.xp.toLocaleString()} XP
+                          <span className="text-dd-text text-[10px] font-black font-mono">
+                            {row.xp.toLocaleString()} XP
                           </span>
                         </div>
                       </div>
@@ -199,60 +205,119 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
                 </div>
               )}
 
-              {/* List Table for Remaining */}
-              <div className="rounded-xl border border-dd-border bg-dd-surface overflow-hidden">
-                <table className="w-full text-left border-collapse text-sm">
-                  <thead>
-                    <tr className="border-b border-dd-border bg-dd-card/30 text-dd-muted font-bold text-xs uppercase tracking-wider">
-                      <th className="py-4 px-6 text-center w-20">Posição</th>
-                      <th className="py-4 px-6">Desenvolvedor</th>
-                      <th className="py-4 px-6 text-center">Nível</th>
-                      <th className="py-4 px-6 text-right">XP Acumulado</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {remaining.length === 0 && top3.length <= leaderboard.length ? (
-                      <tr>
-                        <td colSpan={4} className="py-8 text-center text-dd-muted text-xs">
-                          Nenhum outro desenvolvedor no ranking ainda.
-                        </td>
-                      </tr>
-                    ) : (
-                      remaining.map((row) => (
-                        <tr
-                          key={row.username}
-                          className="border-b border-dd-border hover:bg-dd-card/10 transition-colors"
+              {/* List Table for Remaining (Twitter List style) */}
+              <div className="border border-dd-border rounded-2xl overflow-hidden divide-y divide-dd-border/60 bg-dd-sidebar-bg/25">
+                {remaining.length === 0 && top3.length <= leaderboard.length ? (
+                  <div className="p-8 text-center text-dd-muted text-xs">
+                    Nenhum outro desenvolvedor no ranking ainda.
+                  </div>
+                ) : (
+                  remaining.map((row) => (
+                    <div
+                      key={row.username}
+                      className="flex items-center justify-between p-3.5 hover:bg-dd-surface/20 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="w-8 font-black text-center text-xs text-dd-muted">
+                          #{row.rank}
+                        </span>
+                        <Link
+                          href={`/profile/${row.username}`}
+                          className="flex items-center gap-3 group"
                         >
-                          <td className="py-4 px-6 text-center font-bold text-dd-muted">
-                            #{row.rank}
-                          </td>
-                          <td className="py-4 px-6 font-semibold text-dd-text">
-                            <Link
-                              href={`/profile/${row.username}`}
-                              className="flex items-center gap-3 hover:text-orange-400 transition-colors w-fit"
-                            >
-                              <div className="w-8 h-8 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/20 flex items-center justify-center font-bold text-xs">
-                                {row.username.slice(0, 2).toUpperCase()}
-                              </div>
-                              {row.username}
-                            </Link>
-                          </td>
-                          <td className="py-4 px-6 text-center text-dd-amber font-mono font-bold">
-                            Nível {row.level}
-                          </td>
-                          <td className="py-4 px-6 text-right font-mono font-bold text-orange-400">
-                            {row.xp.toLocaleString()} XP
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                          <div className="w-8 h-8 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/20 flex items-center justify-center font-bold text-xs group-hover:scale-105 transition-transform shrink-0">
+                            {row.username.slice(0, 2).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-xs font-black text-dd-text group-hover:underline">
+                              @{row.username}
+                            </p>
+                            <p className="text-[9px] text-dd-amber font-bold font-mono mt-0.5">
+                              Nível {row.level}
+                            </p>
+                          </div>
+                        </Link>
+                      </div>
+                      <span className="font-mono font-bold text-xs text-orange-500">
+                        {row.xp.toLocaleString()} XP
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
-            </>
+            </div>
           )}
         </main>
-        <Footer />
+
+        {/* Coluna Direita (Widgets) */}
+        <aside className="hidden lg:block w-80 p-4 space-y-4 shrink-0 border-l border-dd-border/80 min-h-screen bg-dd-bg">
+          {/* Widget 1: Como Subir no Ranking */}
+          <div className="bg-dd-sidebar-bg border border-dd-border rounded-2xl p-4.5 space-y-3.5">
+            <h3 className="text-xs font-black text-dd-text uppercase tracking-wider border-b border-dd-border/50 pb-2">
+              Como Pontuar
+            </h3>
+            <div className="space-y-3 text-[10px] text-dd-muted leading-normal">
+              <div className="flex gap-2">
+                <span className="text-orange-500 font-bold shrink-0">·</span>
+                <p>
+                  <strong className="text-dd-text">Publicações:</strong> Compartilhe conhecimento e
+                  responda dúvidas de outros devs.
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <span className="text-orange-500 font-bold shrink-0">·</span>
+                <p>
+                  <strong className="text-dd-text">Duelos (+20 XP):</strong> Desafie oponentes em
+                  batalhas de algoritmo e ganhe votos.
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <span className="text-orange-500 font-bold shrink-0">·</span>
+                <p>
+                  <strong className="text-dd-text">Quizzes (+10 XP):</strong> Mantenha a ofensiva
+                  diária resolvendo quizzes rápidos.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Widget 2: Seu Desempenho */}
+          {initialUser && (
+            <div className="bg-dd-sidebar-bg border border-dd-border rounded-2xl p-4.5 space-y-3">
+              <h3 className="text-xs font-black text-dd-text uppercase tracking-wider border-b border-dd-border/50 pb-2">
+                Seu Ranking
+              </h3>
+              <div className="flex items-center gap-3 p-1">
+                <div className="w-9 h-9 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold text-xs ring-1 ring-orange-500/30 shrink-0">
+                  {initialUser.username.slice(0, 2).toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-grow">
+                  <p className="text-xs font-black text-dd-text truncate">
+                    @{initialUser.username}
+                  </p>
+                  <p className="text-[10px] text-dd-muted mt-0.5">
+                    Pontos totais:{' '}
+                    <strong className="text-orange-500 font-mono">
+                      {initialUser.total_xp.toLocaleString()} XP
+                    </strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Subtle footer */}
+          <div className="px-4 text-[10px] text-dd-muted leading-normal space-y-2 pt-2">
+            <div className="flex flex-wrap gap-x-2 gap-y-1">
+              <span className="hover:underline cursor-pointer">Termos</span>
+              <span>|</span>
+              <span className="hover:underline cursor-pointer">Privacidade</span>
+              <span>|</span>
+              <span className="hover:underline cursor-pointer">Cookies</span>
+            </div>
+            <p>© {new Date().getFullYear()} DevDeck Corp.</p>
+          </div>
+        </aside>
       </div>
     </div>
   );
