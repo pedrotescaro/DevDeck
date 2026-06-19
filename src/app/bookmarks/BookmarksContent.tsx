@@ -65,16 +65,13 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
           <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60 px-4 py-3 flex items-center gap-4">
             <button
               onClick={() => router.back()}
-              className="p-2 border border-dd-border bg-dd-surface hover:bg-dd-border/50 text-dd-muted hover:text-dd-text rounded-xl transition-all cursor-pointer"
+              className="p-2 hover:bg-dd-surface rounded-full transition-colors text-dd-text cursor-pointer"
               title="Voltar"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-dd-text text-base font-extrabold tracking-tight flex items-center gap-2">
-                <Bookmark className="w-4 h-4 text-orange-500 fill-orange-500/10" />
-                Itens salvos
-              </h1>
+              <h1 className="text-dd-text text-base font-extrabold tracking-tight">Itens salvos</h1>
               <p className="text-dd-muted text-[10px] uppercase font-bold tracking-wider">
                 {posts.length} {posts.length === 1 ? 'publicação salva' : 'publicações salvas'}
               </p>
