@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { LanguageTag } from './LanguageTag';
 import { Flag, Heart, MessageSquare, BarChart2, Trash2 } from 'lucide-react';
-import { ExpandedReactionButton } from './motion/ExpandedReactions';
+import { LikeButton } from './motion/LikeButton';
 import { BookmarkButton } from './motion/BookmarkButton';
 import { RepostMenu } from './motion/RepostMenu';
 import { AuthorAvatar } from '@/components/AuthorAvatar';
@@ -94,19 +94,15 @@ export function PostCard({
     BULB: '💡',
   };
 
-  const getInitialReaction = () => {
-    if (post.reactions && post.reactions.length > 0) {
-      return TYPE_TO_EMOJI[post.reactions[0].type] || null;
-    }
+  const getInitialLikeState = () => {
     if (post.votes && post.votes.length > 0 && post.votes[0].value === 1) {
-      return '❤️';
+      return true;
     }
-    return null;
+    return false;
   };
 
-  const initialReaction = getInitialReaction();
-  const [activeReaction, setActiveReaction] = useState<string | null>(initialReaction);
-  const [liked, setLiked] = useState<boolean>(!!initialReaction);
+  const initialLiked = getInitialLikeState();
+  const [liked, setLiked] = useState<boolean>(initialLiked);
   const [likesCount, setLikesCount] = useState(post.upvotes ?? 0);
   const [bookmarked, setBookmarked] = useState<boolean>(
     !!(post.bookmarks && post.bookmarks.length > 0)
@@ -114,51 +110,32 @@ export function PostCard({
   const [repostsCount, setRepostsCount] = useState(0);
   const [reposted, setReposted] = useState(false);
 
-  const handleReact = async (reactionEmoji?: string | null) => {
-    let targetEmoji: string | null = null;
-    if (reactionEmoji === undefined || reactionEmoji === null) {
-      targetEmoji = activeReaction ? null : '❤️';
-    } else {
-      targetEmoji = reactionEmoji;
-    }
+  const handleLikeToggle = async () => {
+    const nextLiked = !liked;
+    const newValue = nextLiked ? 1 : 0;
+    const previousLiked = liked;
+    const previousCount = likesCount;
 
-    const previousReaction = activeReaction;
-    const wasActive = !!previousReaction;
-    const isNowActive = !!targetEmoji;
-
-    setActiveReaction(targetEmoji);
-    setLiked(isNowActive);
-
-    let countDiff = 0;
-    if (wasActive && !isNowActive) {
-      countDiff = -1;
-    } else if (!wasActive && isNowActive) {
-      countDiff = 1;
-    }
-    setLikesCount((prev) => Math.max(0, prev + countDiff));
+    setLiked(nextLiked);
+    setLikesCount((prev) => (nextLiked ? prev + 1 : Math.max(0, prev - 1)));
 
     try {
-      const typeToSend = targetEmoji ? EMOJI_TO_TYPE[targetEmoji] : null;
-      const res = await fetch(`/api/posts/${post.id}/react`, {
+      const res = await fetch(`/api/posts/${post.id}/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: typeToSend }),
+        body: JSON.stringify({ value: newValue }),
       });
 
       if (!res.ok) {
-        throw new Error('Falha ao registrar reação');
+        throw new Error('Falha ao registrar curtida');
       }
 
       const data = await res.json();
-      const serverEmoji = data.reaction ? TYPE_TO_EMOJI[data.reaction] : null;
-
-      setActiveReaction(serverEmoji);
-      setLiked(!!serverEmoji);
+      setLikesCount(data.upvotes);
     } catch (err) {
-      console.error('Error toggling reaction:', err);
-      setActiveReaction(previousReaction);
-      setLiked(wasActive);
-      setLikesCount(likesCount);
+      console.error(err);
+      setLiked(previousLiked);
+      setLikesCount(previousCount);
     }
   };
 
@@ -373,23 +350,13 @@ export function PostCard({
             onQuote={() => {}}
           />
 
-          {/* 3. Reactions button */}
-          <div className="flex items-center gap-0.5 text-dd-muted hover:text-orange-500 transition-colors group/likes shrink-0">
-            <ExpandedReactionButton
-              isActive={liked}
-              activeReaction={activeReaction as any}
-              onReact={handleReact}
-              title="Reagir ao post"
-            />
-            <span
-              className={cn(
-                'px-1 font-semibold text-[10px] transition-colors',
-                liked ? 'text-orange-500' : 'text-dd-muted group-hover/likes:text-orange-500'
-              )}
-            >
-              {likesCount}
-            </span>
-          </div>
+          {/* 3. Heart/Like button */}
+          <LikeButton
+            count={likesCount}
+            isActive={liked}
+            onToggle={handleLikeToggle}
+            title="Curtir post"
+          />
 
           {/* 4. Views BarChart */}
           <div className="flex items-center gap-0.5 text-dd-muted select-none group/views">
