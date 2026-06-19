@@ -48,6 +48,7 @@ export default async function BookmarksPage() {
   const serializedPosts = bookmarks.map((b) => ({
     ...b.post,
     created_at: b.post.created_at.toISOString(),
+    bookmarks: [{ id: b.id }], // Garante que a postagem seja identificada como salva no feed de bookmarks
   }));
 
   // Serializar usuário

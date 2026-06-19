@@ -43,10 +43,17 @@ interface PostCardProps {
   post: Post;
   isOwner?: boolean;
   onDelete?: (postId: string) => void;
+  flat?: boolean;
+  onBookmarkToggle?: (postId: string, bookmarked: boolean) => void;
 }
 
-
-export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
+export function PostCard({
+  post,
+  isOwner = false,
+  onDelete,
+  flat = false,
+  onBookmarkToggle,
+}: PostCardProps) {
   const router = useRouter();
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -158,6 +165,7 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
   const handleBookmarkToggle = async () => {
     const newBookmarked = !bookmarked;
     setBookmarked(newBookmarked);
+    onBookmarkToggle?.(post.id, newBookmarked);
 
     try {
       const res = await fetch(`/api/posts/${post.id}/bookmark`, {
@@ -170,6 +178,7 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
     } catch (err) {
       console.error(err);
       setBookmarked(!newBookmarked);
+      onBookmarkToggle?.(post.id, !newBookmarked);
     }
   };
 
@@ -278,7 +287,14 @@ export function PostCard({ post, isOwner = false, onDelete }: PostCardProps) {
 
   return (
     <div onClick={handleCardClick} className="block group cursor-pointer">
-      <article className="bg-dd-card border border-dd-border rounded-xl p-5 hover:border-orange-500/30 transition-colors relative">
+      <article
+        className={cn(
+          'transition-colors relative',
+          flat
+            ? 'bg-transparent border-b border-dd-border/50 rounded-none p-4 sm:p-5 hover:bg-dd-surface/20'
+            : 'bg-dd-card border border-dd-border rounded-xl p-5 hover:border-orange-500/30'
+        )}
+      >
         {/* Header */}
         <div className="flex items-center gap-3 mb-3">
           <AuthorAvatar username={post.author.username} avatar_url={post.author.avatar_url} />
