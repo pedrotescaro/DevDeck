@@ -398,7 +398,15 @@ export function Sidebar({ user }: SidebarProps) {
     </svg>
   );
 
-  const navItems = [
+  const navItems: Array<{
+    label: string;
+    href?: string;
+    onClick?: () => void;
+    icon: any;
+    active?: boolean;
+    badge?: 'dot' | 'timer';
+    isMore?: boolean;
+  }> = [
     {
       label: 'Página Inicial',
       href: '/feed',
@@ -442,12 +450,14 @@ export function Sidebar({ user }: SidebarProps) {
       icon: Bookmark,
       active: pathname === '/bookmarks',
     },
+    /*
     {
       label: 'Premium',
       onClick: () => setPremiumModalOpen(true),
       icon: BadgeCheck,
       badge: 'timer' as const,
     },
+    */
     {
       label: 'Perfil',
       href: activeUser ? `/profile/${activeUser.username}` : '#',
