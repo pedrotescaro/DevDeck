@@ -583,7 +583,7 @@ export function PostDetailContent({
           )}
 
           {/* Write Answer Form */}
-          <div className="relative z-30 bg-transparent border-b border-dd-border/50 p-4 sm:p-6 transition-colors duration-200">
+          <div className="relative z-10 bg-transparent border-b border-dd-border/50 p-4 sm:p-6 transition-colors duration-200">
             {/* Header row to match modal layout */}
             <div className="flex items-center justify-between pb-3 mb-4 border-b border-dd-border/30">
               <button
