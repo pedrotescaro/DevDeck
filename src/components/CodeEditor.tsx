@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
 const ReactCodeMirror = dynamic(() => import('@uiw/react-codemirror'), {
@@ -57,9 +57,28 @@ function CodeEditorInner({
   readOnly = false,
 }: CodeEditorProps) {
   const [extensions, setExtensions] = useState<import('@codemirror/state').Extension[]>([]);
-  const [theme, setTheme] = useState<import('@codemirror/state').Extension | null>(null);
+  const [darkTheme, setDarkTheme] = useState<import('@codemirror/state').Extension | null>(null);
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
-  // Dynamically load language extension and theme
+  // Track the application theme (dark class on documentElement)
+  useEffect(() => {
+    const checkTheme = () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      setIsDarkMode(isDark);
+    };
+
+    checkTheme();
+
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Dynamically load language extension and dark theme
   useEffect(() => {
     let cancelled = false;
 
@@ -71,7 +90,7 @@ function CodeEditorInner({
         ]);
 
         if (!cancelled) {
-          setTheme(themeModule.oneDark);
+          setDarkTheme(themeModule.oneDark);
           if (langModule) {
             setExtensions([langModule]);
           }
@@ -87,13 +106,15 @@ function CodeEditorInner({
     };
   }, [language]);
 
+  const activeTheme = isDarkMode ? (darkTheme ?? 'dark') : 'light';
+
   return (
     <ReactCodeMirror
       value={value}
       onChange={onChange}
       height={height}
       readOnly={readOnly}
-      theme={theme ?? 'dark'}
+      theme={activeTheme}
       extensions={extensions}
       placeholder="Escreva seu código aqui..."
       basicSetup={{
@@ -150,5 +171,4 @@ async function loadLanguageExtension(
   }
 }
 
-// Need these imports for the inner component
-import { useState, useEffect } from 'react';
+// Imports cleaned up
