@@ -66,13 +66,16 @@ export const POST = apiHandler(async (request) => {
     return NextResponse.json({ error: 'Erro ao criar conta de autenticação' }, { status: 500 });
   }
 
+  const avatarBaseUrl =
+    process.env.NEXT_PUBLIC_AVATAR_API_URL || 'https://api.dicebear.com/9.x/pixel-art/svg';
+
   // 2. Create database user record via Prisma
   const dbUser = await prisma.user.create({
     data: {
       id: authUser.id,
       username,
       email,
-      avatar_url: `https://api.dicebear.com/9.x/pixel-art/svg?seed=${username}`,
+      avatar_url: `${avatarBaseUrl}?seed=${username}`,
       bio: 'Novo desenvolvedor no DevDeck! 🚀',
       total_xp: 0,
     },

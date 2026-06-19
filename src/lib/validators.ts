@@ -77,7 +77,15 @@ function deriveTitleFromBody(body: string): string {
 
 export const createPostSchema = z
   .object({
-    title: z.string().max(200).trim().optional().nullable(),
+    title: z
+      .string()
+      .max(200)
+      .trim()
+      .optional()
+      .nullable()
+      .refine((val) => !val || val.length >= 5, {
+        message: 'O título deve ter pelo menos 5 caracteres',
+      }),
     body: z
       .string()
       .min(10, 'O conteúdo deve ter pelo menos 10 caracteres')

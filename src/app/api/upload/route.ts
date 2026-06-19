@@ -1,14 +1,37 @@
 import { NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
+import { getAuthUser } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
 
     if (!file) {
       return NextResponse.json({ error: 'Nenhum arquivo enviado' }, { status: 400 });
+    }
+
+    // Limite de tamanho de 5MB
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      return NextResponse.json({ error: 'O arquivo não pode exceder 5MB' }, { status: 400 });
+    }
+
+    // Permitir apenas imagens comuns
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return NextResponse.json(
+        {
+          error: 'Tipo de arquivo não suportado. Envie apenas imagens (JPEG, PNG, GIF, WebP, SVG).',
+        },
+        { status: 400 }
+      );
     }
 
     const bytes = await file.arrayBuffer();

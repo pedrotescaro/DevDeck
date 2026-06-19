@@ -7,8 +7,12 @@ import { DuelStatus } from '@prisma/client';
 // GET /api/duels
 export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const limit = parseInt(searchParams.get('limit') || '50', 10);
+
     const duels = await prisma.duel.findMany({
       orderBy: { created_at: 'desc' },
+      take: limit,
       include: {
         challenger: {
           select: { username: true, avatar_url: true },

@@ -226,7 +226,8 @@ export const QuizService = {
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), 10000);
 
-        const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        const openAiBase = process.env.OPENAI_API_BASE_URL || 'https://api.openai.com/v1';
+        const aiResponse = await fetch(`${openAiBase}/chat/completions`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -386,7 +387,8 @@ async function fetchOpenAIQuiz(): Promise<z.infer<typeof openAIQuizSchema> | nul
       const controller = new AbortController();
       const id = setTimeout(() => controller.abort(), 10000);
 
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const openAiBase = process.env.OPENAI_API_BASE_URL || 'https://api.openai.com/v1';
+      const response = await fetch(`${openAiBase}/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -50,3 +50,27 @@ export const POST = apiHandler(async (req) => {
 
   return NextResponse.json(message);
 });
+
+export const GET = apiHandler(async (req) => {
+  const user = await requireAuth();
+
+  const { searchParams } = new URL(req.url);
+  const receiverId = searchParams.get('receiver_id');
+
+  if (!receiverId) {
+    return NextResponse.json({ error: 'receiver_id é obrigatório' }, { status: 400 });
+  }
+
+  const messages = await prisma.message.findMany({
+    where: {
+      OR: [
+        { sender_id: user.id, receiver_id: receiverId },
+        { sender_id: receiverId, receiver_id: user.id },
+      ],
+    },
+    orderBy: { created_at: 'asc' },
+    take: 100, // Safe limit for performance
+  });
+
+  return NextResponse.json(messages);
+});
