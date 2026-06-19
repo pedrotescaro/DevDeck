@@ -333,6 +333,12 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
     setSelectedOption(optionIdx);
   };
 
+  const handleRetryQuestion = () => {
+    setAnswered(false);
+    setSelectedOption(null);
+    setQuizError(null);
+  };
+
   useEffect(() => {
     if (!activeLevel || !quizModalOpen) return;
     const question = activeLevel.questions[currentQuestionIndex];
@@ -1001,6 +1007,21 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                             className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5"
                           >
                             {submittingAttempt ? 'Processando...' : 'Verificar'}
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        );
+                      }
+
+                      const question = activeLevel.questions[currentQuestionIndex];
+                      const isCorrect = selectedOption === question.correctIndex;
+
+                      if (!isCorrect) {
+                        return (
+                          <button
+                            onClick={handleRetryQuestion}
+                            className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                          >
+                            Tentar Novamente
                             <ChevronRight className="w-4 h-4" />
                           </button>
                         );

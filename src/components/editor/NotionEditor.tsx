@@ -1,16 +1,9 @@
 'use client';
 
-import {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  type FocusEvent,
-} from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, type FocusEvent } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
-import Link from '@tiptap/extension-link';
 import { BubbleMenu } from '@tiptap/react/menus';
 import { Bold, Code, Italic, Link as LinkIcon } from 'lucide-react';
 import { ExecutableCodeBlock } from '@/components/editor/extensions/executable-code-block';
@@ -61,6 +54,12 @@ export const NotionEditor = forwardRef<NotionEditorRef, NotionEditorProps>(funct
       StarterKit.configure({
         codeBlock: false,
         heading: { levels: [2, 3] },
+        link: {
+          openOnClick: false,
+          HTMLAttributes: {
+            class: 'text-dd-accent underline',
+          },
+        },
       }),
       ExecutableCodeBlock.configure({
         defaultLanguage: 'typescript',
@@ -68,12 +67,6 @@ export const NotionEditor = forwardRef<NotionEditorRef, NotionEditorProps>(funct
       Placeholder.configure({
         placeholder,
         emptyEditorClass: 'is-editor-empty',
-      }),
-      Link.configure({
-        openOnClick: false,
-        HTMLAttributes: {
-          class: 'text-dd-accent underline',
-        },
       }),
       SlashCommand,
     ],
