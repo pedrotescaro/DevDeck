@@ -533,13 +533,13 @@ export default function MessagesPage() {
   );
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased">
+    <div className="flex flex-col md:flex-row h-screen bg-dd-bg text-dd-text antialiased overflow-hidden">
       <Sidebar user={user} />
 
-      <div className="flex-grow flex min-w-0 bg-dd-bg">
-        <div className="flex w-full min-h-screen">
+      <div className="flex-grow flex min-w-0 bg-dd-bg h-full overflow-hidden">
+        <div className="flex w-full h-full overflow-hidden">
           {/* Left Panel: Conversation List Sidebar (Matching image 4) */}
-          <div className="w-80 md:w-96 border-r border-dd-border/60 flex flex-col shrink-0">
+          <div className="w-80 md:w-96 border-r border-dd-border/60 flex flex-col shrink-0 h-full overflow-hidden">
             {/* Header */}
             <div className="p-4 pb-2 flex items-center justify-between">
               <h1 className="text-lg font-black tracking-tight text-dd-text">Bate-papo</h1>
@@ -641,7 +641,7 @@ export default function MessagesPage() {
           </div>
 
           {/* Right Panel: Chat Active Viewport OR Empty State (Matching image 4) */}
-          <div className="flex-1 flex flex-col bg-dd-bg min-h-screen">
+          <div className="flex-1 flex flex-col bg-dd-bg h-full overflow-hidden">
             {activeChat ? (
               // Active Conversation Screen
               <>
@@ -912,7 +912,7 @@ export default function MessagesPage() {
                 </div>
 
                 {/* Messages Input Bar */}
-                <div className="border-t border-dd-border/60 bg-dd-bg flex flex-col">
+                <div className="border-t border-dd-border/60 bg-dd-bg flex flex-col shrink-0">
                   {/* Reply Preview Area */}
                   {replyingToMessage && (
                     <div className="flex items-center justify-between px-4 py-2.5 bg-dd-surface/60 border-b border-dd-border/40 text-xs font-semibold text-dd-muted">
