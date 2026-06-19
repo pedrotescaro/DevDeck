@@ -67,6 +67,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     bio: profileUser.bio,
     institution: profileUser.institution,
     github_username: profileUser.github_username,
+    discord_username: profileUser.discord_username,
+    banner_url: profileUser.banner_url,
     pronouns: profileUser.pronouns,
     birthday: profileUser.birthday ? profileUser.birthday.toISOString() : null,
     created_at: profileUser.created_at.toISOString(),

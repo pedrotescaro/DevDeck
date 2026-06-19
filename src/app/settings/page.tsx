@@ -17,6 +17,7 @@ import {
   Moon,
   Tag,
   Cake,
+  X,
 } from 'lucide-react';
 
 export default function SettingsPage() {
@@ -25,6 +26,9 @@ export default function SettingsPage() {
   const [bio, setBio] = useState('');
   const [institution, setInstitution] = useState('');
   const [githubUsername, setGithubUsername] = useState('');
+  const [discordUsername, setDiscordUsername] = useState('');
+  const [bannerUrl, setBannerUrl] = useState('');
+  const [uploadingBanner, setUploadingBanner] = useState(false);
   const [pronouns, setPronouns] = useState('');
   const [birthday, setBirthday] = useState('');
   const [loading, setLoading] = useState(true);
@@ -92,6 +96,8 @@ export default function SettingsPage() {
           setBio(profileData.user.bio || '');
           setInstitution(profileData.user.institution || '');
           setGithubUsername(profileData.user.github_username || '');
+          setDiscordUsername(profileData.user.discord_username || '');
+          setBannerUrl(profileData.user.banner_url || '');
           setPronouns(profileData.user.pronouns || '');
           setBirthday(profileData.user.birthday ? profileData.user.birthday.split('T')[0] : '');
         }
@@ -104,6 +110,29 @@ export default function SettingsPage() {
 
     fetchUserData();
   }, [router]);
+
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingBanner(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setBannerUrl(data.url);
+      }
+    } catch (err) {
+      console.error('Banner upload failed:', err);
+    } finally {
+      setUploadingBanner(false);
+    }
+  };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,6 +150,8 @@ export default function SettingsPage() {
           bio,
           institution,
           github_username: githubUsername,
+          discord_username: discordUsername,
+          banner_url: bannerUrl,
           pronouns,
           birthday,
         }),
@@ -264,6 +295,29 @@ export default function SettingsPage() {
               <div>
                 <label
                   className="block text-[11px] font-bold text-dd-muted uppercase tracking-wider mb-2 flex items-center gap-1.5"
+                  htmlFor="discordUsername"
+                >
+                  <svg
+                    className="h-3.5 w-3.5 text-dd-muted fill-current"
+                    viewBox="0 0 127.14 96.36"
+                  >
+                    <path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.95,54.65.62,77.53a107.4,107.4,0,0,0,32,16.29,80.1,80.1,0,0,0,6.72-11,68.6,68.6,0,0,1-10.64-5.12c.91-.67,1.81-1.37,2.65-2.1a77,77,0,0,0,74.5,0c.84.73,1.74,1.43,2.65,2.1a68.6,68.6,0,0,1-10.64,5.12,80.1,80.1,0,0,0,6.72,11,107.4,107.4,0,0,0,32-16.29C130.41,47.55,123.57,24.78,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5.16-12.72,11.43-12.72S53.9,46,53.9,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53s5.16-12.72,11.45-12.72S96.14,46,96.14,53,91,65.69,84.69,65.69Z" />
+                  </svg>
+                  Nome de Usuário do Discord
+                </label>
+                <input
+                  id="discordUsername"
+                  type="text"
+                  value={discordUsername}
+                  onChange={(e) => setDiscordUsername(e.target.value)}
+                  className="w-full rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-xs text-dd-text focus:border-orange-500/60 focus:outline-none transition-colors"
+                  placeholder="Ex: seu-usuario-discord"
+                />
+              </div>
+
+              <div>
+                <label
+                  className="block text-[11px] font-bold text-dd-muted uppercase tracking-wider mb-2 flex items-center gap-1.5"
                   htmlFor="pronouns"
                 >
                   <Tag className="w-3.5 h-3.5 text-dd-muted" />
@@ -294,6 +348,51 @@ export default function SettingsPage() {
                   onChange={(e) => setBirthday(e.target.value)}
                   className="w-full rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-xs text-dd-text focus:border-orange-500/60 focus:outline-none transition-colors"
                 />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-dd-muted uppercase tracking-wider mb-2">
+                  Imagem de Banner do Perfil
+                </label>
+                <div className="space-y-3">
+                  {bannerUrl ? (
+                    <div className="relative rounded-xl overflow-hidden border border-dd-border h-24 bg-dd-surface/20">
+                      <img
+                        src={bannerUrl}
+                        alt="Banner Preview"
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setBannerUrl('')}
+                        className="absolute top-2 right-2 p-1 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors cursor-pointer"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="h-24 border border-dashed border-dd-border rounded-xl flex flex-col items-center justify-center text-dd-muted bg-dd-bg/20">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider">
+                        Nenhuma imagem de banner
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleBannerUpload}
+                      className="hidden"
+                      id="settings-banner-upload"
+                    />
+                    <label
+                      htmlFor="settings-banner-upload"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 border border-dd-border bg-dd-surface hover:bg-dd-border/60 text-dd-text rounded-full text-xs font-bold transition-all cursor-pointer active:scale-95"
+                    >
+                      {uploadingBanner ? 'Enviando...' : 'Alterar Imagem de Banner'}
+                    </label>
+                  </div>
+                </div>
               </div>
 
               <div>
