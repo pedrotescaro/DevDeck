@@ -14,6 +14,7 @@ import {
   MoreHorizontal,
   Pencil,
   X,
+  Sparkles,
 } from 'lucide-react';
 import { LikeButton } from './motion/LikeButton';
 import { BookmarkButton } from './motion/BookmarkButton';
@@ -50,6 +51,7 @@ interface Post {
   bookmarks?: Array<{ id: string }>;
   reactions?: Array<{ type: string }>;
   upvotes?: number;
+  quizzes?: any[];
 }
 
 interface PostCardProps {
@@ -458,9 +460,52 @@ export function PostCard({
         )}
 
         {/* Code snippet preview */}
-        {postCodeSnippet && (
+        {postCodeSnippet && !postBody.includes('```') && (
           <div className="rounded-lg border border-dd-border bg-dd-bg p-4 mb-3 overflow-x-auto max-h-60 shadow-inner">
             {highlightCode(postCodeSnippet)}
+          </div>
+        )}
+
+        {/* Quiz challenge preview (Attachment card style like Twitter/X card preview) */}
+        {post.quizzes && post.quizzes.length > 0 && (
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              router.push(`/post/${post.id}`);
+            }}
+            className="mt-3 mb-3 p-3.5 rounded-xl border border-dd-border bg-dd-surface/30 backdrop-blur-sm flex items-center justify-between gap-4 hover:bg-dd-surface/50 hover:border-orange-500/20 transition-all duration-200 group/quiz cursor-pointer"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-9 h-9 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center shrink-0 group-hover/quiz:scale-105 transition-transform duration-200">
+                <Sparkles className="w-4.5 h-4.5 text-orange-400" />
+              </div>
+              <div className="text-left min-w-0">
+                <h4 className="text-xs font-black text-dd-text truncate">Quiz de Aprendizado</h4>
+                <p className="text-[10px] text-dd-muted font-medium mt-0.5 truncate">
+                  {Boolean(post.quizzes[0].attempts && post.quizzes[0].attempts.length > 0)
+                    ? 'Você já respondeu a este desafio!'
+                    : 'Coloque seus conhecimentos em prática e ganhe +15 XP.'}
+                </p>
+              </div>
+            </div>
+
+            <Link
+              href={`/post/${post.id}`}
+              onClick={(e) => e.stopPropagation()}
+              className={cn(
+                'inline-flex items-center justify-center gap-1 px-4 py-1.5 rounded-full font-bold text-[10px] leading-tight transition-all duration-200 shrink-0 shadow-sm border',
+                Boolean(post.quizzes[0].attempts && post.quizzes[0].attempts.length > 0)
+                  ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20'
+                  : 'bg-orange-500 border-transparent hover:bg-orange-600 text-white'
+              )}
+            >
+              <span>
+                {Boolean(post.quizzes[0].attempts && post.quizzes[0].attempts.length > 0)
+                  ? 'Ver Resultados'
+                  : 'Resolver Quiz'}
+              </span>
+            </Link>
           </div>
         )}
 

@@ -1349,17 +1349,6 @@ export function FeedContent({
                                 );
                               }}
                             />
-                            {post.quizzes && post.quizzes.length > 0 && (
-                              <div className="pl-4 pb-4 sm:pl-5 sm:pb-5 bg-transparent flex justify-start">
-                                <Link
-                                  href={`/post/${post.id}`}
-                                  className="flex items-center gap-1.5 rounded-lg bg-orange-500 px-3.5 py-1.5 font-bold text-white transition-colors hover:bg-orange-600 shadow-sm cursor-pointer text-xs"
-                                >
-                                  <Sparkles className="w-3.5 h-3.5" />
-                                  <span>Resolver como Quiz</span>
-                                </Link>
-                              </div>
-                            )}
                           </motion.div>
                         );
                       })}
