@@ -30,15 +30,26 @@ export async function GET(request: Request) {
         });
 
         if (!existingUser) {
+          // Garantir que o username é único no banco
+          let finalUsername = username;
+          const userWithSameName = await prisma.user.findUnique({
+            where: { username: finalUsername },
+          });
+          if (userWithSameName) {
+            finalUsername = `${username}_${data.user.id.substring(0, 4)}`;
+          }
+
+          const avatarBaseUrl =
+            process.env.NEXT_PUBLIC_AVATAR_API_URL || 'https://api.dicebear.com/9.x/pixel-art/svg';
+
           // Criar usuário no banco
           const dbUser = await prisma.user.create({
             data: {
               id: data.user.id,
-              username,
+              username: finalUsername,
               email: email!,
               avatar_url:
-                data.user.user_metadata?.avatar_url ||
-                `https://api.dicebear.com/9.x/pixel-art/svg?seed=${username}`,
+                data.user.user_metadata?.avatar_url || `${avatarBaseUrl}?seed=${finalUsername}`,
               bio: 'Novo desenvolvedor no DevDeck via GitHub! 🚀',
               github_username: username,
               total_xp: 0,

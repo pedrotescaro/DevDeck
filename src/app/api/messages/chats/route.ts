@@ -59,12 +59,13 @@ export async function GET() {
       }
     }
 
-    // Fetch all messages involving the user
+    // Fetch all messages involving the user (limited to last 200 for performance)
     const messages = await prisma.message.findMany({
       where: {
         OR: [{ sender_id: user.id }, { receiver_id: user.id }],
       },
       orderBy: { created_at: 'desc' },
+      take: 200,
     });
 
     // Group by conversation partner

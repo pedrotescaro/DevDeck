@@ -17,7 +17,7 @@ export const PostService = {
     const { title, body, language, code, image_url, type } = data;
 
     // Use transaction to ensure atomicity
-    return await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
       // 1. Create Post
       const post = await tx.post.create({
         data: {
@@ -67,23 +67,7 @@ export const PostService = {
         }
       }
 
-      // 4. Generate Quiz (non-blocking or run inside transaction)
-      // We will trigger a quiz generation. In Next.js, we can do it via a service call.
-      if (language) {
-        try {
-          await QuizService.generateForPost(
-            post.id,
-            language,
-            title,
-            body,
-            code || extractCodeFromBody(body)
-          );
-        } catch (err) {
-          logger.error('Failed to generate quiz for post', { postId: post.id, error: String(err) });
-        }
-      }
-
-      logger.info('Post created successfully', {
+      logger.info('Post created successfully in DB', {
         userId,
         postId: post.id,
         type,
@@ -94,6 +78,24 @@ export const PostService = {
 
       return { post, xpResult };
     });
+
+    // 4. Generate Quiz (non-blocking outside transaction)
+    if (language) {
+      QuizService.generateForPost(
+        result.post.id,
+        language,
+        title,
+        body,
+        code || extractCodeFromBody(body)
+      ).catch((err) => {
+        logger.error('Failed to generate quiz for post (async)', {
+          postId: result.post.id,
+          error: String(err),
+        });
+      });
+    }
+
+    return result;
   },
 
   async getFeed(

@@ -7,7 +7,11 @@ export const POST = apiHandler(async (req) => {
   const authHeader = req.headers.get('Authorization');
   const secret = process.env.CRON_SECRET;
 
-  if (secret && authHeader !== `Bearer ${secret}`) {
+  if (!secret) {
+    throw new Error('CRON_SECRET não configurado no servidor');
+  }
+
+  if (authHeader !== `Bearer ${secret}`) {
     throw new ForbiddenError('UNAUTHORIZED_CRON', 'Chave CRON inválida');
   }
 

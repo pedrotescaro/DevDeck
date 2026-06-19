@@ -116,7 +116,8 @@ export const POST = apiHandler(async (req) => {
 
   const prepared = prepareCode(code, normalized);
 
-  const response = await fetch('https://emkc.org/api/v2/piston/execute', {
+  const pistonApiUrl = process.env.PISTON_API_URL || 'https://emkc.org/api/v2/piston/execute';
+  const response = await fetch(pistonApiUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
