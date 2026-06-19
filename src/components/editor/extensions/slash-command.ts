@@ -12,15 +12,26 @@ type SlashKey = keyof typeof slashCommandItems;
 const slashHandlers: Record<SlashKey, (editor: Editor, range: Range) => void> = {
   bold: (editor, range) => editor.chain().focus().deleteRange(range).toggleBold().run(),
   italic: (editor, range) => editor.chain().focus().deleteRange(range).toggleItalic().run(),
-  bulletList: (editor, range) =>
-    editor.chain().focus().deleteRange(range).toggleBulletList().run(),
+  bulletList: (editor, range) => editor.chain().focus().deleteRange(range).toggleBulletList().run(),
   orderedList: (editor, range) =>
     editor.chain().focus().deleteRange(range).toggleOrderedList().run(),
   heading: (editor, range) =>
     editor.chain().focus().deleteRange(range).toggleHeading({ level: 2 }).run(),
   inlineCode: (editor, range) => editor.chain().focus().deleteRange(range).toggleCode().run(),
   codeBlock: (editor, range) =>
-    editor.chain().focus().deleteRange(range).setCodeBlock({ language: 'typescript' }).run(),
+    editor
+      .chain()
+      .focus()
+      .deleteRange(range)
+      .setCodeBlock({ language: 'typescript', isExecutable: true } as any)
+      .run(),
+  staticCodeBlock: (editor, range) =>
+    editor
+      .chain()
+      .focus()
+      .deleteRange(range)
+      .setCodeBlock({ language: 'typescript', isExecutable: false } as any)
+      .run(),
 };
 
 function buildItems(query: string): SlashCommandItem[] {
@@ -91,7 +102,9 @@ export const SlashCommand = Extension.create({
                 return true;
               }
 
-              const ref = component?.ref as { onKeyDown?: (event: KeyboardEvent) => boolean } | null;
+              const ref = component?.ref as {
+                onKeyDown?: (event: KeyboardEvent) => boolean;
+              } | null;
               return ref?.onKeyDown?.(props.event) ?? false;
             },
             onExit: () => {

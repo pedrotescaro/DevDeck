@@ -17,6 +17,7 @@ export function ExecutableCodeBlockView({
   getPos,
 }: NodeViewProps) {
   const language = (node.attrs.language as string) || 'typescript';
+  const isExecutable = node.attrs.isExecutable !== false;
   const [output, setOutput] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
@@ -75,16 +76,25 @@ export function ExecutableCodeBlockView({
           ))}
         </select>
 
-        <button
-          type="button"
-          onClick={handleRun}
-          disabled={running || !code.trim()}
-          className="inline-flex items-center gap-1.5 rounded-md bg-dd-accent px-2.5 py-1 text-[10px] font-bold text-white transition-colors hover:bg-dd-accent/90 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
-          contentEditable={false}
-        >
-          {running ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}
-          Executar
-        </button>
+        {isExecutable ? (
+          <button
+            type="button"
+            onClick={handleRun}
+            disabled={running || !code.trim()}
+            className="inline-flex items-center gap-1.5 rounded-md bg-dd-accent px-2.5 py-1 text-[10px] font-bold text-white transition-colors hover:bg-dd-accent/90 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+            contentEditable={false}
+          >
+            {running ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}
+            Executar
+          </button>
+        ) : (
+          <span
+            className="rounded-md border border-dd-border bg-dd-bg/50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-dd-muted select-none"
+            contentEditable={false}
+          >
+            Estático
+          </span>
+        )}
       </div>
 
       <div className="notion-code-editor" contentEditable={false}>
