@@ -66,6 +66,10 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     avatar_url: profileUser.avatar_url,
     bio: profileUser.bio,
     institution: profileUser.institution,
+    github_username: profileUser.github_username,
+    pronouns: profileUser.pronouns,
+    birthday: profileUser.birthday ? profileUser.birthday.toISOString() : null,
+    created_at: profileUser.created_at.toISOString(),
     total_xp: profileUser.total_xp,
     badges: profileUser.badges.map((ub) => ({
       slug: ub.badge.slug,

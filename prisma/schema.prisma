@@ -32,6 +32,8 @@ model User {
   bio         String?
   institution String?
   github_username String?
+  pronouns        String?
+  birthday        DateTime?
   total_xp    Int      @default(0)
   streak_days Int      @default(0)
   last_active_at DateTime?

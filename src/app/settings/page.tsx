@@ -15,6 +15,8 @@ import {
   AlertCircle,
   Sun,
   Moon,
+  Tag,
+  Cake,
 } from 'lucide-react';
 
 export default function SettingsPage() {
@@ -23,6 +25,8 @@ export default function SettingsPage() {
   const [bio, setBio] = useState('');
   const [institution, setInstitution] = useState('');
   const [githubUsername, setGithubUsername] = useState('');
+  const [pronouns, setPronouns] = useState('');
+  const [birthday, setBirthday] = useState('');
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -88,6 +92,8 @@ export default function SettingsPage() {
           setBio(profileData.user.bio || '');
           setInstitution(profileData.user.institution || '');
           setGithubUsername(profileData.user.github_username || '');
+          setPronouns(profileData.user.pronouns || '');
+          setBirthday(profileData.user.birthday ? profileData.user.birthday.split('T')[0] : '');
         }
       } catch (err) {
         console.error('Error fetching settings user:', err);
@@ -111,7 +117,13 @@ export default function SettingsPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ bio, institution, github_username: githubUsername }),
+        body: JSON.stringify({
+          bio,
+          institution,
+          github_username: githubUsername,
+          pronouns,
+          birthday,
+        }),
       });
 
       if (res.ok) {
@@ -246,6 +258,41 @@ export default function SettingsPage() {
                   onChange={(e) => setGithubUsername(e.target.value.replace(/[^a-zA-Z0-9-]/g, ''))}
                   className="w-full rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-xs text-dd-text focus:border-orange-500/60 focus:outline-none transition-colors"
                   placeholder="Ex: seu-usuario-github"
+                />
+              </div>
+
+              <div>
+                <label
+                  className="block text-[11px] font-bold text-dd-muted uppercase tracking-wider mb-2 flex items-center gap-1.5"
+                  htmlFor="pronouns"
+                >
+                  <Tag className="w-3.5 h-3.5 text-dd-muted" />
+                  Pronomes
+                </label>
+                <input
+                  id="pronouns"
+                  type="text"
+                  value={pronouns}
+                  onChange={(e) => setPronouns(e.target.value)}
+                  className="w-full rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-xs text-dd-text focus:border-orange-500/60 focus:outline-none transition-colors"
+                  placeholder="Ex: ele/dele, ela/dela, elu/delu"
+                />
+              </div>
+
+              <div>
+                <label
+                  className="block text-[11px] font-bold text-dd-muted uppercase tracking-wider mb-2 flex items-center gap-1.5"
+                  htmlFor="birthday"
+                >
+                  <Cake className="w-3.5 h-3.5 text-dd-muted" />
+                  Data de Nascimento
+                </label>
+                <input
+                  id="birthday"
+                  type="date"
+                  value={birthday}
+                  onChange={(e) => setBirthday(e.target.value)}
+                  className="w-full rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-xs text-dd-text focus:border-orange-500/60 focus:outline-none transition-colors"
                 />
               </div>
 
