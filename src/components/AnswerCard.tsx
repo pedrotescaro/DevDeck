@@ -308,27 +308,30 @@ export function AnswerCard({
           </div>
 
           {/* 7. Accept Button */}
-          {isPostAuthor && !answer.is_accepted && (
-            <button
-              onClick={handleAccept}
-              disabled={accepting}
-              className="flex items-center gap-1 text-[10px] font-bold text-dd-green bg-dd-green/10 hover:bg-dd-green/20 px-2.5 py-1.5 rounded-full transition-colors disabled:opacity-50 shrink-0"
-            >
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+          {isPostAuthor &&
+            !answer.is_accepted &&
+            currentUser &&
+            answer.author.username !== currentUser.username && (
+              <button
+                onClick={handleAccept}
+                disabled={accepting}
+                className="flex items-center gap-1 text-[10px] font-bold text-dd-green bg-dd-green/10 hover:bg-dd-green/20 px-2.5 py-1.5 rounded-full transition-colors disabled:opacity-50 shrink-0"
               >
-                <path d="M20 6L9 17l-5-5" />
-              </svg>
-              Aceitar
-            </button>
-          )}
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+                Aceitar
+              </button>
+            )}
         </div>
         {showReplyBox && (
           <form
