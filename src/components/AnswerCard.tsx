@@ -180,16 +180,26 @@ export function AnswerCard({
   const childDepth = depth + 1;
   const shouldIndentChildren = childDepth <= MAX_ANSWER_DEPTH;
 
+  const isTopLevel = depth === 0;
+
   return (
-    <article className="space-y-1">
+    <article className="space-y-2">
       <div
-        className={`bg-dd-card border rounded-xl p-5 ${
-          answer.is_accepted ? 'border-dd-green/40' : 'border-dd-border'
-        }`}
+        className={
+          isTopLevel
+            ? `bg-dd-card border rounded-xl p-5 ${
+                answer.is_accepted ? 'border-dd-green/40' : 'border-dd-border'
+              }`
+            : `bg-transparent border-none p-0 pt-3 pb-1 ${
+                answer.is_accepted ? 'border-l-2 border-dd-green/50 pl-3' : ''
+              }`
+        }
       >
         {/* Accepted badge */}
         {answer.is_accepted && (
-          <div className="flex items-center gap-1.5 text-dd-green text-xs font-medium mb-3">
+          <div
+            className={`flex items-center gap-1.5 text-dd-green text-xs font-medium ${isTopLevel ? 'mb-3' : 'mb-1.5'}`}
+          >
             <svg
               width="16"
               height="16"
@@ -379,8 +389,8 @@ export function AnswerCard({
         <div
           className={
             shouldIndentChildren
-              ? 'pl-4 sm:pl-6 ml-3 sm:ml-5 border-l border-dd-border/50 space-y-1'
-              : 'space-y-1'
+              ? 'pl-4 sm:pl-6 ml-3 sm:ml-5 border-l border-dd-border/30 space-y-4 mt-2'
+              : 'space-y-4 mt-2'
           }
         >
           {replies.map((reply) =>
