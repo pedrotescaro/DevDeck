@@ -36,6 +36,8 @@ interface ProfileContentProps {
     bio?: string | null;
     institution?: string | null;
     github_username?: string | null;
+    discord_username?: string | null;
+    banner_url?: string | null;
     pronouns?: string | null;
     birthday?: string | null;
     created_at: string;
@@ -90,9 +92,9 @@ export function ProfileContent({
   const [followers, setFollowers] = useState(followersCount);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'followers' | 'following'>('followers');
-  const [activeTab, setActiveTab] = useState<'posts' | 'likes' | 'stats' | 'trails' | 'badges'>(
-    'posts'
-  );
+  const [activeTab, setActiveTab] = useState<
+    'posts' | 'replies' | 'likes' | 'stats' | 'trails' | 'badges'
+  >('posts');
 
   const showFollowersModal = () => {
     setModalType('followers');
@@ -135,11 +137,18 @@ export function ProfileContent({
   const fetchUserPosts = async (
     currentCursor: string | null,
     isInitial: boolean,
-    targetTab: 'posts' | 'likes'
+    targetTab: 'posts' | 'likes' | 'replies'
   ) => {
     setLoading(true);
     try {
-      const paramName = targetTab === 'likes' ? 'likedBy' : 'author';
+      let paramName: string;
+      if (targetTab === 'likes') {
+        paramName = 'likedBy';
+      } else if (targetTab === 'replies') {
+        paramName = 'answeredBy';
+      } else {
+        paramName = 'author';
+      }
       const url = `/api/posts?${paramName}=${profileUser.username}&useCursor=true&limit=10${currentCursor ? `&cursor=${currentCursor}` : ''}`;
       const res = await fetch(url);
       if (res.ok) {
@@ -161,7 +170,7 @@ export function ProfileContent({
   };
 
   useEffect(() => {
-    if (activeTab === 'posts' || activeTab === 'likes') {
+    if (activeTab === 'posts' || activeTab === 'likes' || activeTab === 'replies') {
       setPosts([]);
       setNextCursor(null);
       setHasMore(true);
@@ -171,7 +180,7 @@ export function ProfileContent({
 
   const loadMorePosts = () => {
     if (loading || !hasMore) return;
-    if (activeTab === 'posts' || activeTab === 'likes') {
+    if (activeTab === 'posts' || activeTab === 'likes' || activeTab === 'replies') {
       fetchUserPosts(nextCursor, false, activeTab);
     }
   };
@@ -234,7 +243,17 @@ export function ProfileContent({
           </div>
 
           {/* Profile Banner (Twitter style gradient) */}
-          <div className="h-32 sm:h-44 bg-gradient-to-r from-orange-500/20 via-amber-500/10 to-transparent relative border-b border-dd-border/40" />
+          {profileUser.banner_url ? (
+            <div className="h-32 sm:h-44 relative border-b border-dd-border/40 overflow-hidden">
+              <img
+                src={profileUser.banner_url}
+                alt="Banner do perfil"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="h-32 sm:h-44 bg-gradient-to-r from-orange-500/20 via-amber-500/10 to-transparent relative border-b border-dd-border/40" />
+          )}
 
           {/* Avatar and Edit Profile/Follow Button flex alignment */}
           <div className="flex justify-between items-end px-4">
@@ -277,6 +296,19 @@ export function ProfileContent({
                 </span>
               </div>
               <p className="text-xs text-dd-muted">@{profileUser.username}</p>
+              {profileUser.discord_username && (
+                <div className="flex items-center gap-1.5 mt-1">
+                  <svg
+                    className="h-3.5 w-3.5 fill-current text-[#5865F2]"
+                    viewBox="0 0 127.14 96.36"
+                  >
+                    <path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.95,54.65.62,77.53a107.4,107.4,0,0,0,32,16.29,80.1,80.1,0,0,0,6.72-11,68.6,68.6,0,0,1-10.64-5.12c.91-.67,1.81-1.37,2.65-2.1a77,77,0,0,0,74.5,0c.84.73,1.74,1.43,2.65,2.1a68.6,68.6,0,0,1-10.64,5.12,80.1,80.1,0,0,0,6.72,11,107.4,107.4,0,0,0,32-16.29C130.41,47.55,123.57,24.78,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5.16-12.72,11.43-12.72S53.9,46,53.9,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53s5.16-12.72,11.45-12.72S96.14,46,96.14,53,91,65.69,84.69,65.69Z" />
+                  </svg>
+                  <span className="text-xs text-[#5865F2] font-semibold">
+                    discord: {profileUser.discord_username}
+                  </span>
+                </div>
+              )}
             </div>
 
             {profileUser.bio ? (
@@ -346,6 +378,7 @@ export function ProfileContent({
           <div className="border-b border-dd-border/60 flex select-none mt-5">
             {[
               { id: 'posts', label: 'Postagens' },
+              { id: 'replies', label: 'Respostas' },
               { id: 'likes', label: 'Curtidas' },
               { id: 'stats', label: 'Estatísticas' },
               { id: 'trails', label: 'Trilhas' },
@@ -377,13 +410,15 @@ export function ProfileContent({
 
           {/* Conditional Content Rendering */}
           <div className="flex-grow flex flex-col">
-            {(activeTab === 'posts' || activeTab === 'likes') && (
+            {(activeTab === 'posts' || activeTab === 'likes' || activeTab === 'replies') && (
               <div className="flex flex-col">
                 {posts.length === 0 && !loading ? (
                   <p className="text-xs text-dd-muted italic py-12 text-center border-b border-dd-border/40">
                     {activeTab === 'likes'
                       ? 'Nenhuma curtida encontrada.'
-                      : 'Nenhuma publicação encontrada.'}
+                      : activeTab === 'replies'
+                        ? 'Nenhuma resposta encontrada.'
+                        : 'Nenhuma publicação encontrada.'}
                   </p>
                 ) : (
                   posts.map((post) => (

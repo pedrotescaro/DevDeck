@@ -105,6 +105,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
         bio: user.bio,
         institution: user.institution,
         github_username: user.github_username,
+        discord_username: user.discord_username,
+        banner_url: user.banner_url,
         pronouns: user.pronouns,
         birthday: user.birthday,
         total_xp: user.total_xp,
