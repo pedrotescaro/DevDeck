@@ -185,6 +185,56 @@ function SafeImage({ src, alt }: { src?: string; alt?: string }) {
   );
 }
 
+function renderStaticCode(code: string) {
+  if (!code) return null;
+  const lines = code.split('\n');
+  return (
+    <pre className="font-mono text-[11px] leading-relaxed text-dd-text">
+      <code>
+        {lines.map((line, idx) => {
+          let html = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+          // Highlight keywords
+          const keywords =
+            /\b(const|let|var|function|return|fn|impl|pub|use|import|from|def|class|async|await|struct|enum|if|else|for|while|match)\b/g;
+          html = html.replace(keywords, '<span class="text-orange-400 font-semibold">$1</span>');
+
+          // Highlight types
+          const types =
+            /\b(string|number|boolean|any|void|User|Post|Language|int|float|str|char)\b/g;
+          html = html.replace(types, '<span class="text-cyan-400 font-medium">$1</span>');
+
+          // Highlight comments
+          if (html.includes('//')) {
+            const parts = html.split('//');
+            html =
+              parts[0] +
+              '<span class="text-dd-muted italic">//' +
+              parts.slice(1).join('//') +
+              '</span>';
+          } else if (html.startsWith('#') || html.includes(' #')) {
+            const parts = html.split('#');
+            html =
+              parts[0] +
+              '<span class="text-dd-muted italic">#' +
+              parts.slice(1).join('#') +
+              '</span>';
+          }
+
+          return (
+            <div key={idx} className="table-row">
+              <span className="table-cell text-right pr-4 select-none opacity-20 text-[9px] w-6">
+                {idx + 1}
+              </span>
+              <span className="table-cell" dangerouslySetInnerHTML={{ __html: html }} />
+            </div>
+          );
+        })}
+      </code>
+    </pre>
+  );
+}
+
 function CodeBlock({
   children,
   className,
@@ -205,6 +255,14 @@ function CodeBlock({
   const language = isStatic ? rawLanguage.slice(0, -7) : rawLanguage;
   const collapsed = compact && !expanded;
   const canRun = !isStatic && isRunnableLanguage(language);
+
+  if (isStatic) {
+    return (
+      <div className="my-3 overflow-x-auto rounded-lg border border-dd-border bg-dd-bg p-4 shadow-inner max-h-60">
+        {renderStaticCode(code)}
+      </div>
+    );
+  }
 
   const handleCopy = async (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
