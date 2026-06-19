@@ -137,6 +137,14 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
                             handleBookmarkToggle(postId);
                           }
                         }}
+                        onDelete={(postId) => {
+                          setPosts((prev) => prev.filter((p) => p.id !== postId));
+                        }}
+                        onEdit={(postId, updatedPost) => {
+                          setPosts((prev) =>
+                            prev.map((p) => (p.id === postId ? { ...p, ...updatedPost } : p))
+                          );
+                        }}
                       />
                       {post.quizzes && post.quizzes.length > 0 && (
                         <div className="pl-4 pb-4 sm:pl-5 sm:pb-5 bg-transparent flex justify-start">

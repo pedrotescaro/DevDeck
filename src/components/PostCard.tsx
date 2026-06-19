@@ -1,11 +1,20 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { LanguageTag } from './LanguageTag';
-import { Flag, Heart, MessageSquare, BarChart2, Trash2 } from 'lucide-react';
+import {
+  Flag,
+  Heart,
+  MessageSquare,
+  BarChart2,
+  Trash2,
+  MoreHorizontal,
+  Pencil,
+  X,
+} from 'lucide-react';
 import { LikeButton } from './motion/LikeButton';
 import { BookmarkButton } from './motion/BookmarkButton';
 import { RepostMenu } from './motion/RepostMenu';
@@ -13,6 +22,10 @@ import { AuthorAvatar } from '@/components/AuthorAvatar';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { cn } from '@/lib/cn';
 import { formatRelativeTime } from '@/lib/date';
+import { ComposeModal } from '@/components/motion/ComposeModal';
+import { MarkdownEditor, type NotionEditorRef } from '@/components/MarkdownEditor';
+import { CharCounter } from '@/components/motion/CharCounter';
+import { POST_CHAR_LIMIT } from '@/lib/motion';
 
 interface PostAuthor {
   username: string;
@@ -43,6 +56,7 @@ interface PostCardProps {
   post: Post;
   isOwner?: boolean;
   onDelete?: (postId: string) => void;
+  onEdit?: (postId: string, updatedPost: any) => void;
   flat?: boolean;
   onBookmarkToggle?: (postId: string, bookmarked: boolean) => void;
 }
@@ -51,16 +65,49 @@ export function PostCard({
   post,
   isOwner = false,
   onDelete,
+  onEdit,
   flat = false,
   onBookmarkToggle,
 }: PostCardProps) {
   const router = useRouter();
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const [reportReason, setReportReason] = useState('');
   const [reporting, setReporting] = useState(false);
   const [reported, setReported] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // Stateful copy of post fields for instant local updates
+  const [postBody, setPostBody] = useState(post.body);
+  const [postLanguage, setPostLanguage] = useState(post.language);
+  const [postCodeSnippet, setPostCodeSnippet] = useState(post.code_snippet);
+  const [editBody, setEditBody] = useState(post.body);
+
+  const menuRef = useRef<HTMLDivElement>(null);
+  const editBodyEditorRef = useRef<NotionEditorRef>(null);
+
+  useEffect(() => {
+    setPostBody(post.body);
+    setPostLanguage(post.language);
+    setPostCodeSnippet(post.code_snippet);
+    setEditBody(post.body);
+  }, [post.body, post.language, post.code_snippet]);
+
+  // Click outside to close the dropdown menu
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [menuOpen]);
 
   const handleCardClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
@@ -212,6 +259,35 @@ export function PostCard({
     }
   };
 
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editBody.trim() || editBody.trim().length < 10) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/posts/${post.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ body: editBody.trim() }),
+      });
+      if (res.ok) {
+        const updatedPost = await res.json();
+        setEditModalOpen(false);
+        setPostBody(updatedPost.body);
+        setPostLanguage(updatedPost.language);
+        setPostCodeSnippet(updatedPost.code_snippet);
+        onEdit?.(post.id, updatedPost);
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Falha ao editar post.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao editar post.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const highlightCode = (code: string) => {
     if (!code) return null;
     const lines = code.split('\n');
@@ -291,13 +367,80 @@ export function PostCard({
             </span>
           </div>
           <div className="flex items-center gap-1.5" onClick={(e) => e.preventDefault()}>
-            {post.language && <LanguageTag language={post.language} size="sm" />}
+            {postLanguage && <LanguageTag language={postLanguage} size="sm" />}
+
+            {/* Top-Right Options Popover Menu */}
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setMenuOpen(!menuOpen);
+                }}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-dd-muted hover:text-dd-text hover:bg-dd-surface transition-colors cursor-pointer"
+                title="Mais opções"
+              >
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
+
+              {menuOpen && (
+                <div
+                  className="absolute right-0 mt-1 w-40 rounded-xl border border-dd-border bg-dd-card p-1 shadow-xl z-30 animate-in fade-in slide-in-from-top-2 duration-150"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
+                >
+                  {isOwner ? (
+                    <>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          setEditModalOpen(true);
+                          setMenuOpen(false);
+                        }}
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-dd-text hover:bg-dd-surface transition-colors cursor-pointer text-left"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                        <span>Editar</span>
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          setDeleteModalOpen(true);
+                          setMenuOpen(false);
+                        }}
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer text-left"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Excluir</span>
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        setReportModalOpen(true);
+                        setMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-dd-text hover:bg-dd-surface transition-colors cursor-pointer text-left"
+                    >
+                      <Flag className="w-3.5 h-3.5" />
+                      <span>Denunciar</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Body preview */}
         <div className="mb-3 text-dd-muted">
-          <MarkdownRenderer content={post.body} compact />
+          <MarkdownRenderer content={postBody} compact />
         </div>
 
         {/* Image preview */}
@@ -315,9 +458,9 @@ export function PostCard({
         )}
 
         {/* Code snippet preview */}
-        {post.code_snippet && (
+        {postCodeSnippet && (
           <div className="rounded-lg border border-dd-border bg-dd-bg p-4 mb-3 overflow-x-auto max-h-60 shadow-inner">
-            {highlightCode(post.code_snippet)}
+            {highlightCode(postCodeSnippet)}
           </div>
         )}
 
@@ -370,27 +513,7 @@ export function PostCard({
             </span>
           </div>
 
-          {/* 5. Report button */}
-          <button
-            onClick={() => setReportModalOpen(true)}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer shrink-0"
-            title="Denunciar postagem"
-          >
-            <Flag className="w-3.5 h-3.5" />
-          </button>
-
-          {/* 6. Delete button (if Owner) */}
-          {isOwner && (
-            <button
-              onClick={() => setDeleteModalOpen(true)}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-dd-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer shrink-0"
-              title="Deletar postagem"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
-          )}
-
-          {/* 7. BookmarkButton */}
+          {/* 5. BookmarkButton */}
           <BookmarkButton isSaved={bookmarked} onToggle={handleBookmarkToggle} />
         </div>
       </article>
@@ -524,6 +647,61 @@ export function PostCard({
           </div>
         </div>
       )}
+
+      {/* EDIT POST MODAL */}
+      <ComposeModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        hasDraft={editBody !== postBody}
+        onDiscard={() => setEditBody(postBody)}
+      >
+        <form
+          onSubmit={handleEditSubmit}
+          className="space-y-4"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex gap-3">
+            <AuthorAvatar username={post.author.username} avatar_url={post.author.avatar_url} />
+
+            <div className="flex-grow min-w-0 space-y-3 relative">
+              <h3 className="text-sm font-black text-dd-text">Editar Publicação</h3>
+              <MarkdownEditor
+                ref={editBodyEditorRef}
+                value={editBody}
+                onChange={(val) => setEditBody(val)}
+                maxLength={POST_CHAR_LIMIT}
+                minHeight="8rem"
+                placeholder="Editar conteúdo..."
+              />
+              <div className="flex justify-end">
+                <CharCounter text={editBody} limit={POST_CHAR_LIMIT} />
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-dd-border/50 pt-3 flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setEditModalOpen(false);
+              }}
+              className="text-xs font-bold text-dd-muted hover:text-dd-text py-2 px-4 rounded-lg hover:bg-dd-surface transition-all cursor-pointer"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              onClick={(e) => e.stopPropagation()}
+              disabled={saving || !editBody.trim() || editBody.length >= POST_CHAR_LIMIT}
+              className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-xs font-bold py-2 px-5 rounded-lg transition-colors cursor-pointer"
+            >
+              {saving ? 'Salvando...' : 'Salvar'}
+            </button>
+          </div>
+        </form>
+      </ComposeModal>
     </div>
   );
 }

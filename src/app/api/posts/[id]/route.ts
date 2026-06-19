@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getAuthUser } from '@/lib/auth';
+import { extractPostMetadata } from '@/lib/editor/extract-metadata';
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -81,6 +82,67 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   } catch (error) {
     console.error('Error fetching post details:', error);
     return NextResponse.json({ error: 'Erro ao buscar detalhes do post' }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params;
+    const user = await getAuthUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
+    }
+
+    const post = await prisma.post.findUnique({
+      where: { id },
+      select: { author_id: true },
+    });
+
+    if (!post) {
+      return NextResponse.json({ error: 'Post não encontrado' }, { status: 404 });
+    }
+
+    if (post.author_id !== user.id) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 403 });
+    }
+
+    const { body } = await request.json();
+    if (!body || body.trim().length < 10) {
+      return NextResponse.json(
+        { error: 'O conteúdo deve ter pelo menos 10 caracteres' },
+        { status: 400 }
+      );
+    }
+
+    const postMetadata = extractPostMetadata(body);
+
+    const updatedPost = await prisma.post.update({
+      where: { id },
+      data: {
+        body: body.trim(),
+        language: postMetadata.language,
+        code_snippet: postMetadata.code || null,
+      },
+      include: {
+        author: {
+          select: {
+            username: true,
+            avatar_url: true,
+            total_xp: true,
+          },
+        },
+        _count: {
+          select: { answers: true },
+        },
+        quizzes: true,
+      },
+    });
+
+    return NextResponse.json(updatedPost);
+  } catch (error) {
+    console.error('Error updating post:', error);
+    return NextResponse.json({ error: 'Erro ao editar post' }, { status: 500 });
   }
 }
 

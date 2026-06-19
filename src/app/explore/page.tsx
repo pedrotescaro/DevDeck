@@ -272,6 +272,11 @@ export default function ExplorePage() {
                       onDelete={(postId) => {
                         setSearchResults((prev) => prev.filter((p) => p.id !== postId));
                       }}
+                      onEdit={(postId, updatedPost) => {
+                        setSearchResults((prev) =>
+                          prev.map((p) => (p.id === postId ? { ...p, ...updatedPost } : p))
+                        );
+                      }}
                     />
                   ))}
                 </div>
