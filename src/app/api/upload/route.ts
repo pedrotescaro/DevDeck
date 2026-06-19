@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
 import { getAuthUser } from '@/lib/auth';
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
   try {
@@ -40,16 +39,31 @@ export async function POST(request: Request) {
     // Gerar um nome único e seguro para o arquivo
     const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
     const uniqueName = `${Date.now()}-${safeName}`;
-    const publicDir = join(process.cwd(), 'public');
-    const uploadDir = join(publicDir, 'uploads');
 
-    // Garantir que a pasta public/uploads existe
-    await mkdir(uploadDir, { recursive: true });
+    // Inicializar o cliente do Supabase
+    const supabase = await createClient();
 
-    const filePath = join(uploadDir, uniqueName);
-    await writeFile(filePath, buffer);
+    // Upload do arquivo para o bucket 'uploads' no Supabase Storage
+    const { error: uploadError } = await supabase.storage
+      .from('uploads')
+      .upload(uniqueName, buffer, {
+        contentType: file.type,
+      });
 
-    return NextResponse.json({ url: `/uploads/${uniqueName}` });
+    if (uploadError) {
+      console.error('Supabase storage upload error:', uploadError);
+      return NextResponse.json(
+        { error: 'Erro ao fazer upload da imagem para o armazenamento em nuvem' },
+        { status: 500 }
+      );
+    }
+
+    // Obter a URL pública do arquivo
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('uploads').getPublicUrl(uniqueName);
+
+    return NextResponse.json({ url: publicUrl });
   } catch (error) {
     console.error('Upload error:', error);
     return NextResponse.json({ error: 'Erro ao fazer upload da imagem' }, { status: 500 });
