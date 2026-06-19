@@ -13,7 +13,12 @@ export function extractPostMetadata(body: string): PostContentMetadata {
     return { language: null, code: null, isQuestion: false };
   }
 
-  const language = editorLanguageToPrisma(match[1]?.trim() || 'typescript');
+  let rawLang = match[1]?.trim() || 'typescript';
+  if (rawLang.endsWith('-static')) {
+    rawLang = rawLang.slice(0, -7);
+  }
+
+  const language = editorLanguageToPrisma(rawLang);
   const code = match[2]?.trim() || null;
 
   return {
