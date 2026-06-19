@@ -187,11 +187,11 @@ export function AnswerCard({
       <div
         className={
           isTopLevel
-            ? `bg-dd-card border rounded-xl p-5 ${
-                answer.is_accepted ? 'border-dd-green/40' : 'border-dd-border'
+            ? `bg-transparent border-b border-dd-border/50 rounded-none p-4 sm:p-5 hover:bg-dd-surface/20 ${
+                answer.is_accepted ? 'border-l-2 border-dd-green/50 pl-3 bg-dd-green/5' : ''
               }`
             : `bg-transparent border-none p-0 pt-3 pb-1 ${
-                answer.is_accepted ? 'border-l-2 border-dd-green/50 pl-3' : ''
+                answer.is_accepted ? 'border-l-2 border-dd-green/50 pl-3 bg-dd-green/5' : ''
               }`
         }
       >
