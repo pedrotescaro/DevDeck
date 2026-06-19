@@ -10,6 +10,7 @@ import { FollowersModal } from '@/components/motion/FollowersModal';
 import { LanguageTrailBar } from '@/components/LanguageTrailBar';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { FollowButton } from '@/components/motion/FollowButton';
+import { EditProfileModal } from '@/components/EditProfileModal';
 import {
   ArrowLeft,
   GraduationCap,
@@ -95,6 +96,8 @@ export function ProfileContent({
   const [activeTab, setActiveTab] = useState<
     'posts' | 'replies' | 'likes' | 'stats' | 'trails' | 'badges'
   >('posts');
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [localProfileUser, setLocalProfileUser] = useState(profileUser);
 
   const showFollowersModal = () => {
     setModalType('followers');
@@ -243,10 +246,10 @@ export function ProfileContent({
           </div>
 
           {/* Profile Banner (Twitter style gradient) */}
-          {profileUser.banner_url ? (
+          {localProfileUser.banner_url ? (
             <div className="h-32 sm:h-44 relative border-b border-dd-border/40 overflow-hidden">
               <img
-                src={profileUser.banner_url}
+                src={localProfileUser.banner_url}
                 alt="Banner do perfil"
                 className="w-full h-full object-cover"
               />
@@ -273,7 +276,7 @@ export function ProfileContent({
             <div className="pb-3 flex gap-2">
               {user.id === profileUser.id ? (
                 <button
-                  onClick={() => router.push('/settings')}
+                  onClick={() => setEditModalOpen(true)}
                   className="px-4.5 py-2 border border-dd-border bg-dd-surface hover:bg-dd-border/60 text-dd-text rounded-full text-xs font-black transition-all cursor-pointer active:scale-95"
                 >
                   Editar perfil
@@ -299,11 +302,11 @@ export function ProfileContent({
             </div>
 
             {/* Provider badges (Twitter "Automatizado por" style) */}
-            {(profileUser.github_username || profileUser.discord_username) && (
+            {(localProfileUser.github_username || localProfileUser.discord_username) && (
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
-                {profileUser.github_username && (
+                {localProfileUser.github_username && (
                   <a
-                    href={`https://github.com/${profileUser.github_username}`}
+                    href={`https://github.com/${localProfileUser.github_username}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1.5 text-dd-muted hover:text-dd-text transition-colors cursor-pointer group"
@@ -312,11 +315,11 @@ export function ProfileContent({
                       <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.579.688.481C19.137 20.164 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
                     </svg>
                     <span className="text-[11px] font-semibold">
-                      @{profileUser.github_username}
+                      @{localProfileUser.github_username}
                     </span>
                   </a>
                 )}
-                {profileUser.discord_username && (
+                {localProfileUser.discord_username && (
                   <div className="flex items-center gap-1.5 text-dd-muted">
                     <svg
                       className="h-3.5 w-3.5 fill-current text-[#5865F2]"
@@ -325,16 +328,16 @@ export function ProfileContent({
                       <path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.95,54.65.62,77.53a107.4,107.4,0,0,0,32,16.29,80.1,80.1,0,0,0,6.72-11,68.6,68.6,0,0,1-10.64-5.12c.91-.67,1.81-1.37,2.65-2.1a77,77,0,0,0,74.5,0c.84.73,1.74,1.43,2.65,2.1a68.6,68.6,0,0,1-10.64,5.12,80.1,80.1,0,0,0,6.72,11,107.4,107.4,0,0,0,32-16.29C130.41,47.55,123.57,24.78,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5.16-12.72,11.43-12.72S53.9,46,53.9,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53s5.16-12.72,11.45-12.72S96.14,46,96.14,53,91,65.69,84.69,65.69Z" />
                     </svg>
                     <span className="text-[11px] font-semibold text-[#5865F2]">
-                      {profileUser.discord_username}
+                      {localProfileUser.discord_username}
                     </span>
                   </div>
                 )}
               </div>
             )}
 
-            {profileUser.bio ? (
+            {localProfileUser.bio ? (
               <div className="text-xs text-dd-text leading-relaxed">
-                <MarkdownRenderer content={profileUser.bio} compact />
+                <MarkdownRenderer content={localProfileUser.bio} compact />
               </div>
             ) : (
               <p className="text-xs text-dd-muted italic">Sem biografia fornecida.</p>
@@ -342,22 +345,22 @@ export function ProfileContent({
 
             {/* Institution, Github, Pronouns, Birthday and Joined counters with icons */}
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-bold text-dd-muted uppercase tracking-wider">
-              {profileUser.institution && (
+              {localProfileUser.institution && (
                 <div className="flex items-center gap-1.5">
                   <GraduationCap className="w-4 h-4 text-orange-500/80" />
-                  <span>{profileUser.institution}</span>
+                  <span>{localProfileUser.institution}</span>
                 </div>
               )}
-              {profileUser.pronouns && (
+              {localProfileUser.pronouns && (
                 <div className="flex items-center gap-1.5">
                   <Tag className="w-4 h-4 text-orange-500/80" />
-                  <span>{profileUser.pronouns}</span>
+                  <span>{localProfileUser.pronouns}</span>
                 </div>
               )}
-              {profileUser.birthday && (
+              {localProfileUser.birthday && (
                 <div className="flex items-center gap-1.5">
                   <Cake className="w-4 h-4 text-orange-500/80" />
-                  <span>Nascido(a) em {formatBirthday(profileUser.birthday)}</span>
+                  <span>Nascido(a) em {formatBirthday(localProfileUser.birthday)}</span>
                 </div>
               )}
               <div className="flex items-center gap-1.5">
@@ -550,6 +553,15 @@ export function ProfileContent({
         currentUserId={user.id}
         type={modalType}
         title={modalType === 'followers' ? 'Seguidores' : 'Seguindo'}
+      />
+
+      <EditProfileModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        profileUser={localProfileUser}
+        onSaved={(updatedFields) => {
+          setLocalProfileUser((prev) => ({ ...prev, ...updatedFields }));
+        }}
       />
     </div>
   );
