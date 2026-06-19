@@ -36,18 +36,18 @@ export function AnswerThread({
   const totalAnswers = countAnswers(answers);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
+    <div className="flex flex-col bg-transparent">
+      <div className="flex items-center gap-2 p-4 sm:p-5 border-b border-dd-border/50">
         <MessageSquare className="w-4.5 h-4.5 text-orange-500/85" />
         <h2 className="text-sm font-extrabold text-dd-text">Respostas ({totalAnswers})</h2>
       </div>
 
       {answers.length === 0 ? (
-        <div className="rounded-xl border border-dd-border bg-dd-surface/10 p-8 text-center text-dd-muted text-xs">
+        <div className="p-8 text-center text-dd-muted text-xs border-b border-dd-border/50">
           Nenhuma resposta publicada ainda. Seja o primeiro a ajudar o autor!
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="flex flex-col">
           {answers.map((answer) => (
             <AnswerCard
               key={answer.id}

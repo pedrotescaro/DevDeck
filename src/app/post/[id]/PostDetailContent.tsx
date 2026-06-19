@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/Sidebar';
 import { LanguageTag } from '@/components/LanguageTag';
 import { QuizWidget } from '@/components/QuizWidget';
@@ -70,6 +71,7 @@ export function PostDetailContent({
   post: initialPost,
   initialIsSaved = false,
 }: PostDetailContentProps) {
+  const router = useRouter();
   const [post, setPost] = useState<any>(initialPost);
   const [soundEnabled, setSoundEnabled] = useState(true);
 
@@ -426,19 +428,24 @@ export function PostDetailContent({
 
       <Sidebar user={user} />
 
-      <div className="flex-grow flex flex-col min-w-0">
-        <main className="flex-grow max-w-3xl w-full mx-auto px-4 py-8 pb-24 md:pb-8 flex flex-col min-w-0 space-y-6">
-          {/* Back Link */}
-          <Link
-            href="/feed"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-dd-muted hover:text-dd-text transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Voltar para o Feed
-          </Link>
+      <div className="flex-grow flex flex-col md:flex-row min-w-0">
+        <main className="flex-grow max-w-2xl w-full border-r border-dd-border/80 min-h-screen bg-dd-bg pb-24 md:pb-8 flex flex-col">
+          {/* Header (Twitter style: Back arrow + Title) */}
+          <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60 px-4 py-3 flex items-center gap-4">
+            <button
+              onClick={() => router.back()}
+              className="p-2 border border-dd-border bg-dd-surface hover:bg-dd-border/50 text-dd-muted hover:text-dd-text rounded-xl transition-all cursor-pointer"
+              title="Voltar"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+            <div>
+              <h1 className="text-dd-text text-base font-extrabold tracking-tight">Post</h1>
+            </div>
+          </div>
 
           {/* Post Detail Card */}
-          <article className="bg-dd-surface border border-dd-border rounded-xl p-6 space-y-6 backdrop-blur-sm shadow-sm">
+          <article className="bg-transparent border-b border-dd-border/50 p-4 sm:p-6 space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dd-border/50 pb-3">
               <div className="flex items-center gap-3">
                 <AuthorAvatar
@@ -551,7 +558,7 @@ export function PostDetailContent({
 
           {/* Resolver como Quiz button outside/below the post box */}
           {post.quizzes && post.quizzes.length > 0 && (
-            <div className="flex flex-col gap-4">
+            <div className="px-4 sm:px-6 py-4 border-b border-dd-border/50 flex flex-col gap-4">
               <div className="flex justify-start">
                 <button
                   onClick={() => setShowQuiz(!showQuiz)}
@@ -563,7 +570,7 @@ export function PostDetailContent({
               </div>
 
               {showQuiz && (
-                <div className="bg-dd-surface border border-dd-border rounded-xl p-5 backdrop-blur-sm shadow-sm">
+                <div className="bg-dd-card border border-dd-border rounded-xl p-5 backdrop-blur-sm shadow-sm">
                   <QuizWidget
                     quiz={post.quizzes[0]}
                     postId={post.id}
@@ -576,7 +583,7 @@ export function PostDetailContent({
           )}
 
           {/* Write Answer Form */}
-          <div className="relative z-30 rounded-2xl border border-dd-border bg-dd-surface p-5 shadow-sm transition-[border-color,box-shadow] duration-200 focus-within:border-orange-500/40 focus-within:shadow-md focus-within:shadow-orange-500/5">
+          <div className="relative z-30 bg-transparent border-b border-dd-border/50 p-4 sm:p-6 transition-colors duration-200">
             {/* Header row to match modal layout */}
             <div className="flex items-center justify-between pb-3 mb-4 border-b border-dd-border/30">
               <button
@@ -743,7 +750,6 @@ export function PostDetailContent({
             }}
           />
         </main>
-        <Footer />
       </div>
 
       {reportModalOpen && (
