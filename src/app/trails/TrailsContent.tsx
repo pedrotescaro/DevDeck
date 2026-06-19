@@ -197,6 +197,22 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
   const [submittingAttempt, setSubmittingAttempt] = useState(false);
   const [quizError, setQuizError] = useState<string | null>(null);
 
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    onCancel?: () => void;
+    confirmText?: string;
+    cancelText?: string;
+    variant?: 'danger' | 'warning' | 'info';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
+
   // Estados das etapas (Aprender, Praticar, Desafio)
   const [currentStage, setCurrentStage] = useState<'learn' | 'practice' | 'challenge' | 'summary'>(
     'learn'
@@ -280,33 +296,72 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
         setQuizModalOpen(true);
         setQuizError(null);
       } else {
-        alert('Erro ao resetar progresso da fase.');
+        setConfirmDialog({
+          isOpen: true,
+          title: 'Erro',
+          message: 'Erro ao resetar progresso da fase.',
+          confirmText: 'Entendido',
+          variant: 'danger',
+          onConfirm: () => setConfirmDialog((prev) => ({ ...prev, isOpen: false })),
+        });
       }
     } catch (err) {
       console.error('Error resetting level attempts:', err);
-      alert('Erro de conexão ao tentar resetar a fase.');
+      setConfirmDialog({
+        isOpen: true,
+        title: 'Erro de Conexão',
+        message: 'Erro de conexão ao tentar resetar a fase.',
+        confirmText: 'Entendido',
+        variant: 'danger',
+        onConfirm: () => setConfirmDialog((prev) => ({ ...prev, isOpen: false })),
+      });
     }
   };
 
   const handleLevelClick = async (level: TrailLevel, unlocked: boolean) => {
     if (!unlocked) {
-      playSound('notification'); // Som de aviso de bloqueado
-      alert(
-        'Esta fase está bloqueada! Complete todos os exercícios da fase anterior para liberá-la.'
-      );
+      playSound('notification');
+      setConfirmDialog({
+        isOpen: true,
+        title: 'Fase Bloqueada',
+        message:
+          'Esta fase está bloqueada! Complete todos os exercícios da fase anterior para liberá-la.',
+        confirmText: 'Entendido',
+        variant: 'info',
+        onConfirm: () => setConfirmDialog((prev) => ({ ...prev, isOpen: false })),
+      });
       return;
     }
 
     const completedCount = level.questions.filter((q) => attempts[q.id] === true).length;
     if (completedCount > 0) {
-      if (
-        confirm(
-          `Você já respondeu a esta fase anteriormente. Deseja refazer do zero para tentar obter as 3 estrelas?`
-        )
-      ) {
-        await handleResetLevelAttempts(level);
-        return;
-      }
+      setConfirmDialog({
+        isOpen: true,
+        title: 'Refazer do Zero?',
+        message: `Você já respondeu a esta fase anteriormente e obteve ${completedCount} de 3 estrelas. Deseja refazer do zero para tentar obter as 3 estrelas?`,
+        confirmText: 'Refazer do Zero',
+        cancelText: 'Continuar Progresso',
+        variant: 'warning',
+        onConfirm: async () => {
+          setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+          await handleResetLevelAttempts(level);
+        },
+        onCancel: () => {
+          setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+          setActiveLevel(level);
+          setCurrentStage('learn');
+          setLearnStep(0);
+          setPracticeStep(0);
+          setCurrentQuestionIndex(0);
+          setSelectedOption(null);
+          setAnswered(false);
+          setCorrectCount(0);
+          setXpEarned(0);
+          setQuizModalOpen(true);
+          setQuizError(null);
+        },
+      });
+      return;
     }
 
     setActiveLevel(level);
@@ -320,6 +375,28 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
     setXpEarned(0);
     setQuizModalOpen(true);
     setQuizError(null);
+  };
+
+  const handleCloseQuizRequest = () => {
+    if (currentStage !== 'summary' && !submittingAttempt) {
+      setConfirmDialog({
+        isOpen: true,
+        title: 'Sair do Quiz',
+        message: 'Quer realmente sair do quiz? Seu progresso nesta sessão será perdido.',
+        confirmText: 'Sair',
+        cancelText: 'Continuar',
+        variant: 'danger',
+        onConfirm: () => {
+          setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+          setQuizModalOpen(false);
+        },
+        onCancel: () => {
+          setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+        },
+      });
+    } else {
+      setQuizModalOpen(false);
+    }
   };
 
   const handleNextStageOrStep = () => {
@@ -789,17 +866,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
               animate="visible"
               exit="exit"
               className="fixed inset-0 bg-black/60 backdrop-blur-[8px]"
-              onClick={() => {
-                if (currentStage !== 'summary' && !submittingAttempt) {
-                  if (
-                    confirm('Quer realmente sair do quiz? Seu progresso nesta sessão será perdido.')
-                  ) {
-                    setQuizModalOpen(false);
-                  }
-                } else {
-                  setQuizModalOpen(false);
-                }
-              }}
+              onClick={handleCloseQuizRequest}
             />
 
             <motion.div
@@ -814,19 +881,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
               <div className="bg-gradient-to-r from-orange-500 to-amber-600 text-white p-5 pb-8 relative flex flex-col gap-4">
                 <div className="flex items-center justify-between w-full">
                   <button
-                    onClick={() => {
-                      if (currentStage !== 'summary' && !submittingAttempt) {
-                        if (
-                          confirm(
-                            'Quer realmente sair do quiz? Seu progresso nesta sessão será perdido.'
-                          )
-                        ) {
-                          setQuizModalOpen(false);
-                        }
-                      } else {
-                        setQuizModalOpen(false);
-                      }
-                    }}
+                    onClick={handleCloseQuizRequest}
                     className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition-all cursor-pointer border-none"
                     aria-label="Fechar quiz"
                   >
@@ -1168,6 +1223,88 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
               >
                 Continuar Jornada
               </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* CUSTOM CONFIRMATION DIALOG */}
+      <AnimatePresence>
+        {confirmDialog.isOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/75 backdrop-blur-[6px]"
+              onClick={() => {
+                if (confirmDialog.onCancel) {
+                  confirmDialog.onCancel();
+                } else {
+                  confirmDialog.onConfirm();
+                }
+              }}
+            />
+
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0, y: 8 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.92, opacity: 0, y: 8 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              className="relative w-full max-w-sm bg-dd-surface border border-dd-border/80 rounded-2xl shadow-2xl p-6 z-10 text-center space-y-5"
+            >
+              {/* Icon based on variant */}
+              <div className="flex justify-center">
+                {confirmDialog.variant === 'danger' && (
+                  <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 flex items-center justify-center text-xl">
+                    ⚠️
+                  </div>
+                )}
+                {confirmDialog.variant === 'warning' && (
+                  <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center text-xl animate-pulse">
+                    🔄
+                  </div>
+                )}
+                {confirmDialog.variant === 'info' && (
+                  <div className="w-12 h-12 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 flex items-center justify-center text-xl">
+                    ℹ️
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-dd-text text-sm font-extrabold tracking-tight uppercase">
+                  {confirmDialog.title}
+                </h3>
+                <p className="text-dd-muted text-[11.5px] leading-relaxed font-medium">
+                  {confirmDialog.message}
+                </p>
+              </div>
+
+              <div className="flex gap-2.5 pt-2">
+                {confirmDialog.onCancel && (
+                  <button
+                    type="button"
+                    onClick={confirmDialog.onCancel}
+                    className="flex-1 py-2.5 bg-dd-surface border border-dd-border hover:bg-dd-border/40 text-dd-text rounded-xl text-[10.5px] font-black transition-all cursor-pointer select-none active:scale-[0.98]"
+                  >
+                    {confirmDialog.cancelText || 'Cancelar'}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={confirmDialog.onConfirm}
+                  className={`flex-1 py-2.5 rounded-xl text-[10.5px] font-black transition-all cursor-pointer select-none active:scale-[0.98] ${
+                    confirmDialog.variant === 'danger'
+                      ? 'bg-red-500 hover:bg-red-600 text-white shadow-md shadow-red-500/15'
+                      : confirmDialog.variant === 'warning'
+                        ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-md shadow-orange-500/15'
+                        : 'bg-dd-accent hover:bg-dd-accent/90 text-white shadow-md'
+                  }`}
+                >
+                  {confirmDialog.confirmText || 'OK'}
+                </button>
+              </div>
             </motion.div>
           </div>
         )}
