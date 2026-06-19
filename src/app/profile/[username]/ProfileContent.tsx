@@ -10,7 +10,17 @@ import { FollowersModal } from '@/components/motion/FollowersModal';
 import { LanguageTrailBar } from '@/components/LanguageTrailBar';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { FollowButton } from '@/components/motion/FollowButton';
-import { ArrowLeft, GraduationCap, BookOpen, Award, Check, Sparkles } from 'lucide-react';
+import {
+  ArrowLeft,
+  GraduationCap,
+  BookOpen,
+  Award,
+  Check,
+  Sparkles,
+  Tag,
+  Cake,
+  Calendar,
+} from 'lucide-react';
 
 interface ProfileContentProps {
   user: {
@@ -26,6 +36,9 @@ interface ProfileContentProps {
     bio?: string | null;
     institution?: string | null;
     github_username?: string | null;
+    pronouns?: string | null;
+    birthday?: string | null;
+    created_at: string;
     total_xp: number;
     badges: any[];
   };
@@ -40,6 +53,23 @@ interface ProfileContentProps {
   followersCount: number;
   followingCount: number;
 }
+
+const formatBirthday = (dateStr: string) => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('pt-BR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+};
+
+const formatJoinedDate = (dateStr: string) => {
+  const date = new Date(dateStr);
+  const month = date.toLocaleDateString('pt-BR', { month: 'long' });
+  const year = date.getFullYear();
+  const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
+  return `Ingressou em ${capitalizedMonth} de ${year}`;
+};
 
 export function ProfileContent({
   user,
@@ -257,7 +287,7 @@ export function ProfileContent({
               <p className="text-xs text-dd-muted italic">Sem biografia fornecida.</p>
             )}
 
-            {/* Institution and Github items with icons */}
+            {/* Institution, Github, Pronouns, Birthday and Joined counters with icons */}
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-bold text-dd-muted uppercase tracking-wider">
               {profileUser.institution && (
                 <div className="flex items-center gap-1.5">
@@ -281,6 +311,22 @@ export function ProfileContent({
                   <span>@{profileUser.github_username}</span>
                 </a>
               )}
+              {profileUser.pronouns && (
+                <div className="flex items-center gap-1.5">
+                  <Tag className="w-4 h-4 text-orange-500/80" />
+                  <span>{profileUser.pronouns}</span>
+                </div>
+              )}
+              {profileUser.birthday && (
+                <div className="flex items-center gap-1.5">
+                  <Cake className="w-4 h-4 text-orange-500/80" />
+                  <span>Nascido(a) em {formatBirthday(profileUser.birthday)}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-1.5">
+                <Calendar className="w-4 h-4 text-orange-500/80" />
+                <span>{formatJoinedDate(profileUser.created_at)}</span>
+              </div>
             </div>
 
             {/* Followers and Following counters (Twitter style) */}
