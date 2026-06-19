@@ -18,6 +18,9 @@ import {
   Sparkles,
   ArrowLeft,
   ChevronDown,
+  AlertTriangle,
+  RotateCcw,
+  Info,
 } from 'lucide-react';
 function getLevelFromXp(xp: number) {
   return Math.max(1, Math.floor(xp / 1000) + 1);
@@ -1256,18 +1259,18 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
               {/* Icon based on variant */}
               <div className="flex justify-center">
                 {confirmDialog.variant === 'danger' && (
-                  <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 flex items-center justify-center text-xl">
-                    ⚠️
+                  <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 flex items-center justify-center">
+                    <AlertTriangle className="w-6 h-6" />
                   </div>
                 )}
                 {confirmDialog.variant === 'warning' && (
-                  <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center text-xl animate-pulse">
-                    🔄
+                  <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center animate-pulse">
+                    <RotateCcw className="w-6 h-6" />
                   </div>
                 )}
                 {confirmDialog.variant === 'info' && (
-                  <div className="w-12 h-12 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 flex items-center justify-center text-xl">
-                    ℹ️
+                  <div className="w-12 h-12 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 flex items-center justify-center">
+                    <Info className="w-6 h-6" />
                   </div>
                 )}
               </div>
