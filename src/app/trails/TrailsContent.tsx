@@ -249,7 +249,46 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
       return completedCount < 3;
     }) || sectionLevels[0];
 
-  const handleLevelClick = (level: TrailLevel, unlocked: boolean) => {
+  const handleResetLevelAttempts = async (level: TrailLevel) => {
+    const questionIds = level.questions.map((q) => q.id);
+
+    try {
+      const res = await fetch('/api/quiz/reset-level', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question_ids: questionIds }),
+      });
+
+      if (res.ok) {
+        setAttempts((prev) => {
+          const next = { ...prev };
+          questionIds.forEach((id) => {
+            delete next[id];
+          });
+          return next;
+        });
+
+        setActiveLevel(level);
+        setCurrentStage('learn');
+        setLearnStep(0);
+        setPracticeStep(0);
+        setCurrentQuestionIndex(0);
+        setSelectedOption(null);
+        setAnswered(false);
+        setCorrectCount(0);
+        setXpEarned(0);
+        setQuizModalOpen(true);
+        setQuizError(null);
+      } else {
+        alert('Erro ao resetar progresso da fase.');
+      }
+    } catch (err) {
+      console.error('Error resetting level attempts:', err);
+      alert('Erro de conexão ao tentar resetar a fase.');
+    }
+  };
+
+  const handleLevelClick = async (level: TrailLevel, unlocked: boolean) => {
     if (!unlocked) {
       playSound('notification'); // Som de aviso de bloqueado
       alert(
@@ -257,6 +296,19 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
       );
       return;
     }
+
+    const completedCount = level.questions.filter((q) => attempts[q.id] === true).length;
+    if (completedCount > 0) {
+      if (
+        confirm(
+          `Você já respondeu a esta fase anteriormente. Deseja refazer do zero para tentar obter as 3 estrelas?`
+        )
+      ) {
+        await handleResetLevelAttempts(level);
+        return;
+      }
+    }
+
     setActiveLevel(level);
     setCurrentStage('learn');
     setLearnStep(0);
