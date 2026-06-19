@@ -107,9 +107,10 @@ export const PostService = {
       filter?: string;
       cursor?: string;
       limit?: number;
+      likedBy?: string;
     }
   ) {
-    const { language, search, author, filter, cursor, limit = 10 } = params;
+    const { language, search, author, filter, cursor, limit = 10, likedBy } = params;
 
     const whereClause: any = {};
 
@@ -127,6 +128,14 @@ export const PostService = {
     }
     if (author) {
       whereClause.author = { username: author };
+    }
+    if (likedBy) {
+      whereClause.votes = {
+        some: {
+          user: { username: likedBy },
+          value: 1,
+        },
+      };
     }
     if (search) {
       whereClause.OR = [

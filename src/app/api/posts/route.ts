@@ -13,6 +13,7 @@ export const GET = apiHandler(async (req, { session }) => {
   const filter = searchParams.get('filter') || undefined;
   const cursor = searchParams.get('cursor') || undefined;
   const limit = parseInt(searchParams.get('limit') || '10', 10);
+  const likedBy = searchParams.get('likedBy') || undefined;
 
   const feed = await PostService.getFeed(session?.id || null, {
     language,
@@ -21,6 +22,7 @@ export const GET = apiHandler(async (req, { session }) => {
     filter,
     cursor,
     limit,
+    likedBy,
   });
 
   return NextResponse.json(feed);

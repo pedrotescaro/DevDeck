@@ -60,7 +60,9 @@ export function ProfileContent({
   const [followers, setFollowers] = useState(followersCount);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'followers' | 'following'>('followers');
-  const [activeTab, setActiveTab] = useState<'posts' | 'stats' | 'trails' | 'badges'>('posts');
+  const [activeTab, setActiveTab] = useState<'posts' | 'likes' | 'stats' | 'trails' | 'badges'>(
+    'posts'
+  );
 
   const showFollowersModal = () => {
     setModalType('followers');
@@ -100,10 +102,15 @@ export function ProfileContent({
     }
   };
 
-  const fetchUserPosts = async (currentCursor: string | null, isInitial: boolean) => {
+  const fetchUserPosts = async (
+    currentCursor: string | null,
+    isInitial: boolean,
+    targetTab: 'posts' | 'likes'
+  ) => {
     setLoading(true);
     try {
-      const url = `/api/posts?author=${profileUser.username}&useCursor=true&limit=10${currentCursor ? `&cursor=${currentCursor}` : ''}`;
+      const paramName = targetTab === 'likes' ? 'likedBy' : 'author';
+      const url = `/api/posts?${paramName}=${profileUser.username}&useCursor=true&limit=10${currentCursor ? `&cursor=${currentCursor}` : ''}`;
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
@@ -124,12 +131,19 @@ export function ProfileContent({
   };
 
   useEffect(() => {
-    fetchUserPosts(null, true);
-  }, [profileUser.username]);
+    if (activeTab === 'posts' || activeTab === 'likes') {
+      setPosts([]);
+      setNextCursor(null);
+      setHasMore(true);
+      fetchUserPosts(null, true, activeTab);
+    }
+  }, [profileUser.username, activeTab]);
 
   const loadMorePosts = () => {
     if (loading || !hasMore) return;
-    fetchUserPosts(nextCursor, false);
+    if (activeTab === 'posts' || activeTab === 'likes') {
+      fetchUserPosts(nextCursor, false, activeTab);
+    }
   };
 
   const userEarnedSlugs = new Map<string, string>(
@@ -286,6 +300,7 @@ export function ProfileContent({
           <div className="border-b border-dd-border/60 flex select-none mt-5">
             {[
               { id: 'posts', label: 'Postagens' },
+              { id: 'likes', label: 'Curtidas' },
               { id: 'stats', label: 'Estatísticas' },
               { id: 'trails', label: 'Trilhas' },
               { id: 'badges', label: 'Conquistas' },
@@ -316,11 +331,13 @@ export function ProfileContent({
 
           {/* Conditional Content Rendering */}
           <div className="flex-grow flex flex-col">
-            {activeTab === 'posts' && (
+            {(activeTab === 'posts' || activeTab === 'likes') && (
               <div className="flex flex-col">
                 {posts.length === 0 && !loading ? (
                   <p className="text-xs text-dd-muted italic py-12 text-center border-b border-dd-border/40">
-                    Nenhuma publicação encontrada.
+                    {activeTab === 'likes'
+                      ? 'Nenhuma curtida encontrada.'
+                      : 'Nenhuma publicação encontrada.'}
                   </p>
                 ) : (
                   posts.map((post) => (
@@ -340,7 +357,7 @@ export function ProfileContent({
                 {loading && (
                   <div className="text-center py-6 border-b border-dd-border/40">
                     <span className="text-xs text-dd-muted animate-pulse font-semibold">
-                      Carregando postagens...
+                      Carregando...
                     </span>
                   </div>
                 )}
