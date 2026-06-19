@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { Sidebar } from '@/components/Sidebar';
-import { Footer } from '@/components/Footer';
 import { PostCard } from '@/components/PostCard';
 import { springGentle } from '@/lib/motion';
 import { ArrowLeft, Search, Bookmark, Sparkles } from 'lucide-react';
@@ -60,10 +59,10 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
     <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased">
       <Sidebar user={user} />
 
-      <div className="flex-grow flex flex-col min-w-0">
-        <main className="flex-grow max-w-2xl w-full mx-auto px-4 py-8 pb-24 md:pb-8 flex flex-col min-w-0 space-y-6">
+      <div className="flex-grow flex flex-col md:flex-row min-w-0">
+        <main className="flex-grow max-w-2xl w-full border-r border-dd-border/80 min-h-screen bg-dd-bg pb-24 md:pb-8 flex flex-col">
           {/* Header (Twitter style: Back arrow + Title + count) */}
-          <div className="flex items-center gap-4 border-b border-dd-border/50 pb-4">
+          <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60 px-4 py-3 flex items-center gap-4">
             <button
               onClick={() => router.back()}
               className="p-2 border border-dd-border bg-dd-surface hover:bg-dd-border/50 text-dd-muted hover:text-dd-text rounded-xl transition-all cursor-pointer"
@@ -72,8 +71,8 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
               <ArrowLeft className="w-4 h-4" />
             </button>
             <div>
-              <h1 className="text-dd-text text-lg font-extrabold tracking-tight flex items-center gap-2">
-                <Bookmark className="w-5 h-5 text-orange-500 fill-orange-500/10" />
+              <h1 className="text-dd-text text-base font-extrabold tracking-tight flex items-center gap-2">
+                <Bookmark className="w-4 h-4 text-orange-500 fill-orange-500/10" />
                 Itens salvos
               </h1>
               <p className="text-dd-muted text-[10px] uppercase font-bold tracking-wider">
@@ -83,21 +82,23 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
           </div>
 
           {/* Search bar (Twitter style) */}
-          <div className="relative w-full">
-            <Search className="absolute left-4.5 top-1/2 -translate-y-1/2 w-4 h-4 text-dd-muted" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar Itens salvos"
-              className="w-full pl-11 pr-4 py-2.5 bg-dd-surface/40 hover:bg-dd-surface/60 focus:bg-dd-surface/80 border border-dd-border/60 focus:border-orange-500/50 rounded-full text-xs text-dd-text placeholder-dd-muted outline-0 transition-all shadow-inner"
-            />
+          <div className="p-4 border-b border-dd-border/40">
+            <div className="relative w-full">
+              <Search className="absolute left-4.5 top-1/2 -translate-y-1/2 w-4 h-4 text-dd-muted" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar Itens salvos"
+                className="w-full pl-11 pr-4 py-2.5 bg-dd-surface/40 hover:bg-dd-surface/60 focus:bg-dd-surface/80 border border-dd-border/60 focus:border-orange-500/50 rounded-full text-xs text-dd-text placeholder-dd-muted outline-0 transition-all shadow-inner"
+              />
+            </div>
           </div>
 
           {/* Saved Posts Feed (exit/entrance animations) */}
           <div className="flex flex-col">
             {filteredPosts.length === 0 ? (
-              <div className="text-center py-12 px-6 bg-dd-surface/20 border border-dd-border border-dashed rounded-2xl space-y-4 max-w-md mx-auto">
+              <div className="text-center py-12 px-6 bg-dd-surface/20 border border-dd-border border-dashed rounded-2xl space-y-4 max-w-md mx-auto mt-8">
                 <div className="w-12 h-12 bg-orange-500/10 border border-orange-500/20 text-orange-500 rounded-full flex items-center justify-center mx-auto">
                   <Bookmark className="w-6 h-6" />
                 </div>
@@ -155,7 +156,6 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
             )}
           </div>
         </main>
-        <Footer />
       </div>
     </div>
   );
