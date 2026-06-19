@@ -468,7 +468,7 @@ export function PostDetailContent({
 
             <MarkdownRenderer content={post.body} compact={false} />
 
-            {post.code_snippet && (
+            {post.code_snippet && !post.body.includes('```') && (
               <div className="rounded-lg border border-dd-border bg-dd-bg p-4 overflow-x-auto shadow-inner">
                 {highlightCode(post.code_snippet)}
               </div>
