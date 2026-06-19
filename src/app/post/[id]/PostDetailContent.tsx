@@ -19,6 +19,7 @@ import { PostComposerExtras } from '@/components/PostComposerExtras';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { AuthorAvatar } from '@/components/AuthorAvatar';
 import { ReplyAudience } from '@/lib/post-composer';
+import { cn } from '@/lib/cn';
 
 interface PostDetailContentProps {
   user: {
@@ -92,6 +93,7 @@ export function PostDetailContent({
   }, []);
 
   const { playSound } = useSoundEffects(soundEnabled);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [answerBody, setAnswerBody] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [toastXp, setToastXp] = useState<{ amount: number; language: string } | null>(null);
@@ -326,6 +328,7 @@ export function PostDetailContent({
         setScheduledAt(null);
         setAnswerLocation('');
         setIsSensitive(false);
+        setIsExpanded(false);
         await reloadPost();
 
         if (data.xpResult?.xpEarned) {
@@ -447,7 +450,10 @@ export function PostDetailContent({
           {/* Post Detail Card */}
           <article className="bg-transparent border-b border-dd-border/50 p-4 sm:p-6 space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dd-border/50 pb-3">
-              <div className="flex items-center gap-3">
+              <Link
+                href={`/profile/${post.author.username}`}
+                className="flex items-center gap-3 hover:opacity-85 transition-opacity"
+              >
                 <AuthorAvatar
                   username={post.author.username}
                   avatar_url={post.author.avatar_url}
@@ -456,7 +462,7 @@ export function PostDetailContent({
                 <div>
                   <p className="text-xs font-bold text-dd-text">@{post.author.username}</p>
                 </div>
-              </div>
+              </Link>
 
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[9px] bg-dd-surface border border-dd-border px-2 py-0.5 rounded text-dd-muted font-mono font-semibold">
@@ -559,13 +565,43 @@ export function PostDetailContent({
           {/* Resolver como Quiz button outside/below the post box */}
           {post.quizzes && post.quizzes.length > 0 && (
             <div className="px-4 sm:px-6 py-4 border-b border-dd-border/50 flex flex-col gap-4">
-              <div className="flex justify-start">
+              {/* Card mimicking the Feed layout */}
+              <div
+                onClick={() => setShowQuiz(!showQuiz)}
+                className="p-3.5 rounded-xl border border-dd-border bg-dd-surface/30 backdrop-blur-sm flex items-center justify-between gap-4 hover:bg-dd-surface/50 hover:border-orange-500/20 transition-all duration-200 group/quiz cursor-pointer"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center shrink-0 group-hover/quiz:scale-105 transition-transform duration-200">
+                    <Sparkles className="w-4.5 h-4.5 text-orange-400" />
+                  </div>
+                  <div className="text-left min-w-0">
+                    <h4 className="text-xs font-black text-dd-text truncate">
+                      Quiz de Aprendizado
+                    </h4>
+                    <p className="text-[10px] text-dd-muted font-medium mt-0.5 truncate">
+                      {Boolean(post.quizzes[0].attempts && post.quizzes[0].attempts.length > 0)
+                        ? 'Você já respondeu a este desafio!'
+                        : 'Coloque seus conhecimentos em prática e ganhe +15 XP.'}
+                    </p>
+                  </div>
+                </div>
+
                 <button
-                  onClick={() => setShowQuiz(!showQuiz)}
-                  className="flex items-center gap-1.5 rounded-lg bg-orange-500 px-3.5 py-1.5 font-bold text-white transition-colors hover:bg-orange-600 shadow-sm cursor-pointer text-xs"
+                  type="button"
+                  className={cn(
+                    'inline-flex items-center justify-center gap-1 px-4 py-1.5 rounded-full font-bold text-[10px] leading-tight transition-all duration-200 shrink-0 shadow-sm border cursor-pointer',
+                    Boolean(post.quizzes[0].attempts && post.quizzes[0].attempts.length > 0)
+                      ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20'
+                      : 'bg-orange-500 border-transparent hover:bg-orange-600 text-white'
+                  )}
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>{showQuiz ? 'Ocultar Quiz' : 'Resolver como Quiz'}</span>
+                  <span>
+                    {showQuiz
+                      ? 'Ocultar Quiz'
+                      : Boolean(post.quizzes[0].attempts && post.quizzes[0].attempts.length > 0)
+                        ? 'Ver Resultados'
+                        : 'Resolver Quiz'}
+                  </span>
                 </button>
               </div>
 
@@ -583,150 +619,179 @@ export function PostDetailContent({
           )}
 
           {/* Write Answer Form */}
-          <div className="relative z-10 bg-transparent border-b border-dd-border/50 p-4 sm:p-6 transition-colors duration-200">
-            {/* Header row to match modal layout */}
-            <div className="flex items-center justify-between pb-3 mb-4 border-b border-dd-border/30">
-              <button
-                type="button"
-                onClick={() => {
-                  setAnswerBody('');
-                  setAnswerImage('');
-                  setReplyAudience('everyone');
-                  setScheduledAt(null);
-                  setAnswerLocation('');
-                  setIsSensitive(false);
-                }}
-                className="p-1 text-dd-muted hover:text-dd-text hover:bg-dd-border/30 rounded-full transition-colors cursor-pointer"
-                title="Limpar formulário"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => alert('Rascunhos salvos localmente (Mock)! ')}
-                className="text-xs font-bold text-orange-500 hover:text-orange-400 cursor-pointer"
-              >
-                Rascunhos
-              </button>
-            </div>
-
-            <form onSubmit={handlePostAnswer} className="flex gap-4">
-              <div className="shrink-0 pt-1">
+          {!isExpanded ? (
+            <div
+              onClick={() => setIsExpanded(true)}
+              className="flex items-center justify-between gap-4 p-4 border-b border-dd-border/50 bg-transparent cursor-pointer hover:bg-dd-surface/5 transition-colors"
+            >
+              <div className="flex items-center gap-3 flex-grow">
                 {user.avatar_url ? (
                   <img
                     src={user.avatar_url}
                     alt={user.username}
-                    className="w-10 h-10 rounded-full object-cover border border-dd-border"
+                    className="w-9 h-9 rounded-full object-cover border border-dd-border shrink-0"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-sm font-bold border border-orange-500/10">
+                  <div className="w-9 h-9 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold border border-orange-500/10 shrink-0">
                     {user.username.slice(0, 2).toUpperCase()}
                   </div>
                 )}
+                <span className="text-sm text-dd-muted select-none">Postar sua resposta</span>
+              </div>
+              <button
+                type="button"
+                className="bg-dd-surface border border-dd-border/60 hover:bg-dd-border/30 text-dd-muted text-xs font-bold px-4 py-1.5 rounded-full transition-colors cursor-pointer"
+              >
+                Responder
+              </button>
+            </div>
+          ) : (
+            <div className="relative z-10 bg-transparent border-b border-dd-border/50 p-4 sm:p-6 transition-colors duration-200">
+              {/* Header row to match modal layout */}
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-dd-border/30">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAnswerBody('');
+                    setAnswerImage('');
+                    setReplyAudience('everyone');
+                    setScheduledAt(null);
+                    setAnswerLocation('');
+                    setIsSensitive(false);
+                    setIsExpanded(false);
+                  }}
+                  className="p-1 text-dd-muted hover:text-dd-text hover:bg-dd-border/30 rounded-full transition-colors cursor-pointer"
+                  title="Fechar"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => alert('Rascunhos salvos localmente (Mock)! ')}
+                  className="text-xs font-bold text-orange-500 hover:text-orange-400 cursor-pointer"
+                >
+                  Rascunhos
+                </button>
               </div>
 
-              <div className="flex-grow min-w-0 space-y-4">
-                <div className="relative">
-                  <MarkdownEditor
-                    ref={answerBodyEditorRef}
-                    value={answerBody}
-                    onChange={setAnswerBody}
-                    minHeight="6rem"
-                    placeholder="Escreva sua resposta... Digite / para inserir blocos"
-                  />
+              <form onSubmit={handlePostAnswer} className="flex gap-4">
+                <div className="shrink-0 pt-1">
+                  {user.avatar_url ? (
+                    <img
+                      src={user.avatar_url}
+                      alt={user.username}
+                      className="w-10 h-10 rounded-full object-cover border border-dd-border"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-sm font-bold border border-orange-500/10">
+                      {user.username.slice(0, 2).toUpperCase()}
+                    </div>
+                  )}
                 </div>
 
-                {answerImage && (
-                  <div className="relative rounded-xl overflow-hidden border border-dd-border max-h-40">
-                    <img src={answerImage} alt="Preview" className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => setAnswerImage('')}
-                      className="absolute top-2 right-2 p-1 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                )}
-
-                <PostComposerExtras
-                  section="meta"
-                  postBody={answerBody}
-                  setPostBody={setAnswerBody}
-                  editorRef={answerBodyEditorRef}
-                  replyAudience={replyAudience}
-                  setReplyAudience={setReplyAudience}
-                  scheduledAt={scheduledAt}
-                  setScheduledAt={setScheduledAt}
-                  location={answerLocation}
-                  setLocation={setAnswerLocation}
-                  isSensitive={isSensitive}
-                  setIsSensitive={setIsSensitive}
-                />
-
-                {/* Bottom Row Divider */}
-                <div className="border-t border-dd-border/50 pt-3 flex items-center justify-between">
-                  {/* Left tools (Icons) */}
-                  <div className="flex items-center gap-1.5 text-orange-500">
-                    {/* Image input trigger */}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                      id="answer-image-upload"
+                <div className="flex-grow min-w-0 space-y-4">
+                  <div className="relative">
+                    <MarkdownEditor
+                      ref={answerBodyEditorRef}
+                      value={answerBody}
+                      onChange={setAnswerBody}
+                      minHeight="6rem"
+                      placeholder="Escreva sua resposta... Digite / para inserir blocos"
                     />
-                    <label
-                      htmlFor="answer-image-upload"
-                      className="p-2 hover:bg-orange-500/10 rounded-full transition-colors cursor-pointer"
-                      title="Adicionar imagem"
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        className="w-4.5 h-4.5 fill-none stroke-current"
-                        strokeWidth="2"
+                  </div>
+
+                  {answerImage && (
+                    <div className="relative rounded-xl overflow-hidden border border-dd-border max-h-40">
+                      <img src={answerImage} alt="Preview" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setAnswerImage('')}
+                        className="absolute top-2 right-2 p-1 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors"
                       >
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                        <polyline points="21 15 16 10 5 21"></polyline>
-                      </svg>
-                    </label>
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
 
-                    <PostComposerExtras
-                      section="tools"
-                      postBody={answerBody}
-                      setPostBody={setAnswerBody}
-                      editorRef={answerBodyEditorRef}
-                      replyAudience={replyAudience}
-                      setReplyAudience={setReplyAudience}
-                      scheduledAt={scheduledAt}
-                      setScheduledAt={setScheduledAt}
-                      location={answerLocation}
-                      setLocation={setAnswerLocation}
-                      isSensitive={isSensitive}
-                      setIsSensitive={setIsSensitive}
-                    />
-                  </div>
+                  <PostComposerExtras
+                    section="meta"
+                    postBody={answerBody}
+                    setPostBody={setAnswerBody}
+                    editorRef={answerBodyEditorRef}
+                    replyAudience={replyAudience}
+                    setReplyAudience={setReplyAudience}
+                    scheduledAt={scheduledAt}
+                    setScheduledAt={setScheduledAt}
+                    location={answerLocation}
+                    setLocation={setAnswerLocation}
+                    isSensitive={isSensitive}
+                    setIsSensitive={setIsSensitive}
+                  />
 
-                  {/* Right submit button */}
-                  <div className="flex items-center gap-3">
-                    {uploadingImage && (
-                      <span className="text-[10px] text-dd-muted animate-pulse font-semibold">
-                        Enviando...
-                      </span>
-                    )}
-                    <button
-                      type="submit"
-                      disabled={submitting || !answerBody.trim() || uploadingImage}
-                      className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-xs font-bold px-5 py-2 rounded-full transition-colors cursor-pointer shadow-md shadow-orange-500/10"
-                    >
-                      {submitting ? 'Postando...' : 'Postar'}
-                    </button>
+                  {/* Bottom Row Divider */}
+                  <div className="border-t border-dd-border/50 pt-3 flex items-center justify-between">
+                    {/* Left tools (Icons) */}
+                    <div className="flex items-center gap-1.5 text-orange-500">
+                      {/* Image input trigger */}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        id="answer-image-upload"
+                      />
+                      <label
+                        htmlFor="answer-image-upload"
+                        className="p-2 hover:bg-orange-500/10 rounded-full transition-colors cursor-pointer"
+                        title="Adicionar imagem"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          className="w-4.5 h-4.5 fill-none stroke-current"
+                          strokeWidth="2"
+                        >
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                          <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
+                      </label>
+
+                      <PostComposerExtras
+                        section="tools"
+                        postBody={answerBody}
+                        setPostBody={setAnswerBody}
+                        editorRef={answerBodyEditorRef}
+                        replyAudience={replyAudience}
+                        setReplyAudience={setReplyAudience}
+                        scheduledAt={scheduledAt}
+                        setScheduledAt={setScheduledAt}
+                        location={answerLocation}
+                        setLocation={setAnswerLocation}
+                        isSensitive={isSensitive}
+                        setIsSensitive={setIsSensitive}
+                      />
+                    </div>
+
+                    {/* Right submit button */}
+                    <div className="flex items-center gap-3">
+                      {uploadingImage && (
+                        <span className="text-[10px] text-dd-muted animate-pulse font-semibold">
+                          Enviando...
+                        </span>
+                      )}
+                      <button
+                        type="submit"
+                        disabled={submitting || !answerBody.trim() || uploadingImage}
+                        className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-xs font-bold px-5 py-2 rounded-full transition-colors cursor-pointer shadow-md shadow-orange-500/10"
+                      >
+                        {submitting ? 'Postando...' : 'Postar'}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </form>
-          </div>
+              </form>
+            </div>
+          )}
 
           {/* Answers List Section */}
           <AnswerThread

@@ -352,12 +352,24 @@ export function PostCard({
       >
         {/* Header */}
         <div className="flex items-center gap-3 mb-3">
-          <AuthorAvatar username={post.author.username} avatar_url={post.author.avatar_url} />
+          <Link
+            href={`/profile/${post.author.username}`}
+            onClick={(e) => e.stopPropagation()}
+            className="hover:opacity-85 transition-opacity shrink-0"
+          >
+            <AuthorAvatar username={post.author.username} avatar_url={post.author.avatar_url} />
+          </Link>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-dd-text text-xs font-bold truncate">
-                @{post.author.username}
-              </span>
+              <Link
+                href={`/profile/${post.author.username}`}
+                onClick={(e) => e.stopPropagation()}
+                className="hover:underline truncate"
+              >
+                <span className="text-dd-text text-xs font-bold truncate">
+                  @{post.author.username}
+                </span>
+              </Link>
               <span className="text-[9px] bg-dd-surface border border-dd-border px-1.5 py-0.5 rounded text-dd-muted font-mono font-semibold">
                 Lvl {Math.max(1, Math.floor((post.author.total_xp ?? 0) / 1000) + 1)}
               </span>
@@ -526,7 +538,7 @@ export function PostCard({
               <MessageSquare className="w-3.5 h-3.5 text-dd-muted group-hover/comment:text-orange-400" />
             </div>
             <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/comment:text-orange-400">
-              {post._count.answers}
+              {post._count?.answers ?? 0}
             </span>
           </Link>
 

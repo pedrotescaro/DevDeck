@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { MessageSquare, BarChart2, Share } from 'lucide-react';
 import { formatRelativeTime } from '@/lib/date';
 import { LikeButton } from '@/components/motion/LikeButton';
@@ -218,12 +219,17 @@ export function AnswerCard({
 
         {/* Header */}
         <div className="flex items-center gap-2 mb-3">
-          <AuthorAvatar
-            username={answer.author.username}
-            avatar_url={answer.author.avatar_url}
-            size="sm"
-          />
-          <span className="text-dd-text text-sm font-medium">{answer.author.username}</span>
+          <Link
+            href={`/profile/${answer.author.username}`}
+            className="flex items-center gap-2 hover:opacity-85 transition-opacity"
+          >
+            <AuthorAvatar
+              username={answer.author.username}
+              avatar_url={answer.author.avatar_url}
+              size="sm"
+            />
+            <span className="text-dd-text text-sm font-medium">@{answer.author.username}</span>
+          </Link>
           <span className="text-dd-muted text-xs">{relativeTime}</span>
         </div>
 

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sidebar } from '@/components/Sidebar';
 import { BadgeGrid } from '@/components/BadgeGrid';
 import { PostCard } from '@/components/PostCard';
+import { ProfileReplyThread } from '@/components/ProfileReplyThread';
 import { FollowersModal } from '@/components/motion/FollowersModal';
 import { LanguageTrailBar } from '@/components/LanguageTrailBar';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
@@ -85,7 +86,7 @@ export function ProfileContent({
   followingCount,
 }: ProfileContentProps) {
   const router = useRouter();
-  const [posts, setPosts] = useState<any[]>([]);
+  const [posts, setPosts] = useState<{ tab: string; items: any[] }>({ tab: 'posts', items: [] });
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -96,6 +97,7 @@ export function ProfileContent({
   const [activeTab, setActiveTab] = useState<
     'posts' | 'replies' | 'likes' | 'stats' | 'trails' | 'badges'
   >('posts');
+  const itemsToRender = posts.tab === activeTab ? posts.items : [];
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [localProfileUser, setLocalProfileUser] = useState(profileUser);
 
@@ -144,23 +146,24 @@ export function ProfileContent({
   ) => {
     setLoading(true);
     try {
-      let paramName: string;
-      if (targetTab === 'likes') {
-        paramName = 'likedBy';
-      } else if (targetTab === 'replies') {
-        paramName = 'answeredBy';
+      let url: string;
+      if (targetTab === 'replies') {
+        url = `/api/profile/${profileUser.username}/replies?limit=10${currentCursor ? `&cursor=${currentCursor}` : ''}`;
       } else {
-        paramName = 'author';
+        const paramName = targetTab === 'likes' ? 'likedBy' : 'author';
+        url = `/api/posts?${paramName}=${profileUser.username}&useCursor=true&limit=10${currentCursor ? `&cursor=${currentCursor}` : ''}`;
       }
-      const url = `/api/posts?${paramName}=${profileUser.username}&useCursor=true&limit=10${currentCursor ? `&cursor=${currentCursor}` : ''}`;
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
         const items = data.items || [];
         if (isInitial) {
-          setPosts(items);
+          setPosts({ tab: targetTab, items });
         } else {
-          setPosts((prev) => [...prev, ...items]);
+          setPosts((prev) => ({
+            tab: targetTab,
+            items: [...prev.items, ...items],
+          }));
         }
         setNextCursor(data.nextCursor || null);
         setHasMore(!!data.nextCursor);
@@ -174,7 +177,7 @@ export function ProfileContent({
 
   useEffect(() => {
     if (activeTab === 'posts' || activeTab === 'likes' || activeTab === 'replies') {
-      setPosts([]);
+      setPosts({ tab: activeTab, items: [] });
       setNextCursor(null);
       setHasMore(true);
       fetchUserPosts(null, true, activeTab);
@@ -240,7 +243,7 @@ export function ProfileContent({
                 {profileUser.username}
               </h1>
               <p className="text-dd-muted text-[10px] uppercase font-bold tracking-wider">
-                {posts.length} {posts.length === 1 ? 'publicação' : 'publicações'}
+                {itemsToRender.length} {itemsToRender.length === 1 ? 'publicação' : 'publicações'}
               </p>
             </div>
           </div>
@@ -420,7 +423,7 @@ export function ProfileContent({
           <div className="flex-grow flex flex-col">
             {(activeTab === 'posts' || activeTab === 'likes' || activeTab === 'replies') && (
               <div className="flex flex-col">
-                {posts.length === 0 && !loading ? (
+                {itemsToRender.length === 0 && !loading ? (
                   <p className="text-xs text-dd-muted italic py-12 text-center border-b border-dd-border/40">
                     {activeTab === 'likes'
                       ? 'Nenhuma curtida encontrada.'
@@ -429,23 +432,38 @@ export function ProfileContent({
                         : 'Nenhuma publicação encontrada.'}
                   </p>
                 ) : (
-                  posts.map((post) => (
-                    <div key={post.id} className="border-b border-dd-border/50 last:border-b-0">
-                      <PostCard
-                        post={post}
-                        isOwner={post.author_id === user.id}
-                        flat={true}
-                        onDelete={(postId) => {
-                          setPosts((prev) => prev.filter((p) => p.id !== postId));
-                        }}
-                        onEdit={(postId, updatedPost) => {
-                          setPosts((prev) =>
-                            prev.map((p) => (p.id === postId ? { ...p, ...updatedPost } : p))
-                          );
-                        }}
-                      />
-                    </div>
-                  ))
+                  itemsToRender.map((item) => {
+                    if (activeTab === 'replies') {
+                      return (
+                        <div key={item.id} className="border-b border-dd-border/50 last:border-b-0">
+                          <ProfileReplyThread reply={item} currentUser={user} />
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={item.id} className="border-b border-dd-border/50 last:border-b-0">
+                        <PostCard
+                          post={item}
+                          isOwner={item.author_id === user.id}
+                          flat={true}
+                          onDelete={(postId) => {
+                            setPosts((prev) => ({
+                              ...prev,
+                              items: prev.items.filter((p) => p.id !== postId),
+                            }));
+                          }}
+                          onEdit={(postId, updatedPost) => {
+                            setPosts((prev) => ({
+                              ...prev,
+                              items: prev.items.map((p) =>
+                                p.id === postId ? { ...p, ...updatedPost } : p
+                              ),
+                            }));
+                          }}
+                        />
+                      </div>
+                    );
+                  })
                 )}
 
                 {loading && (

@@ -10,6 +10,9 @@
   --color-dd-border: var(--color-dd-border);
   --color-dd-text: var(--color-dd-text);
   --color-dd-muted: var(--color-dd-muted);
+  --color-dd-sidebar-bg: var(--color-dd-sidebar-bg);
+  --color-dd-search-bg: var(--color-dd-search-bg);
+  --color-dd-search-border: var(--color-dd-search-border);
   --color-dd-purple: var(--color-dd-purple);
   --color-dd-green: var(--color-dd-green);
   --color-dd-amber: var(--color-dd-amber);
@@ -28,9 +31,12 @@
   --color-dd-bg: #ffffff;
   --color-dd-surface: #f4f4f5;
   --color-dd-card: #ffffff;
-  --color-dd-border: #e4e4e7;
-  --color-dd-text: #09090b;
-  --color-dd-muted: #71717a;
+  --color-dd-border: #eff3f4;
+  --color-dd-sidebar-bg: #f7f9f9;
+  --color-dd-search-bg: #eff3f4;
+  --color-dd-search-border: #eff3f4;
+  --color-dd-text: #0f1419;
+  --color-dd-muted: #536471;
 }
 
 :root.dark {
@@ -40,12 +46,15 @@
   --color-dd-amber: #f5a623;
   --color-dd-blue: #5ba3f5;
 
-  --color-dd-bg: #09090b; /* Zinc 900 - true dark mode black */
-  --color-dd-surface: #18181b; /* Zinc 850 */
-  --color-dd-card: #18181b; /* Zinc 850 */
-  --color-dd-border: #27272a; /* Zinc 800 */
-  --color-dd-text: #f4f4f5; /* Zinc 100 */
-  --color-dd-muted: #a1a1aa; /* Zinc 400 */
+  --color-dd-bg: #000000;
+  --color-dd-surface: #16181c;
+  --color-dd-card: #000000;
+  --color-dd-border: #2f3336;
+  --color-dd-sidebar-bg: #000000;
+  --color-dd-search-bg: #000000;
+  --color-dd-search-border: #2f3336;
+  --color-dd-text: #e7e9ea;
+  --color-dd-muted: #71767b;
 }
 
 body {

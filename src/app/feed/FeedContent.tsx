@@ -133,8 +133,18 @@ export function FeedContent({
     if (items.length < 10) return null;
     const lastItem = items[items.length - 1];
     if (!lastItem) return null;
-    const lastTime = new Date(lastItem.created_at).getTime();
-    return `${lastTime}_${lastItem.id}`;
+    try {
+      const payload = JSON.stringify({
+        t: new Date(lastItem.created_at).toISOString(),
+        i: lastItem.id,
+      });
+      const base64 = btoa(payload);
+      return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    } catch (e) {
+      console.error('Failed to encode initial cursor:', e);
+      const lastTime = new Date(lastItem.created_at).getTime();
+      return `${lastTime}_${lastItem.id}`;
+    }
   };
 
   const [nextCursor, setNextCursor] = useState<string | null>(() => getInitialCursor(initialPosts));
@@ -1693,7 +1703,7 @@ export function FeedContent({
               placeholder="Buscar"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-11 pr-4 py-2.5 bg-dd-surface hover:bg-dd-surface/80 focus:bg-dd-bg border border-dd-border focus:border-orange-500/50 text-sm rounded-full text-dd-text placeholder-dd-muted focus:outline-none focus:ring-1 focus:ring-orange-500/30 transition-all duration-200"
+              className="w-full pl-11 pr-4 py-2.5 bg-dd-search-bg hover:bg-dd-search-bg/80 focus:bg-dd-bg border border-dd-search-border focus:border-orange-500/50 text-sm rounded-full text-dd-text placeholder-dd-muted focus:outline-none focus:ring-1 focus:ring-orange-500/30 transition-all duration-200"
             />
           </div>
           {searchQuery.trim() && (
@@ -1705,7 +1715,7 @@ export function FeedContent({
           )}
 
           {/* Streak & User Stats Card */}
-          <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-4">
+          <div className="rounded-2xl bg-dd-sidebar-bg border border-dd-border p-5 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider">
                 Engajamento
@@ -1755,7 +1765,7 @@ export function FeedContent({
           </div>
 
           {/* Badges Grid (showing 3 latest badges) */}
-          <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-4">
+          <div className="rounded-2xl bg-dd-sidebar-bg border border-dd-border p-5 space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider block">
                 Conquistas
@@ -1796,7 +1806,7 @@ export function FeedContent({
           </div>
 
           {/* Language Trail Progress bar */}
-          <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-4">
+          <div className="rounded-2xl bg-dd-sidebar-bg border border-dd-border p-5 space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider block">
                 Minhas Trilhas
@@ -1846,7 +1856,7 @@ export function FeedContent({
           </div>
 
           {/* Tópicos em Alta (Trending Widget) */}
-          <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-4">
+          <div className="rounded-2xl bg-dd-sidebar-bg border border-dd-border p-5 space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider block">
                 Tópicos em Alta
@@ -1900,7 +1910,7 @@ export function FeedContent({
           </div>
 
           {/* Featured Duels (votar em resoluções) */}
-          <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm space-y-3.5">
+          <div className="rounded-2xl bg-dd-sidebar-bg border border-dd-border p-5 space-y-3.5">
             <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider block">
               Duelos em Destaque
             </span>

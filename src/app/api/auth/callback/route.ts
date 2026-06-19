@@ -18,9 +18,11 @@ export async function GET(request: Request) {
 
     if (data?.user) {
       const email = data.user.email;
+      const provider = data.user.app_metadata?.provider || 'github';
       const username =
         data.user.user_metadata?.preferred_username ||
         data.user.user_metadata?.username ||
+        data.user.user_metadata?.full_name?.replace(/\s+/g, '_').toLowerCase() ||
         `user_${data.user.id.substring(0, 8)}`;
 
       try {
@@ -42,6 +44,10 @@ export async function GET(request: Request) {
           const avatarBaseUrl =
             process.env.NEXT_PUBLIC_AVATAR_API_URL || 'https://api.dicebear.com/9.x/pixel-art/svg';
 
+          // Configurar campos específicos do provedor
+          const isDiscord = provider === 'discord';
+          const isGithub = provider === 'github';
+
           // Criar usuário no banco
           const dbUser = await prisma.user.create({
             data: {
@@ -50,13 +56,20 @@ export async function GET(request: Request) {
               email: email!,
               avatar_url:
                 data.user.user_metadata?.avatar_url || `${avatarBaseUrl}?seed=${finalUsername}`,
-              bio: 'Novo desenvolvedor no DevDeck via GitHub! 🚀',
-              github_username: username,
+              bio: isDiscord
+                ? 'Novo desenvolvedor no DevDeck via Discord! 🎮'
+                : 'Novo desenvolvedor no DevDeck via GitHub! 🚀',
+              github_username: isGithub ? username : null,
+              discord_username: isDiscord
+                ? data.user.user_metadata?.full_name ||
+                  data.user.user_metadata?.custom_claims?.global_name ||
+                  username
+                : null,
               total_xp: 0,
             },
           });
 
-          // Inicializar trilhas de linguagem padrões para o usuário do GitHub
+          // Inicializar trilhas de linguagem padrões
           const defaultLanguages = [
             'TS',
             'JS',

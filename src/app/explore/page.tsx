@@ -34,6 +34,8 @@ export default function ExplorePage() {
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchUsers, setSearchUsers] = useState<any[]>([]);
+  const [searchTab, setSearchTab] = useState<'posts' | 'users'>('posts');
   const [searching, setSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
@@ -57,6 +59,17 @@ export default function ExplorePage() {
         if (resUser.ok) {
           const userData = await resUser.json();
           setUser(userData);
+
+          // Fetch followings to populate followingMap
+          const resFollowing = await fetch(`/api/users/${userData.id}/following`);
+          if (resFollowing.ok) {
+            const followingData = await resFollowing.json();
+            const fMap: Record<string, boolean> = {};
+            followingData.forEach((f: any) => {
+              fMap[f.id] = true;
+            });
+            setFollowingMap(fMap);
+          }
         }
 
         // Fetch user suggestions
@@ -73,37 +86,21 @@ export default function ExplorePage() {
     fetchUserData();
   }, [router]);
 
-  useEffect(() => {
-    if (!searchQuery.trim()) return;
-    const timer = setTimeout(async () => {
-      setSearching(true);
-      setHasSearched(true);
-      try {
-        const res = await fetch(`/api/posts?search=${encodeURIComponent(searchQuery.trim())}`);
-        if (res.ok) {
-          const data = await res.json();
-          setSearchResults(data);
-        }
-      } catch (err) {
-        console.error('Search failed:', err);
-      } finally {
-        setSearching(false);
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-
+  const executeSearch = async (query: string) => {
+    if (!query.trim()) return;
     setSearching(true);
     setHasSearched(true);
     try {
-      const res = await fetch(`/api/posts?search=${encodeURIComponent(searchQuery.trim())}`);
-      if (res.ok) {
-        const data = await res.json();
-        setSearchResults(data);
+      const resPosts = await fetch(`/api/search?q=${encodeURIComponent(query.trim())}&type=posts`);
+      if (resPosts.ok) {
+        const dataPosts = await resPosts.json();
+        setSearchResults(dataPosts.items || []);
+      }
+
+      const resUsers = await fetch(`/api/search?q=${encodeURIComponent(query.trim())}&type=users`);
+      if (resUsers.ok) {
+        const dataUsers = await resUsers.json();
+        setSearchUsers(dataUsers.items || []);
       }
     } catch (err) {
       console.error('Search failed:', err);
@@ -112,9 +109,28 @@ export default function ExplorePage() {
     }
   };
 
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      setSearchUsers([]);
+      setHasSearched(false);
+      return;
+    }
+    const timer = setTimeout(() => {
+      executeSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    executeSearch(searchQuery);
+  };
+
   const handleClearSearch = () => {
     setSearchQuery('');
     setSearchResults([]);
+    setSearchUsers([]);
     setHasSearched(false);
   };
 
@@ -229,7 +245,7 @@ export default function ExplorePage() {
                 placeholder="Buscar"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-full bg-dd-surface/85 border border-transparent focus:border-orange-500/50 focus:bg-dd-bg py-2.5 pl-12 pr-4 text-xs font-semibold text-dd-text placeholder-dd-muted/70 focus:outline-none transition-colors"
+                className="w-full rounded-full bg-dd-search-bg border border-dd-search-border focus:border-orange-500/50 focus:bg-dd-bg py-2.5 pl-12 pr-4 text-xs font-semibold text-dd-text placeholder-dd-muted/70 focus:outline-none transition-colors"
               />
             </form>
 
@@ -240,19 +256,79 @@ export default function ExplorePage() {
 
           {/* If search results are showing */}
           {hasSearched ? (
-            <div className="space-y-4 p-4">
-              <h2 className="text-sm font-black text-dd-text">
-                Resultados para &ldquo;{searchQuery}&rdquo;
-              </h2>
+            <div className="p-4 flex flex-col min-h-0">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-sm font-black text-dd-text">
+                  Resultados para &ldquo;{searchQuery}&rdquo;
+                </h2>
+              </div>
+
+              {/* Search Tabs */}
+              <div className="flex border-b border-dd-border/40 bg-dd-bg mb-4">
+                {(['posts', 'users'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setSearchTab(tab)}
+                    className="flex-1 py-3 text-xs font-bold relative hover:bg-dd-surface/30 transition-colors"
+                  >
+                    <span
+                      className={
+                        searchTab === tab ? 'text-dd-text font-black' : 'text-dd-muted font-bold'
+                      }
+                    >
+                      {tab === 'posts' ? 'Publicações' : 'Pessoas'}
+                    </span>
+                    {searchTab === tab && (
+                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500" />
+                    )}
+                  </button>
+                ))}
+              </div>
 
               {searching ? (
                 <div className="flex flex-col items-center justify-center py-20 gap-3">
                   <div className="h-6 w-6 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
-                  <p className="text-xs text-dd-muted">Buscando postagens...</p>
+                  <p className="text-xs text-dd-muted">Buscando...</p>
                 </div>
-              ) : searchResults.length === 0 ? (
+              ) : searchTab === 'posts' ? (
+                searchResults.length === 0 ? (
+                  <div className="space-y-3">
+                    <EmptyState type="search" searchTerm={searchQuery} />
+                    <div className="text-center">
+                      <button
+                        onClick={handleClearSearch}
+                        className="text-xs text-orange-400 font-bold hover:underline"
+                      >
+                        Voltar para assuntos do momento
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col">
+                    {searchResults.map((post) => (
+                      <div key={post.id} className="border-b border-dd-border/50 last:border-b-0">
+                        <PostCard
+                          post={post}
+                          isOwner={post.author_id === user?.id}
+                          flat={true}
+                          onDelete={(postId) => {
+                            setSearchResults((prev) => prev.filter((p) => p.id !== postId));
+                          }}
+                          onEdit={(postId, updatedPost) => {
+                            setSearchResults((prev) =>
+                              prev.map((p) => (p.id === postId ? { ...p, ...updatedPost } : p))
+                            );
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : searchUsers.length === 0 ? (
                 <div className="space-y-3">
-                  <EmptyState type="search" searchTerm={searchQuery} />
+                  <p className="text-xs text-dd-muted text-center py-12 italic">
+                    Nenhum desenvolvedor encontrado.
+                  </p>
                   <div className="text-center">
                     <button
                       onClick={handleClearSearch}
@@ -264,20 +340,49 @@ export default function ExplorePage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {searchResults.map((post) => (
-                    <PostCard
-                      key={post.id}
-                      post={post}
-                      isOwner={post.author_id === user?.id}
-                      onDelete={(postId) => {
-                        setSearchResults((prev) => prev.filter((p) => p.id !== postId));
-                      }}
-                      onEdit={(postId, updatedPost) => {
-                        setSearchResults((prev) =>
-                          prev.map((p) => (p.id === postId ? { ...p, ...updatedPost } : p))
-                        );
-                      }}
-                    />
+                  {searchUsers.map((sugUser) => (
+                    <div
+                      key={sugUser.id}
+                      className="flex items-center justify-between gap-3 p-4 border border-dd-border/50 bg-dd-surface/20 rounded-xl hover:bg-dd-surface/30 transition-colors"
+                    >
+                      <Link
+                        href={`/profile/${sugUser.username}`}
+                        className="flex items-center gap-3 min-w-0 group"
+                      >
+                        {sugUser.avatar_url ? (
+                          <img
+                            src={sugUser.avatar_url}
+                            alt={sugUser.username}
+                            className="w-10 h-10 rounded-full object-cover border border-dd-border group-hover:scale-105 transition-transform shrink-0"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold border border-orange-500/10 group-hover:scale-105 transition-transform shrink-0">
+                            {sugUser.username.slice(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="min-w-0 text-left">
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-xs font-black text-dd-text truncate group-hover:underline">
+                              {sugUser.username}
+                            </p>
+                            <span className="text-[9px] bg-dd-surface border border-dd-border/60 px-1.5 py-0.5 rounded text-dd-muted font-mono font-semibold">
+                              Lvl {Math.max(1, Math.floor((sugUser.total_xp ?? 0) / 1000) + 1)}
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-dd-muted font-semibold truncate mt-0.5">
+                            @{sugUser.username.toLowerCase()}
+                          </p>
+                        </div>
+                      </Link>
+
+                      {sugUser.id !== user?.id && (
+                        <FollowButton
+                          isFollowing={!!followingMap[sugUser.id]}
+                          onToggle={() => handleFollowToggle(sugUser.id)}
+                          size="sm"
+                        />
+                      )}
+                    </div>
                   ))}
                 </div>
               )}
@@ -325,12 +430,8 @@ export default function ExplorePage() {
                     onClick={() => {
                       setSearchQuery(trend.title);
                       setHasSearched(true);
-                      setSearching(true);
-                      fetch(`/api/posts?search=${encodeURIComponent(trend.title)}`)
-                        .then((res) => res.json())
-                        .then((data) => setSearchResults(data))
-                        .catch((err) => console.error(err))
-                        .finally(() => setSearching(false));
+                      setSearchTab('posts');
+                      executeSearch(trend.title);
                     }}
                     className="p-4.5 flex justify-between hover:bg-dd-surface/25 transition-colors cursor-pointer"
                   >
@@ -365,7 +466,7 @@ export default function ExplorePage() {
 
         {/* Right Side: Who to Follow Widget (Matching image 2) */}
         <aside className="hidden lg:block w-80 p-4 space-y-4 shrink-0">
-          <div className="bg-dd-surface border border-dd-border rounded-2xl p-4 space-y-4">
+          <div className="bg-dd-sidebar-bg border border-dd-border rounded-2xl p-4 space-y-4">
             <h3 className="text-sm font-black text-dd-text">Quem seguir</h3>
 
             <div className="space-y-4">
