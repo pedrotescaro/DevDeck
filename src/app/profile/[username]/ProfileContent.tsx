@@ -395,6 +395,11 @@ export function ProfileContent({
                         onDelete={(postId) => {
                           setPosts((prev) => prev.filter((p) => p.id !== postId));
                         }}
+                        onEdit={(postId, updatedPost) => {
+                          setPosts((prev) =>
+                            prev.map((p) => (p.id === postId ? { ...p, ...updatedPost } : p))
+                          );
+                        }}
                       />
                     </div>
                   ))
