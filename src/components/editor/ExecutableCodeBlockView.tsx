@@ -32,7 +32,6 @@ export function ExecutableCodeBlockView({
 
       editor
         .chain()
-        .focus(undefined, { scrollIntoView: false })
         .command(({ tr }) => {
           const from = pos + 1;
           const to = pos + node.nodeSize - 1;
