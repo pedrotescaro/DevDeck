@@ -473,23 +473,23 @@
 }
 
 /* === Scrollbar (global brand style) === */
-::-webkit-scrollbar {
+html.lp-landing-page::-webkit-scrollbar {
   width: 12px;
   height: 12px;
 }
 
-::-webkit-scrollbar-track {
+html.lp-landing-page::-webkit-scrollbar-track {
   background: #0E0D0B;
   border-left: 1px solid var(--lp-border);
 }
 
-::-webkit-scrollbar-thumb {
+html.lp-landing-page::-webkit-scrollbar-thumb {
   background: var(--lp-accent);
   border: 2px solid #0E0D0B;
   border-radius: 0;
 }
 
-::-webkit-scrollbar-thumb:hover {
+html.lp-landing-page::-webkit-scrollbar-thumb:hover {
   background: var(--lp-accent-bright);
 }
 

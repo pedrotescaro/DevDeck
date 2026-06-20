@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import LandingNav from '@/components/landing/LandingNav';
 import LandingHero from '@/components/landing/LandingHero';
 import LandingMarquee from '@/components/landing/LandingMarquee';
@@ -18,6 +19,13 @@ interface HomeClientProps {
 }
 
 export default function HomeClient({ initialUser }: HomeClientProps) {
+  useEffect(() => {
+    document.documentElement.classList.add('lp-landing-page');
+    return () => {
+      document.documentElement.classList.remove('lp-landing-page');
+    };
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen bg-[#0E0D0B] text-[#F4F1EB] antialiased selection:bg-[var(--lp-accent)]/30 selection:text-white">
       {/* Background grain texture */}

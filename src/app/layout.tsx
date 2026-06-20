@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, Space_Grotesk, JetBrains_Mono, Bebas_Neue } from 'next/font/google';
 import './globals.css';
+import './landing.css';
 
 const themeScript = `
   (function() {
