@@ -98,7 +98,7 @@ fn credit_xp(user: &User, action: Action) -> Result<XP, Error> {
             <span>V2.4 · BETA PÚBLICO</span>
           </div>
 
-          <h1 className="lp-font-display text-[11vw] md:text-[8vw] lg:text-[5.2vw] leading-[0.88] mb-8 uppercase text-[var(--lp-fg)]">
+          <h1 className="lp-font-display text-[11vw] md:text-[8vw] lg:text-[5.2vw] leading-[1.0] mb-8 uppercase text-[var(--lp-fg)]">
             <span className="overflow-hidden block">
               <motion.span variants={lineReveal} className="inline-block">
                 Stack Overflow
@@ -202,8 +202,8 @@ fn credit_xp(user: &User, action: Action) -> Result<XP, Error> {
             </a>
           </motion.div>
 
-          {/* Bottom stats + reel progress split */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 pt-6 border-t border-[var(--lp-border)] max-w-xl">
+          {/* Bottom stats */}
+          <div className="pt-6 border-t border-[var(--lp-border)] max-w-xl">
             {/* Live stats */}
             <motion.div
               className="flex items-center gap-4 lp-font-mono text-[10px] tracking-[0.15em] uppercase flex-wrap"
@@ -234,173 +234,11 @@ fn credit_xp(user: &User, action: Action) -> Result<XP, Error> {
                 devs subindo
               </span>
             </motion.div>
-
-            {/* Reel progress & chapter */}
-            <motion.div
-              className="flex items-center gap-4 max-w-xs w-full sm:w-auto"
-              variants={{
-                hidden: { opacity: 0 },
-                show: { opacity: 1, transition: { duration: 0.7, delay: 0.5 } },
-              }}
-            >
-              <span className="lp-font-mono text-[10px]" style={{ color: 'var(--lp-muted)' }}>
-                {String(activeIndex + 1).padStart(2, '0')} / 05
-              </span>
-              <div className="lp-progress-bar flex-1 sm:flex-none">
-                <motion.div
-                  key={activeIndex}
-                  initial={{ width: '0%' }}
-                  animate={{ width: '100%' }}
-                  transition={{ duration: 6, ease: 'linear' }}
-                  className="lp-progress-bar-fill"
-                />
-              </div>
-              <span className="lp-font-mono text-[9px] tracking-[0.1em] uppercase text-[var(--lp-accent)] font-semibold whitespace-nowrap">
-                REEL DA ARENA
-              </span>
-            </motion.div>
           </div>
         </motion.div>
 
-        {/* Right Column — 3D Logo + Floating Cards */}
+        {/* Right Column — 3D Logo */}
         <div className="lg:col-span-5 relative h-[560px] flex items-center justify-center">
-          {/* Floating Post Card */}
-          <div
-            className="absolute top-8 right-0 w-[280px] overflow-hidden z-30"
-            style={{
-              backgroundColor: 'var(--lp-bg-card)',
-              border: '1px solid var(--lp-border-light)',
-              transform: 'perspective(1200px) rotateY(-8deg) rotateX(4deg) rotateZ(3deg)',
-              boxShadow: '0 40px 80px -20px rgba(0,0,0,0.6)',
-            }}
-          >
-            <div
-              className="flex items-center gap-2.5 px-3 py-2.5"
-              style={{ borderBottom: '1px solid var(--lp-border)', background: 'rgba(0,0,0,0.3)' }}
-            >
-              <div
-                className="w-7 h-7 rounded-md flex items-center justify-center lp-font-mono font-bold text-[11px]"
-                style={{
-                  background: 'linear-gradient(135deg, var(--lp-accent), #8B4318)',
-                  color: '#1A0F04',
-                }}
-              >
-                MO
-              </div>
-              <div className="flex-1 min-w-0">
-                <div
-                  className="lp-font-heading font-semibold text-[12px] leading-tight"
-                  style={{ color: 'var(--lp-fg)' }}
-                >
-                  mira.okonkwo
-                </div>
-                <div className="lp-font-mono text-[10px]" style={{ color: 'var(--lp-muted)' }}>
-                  4h atrás · Rust
-                </div>
-              </div>
-              <div
-                className="lp-font-mono text-[9px] font-semibold px-1.5 py-0.5 rounded"
-                style={{
-                  color: 'var(--lp-accent)',
-                  border: '1px solid rgba(245,118,43,0.3)',
-                  background: 'rgba(245,118,43,0.1)',
-                }}
-              >
-                L14
-              </div>
-            </div>
-            <div className="p-3">
-              <div
-                className="lp-font-heading font-semibold text-[13px] leading-snug mb-2"
-                style={{ color: 'var(--lp-fg)' }}
-              >
-                Por que <span style={{ color: 'var(--lp-blue)' }}>{'Option<&T>'}</span> não
-                implementa Copy?
-              </div>
-              <div
-                className="rounded p-2 lp-font-mono text-[10px] leading-relaxed mb-2 overflow-hidden"
-                style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid var(--lp-border)' }}
-              >
-                <div>
-                  <span className="lp-cm">{'// repro mínimo'}</span>
-                </div>
-                <div>
-                  <span className="lp-kw">fn</span> <span className="lp-fn">main</span>() {'{'}
-                </div>
-                <div>
-                  &nbsp;&nbsp;<span className="lp-kw">let</span> x:{' '}
-                  <span className="lp-ty">Option</span>&lt;<span className="lp-kw">&amp;</span>
-                  <span className="lp-ty">i32</span>&gt; = <span className="lp-ty">Some</span>(
-                  <span className="lp-kw">&amp;</span>
-                  <span className="lp-nm">5</span>);
-                </div>
-                <div>
-                  &nbsp;&nbsp;<span className="lp-kw">let</span> y = x;{' '}
-                  <span className="lp-cm">{'// moves'}</span>
-                </div>
-                <div>{'}'}</div>
-              </div>
-              <div className="flex gap-1.5 mb-2">
-                <span
-                  className="lp-font-mono text-[9px] px-1.5 py-0.5 rounded"
-                  style={{ color: 'var(--lp-blue)', background: 'rgba(127,168,201,0.1)' }}
-                >
-                  rust
-                </span>
-                <span
-                  className="lp-font-mono text-[9px] px-1.5 py-0.5 rounded"
-                  style={{ color: 'var(--lp-blue)', background: 'rgba(127,168,201,0.1)' }}
-                >
-                  ownership
-                </span>
-              </div>
-              <div
-                className="flex items-center gap-3 pt-2 lp-font-mono text-[10px]"
-                style={{ borderTop: '1px solid var(--lp-border)', color: 'var(--lp-muted)' }}
-              >
-                <span style={{ color: 'var(--lp-accent)' }} className="font-semibold">
-                  ▲ 247
-                </span>
-                <span>32 res</span>
-                <span className="ml-auto font-semibold" style={{ color: 'var(--lp-accent)' }}>
-                  +45 XP
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Floating XP Badge */}
-          <div
-            className="absolute top-4 left-0 lp-font-mono text-[11px] rounded-md px-3 py-2 backdrop-blur-sm z-30"
-            style={{
-              backgroundColor: 'rgba(26,24,21,0.95)',
-              border: '1px solid var(--lp-border-light)',
-              transform: 'rotate(-3deg)',
-              boxShadow: '0 10px 30px -10px rgba(0,0,0,0.5)',
-            }}
-          >
-            <span className="font-bold" style={{ color: 'var(--lp-accent)' }}>
-              +45 XP
-            </span>
-            <span style={{ color: 'var(--lp-muted)' }}> · resposta aceita</span>
-          </div>
-
-          {/* Floating Level Badge */}
-          <div
-            className="absolute bottom-20 left-4 lp-font-mono text-[11px] rounded-md px-3 py-2 backdrop-blur-sm z-30"
-            style={{
-              backgroundColor: 'rgba(26,24,21,0.95)',
-              border: '1px solid var(--lp-border-light)',
-              transform: 'rotate(2deg)',
-              boxShadow: '0 10px 30px -10px rgba(0,0,0,0.5)',
-            }}
-          >
-            TypeScript{' '}
-            <span className="font-semibold" style={{ color: 'var(--lp-blue)' }}>
-              L18 → L19
-            </span>
-          </div>
-
           {/* 3D Logo */}
           <div className="lp-logo-stage relative z-20">
             <div className="lp-logo-stack">
@@ -414,6 +252,25 @@ fn credit_xp(user: &User, action: Action) -> Result<XP, Error> {
             <div className="lp-logo-floor" />
           </div>
         </div>
+      </div>
+
+      {/* Reel progress & chapter - absolute bottom-right */}
+      <div className="absolute bottom-8 right-6 lg:right-10 z-30 flex items-center gap-4">
+        <span className="lp-font-mono text-[10px]" style={{ color: 'var(--lp-muted)' }}>
+          {String(activeIndex + 1).padStart(2, '0')} / 05
+        </span>
+        <div className="lp-progress-bar w-[120px]">
+          <motion.div
+            key={activeIndex}
+            initial={{ width: '0%' }}
+            animate={{ width: '100%' }}
+            transition={{ duration: 6, ease: 'linear' }}
+            className="lp-progress-bar-fill"
+          />
+        </div>
+        <span className="lp-font-mono text-[9px] tracking-[0.1em] uppercase text-[var(--lp-accent)] font-semibold whitespace-nowrap">
+          REEL DA ARENA
+        </span>
       </div>
     </section>
   );

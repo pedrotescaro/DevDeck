@@ -35,7 +35,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 const bebasNeue = Bebas_Neue({
-  subsets: ['latin'],
+  subsets: ['latin', 'latin-ext'],
   variable: '--font-bebas-neue',
   weight: '400',
 });
