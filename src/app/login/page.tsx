@@ -13,17 +13,16 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    document.documentElement.classList.add('lp-landing-page');
+
     if (typeof window !== 'undefined') {
       // 1. Verificar query parameters (?error=...)
       const queryParams = new URLSearchParams(window.location.search);
       const queryError = queryParams.get('error');
       if (queryError) {
         setError(queryError);
-        return;
-      }
-
-      // 2. Verificar hash parameters (#error=...)
-      if (window.location.hash) {
+      } else if (window.location.hash) {
+        // 2. Verificar hash parameters (#error=...)
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const hashError = hashParams.get('error_description') || hashParams.get('error');
         if (hashError) {
@@ -31,6 +30,10 @@ export default function LoginPage() {
         }
       }
     }
+
+    return () => {
+      document.documentElement.classList.remove('lp-landing-page');
+    };
   }, []);
 
   const handleGithubLogin = async () => {
@@ -105,35 +108,70 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-dd-bg px-6 py-12 text-dd-text">
-      <div className="w-full max-w-md rounded-xl border border-dd-border bg-dd-surface p-8 shadow-xl">
-        <div className="flex flex-col items-center mb-8">
-          <div className="flex items-center gap-2 mb-2">
-            <img
-              src="/logo.png"
-              alt="DevDeck Logo"
-              className="w-6 h-6 object-contain hidden dark:block"
-            />
-            <img
-              src="/logo-light.png"
-              alt="DevDeck Logo"
-              className="w-6 h-6 object-contain block dark:hidden"
-            />
-            <span className="font-sans text-2xl font-bold tracking-tight">DevDeck</span>
-          </div>
-          <p className="text-dd-muted text-sm">Entre na sua conta para continuar programando</p>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#0E0D0B] text-[#F4F1EB] antialiased px-6 py-12 relative overflow-hidden select-none">
+      {/* Background grain texture */}
+      <div className="lp-grain" />
+
+      {/* Decorative glows */}
+      <div
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] pointer-events-none select-none opacity-20"
+        style={{
+          background: 'radial-gradient(circle, rgba(245,118,43,0.06) 0%, transparent 70%)',
+          filter: 'blur(60px)',
+        }}
+      />
+
+      {/* Top Left back link */}
+      <div className="absolute top-6 left-6 z-30">
+        <Link
+          href="/"
+          className="lp-nav-link flex items-center gap-2 group lp-font-heading text-xs tracking-wider uppercase text-[var(--lp-fg-dim)] hover:text-white transition-colors"
+        >
+          <span className="transform group-hover:-translate-x-1 transition-transform">←</span>
+          <span>Voltar para a Home</span>
+        </Link>
+      </div>
+
+      <div className="w-full max-w-md lp-notch-corner p-8 bg-[#1A1815] border border-[var(--lp-border-light)] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.85)] relative z-10">
+        <div className="flex flex-col items-center mb-8 text-center">
+          {/* Logo & Title */}
+          <Link href="/" className="flex items-center gap-3 mb-4 group">
+            <img src="/logo.png" alt="DevDeck Logo" className="w-8 h-8 object-contain" />
+            <span
+              className="lp-font-heading font-semibold text-xl tracking-wide animate-pulse"
+              style={{ color: 'var(--lp-fg)' }}
+            >
+              DevDeck
+            </span>
+          </Link>
+          <h2 className="lp-font-display text-4xl tracking-wider text-[var(--lp-fg)] mb-2 uppercase">
+            Entrar na Arena
+          </h2>
+          <p className="text-sm font-medium text-[var(--lp-muted)]">
+            Sua competência é sua identidade.
+          </p>
         </div>
 
         {error && (
-          <div className="mb-4 rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
+          <div
+            className="mb-6 rounded-md border p-3.5 text-xs lp-font-mono leading-relaxed"
+            style={{
+              backgroundColor: 'rgba(239,68,68,0.06)',
+              borderColor: 'rgba(239,68,68,0.2)',
+              color: '#FCA5A5',
+            }}
+          >
             {error}
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-6">
+        <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="block text-sm font-semibold mb-2" htmlFor="email">
-              E-mail
+            <label
+              className="lp-font-mono text-[10px] tracking-[0.15em] uppercase text-[var(--lp-muted)] mb-2 block"
+              htmlFor="email"
+            >
+              Endereço de E-mail
             </label>
             <input
               id="email"
@@ -141,14 +179,17 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-lg border border-dd-border bg-dd-bg px-4 py-2 text-sm text-dd-text placeholder-dd-muted focus:border-orange-500 focus:outline-none"
+              className="w-full rounded-md border border-[var(--lp-border)] bg-[#0E0D0B] px-4 py-3 text-sm lp-font-mono text-[var(--lp-fg)] placeholder-[var(--lp-muted-2)] focus:border-[var(--lp-accent)] focus:ring-1 focus:ring-[var(--lp-accent)] focus:outline-none transition-all"
               placeholder="seu-email@dev.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-2" htmlFor="password">
-              Senha
+            <label
+              className="lp-font-mono text-[10px] tracking-[0.15em] uppercase text-[var(--lp-muted)] mb-2 block"
+              htmlFor="password"
+            >
+              Sua Senha
             </label>
             <input
               id="password"
@@ -156,7 +197,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full rounded-lg border border-dd-border bg-dd-bg px-4 py-2 text-sm text-dd-text placeholder-dd-muted focus:border-orange-500 focus:outline-none"
+              className="w-full rounded-md border border-[var(--lp-border)] bg-[#0E0D0B] px-4 py-3 text-sm lp-font-mono text-[var(--lp-fg)] placeholder-[var(--lp-muted-2)] focus:border-[var(--lp-accent)] focus:ring-1 focus:ring-[var(--lp-accent)] focus:outline-none transition-all"
               placeholder="••••••••"
             />
           </div>
@@ -164,18 +205,20 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-orange-500 py-2.5 text-sm font-bold text-white transition-all hover:bg-orange-600 shadow-md shadow-orange-500/10 disabled:opacity-50 cursor-pointer"
+            className="w-full rounded-md bg-[var(--lp-accent)] hover:bg-[var(--lp-accent-bright)] text-[#0E0D0B] font-semibold tracking-[0.15em] uppercase text-xs py-3.5 transition-all lp-pulse-btn disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
           >
-            {loading ? 'Entrando...' : 'Entrar'}
+            {loading ? 'Acessando Arena...' : 'Entrar na Arena'}
           </button>
         </form>
 
-        <div className="relative my-6">
+        <div className="relative my-7">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-dd-border"></div>
+            <div className="w-full border-t border-[var(--lp-border)]"></div>
           </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-dd-surface px-2 text-dd-muted font-semibold">Ou continue com</span>
+          <div className="relative flex justify-center text-[10px] lp-font-mono tracking-[0.15em] uppercase">
+            <span className="bg-[#1A1815] px-3 text-[var(--lp-muted)] font-medium">
+              Ou continue com
+            </span>
           </div>
         </div>
 
@@ -183,9 +226,9 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={handleGithubLogin}
-            className="flex flex-1 items-center justify-center gap-2.5 rounded-lg border border-dd-border bg-dd-bg px-4 py-2.5 text-sm font-semibold text-dd-text transition-all hover:bg-dd-border/30 hover:border-orange-500/30 active:scale-[0.98] cursor-pointer"
+            className="flex flex-1 items-center justify-center gap-2.5 rounded-md border border-[var(--lp-border-light)] bg-[#0E0D0B] px-4 py-3 text-xs lp-font-heading font-semibold tracking-wider uppercase text-[var(--lp-fg)] transition-all hover:bg-[var(--lp-bg-card-hover)] hover:border-[var(--lp-accent)] hover:text-white active:scale-[0.98] cursor-pointer"
           >
-            <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
+            <svg className="h-4.5 w-4.5 fill-current" viewBox="0 0 24 24">
               <path
                 fillRule="evenodd"
                 clipRule="evenodd"
@@ -198,18 +241,21 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={handleDiscordLogin}
-            className="flex flex-1 items-center justify-center gap-2.5 rounded-lg border border-dd-border bg-dd-bg px-4 py-2.5 text-sm font-semibold text-dd-text transition-all hover:bg-dd-border/30 hover:border-[#5865F2]/40 active:scale-[0.98] cursor-pointer"
+            className="flex flex-1 items-center justify-center gap-2.5 rounded-md border border-[var(--lp-border-light)] bg-[#0E0D0B] px-4 py-3 text-xs lp-font-heading font-semibold tracking-wider uppercase text-[var(--lp-fg)] transition-all hover:bg-[var(--lp-bg-card-hover)] hover:border-[#5865F2] hover:text-white active:scale-[0.98] cursor-pointer"
           >
-            <svg className="h-5 w-5 fill-current text-[#5865F2]" viewBox="0 0 127.14 96.36">
+            <svg className="h-4.5 w-4.5 fill-current text-[#5865F2]" viewBox="0 0 127.14 96.36">
               <path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.95,54.65.62,77.53a107.4,107.4,0,0,0,32,16.29,80.1,80.1,0,0,0,6.72-11,68.6,68.6,0,0,1-10.64-5.12c.91-.67,1.81-1.37,2.65-2.1a77,77,0,0,0,74.5,0c.84.73,1.74,1.43,2.65,2.1a68.6,68.6,0,0,1-10.64,5.12,80.1,80.1,0,0,0,6.72,11,107.4,107.4,0,0,0,32-16.29C130.41,47.55,123.57,24.78,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5.16-12.72,11.43-12.72S53.9,46,53.9,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53s5.16-12.72,11.45-12.72S96.14,46,96.14,53,91,65.69,84.69,65.69Z" />
             </svg>
             Discord
           </button>
         </div>
 
-        <p className="mt-8 text-center text-sm text-dd-muted">
+        <p className="mt-8 text-center text-sm font-medium text-[var(--lp-muted)]">
           Não tem uma conta?{' '}
-          <Link href="/register" className="text-orange-400 hover:underline font-semibold">
+          <Link
+            href="/register"
+            className="text-[var(--lp-accent)] hover:text-[var(--lp-accent-bright)] hover:underline font-semibold transition-colors"
+          >
             Cadastrar-se
           </Link>
         </p>
