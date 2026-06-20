@@ -4,14 +4,7 @@ import { logger } from '@/lib/logger';
 import { XpService } from './xp.service';
 import { findTrailQuestionById } from '@/lib/trailsData';
 import { NotificationService } from './notification.service';
-
-const openAIQuizSchema = z.object({
-  question: z.string().min(10).max(500),
-  options: z.array(z.string().min(1).max(200)).length(4),
-  correct_index: z.number().int().min(0).max(3),
-  explanation: z.string().min(10).max(500),
-  tags: z.array(z.string()).max(5),
-});
+import { generateQuizAI, AIQuizResponse } from '@/lib/ai';
 
 export const QuizService = {
   async generateDaily(scheduledFor: Date) {
@@ -28,19 +21,20 @@ export const QuizService = {
       return existing;
     }
 
-    let quizData: z.infer<typeof openAIQuizSchema> | null = null;
-    let source: 'openai' | 'library' | 'null' = 'null';
+    let quizData: AIQuizResponse | null = null;
+    let source: 'ai' | 'library' | 'null' = 'null';
 
-    // 2. Try OpenAI
-    if (process.env.OPENAI_API_KEY) {
-      try {
-        quizData = await fetchOpenAIQuiz();
-        if (quizData) {
-          source = 'openai';
-        }
-      } catch (err) {
-        logger.error('OpenAI quiz generation completely failed', { error: String(err) });
+    // 2. Try AI Geração
+    try {
+      const systemPrompt = 'Você é um assistente técnico especialista em programação.';
+      const userPrompt = `Gere um quiz de múltipla escolha sobre tecnologia de software, adequado para desenvolvedores de nível intermediário. O quiz deve ser sobre um dos temas: linguagens de programação, arquitetura de software, algoritmos, boas práticas, ferramentas de desenvolvimento ou paradigmas de programação. Retorne APENAS JSON válido, sem markdown, sem explicações extras. Schema: { "question": string, "options": [string, string, string, string], "correct_index": number (0-3), "explanation": string, "tags": [string] }`;
+
+      quizData = await generateQuizAI(systemPrompt, userPrompt);
+      if (quizData) {
+        source = 'ai';
       }
+    } catch (err) {
+      logger.error('AI quiz generation completely failed', { error: String(err) });
     }
 
     // 3. Fallback to QuizLibrary
@@ -219,31 +213,11 @@ export const QuizService = {
     code?: string
   ) {
     let quizCreated = false;
-    const openAiKey = process.env.OPENAI_API_KEY;
 
-    if (openAiKey) {
-      try {
-        const controller = new AbortController();
-        const id = setTimeout(() => controller.abort(), 10000);
-
-        const openAiBase = process.env.OPENAI_API_BASE_URL || 'https://api.openai.com/v1';
-        const aiResponse = await fetch(`${openAiBase}/chat/completions`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${openAiKey}`,
-          },
-          body: JSON.stringify({
-            model: 'gpt-4o-mini',
-            messages: [
-              {
-                role: 'system',
-                content:
-                  'Você é um assistente técnico especialista em programação. Gere um quiz de múltipla escolha com exatamente 4 opções baseada na postagem enviada.',
-              },
-              {
-                role: 'user',
-                content: `Gere um quiz em formato JSON bruto.
+    try {
+      const systemPrompt =
+        'Você é um assistente técnico especialista em programação. Gere um quiz de múltipla escolha com exatamente 4 opções baseada na postagem enviada.';
+      const userPrompt = `Gere um quiz em formato JSON bruto.
 Linguagem: ${language}
 Título: ${title}
 Conteúdo: ${body}
@@ -254,38 +228,24 @@ Formato do JSON esperado:
   "question": "Pergunta do quiz",
   "options": ["Opção A", "Opção B", "Opção C", "Opção D"],
   "correct_index": 0
-}`,
-              },
-            ],
-            response_format: { type: 'json_object' },
-          }),
-          signal: controller.signal,
+}`;
+
+      const quizData = await generateQuizAI(systemPrompt, userPrompt);
+      if (quizData) {
+        await prisma.quiz.create({
+          data: {
+            post_id: postId,
+            question: quizData.question,
+            options: quizData.options,
+            correct_index: quizData.correct_index,
+          },
         });
-
-        clearTimeout(id);
-
-        if (aiResponse.ok) {
-          const aiData = (await aiResponse.ok) ? await aiResponse.json() : null;
-          const content = aiData?.choices?.[0]?.message?.content;
-          if (content) {
-            const quizJson = JSON.parse(content);
-
-            await prisma.quiz.create({
-              data: {
-                post_id: postId,
-                question: quizJson.question,
-                options: quizJson.options,
-                correct_index: quizJson.correct_index,
-              },
-            });
-            quizCreated = true;
-          }
-        }
-      } catch (aiError) {
-        logger.error('OpenAI Post Quiz generation failed, falling back', {
-          error: String(aiError),
-        });
+        quizCreated = true;
       }
+    } catch (aiError) {
+      logger.error('AI Post Quiz generation failed, falling back', {
+        error: String(aiError),
+      });
     }
 
     if (!quizCreated) {
@@ -378,52 +338,4 @@ Formato do JSON esperado:
   },
 };
 
-async function fetchOpenAIQuiz(): Promise<z.infer<typeof openAIQuizSchema> | null> {
-  const openAiKey = process.env.OPENAI_API_KEY;
-  if (!openAiKey) return null;
-
-  for (let attempt = 1; attempt <= 2; attempt++) {
-    try {
-      const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), 10000);
-
-      const openAiBase = process.env.OPENAI_API_BASE_URL || 'https://api.openai.com/v1';
-      const response = await fetch(`${openAiBase}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${openAiKey}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'system',
-              content: 'Você é um assistente técnico especialista em programação.',
-            },
-            {
-              role: 'user',
-              content: `Gere um quiz de múltipla escolha sobre tecnologia de software, adequado para desenvolvedores de nível intermediário. O quiz deve ser sobre um dos temas: linguagens de programação, arquitetura de software, algoritmos, boas práticas, ferramentas de desenvolvimento ou paradigmas de programação. Retorne APENAS JSON válido, sem markdown, sem explicações extras. Schema: { "question": string, "options": [string, string, string, string], "correct_index": number (0-3), "explanation": string, "tags": [string] }`,
-            },
-          ],
-          response_format: { type: 'json_object' },
-        }),
-        signal: controller.signal,
-      });
-
-      clearTimeout(id);
-
-      if (response.ok) {
-        const data = await response.json();
-        const content = data.choices?.[0]?.message?.content;
-        if (content) {
-          const parsed = JSON.parse(content);
-          return openAIQuizSchema.parse(parsed);
-        }
-      }
-    } catch (err) {
-      logger.warn(`OpenAI attempt ${attempt} failed`, { error: String(err) });
-    }
-  }
-  return null;
-}
+// Removed fetchOpenAIQuiz as it is superseded by generateQuizAI
