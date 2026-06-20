@@ -108,16 +108,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#0E0D0B] text-[#F4F1EB] antialiased px-6 py-12 relative overflow-hidden select-none">
-      {/* Background grain texture */}
-      <div className="lp-grain" />
-
-      {/* Decorative glows */}
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#0B0A09] text-[#F4F1EB] antialiased px-6 py-12 relative overflow-hidden select-none">
+      {/* Subtle background glow */}
       <div
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] pointer-events-none select-none opacity-20"
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] pointer-events-none select-none opacity-[0.07]"
         style={{
-          background: 'radial-gradient(circle, rgba(245,118,43,0.06) 0%, transparent 70%)',
-          filter: 'blur(60px)',
+          background: 'radial-gradient(circle, #F5762B 0%, transparent 70%)',
+          filter: 'blur(80px)',
         }}
       />
 
@@ -125,36 +122,33 @@ export default function LoginPage() {
       <div className="absolute top-6 left-6 z-30">
         <Link
           href="/"
-          className="lp-nav-link flex items-center gap-2 group lp-font-heading text-xs tracking-wider uppercase text-[var(--lp-fg-dim)] hover:text-white transition-colors"
+          className="flex items-center gap-2 group lp-font-heading text-xs tracking-wider uppercase text-[var(--lp-muted)] hover:text-[var(--lp-fg)] transition-colors"
         >
-          <span className="transform group-hover:-translate-x-1 transition-transform">←</span>
+          <span className="transform group-hover:-translate-x-0.5 transition-transform">←</span>
           <span>Voltar para a Home</span>
         </Link>
       </div>
 
-      <div className="w-full max-w-md lp-notch-corner p-8 bg-[#1A1815] border border-[var(--lp-border-light)] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.85)] relative z-10">
+      <div className="w-full max-w-md rounded-2xl p-8 bg-[#131210] border border-[#22201D] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] relative z-10">
         <div className="flex flex-col items-center mb-8 text-center">
           {/* Logo & Title */}
-          <Link href="/" className="flex items-center gap-3 mb-4 group">
-            <img src="/logo.png" alt="DevDeck Logo" className="w-8 h-8 object-contain" />
-            <span
-              className="lp-font-heading font-semibold text-xl tracking-wide animate-pulse"
-              style={{ color: 'var(--lp-fg)' }}
-            >
+          <Link href="/" className="flex items-center gap-2.5 mb-3.5 group">
+            <img src="/logo.png" alt="DevDeck Logo" className="w-7 h-7 object-contain" />
+            <span className="lp-font-heading font-semibold text-lg tracking-wide text-[var(--lp-fg)]">
               DevDeck
             </span>
           </Link>
-          <h2 className="lp-font-display text-4xl tracking-wider text-[var(--lp-fg)] mb-2 uppercase">
+          <h2 className="lp-font-heading text-2xl font-bold tracking-tight text-[var(--lp-fg)] mb-1">
             Entrar na Arena
           </h2>
-          <p className="text-sm font-medium text-[var(--lp-muted)]">
+          <p className="text-xs font-medium text-[var(--lp-muted)]">
             Sua competência é sua identidade.
           </p>
         </div>
 
         {error && (
           <div
-            className="mb-6 rounded-md border p-3.5 text-xs lp-font-mono leading-relaxed"
+            className="mb-5 rounded-lg border p-3 text-xs lp-font-mono leading-relaxed"
             style={{
               backgroundColor: 'rgba(239,68,68,0.06)',
               borderColor: 'rgba(239,68,68,0.2)',
@@ -168,7 +162,7 @@ export default function LoginPage() {
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
             <label
-              className="lp-font-mono text-[10px] tracking-[0.15em] uppercase text-[var(--lp-muted)] mb-2 block"
+              className="lp-font-mono text-[10px] tracking-wider uppercase text-[var(--lp-muted)] mb-1.5 block"
               htmlFor="email"
             >
               Endereço de E-mail
@@ -179,14 +173,14 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-md border border-[var(--lp-border)] bg-[#0E0D0B] px-4 py-3 text-sm lp-font-mono text-[var(--lp-fg)] placeholder-[var(--lp-muted-2)] focus:border-[var(--lp-accent)] focus:ring-1 focus:ring-[var(--lp-accent)] focus:outline-none transition-all"
+              className="w-full rounded-lg border border-[#22201D] bg-[#0E0D0B] px-4 py-3 text-sm lp-font-mono text-[var(--lp-fg)] placeholder-[var(--lp-muted-2)] focus:border-[var(--lp-accent)] focus:ring-1 focus:ring-[var(--lp-accent)] focus:outline-none transition-all duration-200"
               placeholder="seu-email@dev.com"
             />
           </div>
 
           <div>
             <label
-              className="lp-font-mono text-[10px] tracking-[0.15em] uppercase text-[var(--lp-muted)] mb-2 block"
+              className="lp-font-mono text-[10px] tracking-wider uppercase text-[var(--lp-muted)] mb-1.5 block"
               htmlFor="password"
             >
               Sua Senha
@@ -197,7 +191,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full rounded-md border border-[var(--lp-border)] bg-[#0E0D0B] px-4 py-3 text-sm lp-font-mono text-[var(--lp-fg)] placeholder-[var(--lp-muted-2)] focus:border-[var(--lp-accent)] focus:ring-1 focus:ring-[var(--lp-accent)] focus:outline-none transition-all"
+              className="w-full rounded-lg border border-[#22201D] bg-[#0E0D0B] px-4 py-3 text-sm lp-font-mono text-[var(--lp-fg)] placeholder-[var(--lp-muted-2)] focus:border-[var(--lp-accent)] focus:ring-1 focus:ring-[var(--lp-accent)] focus:outline-none transition-all duration-200"
               placeholder="••••••••"
             />
           </div>
@@ -205,18 +199,18 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-md bg-[var(--lp-accent)] hover:bg-[var(--lp-accent-bright)] text-[#0E0D0B] font-semibold tracking-[0.15em] uppercase text-xs py-3.5 transition-all lp-pulse-btn disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+            className="w-full rounded-lg bg-[#F5762B] hover:bg-[#FF8B3D] text-[#0E0D0B] font-semibold tracking-wider uppercase text-xs py-3.5 transition-all duration-200 active:scale-[0.98] disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
           >
             {loading ? 'Acessando Arena...' : 'Entrar na Arena'}
           </button>
         </form>
 
-        <div className="relative my-7">
+        <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-[var(--lp-border)]"></div>
+            <div className="w-full border-t border-[#22201D]"></div>
           </div>
-          <div className="relative flex justify-center text-[10px] lp-font-mono tracking-[0.15em] uppercase">
-            <span className="bg-[#1A1815] px-3 text-[var(--lp-muted)] font-medium">
+          <div className="relative flex justify-center text-[10px] lp-font-mono tracking-wider uppercase">
+            <span className="bg-[#131210] px-3 text-[var(--lp-muted)] font-medium">
               Ou continue com
             </span>
           </div>
@@ -226,9 +220,9 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={handleGithubLogin}
-            className="flex flex-1 items-center justify-center gap-2.5 rounded-md border border-[var(--lp-border-light)] bg-[#0E0D0B] px-4 py-3 text-xs lp-font-heading font-semibold tracking-wider uppercase text-[var(--lp-fg)] transition-all hover:bg-[var(--lp-bg-card-hover)] hover:border-[var(--lp-accent)] hover:text-white active:scale-[0.98] cursor-pointer"
+            className="flex flex-1 items-center justify-center gap-2.5 rounded-lg border border-[#22201D] bg-[#0E0D0B] px-4 py-3 text-xs lp-font-heading font-semibold tracking-wide uppercase text-[var(--lp-fg)] transition-all hover:bg-[#1A1916] hover:border-[var(--lp-accent)] hover:text-white active:scale-[0.98] cursor-pointer"
           >
-            <svg className="h-4.5 w-4.5 fill-current" viewBox="0 0 24 24">
+            <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
               <path
                 fillRule="evenodd"
                 clipRule="evenodd"
@@ -241,7 +235,7 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={handleDiscordLogin}
-            className="flex flex-1 items-center justify-center gap-2.5 rounded-md border border-[var(--lp-border-light)] bg-[#0E0D0B] px-4 py-3 text-xs lp-font-heading font-semibold tracking-wider uppercase text-[var(--lp-fg)] transition-all hover:bg-[var(--lp-bg-card-hover)] hover:border-[#5865F2] hover:text-white active:scale-[0.98] cursor-pointer"
+            className="flex flex-1 items-center justify-center gap-2.5 rounded-lg border border-[#22201D] bg-[#0E0D0B] px-4 py-3 text-xs lp-font-heading font-semibold tracking-wide uppercase text-[var(--lp-fg)] transition-all hover:bg-[#1A1916] hover:border-[#5865F2] hover:text-white active:scale-[0.98] cursor-pointer"
           >
             <svg className="h-4.5 w-4.5 fill-current text-[#5865F2]" viewBox="0 0 127.14 96.36">
               <path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.95,54.65.62,77.53a107.4,107.4,0,0,0,32,16.29,80.1,80.1,0,0,0,6.72-11,68.6,68.6,0,0,1-10.64-5.12c.91-.67,1.81-1.37,2.65-2.1a77,77,0,0,0,74.5,0c.84.73,1.74,1.43,2.65,2.1a68.6,68.6,0,0,1-10.64,5.12,80.1,80.1,0,0,0,6.72,11,107.4,107.4,0,0,0,32-16.29C130.41,47.55,123.57,24.78,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5.16-12.72,11.43-12.72S53.9,46,53.9,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53s5.16-12.72,11.45-12.72S96.14,46,96.14,53,91,65.69,84.69,65.69Z" />
