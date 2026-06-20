@@ -171,6 +171,25 @@ function normalizeQuizJson(parsed: any): any {
     throw new Error('Retorno da IA não é um objeto JSON válido');
   }
 
+  // Se o retorno for uma lista de quizzes, pega o primeiro item
+  if (Array.isArray(parsed)) {
+    parsed = parsed[0];
+  }
+
+  // Se o retorno tiver os dados encapsulados em chaves comuns (ex: questions, quizzes, quiz)
+  if (parsed && !parsed.question) {
+    const possibleArray = parsed.questions ?? parsed.quizzes ?? parsed.quiz ?? parsed.data;
+    if (Array.isArray(possibleArray)) {
+      parsed = possibleArray[0];
+    } else if (typeof possibleArray === 'object' && possibleArray !== null) {
+      parsed = possibleArray;
+    }
+  }
+
+  if (typeof parsed !== 'object' || parsed === null) {
+    throw new Error('Retorno da IA não pôde ser normalizado para um objeto de quiz');
+  }
+
   // Normalize correct index
   let correctIndex: number | undefined = undefined;
   if (typeof parsed.correct_index === 'number') {
@@ -238,6 +257,7 @@ export async function generateQuizAI(
         rawJson = await callOllama(systemPrompt, userPrompt);
       }
 
+      logger.debug(`[AI TRY] Attempt ${attempt} raw response`, { rawJson });
       const normalized = normalizeQuizJson(rawJson);
       return AIQuizResponseSchema.parse(normalized);
     } catch (err) {
