@@ -626,17 +626,17 @@ export function Sidebar({ user }: SidebarProps) {
           <div className="relative">
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="group w-full flex items-center justify-between p-3.5 rounded-2xl border border-transparent hover:border-dd-border hover:bg-dd-surface/40 transition-all duration-200 cursor-pointer"
+              className="group w-full flex items-start justify-between p-3.5 rounded-2xl border border-transparent hover:border-dd-border hover:bg-dd-surface/40 transition-all duration-200 cursor-pointer"
             >
-              <div className="flex items-center gap-3.5 min-w-0 flex-grow">
+              <div className="flex items-start gap-3.5 min-w-0 flex-grow">
                 {activeUser.avatar_url ? (
                   <img
                     src={activeUser.avatar_url}
                     alt={activeUser.username}
-                    className="w-10 h-10 rounded-full object-cover border border-dd-border shrink-0"
+                    className="w-10 h-10 rounded-full object-cover border border-dd-border shrink-0 mt-0.5"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-sm font-bold border border-orange-500/10 shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-sm font-bold border border-orange-500/10 shrink-0 mt-0.5">
                     {initials}
                   </div>
                 )}
@@ -663,7 +663,7 @@ export function Sidebar({ user }: SidebarProps) {
                 </div>
               </div>
               <ChevronDown
-                className={`w-4 h-4 text-dd-muted transition-transform duration-200 shrink-0 ${dropdownOpen ? 'rotate-180' : ''}`}
+                className={`w-4 h-4 text-dd-muted transition-transform duration-200 shrink-0 mt-1.5 ${dropdownOpen ? 'rotate-180' : ''}`}
               />
             </button>
 
