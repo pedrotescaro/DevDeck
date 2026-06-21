@@ -555,7 +555,11 @@ export function Sidebar({ user }: SidebarProps) {
                             className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors border-b border-dd-border/40"
                             onClick={() => setMoreMenuOpen(false)}
                           >
-                            <DuckyIcon className="w-4.5 h-4.5 text-dd-muted" />
+                            <img
+                              src="/Ducky_logo.png"
+                              alt="Ducky"
+                              className="w-4.5 h-4.5 rounded-full object-cover shrink-0"
+                            />
                             Ducky
                           </Link>
                           <Link
