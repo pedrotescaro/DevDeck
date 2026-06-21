@@ -228,6 +228,159 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
   const [unlockedTitle, setUnlockedTitle] = useState('');
   const [newLevelNumber, setNewLevelNumber] = useState(1);
 
+  // Estados para o Agente de IA nas Trilhas
+  const [aiChatOpen, setAiChatOpen] = useState(false);
+  interface ChatMessage {
+    role: 'user' | 'assistant';
+    content: string;
+  }
+  const [aiMessages, setAiMessages] = useState<ChatMessage[]>([]);
+  const [aiInput, setAiInput] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+
+  // Função para renderizar o conteúdo da mensagem com markdown simples
+  const renderMessageContent = (content: string) => {
+    const parts = content.split(/(\`\`\`[\s\S]*?\`\`\`|\`.*?\`|\*\*.*?\*\*)/g);
+    return parts.map((part, idx) => {
+      if (part.startsWith('```') && part.endsWith('```')) {
+        const code = part.slice(3, -3).replace(/^[a-zA-Z]+\n/, '');
+        return (
+          <pre
+            key={idx}
+            className="bg-black/30 text-orange-200 rounded-lg p-2.5 my-1.5 font-mono text-[9px] overflow-x-auto whitespace-pre leading-relaxed select-text"
+          >
+            <code>{code}</code>
+          </pre>
+        );
+      }
+      if (part.startsWith('`') && part.endsWith('`')) {
+        const code = part.slice(1, -1);
+        return (
+          <code
+            key={idx}
+            className="bg-dd-border px-1 py-0.5 rounded text-[10px] font-mono text-orange-400"
+          >
+            {code}
+          </code>
+        );
+      }
+      if (part.startsWith('**') && part.endsWith('**')) {
+        const boldText = part.slice(2, -2);
+        return (
+          <strong key={idx} className="font-extrabold text-dd-text">
+            {boldText}
+          </strong>
+        );
+      }
+      return part;
+    });
+  };
+
+  // Efeito para atualizar as mensagens de boas-vindas do Tutor de IA dependendo do contexto
+  useEffect(() => {
+    if (!quizModalOpen) {
+      setAiMessages([]);
+      setAiChatOpen(false);
+      return;
+    }
+
+    if (!activeLevel) return;
+
+    let welcomeText = '';
+    if (currentStage === 'learn') {
+      const slides = getLearnSlidesForLevel(activeLevel);
+      const slide = slides[learnStep];
+      welcomeText = `Acompanhando você no conceito **"${slide?.title}"**. Como posso te ajudar a entender melhor?`;
+    } else if (currentStage === 'practice' || currentStage === 'challenge') {
+      welcomeText = `Exercício ativo. Se precisar de uma dica sutil sem a resposta direta, basta me pedir!`;
+    } else {
+      welcomeText = `Fase concluída! Quer tirar alguma dúvida final sobre o conteúdo estudado?`;
+    }
+
+    setAiMessages((prev) => {
+      if (prev.length > 0) {
+        // Evitar duplicar mensagens de atualização idênticas consecutivas
+        const lastMsg = prev[prev.length - 1];
+        if (lastMsg.content.includes(welcomeText)) return prev;
+        return [
+          ...prev,
+          { role: 'assistant', content: `🔄 *Contexto atualizado:* ${welcomeText}` },
+        ];
+      }
+      return [
+        {
+          role: 'assistant',
+          content: `Olá! Sou o **DevAssistant**, seu tutor de IA para **${activeLang}**. ${welcomeText}`,
+        },
+      ];
+    });
+  }, [quizModalOpen, currentStage, learnStep, currentQuestionIndex, activeLevel, activeLang]);
+
+  // Função para enviar mensagem para o Tutor de IA
+  const handleSendAiMessage = async (customMessage?: string) => {
+    const textToSend = customMessage || aiInput;
+    if (!textToSend.trim() || aiLoading || !activeLevel) return;
+
+    const userMessage: ChatMessage = { role: 'user', content: textToSend };
+    const updatedMessages = [...aiMessages, userMessage];
+
+    setAiMessages(updatedMessages);
+    if (!customMessage) setAiInput('');
+    setAiLoading(true);
+
+    try {
+      let currentContext: any = {};
+      if (currentStage === 'learn') {
+        const slides = getLearnSlidesForLevel(activeLevel);
+        const slide = slides[learnStep];
+        currentContext = {
+          title: slide.title,
+          concept: slide.concept,
+          code: slide.code,
+          tip: slide.tip,
+        };
+      } else if (currentStage === 'practice' || currentStage === 'challenge') {
+        const question = activeLevel.questions[currentQuestionIndex];
+        currentContext = {
+          question: question.question,
+          options: question.options,
+          correctIndex: question.correctIndex,
+        };
+      }
+
+      const response = await fetch('/api/ai/trails/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          language: activeLang,
+          levelTitle: activeLevel.title,
+          stage: currentStage,
+          currentContext,
+          history: updatedMessages.map((m) => ({ role: m.role, content: m.content })),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Falha na resposta da API');
+      }
+
+      const data = await response.json();
+      setAiMessages([...updatedMessages, { role: 'assistant', content: data.text }]);
+    } catch (error) {
+      console.error(error);
+      setAiMessages([
+        ...updatedMessages,
+        {
+          role: 'assistant',
+          content:
+            'Desculpe, ocorreu um erro ao tentar processar sua mensagem. Certifique-se de que as chaves de API estão configuradas corretamente.',
+        },
+      ]);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   // Obter nível e XP da linguagem atual
   const activeTrail = trails.find((t) => t.language === activeLang) || {
     language: activeLang,
@@ -877,7 +1030,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="relative w-full max-w-lg bg-dd-surface border border-dd-border rounded-2xl shadow-2xl z-10 font-sans flex flex-col max-h-[90vh] overflow-hidden"
+              className={`relative w-full ${aiChatOpen ? 'max-w-4xl' : 'max-w-lg'} bg-dd-surface border border-dd-border rounded-2xl shadow-2xl z-10 font-sans flex flex-col max-h-[90vh] overflow-hidden transition-all duration-300`}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Colored Modal Header */}
@@ -891,7 +1044,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                     <X className="w-4.5 h-4.5" />
                   </button>
 
-                  <h2 className="text-xs font-black uppercase tracking-wider text-center flex-grow pr-8 text-white">
+                  <h2 className="text-xs font-black uppercase tracking-wider text-center flex-grow text-white">
                     {(() => {
                       if (currentStage === 'learn') {
                         return `Etapa 1: Aprender ${learnStep + 1} de 3`;
@@ -905,6 +1058,18 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                       return `Fase Concluída!`;
                     })()}
                   </h2>
+
+                  <button
+                    onClick={() => setAiChatOpen(!aiChatOpen)}
+                    className={`h-7 px-2.5 rounded-full flex items-center gap-1.5 text-[10px] font-bold transition-all cursor-pointer border-none shadow-sm ${
+                      aiChatOpen
+                        ? 'bg-white text-orange-600 hover:bg-white/95 font-black'
+                        : 'bg-white/15 text-white hover:bg-white/25 animate-pulse'
+                    }`}
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>DevAssistant {aiChatOpen ? 'Aberto' : 'IA'}</span>
+                  </button>
                 </div>
 
                 {/* Segmented Progress Pills */}
@@ -946,227 +1111,362 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                 </div>
               </div>
 
-              {/* Overlapping Content Container */}
-              <div className="relative -mt-4 rounded-t-2xl bg-dd-surface p-6 flex-grow flex flex-col overflow-y-auto min-h-[350px]">
-                {currentStage === 'learn' &&
-                  (() => {
-                    const slides = getLearnSlidesForLevel(activeLevel);
-                    const slide = slides[learnStep];
-                    return (
-                      <div className="space-y-4 py-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500 font-bold text-sm">
-                            💡
+              {/* Split Content Pane */}
+              <div className="flex flex-row flex-grow overflow-hidden relative">
+                {/* Left Column: Study content */}
+                <div
+                  className={`flex flex-col flex-grow overflow-hidden ${aiChatOpen ? 'md:w-1/2 border-r border-dd-border' : 'w-full'}`}
+                >
+                  {/* Overlapping Content Container */}
+                  <div className="relative -mt-4 rounded-t-2xl bg-dd-surface p-6 flex-grow flex flex-col overflow-y-auto min-h-[350px]">
+                    {currentStage === 'learn' &&
+                      (() => {
+                        const slides = getLearnSlidesForLevel(activeLevel);
+                        const slide = slides[learnStep];
+                        return (
+                          <div className="space-y-4 py-2">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500 font-bold text-sm">
+                                💡
+                              </div>
+                              <h3 className="text-sm font-extrabold text-dd-text">{slide.title}</h3>
+                            </div>
+
+                            <p className="text-xs text-dd-text leading-relaxed font-medium">
+                              {slide.concept}
+                            </p>
+
+                            {slide.code && (
+                              <div className="relative bg-black/40 rounded-xl p-4 border border-dd-border font-mono text-[10px] text-orange-200 overflow-x-auto whitespace-pre leading-relaxed font-semibold">
+                                {slide.code}
+                              </div>
+                            )}
+
+                            {slide.tip && (
+                              <div className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-3 flex items-start gap-2.5">
+                                <span className="text-orange-500 text-xs mt-0.5">💡</span>
+                                <div className="space-y-0.5">
+                                  <h4 className="text-[10px] font-bold text-orange-500 uppercase tracking-wide">
+                                    Dica Pro
+                                  </h4>
+                                  <p className="text-[10px] text-dd-muted leading-relaxed">
+                                    {slide.tip}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          <h3 className="text-sm font-extrabold text-dd-text">{slide.title}</h3>
+                        );
+                      })()}
+
+                    {(currentStage === 'practice' || currentStage === 'challenge') &&
+                      (() => {
+                        const question = activeLevel.questions[currentQuestionIndex];
+                        return (
+                          <div className="space-y-6 py-2">
+                            {currentStage === 'challenge' && (
+                              <div className="flex items-center gap-2">
+                                <span className="px-2 py-0.5 rounded bg-orange-500/10 text-[9px] font-black text-orange-500 uppercase tracking-wider">
+                                  Desafio Final
+                                </span>
+                              </div>
+                            )}
+
+                            <h3 className="text-sm font-bold text-dd-text leading-relaxed">
+                              {question.question}
+                            </h3>
+
+                            <div className="space-y-2.5">
+                              {question.options.map((opt, oIdx) => {
+                                const isSelected = selectedOption === oIdx;
+                                const isCorrectAnswer = oIdx === question.correctIndex;
+
+                                let btnClasses =
+                                  'border border-dd-border bg-dd-surface text-dd-text hover:bg-dd-border/20';
+
+                                if (answered) {
+                                  if (isCorrectAnswer) {
+                                    btnClasses =
+                                      'border-emerald-500 bg-emerald-500/10 text-emerald-400';
+                                  } else if (isSelected) {
+                                    btnClasses = 'border-red-500 bg-red-500/10 text-red-400';
+                                  } else {
+                                    btnClasses =
+                                      'border-dd-border opacity-50 bg-dd-surface text-dd-muted';
+                                  }
+                                } else if (isSelected) {
+                                  btnClasses = 'border-orange-500 bg-orange-500/5 text-orange-400';
+                                }
+
+                                return (
+                                  <button
+                                    key={oIdx}
+                                    onClick={() => handleOptionSelect(oIdx)}
+                                    disabled={answered}
+                                    className={`w-full text-left p-4 rounded-xl text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${btnClasses}`}
+                                  >
+                                    <span>{opt}</span>
+                                    {answered && isCorrectAnswer && (
+                                      <Check className="w-4 h-4 text-emerald-400" />
+                                    )}
+                                    {answered && isSelected && !isCorrectAnswer && (
+                                      <X className="w-4 h-4 text-red-400" />
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+
+                            {quizError && (
+                              <p className="text-[10px] text-red-400 font-bold bg-red-500/5 border border-red-500/10 p-3 rounded-lg">
+                                {quizError}
+                              </p>
+                            )}
+                          </div>
+                        );
+                      })()}
+
+                    {currentStage === 'summary' && (
+                      <div className="text-center py-6 space-y-6">
+                        <div className="w-16 h-16 bg-orange-500/10 border border-orange-500/20 rounded-full flex items-center justify-center text-orange-400 mx-auto animate-bounce">
+                          <Trophy className="w-8 h-8" />
                         </div>
 
-                        <p className="text-xs text-dd-text leading-relaxed font-medium">
-                          {slide.concept}
-                        </p>
+                        <div className="space-y-2">
+                          <h3 className="text-lg font-black text-dd-text uppercase">
+                            Fase Concluída!
+                          </h3>
+                          <p className="text-xs text-dd-muted max-w-xs mx-auto">
+                            Você concluiu a Fase {activeLevel.levelNumber} de {activeLang}!
+                          </p>
+                        </div>
 
-                        {slide.code && (
-                          <div className="relative bg-black/40 rounded-xl p-4 border border-dd-border font-mono text-[10px] text-orange-200 overflow-x-auto whitespace-pre leading-relaxed">
-                            {slide.code}
+                        <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto">
+                          <div className="bg-dd-surface border border-dd-border p-4 rounded-xl text-center">
+                            <p className="text-[9px] font-bold text-dd-muted uppercase">Acertos</p>
+                            <p className="text-lg font-black text-dd-text mt-1">
+                              {correctCount} / 3
+                            </p>
                           </div>
-                        )}
-
-                        {slide.tip && (
-                          <div className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-3 flex items-start gap-2.5">
-                            <span className="text-orange-500 text-xs mt-0.5">💡</span>
-                            <div className="space-y-0.5">
-                              <h4 className="text-[10px] font-bold text-orange-500 uppercase tracking-wide">
-                                Dica Pro
-                              </h4>
-                              <p className="text-[10px] text-dd-muted leading-relaxed">
-                                {slide.tip}
-                              </p>
-                            </div>
+                          <div className="bg-dd-surface border border-dd-border p-4 rounded-xl text-center">
+                            <p className="text-[9px] font-bold text-dd-muted uppercase">XP Ganho</p>
+                            <p className="text-lg font-black text-orange-400 mt-1 font-mono">
+                              +{xpEarned} XP
+                            </p>
                           </div>
-                        )}
+                        </div>
                       </div>
-                    );
-                  })()}
+                    )}
+                  </div>
 
-                {(currentStage === 'practice' || currentStage === 'challenge') &&
-                  (() => {
-                    const question = activeLevel.questions[currentQuestionIndex];
-                    return (
-                      <div className="space-y-6 py-2">
-                        {currentStage === 'challenge' && (
-                          <div className="flex items-center gap-2">
-                            <span className="px-2 py-0.5 rounded bg-orange-500/10 text-[9px] font-black text-orange-500 uppercase tracking-wider">
-                              Desafio Final
-                            </span>
-                          </div>
-                        )}
+                  {/* Navigation Footer */}
+                  <div className="p-4 border-t border-dd-border flex justify-between items-center bg-dd-surface">
+                    {currentStage !== 'summary' ? (
+                      <>
+                        <button
+                          onClick={handlePrevStageOrStep}
+                          disabled={currentStage === 'learn' && learnStep === 0}
+                          className="px-6 py-2.5 bg-transparent border border-dd-border hover:bg-dd-border/20 text-dd-text rounded-full text-xs font-bold transition-all cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed"
+                        >
+                          Anterior
+                        </button>
 
-                        <h3 className="text-sm font-bold text-dd-text leading-relaxed">
-                          {question.question}
-                        </h3>
-
-                        <div className="space-y-2.5">
-                          {question.options.map((opt, oIdx) => {
-                            const isSelected = selectedOption === oIdx;
-                            const isCorrectAnswer = oIdx === question.correctIndex;
-
-                            let btnClasses =
-                              'border border-dd-border bg-dd-surface text-dd-text hover:bg-dd-border/20';
-
-                            if (answered) {
-                              if (isCorrectAnswer) {
-                                btnClasses =
-                                  'border-emerald-500 bg-emerald-500/10 text-emerald-400';
-                              } else if (isSelected) {
-                                btnClasses = 'border-red-500 bg-red-500/10 text-red-400';
-                              } else {
-                                btnClasses =
-                                  'border-dd-border opacity-50 bg-dd-surface text-dd-muted';
-                              }
-                            } else if (isSelected) {
-                              btnClasses = 'border-orange-500 bg-orange-500/5 text-orange-400';
-                            }
-
+                        {(() => {
+                          if (currentStage === 'learn') {
                             return (
                               <button
-                                key={oIdx}
-                                onClick={() => handleOptionSelect(oIdx)}
-                                disabled={answered}
-                                className={`w-full text-left p-4 rounded-xl text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${btnClasses}`}
+                                onClick={handleNextStageOrStep}
+                                className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
                               >
-                                <span>{opt}</span>
-                                {answered && isCorrectAnswer && (
-                                  <Check className="w-4 h-4 text-emerald-400" />
-                                )}
-                                {answered && isSelected && !isCorrectAnswer && (
-                                  <X className="w-4 h-4 text-red-400" />
-                                )}
+                                Próximo
+                                <ChevronRight className="w-4 h-4" />
                               </button>
                             );
-                          })}
-                        </div>
+                          }
 
-                        {quizError && (
-                          <p className="text-[10px] text-red-400 font-bold bg-red-500/5 border border-red-500/10 p-3 rounded-lg">
-                            {quizError}
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })()}
+                          const question = activeLevel.questions[currentQuestionIndex];
+                          const isCorrect = selectedOption === question.correctIndex;
 
-                {currentStage === 'summary' && (
-                  <div className="text-center py-6 space-y-6">
-                    <div className="w-16 h-16 bg-orange-500/10 border border-orange-500/20 rounded-full flex items-center justify-center text-orange-400 mx-auto animate-bounce">
-                      <Trophy className="w-8 h-8" />
-                    </div>
+                          if (!isCorrect) {
+                            return (
+                              <button
+                                onClick={handleRetryQuestion}
+                                className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                              >
+                                Tentar Novamente
+                                <ChevronRight className="w-4 h-4" />
+                              </button>
+                            );
+                          }
 
-                    <div className="space-y-2">
-                      <h3 className="text-lg font-black text-dd-text uppercase">Fase Concluída!</h3>
-                      <p className="text-xs text-dd-muted max-w-xs mx-auto">
-                        Você concluiu a Fase {activeLevel.levelNumber} de {activeLang}!
-                      </p>
-                    </div>
+                          if (currentStage === 'practice') {
+                            return (
+                              <button
+                                onClick={handleNextStageOrStep}
+                                className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 animate-pulse"
+                              >
+                                Avançar
+                                <ChevronRight className="w-4 h-4" />
+                              </button>
+                            );
+                          }
 
-                    <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto">
-                      <div className="bg-dd-surface border border-dd-border p-4 rounded-xl text-center">
-                        <p className="text-[9px] font-bold text-dd-muted uppercase">Acertos</p>
-                        <p className="text-lg font-black text-dd-text mt-1">{correctCount} / 3</p>
-                      </div>
-                      <div className="bg-dd-surface border border-dd-border p-4 rounded-xl text-center">
-                        <p className="text-[9px] font-bold text-dd-muted uppercase">XP Ganho</p>
-                        <p className="text-lg font-black text-orange-400 mt-1 font-mono">
-                          +{xpEarned} XP
-                        </p>
-                      </div>
-                    </div>
+                          return (
+                            <button
+                              onClick={handleNextStageOrStep}
+                              className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 animate-pulse"
+                            >
+                              Ver Resultado
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
+                          );
+                        })()}
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => setQuizModalOpen(false)}
+                        className="w-full py-2.5 bg-dd-surface border border-dd-border hover:bg-dd-border/30 text-dd-text rounded-full text-xs font-bold transition-all cursor-pointer"
+                      >
+                        Voltar para a Trilha
+                      </button>
+                    )}
                   </div>
-                )}
-              </div>
+                </div>
 
-              {/* Navigation Footer */}
-              <div className="p-4 border-t border-dd-border flex justify-between items-center bg-dd-surface">
-                {currentStage !== 'summary' ? (
-                  <>
-                    <button
-                      onClick={handlePrevStageOrStep}
-                      disabled={currentStage === 'learn' && learnStep === 0}
-                      className="px-6 py-2.5 bg-transparent border border-dd-border hover:bg-dd-border/20 text-dd-text rounded-full text-xs font-bold transition-all cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed"
-                    >
-                      Anterior
-                    </button>
+                {/* Right Column: AI Chat Panel */}
+                {aiChatOpen && (
+                  <div className="w-full md:w-1/2 flex flex-col bg-dd-surface/50 h-full overflow-hidden relative border-t border-dd-border md:border-t-0 select-text">
+                    {/* Header/Title of AI */}
+                    <div className="p-4 border-b border-dd-border flex items-center justify-between bg-dd-surface/70">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-orange-500" />
+                        <span className="text-xs font-bold text-dd-text">DevAssistant IA</span>
+                      </div>
+                      <span className="px-1.5 py-0.5 rounded bg-orange-500/10 text-[8px] font-bold text-orange-500 uppercase tracking-wide">
+                        Online
+                      </span>
+                    </div>
 
-                    {(() => {
-                      if (currentStage === 'learn') {
-                        return (
-                          <button
-                            onClick={handleNextStageOrStep}
-                            className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
-                          >
-                            Próxima
-                            <ChevronRight className="w-4 h-4" />
-                          </button>
-                        );
-                      }
-
-                      if (!answered) {
-                        return (
-                          <button
-                            onClick={handleCheckAnswer}
-                            disabled={selectedOption === null || submittingAttempt}
-                            className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5"
-                          >
-                            {submittingAttempt ? 'Processando...' : 'Verificar'}
-                            <ChevronRight className="w-4 h-4" />
-                          </button>
-                        );
-                      }
-
-                      const question = activeLevel.questions[currentQuestionIndex];
-                      const isCorrect = selectedOption === question.correctIndex;
-
-                      if (!isCorrect) {
-                        return (
-                          <button
-                            onClick={handleRetryQuestion}
-                            className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
-                          >
-                            Tentar Novamente
-                            <ChevronRight className="w-4 h-4" />
-                          </button>
-                        );
-                      }
-
-                      if (currentStage === 'practice') {
-                        return (
-                          <button
-                            onClick={handleNextStageOrStep}
-                            className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 animate-pulse"
-                          >
-                            Avançar
-                            <ChevronRight className="w-4 h-4" />
-                          </button>
-                        );
-                      }
-
-                      return (
-                        <button
-                          onClick={handleNextStageOrStep}
-                          className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 animate-pulse"
+                    {/* Messages Scroll Area */}
+                    <div className="flex-grow p-4 overflow-y-auto space-y-3 scrollbar-thin select-text">
+                      {aiMessages.map((msg, idx) => (
+                        <div
+                          key={idx}
+                          className={`flex gap-2.5 max-w-[85%] ${
+                            msg.role === 'user' ? 'ml-auto flex-row-reverse' : 'mr-auto'
+                          }`}
                         >
-                          Ver Resultado
-                          <ChevronRight className="w-4 h-4" />
-                        </button>
-                      );
-                    })()}
-                  </>
-                ) : (
-                  <button
-                    onClick={() => setQuizModalOpen(false)}
-                    className="w-full py-2.5 bg-dd-surface border border-dd-border hover:bg-dd-border/30 text-dd-text rounded-full text-xs font-bold transition-all cursor-pointer"
-                  >
-                    Voltar para a Trilha
-                  </button>
+                          <div
+                            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                              msg.role === 'user'
+                                ? 'bg-orange-500 text-white'
+                                : 'bg-dd-border text-orange-500'
+                            }`}
+                          >
+                            {msg.role === 'user' ? user.username[0].toUpperCase() : '🤖'}
+                          </div>
+                          <div
+                            className={`p-3 rounded-2xl text-[11px] leading-relaxed select-text ${
+                              msg.role === 'user'
+                                ? 'bg-orange-500 text-white rounded-tr-none font-semibold'
+                                : 'bg-dd-border/40 text-dd-text rounded-tl-none border border-dd-border/30 font-medium'
+                            }`}
+                          >
+                            {renderMessageContent(msg.content)}
+                          </div>
+                        </div>
+                      ))}
+                      {aiLoading && (
+                        <div className="flex gap-2.5 max-w-[80%] mr-auto items-center">
+                          <div className="w-7 h-7 rounded-full bg-dd-border text-orange-500 flex items-center justify-center text-xs font-bold shrink-0">
+                            🤖
+                          </div>
+                          <div className="flex gap-1">
+                            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-100" />
+                            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-200" />
+                            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-300" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Quick Suggestion Chips */}
+                    <div className="px-4 py-2 flex flex-wrap gap-1.5 border-t border-dd-border/50 bg-dd-surface/20">
+                      {currentStage === 'learn' && (
+                        <>
+                          <button
+                            onClick={() =>
+                              handleSendAiMessage('Explicar este conceito de forma mais detalhada')
+                            }
+                            disabled={aiLoading}
+                            className="px-2.5 py-1 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                          >
+                            💡 Explicar Conceito
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleSendAiMessage(
+                                'Me dê outro exemplo prático de código para fixar'
+                              )
+                            }
+                            disabled={aiLoading}
+                            className="px-2.5 py-1 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                          >
+                            💻 Exemplo de Código
+                          </button>
+                        </>
+                      )}
+                      {(currentStage === 'practice' || currentStage === 'challenge') && (
+                        <>
+                          <button
+                            onClick={() =>
+                              handleSendAiMessage(
+                                'Por favor, me dê uma dica sutil sobre esta questão sem me dar a resposta direta'
+                              )
+                            }
+                            disabled={aiLoading}
+                            className="px-2.5 py-1 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                          >
+                            🔍 Dica Sutil
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleSendAiMessage('Explique a teoria por trás desta pergunta')
+                            }
+                            disabled={aiLoading}
+                            className="px-2.5 py-1 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                          >
+                            📚 Explicar Teoria
+                          </button>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Chat Input Field */}
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleSendAiMessage();
+                      }}
+                      className="p-3 border-t border-dd-border flex gap-2 items-center bg-dd-surface/80"
+                    >
+                      <input
+                        type="text"
+                        value={aiInput}
+                        onChange={(e) => setAiInput(e.target.value)}
+                        placeholder="Perguntar ao tutor..."
+                        disabled={aiLoading}
+                        className="flex-grow rounded-xl border border-dd-border bg-dd-surface px-3 py-2 text-xs text-dd-text placeholder-dd-muted focus:border-orange-500 focus:outline-none disabled:opacity-50"
+                      />
+                      <button
+                        type="submit"
+                        disabled={aiLoading || !aiInput.trim()}
+                        className="px-3 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition-all disabled:opacity-50 cursor-pointer"
+                      >
+                        Enviar
+                      </button>
+                    </form>
+                  </div>
                 )}
               </div>
             </motion.div>

@@ -269,3 +269,184 @@ export async function generateQuizAI(
 
   return null;
 }
+
+async function callGeminiChat(
+  systemPrompt: string,
+  messages: { role: 'user' | 'assistant'; content: string }[]
+): Promise<string> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error('GEMINI_API_KEY não configurada');
+
+  const model = process.env.AI_MODEL || 'gemini-1.5-flash';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+  const contents = messages.map((msg) => ({
+    role: msg.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: msg.content }],
+  }));
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents,
+      systemInstruction: {
+        parts: [{ text: systemPrompt }],
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Gemini Chat error: ${response.status} - ${errText}`);
+  }
+
+  const data = await response.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error('Gemini retornou conteúdo de chat vazio');
+  return text;
+}
+
+async function callGroqChat(
+  systemPrompt: string,
+  messages: { role: 'user' | 'assistant'; content: string }[]
+): Promise<string> {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) throw new Error('GROQ_API_KEY não configurada');
+
+  const model = process.env.AI_MODEL || 'llama-3.1-8b-instant';
+  const url = 'https://api.groq.com/openai/v1/chat/completions';
+
+  const groqMessages = [
+    { role: 'system', content: systemPrompt },
+    ...messages.map((m) => ({ role: m.role, content: m.content })),
+  ];
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages: groqMessages,
+    }),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Groq Chat error: ${response.status} - ${errText}`);
+  }
+
+  const data = await response.json();
+  const text = data.choices?.[0]?.message?.content;
+  if (!text) throw new Error('Groq retornou conteúdo de chat vazio');
+  return text;
+}
+
+async function callOpenAIChat(
+  systemPrompt: string,
+  messages: { role: 'user' | 'assistant'; content: string }[]
+): Promise<string> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error('OPENAI_API_KEY não configurada');
+
+  const model = process.env.AI_MODEL || 'gpt-4o-mini';
+  const apiBase = process.env.OPENAI_API_BASE_URL || 'https://api.openai.com/v1';
+  const url = `${apiBase}/chat/completions`;
+
+  const openAiMessages = [
+    { role: 'system', content: systemPrompt },
+    ...messages.map((m) => ({ role: m.role, content: m.content })),
+  ];
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages: openAiMessages,
+    }),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`OpenAI Chat error: ${response.status} - ${errText}`);
+  }
+
+  const data = await response.json();
+  const text = data.choices?.[0]?.message?.content;
+  if (!text) throw new Error('OpenAI retornou conteúdo de chat vazio');
+  return text;
+}
+
+async function callOllamaChat(
+  systemPrompt: string,
+  messages: { role: 'user' | 'assistant'; content: string }[]
+): Promise<string> {
+  const apiBase = process.env.OLLAMA_API_BASE_URL || 'http://localhost:11434';
+  const model = process.env.OLLAMA_MODEL || process.env.AI_MODEL || 'qwen2.5-coder';
+  const url = `${apiBase}/api/chat`;
+
+  const ollamaMessages = [
+    { role: 'system', content: systemPrompt },
+    ...messages.map((m) => ({ role: m.role, content: m.content })),
+  ];
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model,
+      messages: ollamaMessages,
+      stream: false,
+    }),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Ollama Chat error: ${response.status} - ${errText}`);
+  }
+
+  const data = await response.json();
+  const text = data.message?.content;
+  if (!text) throw new Error('Ollama retornou conteúdo de chat vazio');
+  return text;
+}
+
+export async function generateChatAI(
+  systemPrompt: string,
+  messages: { role: 'user' | 'assistant'; content: string }[]
+): Promise<string | null> {
+  const provider = getProvider();
+  if (!provider) {
+    logger.warn('Nenhum provedor de IA configurado ou chaves ausentes para chat. Retornando nulo.');
+    return null;
+  }
+
+  logger.info(`Iniciando resposta do chat via IA com o provedor: ${provider}`);
+
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      if (provider === 'gemini') {
+        return await callGeminiChat(systemPrompt, messages);
+      } else if (provider === 'groq') {
+        return await callGroqChat(systemPrompt, messages);
+      } else if (provider === 'openai') {
+        return await callOpenAIChat(systemPrompt, messages);
+      } else if (provider === 'ollama') {
+        return await callOllamaChat(systemPrompt, messages);
+      }
+    } catch (err) {
+      logger.warn(`Falha na tentativa ${attempt} de chat via ${provider}`, {
+        error: String(err),
+      });
+    }
+  }
+
+  return null;
+}
