@@ -47,35 +47,16 @@ export default function HomeClient({ initialUser }: HomeClientProps) {
       {/* 3D Stack Loader */}
       {renderLoader && (
         <div className={`loader-container ${!showLoader ? 'fade-out' : ''}`}>
-          <div className="loader">
-            <div className="box box-1">
-              <div className="side-left" />
-              <div className="side-right" />
-              <div className="side-top">
-                <span className="loader-braces">{'{ }'}</span>
+          <div className="lp-loader-stage">
+            <div className="lp-loader-stack">
+              <div className="lp-loader-card lc1" />
+              <div className="lp-loader-card lc2" />
+              <div className="lp-loader-card lc3" />
+              <div className="lp-loader-card lcfront">
+                <div className="lp-loader-braces">{'{ }'}</div>
               </div>
             </div>
-            <div className="box box-2">
-              <div className="side-left" />
-              <div className="side-right" />
-              <div className="side-top">
-                <span className="loader-braces">{'{ }'}</span>
-              </div>
-            </div>
-            <div className="box box-3">
-              <div className="side-left" />
-              <div className="side-right" />
-              <div className="side-top">
-                <span className="loader-braces">{'{ }'}</span>
-              </div>
-            </div>
-            <div className="box box-4">
-              <div className="side-left" />
-              <div className="side-right" />
-              <div className="side-top">
-                <span className="loader-braces">{'{ }'}</span>
-              </div>
-            </div>
+            <div className="lp-loader-floor" />
           </div>
         </div>
       )}
