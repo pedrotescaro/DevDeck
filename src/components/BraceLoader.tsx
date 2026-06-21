@@ -5,6 +5,8 @@ interface BraceLoaderProps {
   color?: string;
   /** Cor de fundo do container */
   background?: string;
+  /** Escala do loader */
+  scale?: number;
 }
 
 const BRACE_PATHS = {
@@ -37,7 +39,11 @@ const BraceIcon: React.FC<{ color: string }> = ({ color }) => (
   </div>
 );
 
-const BraceLoader: React.FC<BraceLoaderProps> = ({ color = '#FF5C00', background = '#1a1a1a' }) => {
+const BraceLoader: React.FC<BraceLoaderProps> = ({
+  color = '#FF5C00',
+  background = '#1a1a1a',
+  scale = 3,
+}) => {
   return (
     <div className="brace-loader-wrapper" style={{ background }}>
       <div className="loader">
@@ -70,7 +76,7 @@ const BraceLoader: React.FC<BraceLoaderProps> = ({ color = '#FF5C00', background
           width: 100%;
         }
         .loader {
-          scale: 3;
+          scale: ${scale};
           height: 50px;
           width: 40px;
         }
@@ -82,7 +88,7 @@ const BraceLoader: React.FC<BraceLoaderProps> = ({ color = '#FF5C00', background
         .side-left {
           position: absolute;
           background-color: #0E0D0B;
-          border: 1px solid #A9A9A9;
+          border: 0.5px solid #A9A9A9;
           box-sizing: border-box;
           width: 19px;
           height: 5px;
@@ -93,7 +99,7 @@ const BraceLoader: React.FC<BraceLoaderProps> = ({ color = '#FF5C00', background
         .side-right {
           position: absolute;
           background-color: #0E0D0B;
-          border: 1px solid #D3D3D3;
+          border: 0.5px solid #D3D3D3;
           box-sizing: border-box;
           width: 19px;
           height: 5px;
@@ -104,7 +110,7 @@ const BraceLoader: React.FC<BraceLoaderProps> = ({ color = '#FF5C00', background
         .side-top {
           position: absolute;
           background-color: #0E0D0B;
-          border: 1px solid #fff;
+          border: 0.5px solid #fff;
           box-sizing: border-box;
           width: 20px;
           height: 20px;
@@ -125,7 +131,7 @@ const BraceLoader: React.FC<BraceLoaderProps> = ({ color = '#FF5C00', background
         }
         .brace path {
           fill: none;
-          stroke-width: 2.6;
+          stroke-width: 1.3;
           stroke-linecap: round;
           stroke-linejoin: round;
         }

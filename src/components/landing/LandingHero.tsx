@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import BraceLoader from '@/components/BraceLoader';
 
 const container = {
   hidden: {},
@@ -234,20 +235,9 @@ fn credit_xp(user: &User, action: Action) -> Result<XP, Error> {
           </div>
         </motion.div>
 
-        {/* Right Column — 3D Logo */}
+        {/* Right Column — 3D Loader */}
         <div className="lg:col-span-5 relative h-[560px] flex items-center justify-center">
-          {/* 3D Logo */}
-          <div className="lp-logo-stage relative z-20">
-            <div className="lp-logo-stack">
-              <div className="lp-logo-card c1" />
-              <div className="lp-logo-card c2" />
-              <div className="lp-logo-card c3" />
-              <div className="lp-logo-card cfront">
-                <div className="lp-braces">{'{ }'}</div>
-              </div>
-            </div>
-            <div className="lp-logo-floor" />
-          </div>
+          <BraceLoader scale={3} color="#FF5C00" background="transparent" />
         </div>
       </div>
 
