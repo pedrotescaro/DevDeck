@@ -175,6 +175,128 @@ const Pencil = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+const Flame = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+  </svg>
+);
+
+const GitBranch = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <line x1="6" y1="3" x2="6" y2="15" />
+    <circle cx="18" cy="6" r="3" />
+    <circle cx="6" cy="18" r="3" />
+    <path d="M18 9a9 9 0 0 1-9 9" />
+  </svg>
+);
+
+const SidebarIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <rect width="18" height="18" x="3" y="3" rx="4" />
+    <path d="M9 3v18" />
+  </svg>
+);
+
+const Plus = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M5 12h14" />
+    <path d="M12 5v14" />
+  </svg>
+);
+
+const Search = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <circle cx="11" cy="11" r="8" />
+    <path d="m21 21-4.3-4.3" />
+  </svg>
+);
+
+const BookmarkOutline = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
+  </svg>
+);
+
+const BookmarkFilled = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
+  </svg>
+);
+
+const Trash2 = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M3 6h18" />
+    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+    <line x1="10" y1="11" x2="10" y2="17" />
+    <line x1="14" y1="11" x2="14" y2="17" />
+  </svg>
+);
+
 interface DuckyContentProps {
   user: {
     id: string;
@@ -208,9 +330,29 @@ interface Message {
   text: string;
   isStreaming?: boolean;
   /** Multimodal parts attached to a user message (images + code). */
-  attachments?: { name: string; kind: 'image' | 'code' }[];
+  attachments?: {
+    name: string;
+    kind: 'image' | 'code';
+    data?: string;
+    mimeType?: string;
+  }[];
   /** Metadata when this message is a repository-analysis result. */
   repo?: { name: string; owner: string; url: string; language: string | null };
+}
+
+interface DuckyChatSession {
+  id: string;
+  title: string;
+  messages: Message[];
+  activeRepo: {
+    name: string;
+    owner: string;
+    url: string;
+    language: string | null;
+  } | null;
+  mode: 'Rápido' | 'Deep Debug' | 'Repositório';
+  isSaved?: boolean;
+  createdAt: number;
 }
 
 /** Extensions accepted as code/text attachments. */
@@ -311,7 +453,141 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
   } | null>(null);
 
   const [thinking, setThinking] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(true);
+
+  // History drawer states
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [history, setHistory] = useState<DuckyChatSession[]>([]);
+  const [historySearchQuery, setHistorySearchQuery] = useState('');
+  const [historyActiveTab, setHistoryActiveTab] = useState<'chats' | 'saved' | 'images'>('chats');
+
+  // Load history from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('devdeck-ducky-history');
+      if (saved) {
+        setHistory(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.error('Failed to load history', e);
+    }
+  }, []);
+
+  // Auto-save active chat to history
+  useEffect(() => {
+    if (isPrivate || messages.length === 0) return;
+
+    // Find first user message to determine title
+    const userMsgs = messages.filter((m) => m.sender === 'user');
+    if (userMsgs.length === 0) return;
+
+    let rawTitle = userMsgs[0].text;
+    if (rawTitle.startsWith('[Pesquisa ativa] ')) {
+      rawTitle = rawTitle.replace('[Pesquisa ativa] ', '');
+    }
+    if (rawTitle.startsWith('🔍 Analisar repositório: ')) {
+      rawTitle = rawTitle.replace('🔍 Analisar repositório: ', '');
+    }
+    const derivedTitle = rawTitle.trim()
+      ? rawTitle.length > 50
+        ? rawTitle.slice(0, 50) + '...'
+        : rawTitle
+      : 'Conversa com arquivos';
+
+    if (!activeChatId) {
+      const newId = 'ducky-chat-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9);
+      const newSession: DuckyChatSession = {
+        id: newId,
+        title: derivedTitle,
+        messages: messages,
+        activeRepo: activeRepo,
+        mode: mode,
+        createdAt: Date.now(),
+      };
+      setActiveChatId(newId);
+      setHistory((prev) => {
+        const next = [newSession, ...prev];
+        localStorage.setItem('devdeck-ducky-history', JSON.stringify(next));
+        return next;
+      });
+    } else {
+      setHistory((prev) => {
+        const updated = prev.map((s) => {
+          if (s.id === activeChatId) {
+            return {
+              ...s,
+              title: s.title || derivedTitle,
+              messages: messages,
+              activeRepo: activeRepo,
+              mode: mode,
+            };
+          }
+          return s;
+        });
+        const exists = updated.some((s) => s.id === activeChatId);
+        let finalHistory = updated;
+        if (!exists) {
+          const newSession: DuckyChatSession = {
+            id: activeChatId,
+            title: derivedTitle,
+            messages: messages,
+            activeRepo: activeRepo,
+            mode: mode,
+            createdAt: Date.now(),
+          };
+          finalHistory = [newSession, ...updated];
+        }
+        localStorage.setItem('devdeck-ducky-history', JSON.stringify(finalHistory));
+        return finalHistory;
+      });
+    }
+  }, [messages, activeChatId, mode, activeRepo, isPrivate]);
+
+  const handleSelectSession = (session: DuckyChatSession) => {
+    setActiveChatId(session.id);
+    setMessages(session.messages);
+    setActiveRepo(session.activeRepo);
+    setMode(session.mode);
+    setIsHistoryOpen(false);
+  };
+
+  const handleNewChat = () => {
+    setActiveChatId(null);
+    setMessages([]);
+    setActiveRepo(null);
+    setInputVal('');
+    setAttachedFiles([]);
+    setDeepThinkActive(mode === 'Deep Debug');
+  };
+
+  const toggleBookmarkSession = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setHistory((prev) => {
+      const updated = prev.map((s) => {
+        if (s.id === id) {
+          return { ...s, isSaved: !s.isSaved };
+        }
+        return s;
+      });
+      localStorage.setItem('devdeck-ducky-history', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const deleteSession = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm('Deseja apagar esta conversa do seu histórico?')) {
+      setHistory((prev) => {
+        const updated = prev.filter((s) => s.id !== id);
+        localStorage.setItem('devdeck-ducky-history', JSON.stringify(updated));
+        return updated;
+      });
+      if (activeChatId === id) {
+        handleNewChat();
+      }
+    }
+  };
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -449,7 +725,12 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
       sender: 'user',
       text: typeof content === 'string' ? content : finalQuery,
       attachments: hasAttachments
-        ? attachedFiles.map((f) => ({ name: f.name, kind: f.kind }))
+        ? attachedFiles.map((f) => ({
+            name: f.name,
+            kind: f.kind,
+            data: f.data,
+            mimeType: f.mimeType,
+          }))
         : undefined,
     };
 
@@ -802,21 +1083,21 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
   const renderBottomBanner = () => {
     return (
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-xs md:max-w-sm bg-[#09090b]/80 border border-[#1f1f23] rounded-2xl p-3 flex items-center justify-between gap-4 shadow-xl z-20 backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-500 select-none">
-        <div className="flex items-center gap-2.5 text-left">
-          <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500 text-sm">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm bg-[#131316]/90 border border-[#232329] rounded-2xl p-3.5 flex items-center justify-between gap-4 shadow-2xl z-20 backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-500 select-none">
+        <div className="flex items-center gap-3 text-left">
+          <div className="w-8 h-8 rounded-lg bg-[#2a1b15] border border-[#7c3a0d]/30 flex items-center justify-center text-[#f97316] text-xs">
             ✨
           </div>
           <div className="font-sans">
-            <p className="text-[11px] font-bold text-dd-text">Personalizar o Ducky</p>
-            <p className="text-[9px] text-[#71767b] font-medium leading-tight">
+            <p className="text-[11px] font-bold text-white leading-tight">Personalizar o Ducky</p>
+            <p className="text-[9px] text-[#8b8b93] font-medium leading-tight mt-0.5">
               Tenha acesso a mais recursos no Ducky AI Premium
             </p>
           </div>
         </div>
         <button
           onClick={() => alert('Recurso premium em breve!')}
-          className="px-3 py-1.5 bg-[#f97316] hover:bg-orange-600 text-white text-[10px] font-extrabold rounded-full transition-all cursor-pointer shrink-0 shadow-sm"
+          className="px-4.5 py-2 bg-[#f97316] hover:bg-orange-600 text-white text-[10px] font-bold rounded-full transition-all cursor-pointer shrink-0 shadow-md"
         >
           Explorar
         </button>
@@ -824,35 +1105,226 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
     );
   };
 
+  const renderImagesTab = () => {
+    const images: { data: string; mimeType: string; session: DuckyChatSession; name: string }[] =
+      [];
+    const query = historySearchQuery.trim().toLowerCase();
+    const filteredHistory = history.filter((s) => {
+      if (!query) return true;
+      if (s.title.toLowerCase().includes(query)) return true;
+      return s.messages.some((m) => m.text.toLowerCase().includes(query));
+    });
+
+    filteredHistory.forEach((s) => {
+      s.messages.forEach((m) => {
+        if (m.attachments) {
+          m.attachments.forEach((a) => {
+            if (a.kind === 'image' && a.data) {
+              images.push({
+                data: a.data,
+                mimeType: a.mimeType || 'image/png',
+                session: s,
+                name: a.name,
+              });
+            }
+          });
+        }
+      });
+    });
+
+    if (images.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 text-center select-none">
+          <ImageIcon className="w-8 h-8 text-[#53535f] mb-2" />
+          <p className="text-xs text-[#71767b]">Nenhuma imagem encontrada no seu histórico.</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-3 gap-2">
+        {images.map((img, idx) => (
+          <div
+            key={idx}
+            onClick={() => handleSelectSession(img.session)}
+            className="group relative aspect-square bg-[#131316] border border-[#1f1f23] rounded-lg overflow-hidden cursor-pointer hover:border-orange-500/40 transition-all shadow-sm"
+            title={`Carregar conversa: "${img.session.title}"`}
+          >
+            <img
+              src={`data:${img.mimeType};base64,${img.data}`}
+              alt={img.name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-end p-1.5 transition-opacity">
+              <span className="text-[9px] text-white truncate w-full font-medium">
+                {img.session.title}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const renderChatsTab = () => {
+    const query = historySearchQuery.trim().toLowerCase();
+    const isSavedOnly = historyActiveTab === 'saved';
+
+    const filtered = history.filter((s) => {
+      if (isSavedOnly && !s.isSaved) return false;
+      if (!query) return true;
+      if (s.title.toLowerCase().includes(query)) return true;
+      return s.messages.some((m) => m.text.toLowerCase().includes(query));
+    });
+
+    if (filtered.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 text-center select-none">
+          <svg
+            viewBox="0 0 24 24"
+            className="w-8 h-8 text-[#53535f] mb-2 fill-none stroke-current"
+            strokeWidth="2"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8v4M12 16h.01" />
+          </svg>
+          <p className="text-xs text-[#71767b]">
+            {isSavedOnly ? 'Nenhum item salvo encontrado.' : 'Nenhuma conversa encontrada.'}
+          </p>
+        </div>
+      );
+    }
+
+    const formatGroupDate = (timestamp: number) => {
+      const date = new Date(timestamp);
+      const now = new Date();
+      const isSameDay = (d1: Date, d2: Date) =>
+        d1.getDate() === d2.getDate() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getFullYear() === d2.getFullYear();
+
+      const yesterday = new Date();
+      yesterday.setDate(now.getDate() - 1);
+
+      if (isSameDay(date, now)) return 'Hoje';
+      if (isSameDay(date, yesterday)) return 'Ontem';
+
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(now.getDate() - 7);
+      if (date > oneWeekAgo) return 'Esta semana';
+
+      const monthsShort = [
+        'jan',
+        'fev',
+        'mar',
+        'abr',
+        'mai',
+        'jun',
+        'jul',
+        'ago',
+        'set',
+        'out',
+        'nov',
+        'dez',
+      ];
+      return `${date.getDate()} de ${monthsShort[date.getMonth()]} de ${date.getFullYear()}`;
+    };
+
+    const groups: { [key: string]: DuckyChatSession[] } = {};
+    filtered.forEach((s) => {
+      const gKey = formatGroupDate(s.createdAt);
+      if (!groups[gKey]) groups[gKey] = [];
+      groups[gKey].push(s);
+    });
+
+    const orderedGroupKeys = Object.keys(groups);
+
+    return (
+      <div className="flex flex-col gap-5 select-none">
+        {orderedGroupKeys.map((gKey) => (
+          <div key={gKey} className="flex flex-col gap-1.5">
+            <h3 className="text-[10px] font-bold text-[#71767b] tracking-wider uppercase pl-2.5">
+              {gKey}
+            </h3>
+            <div className="flex flex-col gap-0.5">
+              {groups[gKey].map((s) => (
+                <div
+                  key={s.id}
+                  onClick={() => handleSelectSession(s)}
+                  className={`group flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-all border ${
+                    activeChatId === s.id
+                      ? 'bg-orange-500/10 border-orange-500/20 text-white font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]'
+                      : 'bg-transparent border-transparent hover:bg-[#131316]/60 text-[#b3b3b9] hover:text-white'
+                  }`}
+                >
+                  <span className="text-xs truncate flex-1 pr-2 leading-relaxed">{s.title}</span>
+                  <div className="flex items-center gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shrink-0">
+                    <button
+                      onClick={(e) => toggleBookmarkSession(s.id, e)}
+                      className="p-1 hover:bg-[#1c1c1f] rounded text-[#8b8b93] hover:text-orange-500 transition-colors cursor-pointer"
+                      title={s.isSaved ? 'Remover dos salvos' : 'Salvar conversa'}
+                    >
+                      {s.isSaved ? (
+                        <BookmarkFilled className="w-3.5 h-3.5 text-orange-500" />
+                      ) : (
+                        <BookmarkOutline className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                    <button
+                      onClick={(e) => deleteSession(s.id, e)}
+                      className="p-1 hover:bg-[#1c1c1f] rounded text-[#8b8b93] hover:text-red-500 transition-colors cursor-pointer"
+                      title="Excluir conversa"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
-    <div
-      className={`flex flex-col md:flex-row h-screen bg-[#060606] text-dd-text antialiased transition-all overflow-hidden ${
-        isFullscreen ? 'p-0' : ''
-      }`}
-    >
-      {/* Hide sidebar if in fullscreen focus mode */}
+    <div className="flex flex-col md:flex-row h-screen bg-[#060606] text-dd-text antialiased overflow-hidden">
+      {/* Sidebar rendered conditionally based on expanded mode */}
       {!isFullscreen && <Sidebar user={user} />}
 
-      <div className="flex-grow flex flex-col min-h-0 min-w-0 bg-[#060606] border-l border-[#1f1f23]/40 relative overflow-hidden">
+      <div
+        className={`flex-grow flex flex-col min-h-0 min-w-0 bg-[#060606] relative overflow-hidden ${!isFullscreen ? 'border-l border-[#1f1f23]/40' : ''}`}
+      >
         {/* Top Header */}
-        <header className="flex items-center justify-between px-6 py-4 border-b border-[#1f1f23]/40 bg-[#060606]/40 backdrop-blur-md sticky top-0 z-20 relative select-none">
-          {/* Top Left: Fullscreen Toggle */}
+        <header className="flex items-center justify-between px-6 py-4 bg-[#060606]/40 backdrop-blur-md sticky top-0 z-20 relative select-none">
+          {/* Top Left: Expanded mode toggle button */}
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsFullscreen(!isFullscreen)}
-              className="p-2 border border-[#1f1f23] bg-[#0c0c0e] hover:bg-[#16161a] text-dd-muted hover:text-dd-text rounded-lg transition-all cursor-pointer"
-              title={isFullscreen ? 'Sair da Tela Cheia' : 'Modo Foco / Tela Cheia'}
-            >
-              {isFullscreen ? (
-                <ArrowLeft className="w-3.5 h-3.5" />
-              ) : (
-                <Maximize2 className="w-3.5 h-3.5" />
-              )}
-            </button>
-            {isFullscreen && (
-              <span className="text-xs font-semibold text-[#8b8b93]">Modo Foco</span>
+            {isFullscreen ? (
+              <button
+                onClick={() => setIsFullscreen(false)}
+                className="p-2 hover:bg-[#16161a] text-dd-muted hover:text-dd-text rounded-full transition-all cursor-pointer animate-in fade-in duration-300"
+                title="Mostrar barra lateral (Sair do modo expandido)"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="w-4.5 h-4.5 fill-none stroke-current"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="19" y1="12" x2="5" y2="12" />
+                  <polyline points="12 19 5 12 12 5" />
+                </svg>
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsFullscreen(true)}
+                className="p-2 hover:bg-[#16161a] text-[#8b8b93] hover:text-dd-text rounded-full transition-all cursor-pointer animate-in fade-in duration-300"
+                title="Modo Foco (Ocultar barra lateral)"
+              >
+                <SidebarIcon className="w-4.5 h-4.5" />
+              </button>
             )}
-            {/* Active repo badge */}
             {activeRepo && (
               <a
                 href={activeRepo.url}
@@ -870,31 +1342,38 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
             )}
           </div>
 
-          {/* Top Right: História / Privado */}
+          {/* Top Right: Novo Chat / História / Privado */}
           <div className="flex items-center gap-2.5">
+            {/* Novo Chat Button */}
+            <button
+              onClick={handleNewChat}
+              className="flex items-center gap-1 px-3 py-1.5 text-[#f97316] font-bold text-xs hover:underline cursor-pointer bg-transparent border-0 transition-colors"
+              title="Iniciar nova conversa"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Novo Chat</span>
+            </button>
+
             {/* History Link / Button */}
-            {messages.length > 0 && (
-              <button
-                onClick={clearHistory}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0c0c0e] hover:bg-[#16161a] border border-[#1f1f23] rounded-lg text-[10px] font-bold text-dd-muted hover:text-dd-text transition-all cursor-pointer"
-              >
-                <History className="w-3.5 h-3.5" />
-                <span>História</span>
-              </button>
-            )}
+            <button
+              onClick={() => setIsHistoryOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-[#8b8b93] hover:text-dd-text font-medium text-xs cursor-pointer bg-transparent border-0 transition-colors"
+              title="Ver histórico de conversas"
+            >
+              <History className="w-3.5 h-3.5" />
+              <span>História</span>
+            </button>
 
             {/* Private Mode Toggle */}
             <button
               onClick={() => setIsPrivate(!isPrivate)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[10px] font-bold uppercase transition-all cursor-pointer ${
-                isPrivate
-                  ? 'bg-purple-500/10 border-purple-500/30 text-purple-400'
-                  : 'bg-[#0c0c0e] border-[#1f1f23] hover:bg-[#16161a] text-dd-muted'
+              className={`flex items-center gap-1.5 px-3 py-1.5 font-bold uppercase transition-all cursor-pointer bg-transparent border-0 text-xs ${
+                isPrivate ? 'text-purple-400' : 'text-[#8b8b93] hover:text-dd-text'
               }`}
               title={isPrivate ? 'Histórico pausado (Modo Privado)' : 'Ativar Modo Privado'}
             >
               {isPrivate ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
-              <span>Privado</span>
+              <span>{isPrivate ? 'PRIVADO' : 'PÚBLICO'}</span>
             </button>
           </div>
         </header>
@@ -926,12 +1405,12 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                   onClick={() => setMode('Rápido')}
                   className={`flex items-center gap-1.5 px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     mode === 'Rápido'
-                      ? 'bg-[#2a1b15] text-[#f97316] shadow-sm'
+                      ? 'bg-[#2a1b15] text-[#f97316] shadow-sm border border-orange-500/10'
                       : 'text-[#8b8b93] hover:text-dd-text'
                   }`}
                 >
-                  <Zap
-                    className={`w-3.5 h-3.5 ${mode === 'Rápido' ? 'text-[#f97316] fill-[#f97316]' : ''}`}
+                  <Flame
+                    className={`w-3.5 h-3.5 ${mode === 'Rápido' ? 'text-[#f97316]' : 'text-[#8b8b93]'}`}
                   />
                   <span>Rápido</span>
                 </button>
@@ -940,12 +1419,12 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                   onClick={() => setMode('Deep Debug')}
                   className={`flex items-center gap-1.5 px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     mode === 'Deep Debug'
-                      ? 'bg-[#2a1b15] text-[#f97316] shadow-sm'
+                      ? 'bg-[#2a1b15] text-[#f97316] shadow-sm border border-orange-500/10'
                       : 'text-[#8b8b93] hover:text-dd-text'
                   }`}
                 >
                   <Terminal
-                    className={`w-3.5 h-3.5 ${mode === 'Deep Debug' ? 'text-[#f97316]' : ''}`}
+                    className={`w-3.5 h-3.5 ${mode === 'Deep Debug' ? 'text-[#f97316]' : 'text-[#8b8b93]'}`}
                   />
                   <span>Deep Debug</span>
                 </button>
@@ -954,11 +1433,13 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                   onClick={() => setMode('Repositório')}
                   className={`flex items-center gap-1.5 px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     mode === 'Repositório'
-                      ? 'bg-[#2a1b15] text-[#f97316] shadow-sm'
+                      ? 'bg-[#2a1b15] text-[#f97316] shadow-sm border border-orange-500/10'
                       : 'text-[#8b8b93] hover:text-dd-text'
                   }`}
                 >
-                  <Github className="w-3.5 h-3.5" />
+                  <GitBranch
+                    className={`w-3.5 h-3.5 ${mode === 'Repositório' ? 'text-[#f97316]' : 'text-[#8b8b93]'}`}
+                  />
                   <span>Repositório</span>
                 </button>
               </div>
@@ -1007,10 +1488,10 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
               {/* Minimal Suggestion pills with icons */}
               {mode !== 'Repositório' && (
-                <div className="flex flex-wrap items-center justify-center gap-2.5 w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="flex flex-wrap items-center justify-center gap-2.5 w-full select-none animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <button
                     onClick={() => handleSuggestionClick('Explicar Bug')}
-                    className="flex items-center gap-2 px-4 py-2 border border-[#1f1f23] bg-[#0c0c0e]/30 hover:bg-[#16161a]/60 hover:border-[#38383e] text-[11px] font-semibold text-[#8b8b93] hover:text-dd-text rounded-full transition-all duration-200 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+                    className="flex items-center gap-2 px-4 py-2 border border-[#232329] bg-[#131316]/90 hover:bg-[#1c1c22] hover:border-[#383842] text-[11px] font-semibold text-[#8b8b93] hover:text-white rounded-full transition-all duration-200 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
                   >
                     <svg
                       viewBox="0 0 24 24"
@@ -1027,7 +1508,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                   </button>
                   <button
                     onClick={() => handleSuggestionClick('Refatorar Código')}
-                    className="flex items-center gap-2 px-4 py-2 border border-[#1f1f23] bg-[#0c0c0e]/30 hover:bg-[#16161a]/60 hover:border-[#38383e] text-[11px] font-semibold text-[#8b8b93] hover:text-dd-text rounded-full transition-all duration-200 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+                    className="flex items-center gap-2 px-4 py-2 border border-[#232329] bg-[#131316]/90 hover:bg-[#1c1c22] hover:border-[#383842] text-[11px] font-semibold text-[#8b8b93] hover:text-white rounded-full transition-all duration-200 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
                   >
                     <svg
                       viewBox="0 0 24 24"
@@ -1036,13 +1517,13 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     >
-                      <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364-.707.707M6.343 17.657l-.707.707m0-12.728.707.707m11.314 11.314.707.707M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" />
+                      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
                     </svg>
                     <span>Refatorar Código</span>
                   </button>
                   <button
                     onClick={() => handleSuggestionClick('Escrever Teste')}
-                    className="flex items-center gap-2 px-4 py-2 border border-[#1f1f23] bg-[#0c0c0e]/30 hover:bg-[#16161a]/60 hover:border-[#38383e] text-[11px] font-semibold text-[#8b8b93] hover:text-dd-text rounded-full transition-all duration-200 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+                    className="flex items-center gap-2 px-4 py-2 border border-[#232329] bg-[#131316]/90 hover:bg-[#1c1c22] hover:border-[#383842] text-[11px] font-semibold text-[#8b8b93] hover:text-white rounded-full transition-all duration-200 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
                   >
                     <svg
                       viewBox="0 0 24 24"
@@ -1163,7 +1644,17 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                                 className="flex items-center gap-1 px-2 py-1 bg-[#1c1c1f] border border-[#2c2c35] rounded-md text-[10px] text-dd-text"
                               >
                                 {a.kind === 'image' ? (
-                                  <ImageIcon className="w-3 h-3 text-orange-500" />
+                                  <>
+                                    {a.data ? (
+                                      <img
+                                        src={`data:${a.mimeType || 'image/png'};base64,${a.data}`}
+                                        alt={a.name}
+                                        className="w-5 h-5 object-cover rounded mr-1"
+                                      />
+                                    ) : (
+                                      <ImageIcon className="w-3 h-3 text-orange-500" />
+                                    )}
+                                  </>
                                 ) : (
                                   <FileCode className="w-3 h-3 text-orange-500" />
                                 )}
@@ -1242,6 +1733,86 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
             </div>
           </>
         )}
+      </div>
+
+      {/* History Drawer Backdrop Overlay */}
+      {isHistoryOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity animate-in fade-in duration-300"
+          onClick={() => setIsHistoryOpen(false)}
+        />
+      )}
+
+      {/* History Drawer Panel */}
+      <div
+        className={`fixed top-0 right-0 h-screen w-full max-w-[360px] md:max-w-[400px] bg-[#0c0c0e]/95 border-l border-[#1f1f23]/60 shadow-2xl z-50 flex flex-col transition-transform duration-300 ease-out backdrop-blur-md ${
+          isHistoryOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        {/* Drawer Header */}
+        <div className="flex items-center gap-4 px-4 pt-5 pb-3 border-b border-[#1c1c1f]/40 select-none shrink-0">
+          <button
+            onClick={() => setIsHistoryOpen(false)}
+            className="p-1.5 hover:bg-[#1c1c1f] rounded-full text-[#8b8b93] hover:text-dd-text transition-colors cursor-pointer"
+            title="Fechar"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <h2 className="text-base font-bold text-white">História</h2>
+        </div>
+
+        {/* Drawer Tabs */}
+        <div className="flex px-2 border-b border-[#1c1c1f] select-none shrink-0">
+          {(['chats', 'saved', 'images'] as const).map((tab) => {
+            const isActive = historyActiveTab === tab;
+            const labels = {
+              chats: 'Chats',
+              saved: 'Itens salvos',
+              images: 'Imagens',
+            };
+            return (
+              <button
+                key={tab}
+                onClick={() => setHistoryActiveTab(tab)}
+                className={`flex-1 py-3 text-center text-xs font-semibold relative transition-colors cursor-pointer ${
+                  isActive ? 'text-white font-bold' : 'text-[#8b8b93] hover:text-dd-text'
+                }`}
+              >
+                {labels[tab]}
+                {isActive && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-[2.5px] bg-[#f97316] rounded-full" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Search Input Bar */}
+        <div className="p-4 border-b border-[#1c1c1f]/40 shrink-0">
+          <div className="relative flex items-center bg-[#131316] border border-[#1f1f23] rounded-full px-3.5 py-2 focus-within:border-orange-500/40 transition-colors">
+            <Search className="w-4 h-4 text-[#53535f] mr-2.5 shrink-0" />
+            <input
+              type="text"
+              value={historySearchQuery}
+              onChange={(e) => setHistorySearchQuery(e.target.value)}
+              placeholder="Pesquisar histórico do Ducky"
+              className="bg-transparent border-none outline-none text-xs text-dd-text placeholder-[#53535f] w-full"
+            />
+            {historySearchQuery && (
+              <button
+                onClick={() => setHistorySearchQuery('')}
+                className="p-0.5 hover:bg-[#1c1c1f] rounded text-[#8b8b93] hover:text-dd-text transition-colors cursor-pointer shrink-0"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Scrollable Contents */}
+        <div className="flex-grow overflow-y-auto scrollbar-ducky p-4">
+          {historyActiveTab === 'images' ? renderImagesTab() : renderChatsTab()}
+        </div>
       </div>
     </div>
   );
