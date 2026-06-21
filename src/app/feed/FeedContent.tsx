@@ -1759,7 +1759,7 @@ export function FeedContent({
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                   <div className="flex flex-col items-center">
-                    <Flame className="w-14 h-14 text-orange-500 fill-orange-500 animate-pulse" />
+                    <Flame className="w-14 h-14 text-orange-500 fill-orange-500" />
                     <span className="mt-2.5 text-xs font-bold text-orange-500">
                       {currentStreak} {currentStreak === 1 ? 'dia' : 'dias'} de ofensiva
                     </span>
@@ -1833,7 +1833,7 @@ export function FeedContent({
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                   <div className="flex flex-col items-center">
-                    <Award className="w-14 h-14 text-orange-500 animate-pulse" />
+                    <Calendar className="w-14 h-14 text-orange-500" />
                     <span className="mt-2.5 text-xs font-bold text-orange-500">
                       Atividade Semanal
                     </span>
