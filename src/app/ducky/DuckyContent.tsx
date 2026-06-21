@@ -46,9 +46,9 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
   const [inputVal, setInputVal] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
 
-  // Syncing with DeepSeek:
-  // - mode 'Rápido' maps to 'Instant' tab
-  // - mode 'Deep Debug' maps to 'Expert' tab
+  // Custom naming & DevDeck alignment:
+  // - mode 'Rápido' maps to 'Rápido' (Instant) tab
+  // - mode 'Deep Debug' maps to 'Deep Debug' (Expert) tab
   const [mode, setMode] = useState<'Rápido' | 'Deep Debug'>('Rápido');
   const [deepThinkActive, setDeepThinkActive] = useState(false);
   const [searchActive, setSearchActive] = useState(false);
@@ -60,7 +60,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const [stars, setStars] = useState<
-    { x: number; y: number; size: number; opacity: number; delay: number }[]
+    { x: number; y: number; size: number; opacity: number; delay: number; duration: number }[]
   >([]);
 
   useEffect(() => {
@@ -70,6 +70,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
       size: Math.random() * 1.6 + 0.7,
       opacity: Math.random() * 0.7 + 0.15,
       delay: Math.random() * 4,
+      duration: Math.random() * 4 + 4,
     }));
     setStars(generated);
   }, []);
@@ -220,10 +221,10 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
   const initials = user.username.slice(0, 2).toUpperCase() || 'DV';
 
-  // DeepSeek-style input card
+  // DevDeck Ducky-style input card (Orange accents and custom button names)
   const renderInputCard = () => {
     return (
-      <div className="w-full bg-[#131316]/90 border border-[#232329] rounded-2xl p-4 flex flex-col justify-between min-h-[140px] shadow-2xl focus-within:border-blue-500/40 focus-within:shadow-[0_0_25px_rgba(56,109,245,0.12)] transition-all duration-300 max-w-2xl mx-auto backdrop-blur-md">
+      <div className="w-full bg-[#131316]/90 border border-[#232329] rounded-2xl p-4 flex flex-col justify-between min-h-[140px] shadow-2xl focus-within:border-orange-500/40 focus-within:shadow-[0_0_25px_rgba(249,115,22,0.12)] transition-all duration-300 max-w-2xl mx-auto backdrop-blur-md">
         {/* Text area input */}
         <textarea
           ref={inputRef}
@@ -236,43 +237,36 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
             }
           }}
           disabled={thinking}
-          placeholder="Message Ducky..."
+          placeholder="Perguntar ao Ducky..."
           rows={2}
           className="w-full bg-transparent border-0 outline-0 ring-0 text-sm text-dd-text placeholder-[#53535f] resize-none py-1.5 max-h-36 overflow-y-auto font-sans leading-relaxed focus:ring-0 focus:outline-none"
         />
 
         {/* Bottom row */}
         <div className="flex items-center justify-between border-t border-[#1f1f23]/40 pt-3 mt-2 select-none">
-          {/* Left side: Toggles */}
+          {/* Left side: Orange Toggles */}
           <div className="flex items-center gap-2">
-            {/* DeepThink Toggle */}
+            {/* Deep Debug Toggle */}
             <button
               type="button"
               onClick={handleDeepThinkToggle}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-semibold border transition-all cursor-pointer select-none ${
                 deepThinkActive
-                  ? 'bg-[#1c293e] border-[#2b4c7e] text-[#4f8ff7]'
+                  ? 'bg-[#2a1b15] border-[#7c3a0d] text-[#f97316]'
                   : 'bg-[#1a1a1f] border-[#232329] text-[#8b8b93] hover:bg-[#232329] hover:text-dd-text'
               }`}
             >
-              <svg
-                viewBox="0 0 24 24"
-                className="w-3.5 h-3.5 fill-none stroke-current"
-                strokeWidth="2"
-              >
-                <circle cx="12" cy="12" r="3" />
-                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-              </svg>
-              <span>DeepThink</span>
+              <Terminal className="w-3.5 h-3.5" />
+              <span>Deep Debug</span>
             </button>
 
-            {/* Search Toggle */}
+            {/* Buscar Docs Toggle */}
             <button
               type="button"
               onClick={() => setSearchActive(!searchActive)}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-semibold border transition-all cursor-pointer select-none ${
                 searchActive
-                  ? 'bg-[#1c293e] border-[#2b4c7e] text-[#4f8ff7]'
+                  ? 'bg-[#2a1b15] border-[#7c3a0d] text-[#f97316]'
                   : 'bg-[#1a1a1f] border-[#232329] text-[#8b8b93] hover:bg-[#232329] hover:text-dd-text'
               }`}
             >
@@ -284,11 +278,11 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                 <circle cx="12" cy="12" r="10" />
                 <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10zM2 12h20" />
               </svg>
-              <span>Search</span>
+              <span>Buscar Docs</span>
             </button>
           </div>
 
-          {/* Right side: Attachment and Send */}
+          {/* Right side: Attachment and Send (Orange theme) */}
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -303,7 +297,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
               type="button"
               onClick={() => handleSend(inputVal)}
               disabled={!inputVal.trim() || thinking}
-              className="p-2 bg-[#386df5] hover:bg-[#4d7df7] disabled:opacity-40 disabled:hover:bg-[#386df5] disabled:cursor-not-allowed text-white rounded-full transition-all cursor-pointer flex items-center justify-center shrink-0 w-8.5 h-8.5 shadow-md"
+              className="p-2 bg-[#f97316] hover:bg-orange-600 disabled:opacity-40 disabled:hover:bg-[#f97316] disabled:cursor-not-allowed text-white rounded-full transition-all cursor-pointer flex items-center justify-center shrink-0 w-8.5 h-8.5 shadow-md"
               title="Enviar"
             >
               <svg
@@ -339,7 +333,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
         </div>
         <button
           onClick={() => alert('Recurso premium em breve!')}
-          className="px-3 py-1.5 bg-white hover:bg-neutral-200 text-black text-[10px] font-extrabold rounded-full transition-all cursor-pointer shrink-0 shadow-sm"
+          className="px-3 py-1.5 bg-[#f97316] hover:bg-orange-600 text-white text-[10px] font-extrabold rounded-full transition-all cursor-pointer shrink-0 shadow-sm"
         >
           Explorar
         </button>
@@ -394,8 +388,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                 width: `${star.size}px`,
                 height: `${star.size}px`,
                 opacity: star.opacity,
-                animation: `twinkle ${Math.random() * 4 + 4}s infinite ease-in-out`,
-                animationDelay: `${star.delay}s`,
+                animation: `twinkle ${star.duration}s ease-in-out ${star.delay}s infinite`,
               }}
             />
           ))}
@@ -452,22 +445,24 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
         {/* Chat / Welcome Area */}
         {messages.length === 0 ? (
-          /* EMPTY STATE (DeepSeek Style with Duck Logo) */
+          /* EMPTY STATE (DeepSeek Layout Customized for Ducky) */
           <div className="flex-grow flex flex-col justify-center items-center overflow-y-auto px-4 py-8 max-w-3xl w-full mx-auto relative z-10">
             <div className="w-full max-w-2xl flex flex-col items-center gap-6 text-center -mt-16">
-              {/* DeepSeek Logo & Title Area (Replacing Whale with Duck) */}
-              <div className="flex items-center justify-center gap-3 select-none mb-1 animate-in fade-in zoom-in-95 duration-500">
+              {/* Ducky IA Branding */}
+              <div className="flex items-center justify-center gap-3.5 select-none mb-1 animate-in fade-in zoom-in-95 duration-500">
                 <img
                   src="/Logo_ia_ducky.png"
                   alt="Ducky IA Logo"
                   className="w-10 h-10 object-contain animate-bounce"
                 />
                 <span className="text-2xl font-bold tracking-tight text-white font-sans">
-                  Start chatting with {mode === 'Rápido' ? 'Instant' : 'Expert'}
+                  {mode === 'Rápido'
+                    ? 'Conversar com o Ducky Rápido'
+                    : 'Depuração Profunda com o Ducky'}
                 </span>
               </div>
 
-              {/* Mode switch tabs capsule (Instant, Expert, Vision) */}
+              {/* Mode switch tabs capsule (Rápido, Deep Debug, Repositório) */}
               <div className="flex bg-[#111115] border border-[#1f1f23] rounded-full p-1 select-none animate-in fade-in duration-300">
                 <button
                   onClick={() => {
@@ -475,14 +470,14 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                   }}
                   className={`flex items-center gap-1.5 px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     mode === 'Rápido'
-                      ? 'bg-[#1c293e] text-[#4f8ff7] shadow-sm'
+                      ? 'bg-[#2a1b15] text-[#f97316] shadow-sm'
                       : 'text-[#8b8b93] hover:text-dd-text'
                   }`}
                 >
                   <Zap
-                    className={`w-3.5 h-3.5 ${mode === 'Rápido' ? 'text-[#4f8ff7] fill-[#4f8ff7]' : ''}`}
+                    className={`w-3.5 h-3.5 ${mode === 'Rápido' ? 'text-[#f97316] fill-[#f97316]' : ''}`}
                   />
-                  <span>Instant</span>
+                  <span>Rápido</span>
                 </button>
 
                 <button
@@ -491,34 +486,34 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                   }}
                   className={`flex items-center gap-1.5 px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     mode === 'Deep Debug'
-                      ? 'bg-[#1e2b42] text-[#4f8ff7] shadow-sm' // blue themed for DeepSeek aesthetic
+                      ? 'bg-[#2a1b15] text-[#f97316] shadow-sm'
                       : 'text-[#8b8b93] hover:text-dd-text'
                   }`}
                 >
                   <Terminal
-                    className={`w-3.5 h-3.5 ${mode === 'Deep Debug' ? 'text-[#4f8ff7]' : ''}`}
+                    className={`w-3.5 h-3.5 ${mode === 'Deep Debug' ? 'text-[#f97316]' : ''}`}
                   />
-                  <span>Expert</span>
+                  <span>Deep Debug</span>
                 </button>
 
                 <button
-                  onClick={() => alert('Visão computacional em breve!')}
+                  onClick={() => alert('Análise de repositório em breve!')}
                   className="flex items-center gap-1.5 px-5 py-2 rounded-full text-xs font-semibold text-[#484852] hover:text-[#8b8b93] cursor-pointer transition-all"
                 >
                   <svg
                     viewBox="0 0 24 24"
                     className="w-3.5 h-3.5 fill-none stroke-current"
                     strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <polyline points="21 15 16 10 5 21" />
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
                   </svg>
-                  <span>Vision</span>
+                  <span>Repositório</span>
                 </button>
               </div>
 
-              {/* Centered DeepSeek Input Card */}
+              {/* Centered Ducky Input Card */}
               <div className="w-full">{renderInputCard()}</div>
 
               {/* Minimal Suggestion pills with icons */}
@@ -680,7 +675,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
               </div>
             </div>
 
-            {/* Bottom Pinned Input Capsule */}
+            {/* Bottom Pinned Input Card */}
             <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#060606] via-[#060606]/95 to-transparent z-20">
               <div className="max-w-3xl w-full mx-auto flex flex-col items-center">
                 {renderInputCard()}
