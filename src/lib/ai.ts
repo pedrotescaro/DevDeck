@@ -11,6 +11,40 @@ export const AIQuizResponseSchema = z.object({
 
 export type AIQuizResponse = z.infer<typeof AIQuizResponseSchema>;
 
+/**
+ * Multimodal content parts for chat messages.
+ * - `text`: plain text / code
+ * - `image`: inline base64 image (no data URL prefix), supports any image MIME type
+ */
+export type ChatContentPart =
+  | { type: 'text'; text: string }
+  | { type: 'image'; mimeType: string; data: string };
+
+/** Content of a chat message: plain string OR multimodal parts array. */
+export type ChatContent = string | ChatContentPart[];
+
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: ChatContent;
+}
+
+/** Extracts a plain-text representation of content (for logs / non-multimodal providers). */
+function contentToText(content: ChatContent): string {
+  if (typeof content === 'string') return content;
+  return content
+    .map((part) => {
+      if (part.type === 'text') return part.text;
+      return '[Imagem anexada]';
+    })
+    .join('\n');
+}
+
+/** Returns true if the content carries at least one image part. */
+function contentHasImage(content: ChatContent): boolean {
+  if (typeof content === 'string') return false;
+  return content.some((part) => part.type === 'image');
+}
+
 function getProvider(): 'gemini' | 'groq' | 'openai' | 'ollama' | null {
   const provider = process.env.AI_PROVIDER?.toLowerCase();
   if (
@@ -270,20 +304,26 @@ export async function generateQuizAI(
   return null;
 }
 
-async function callGeminiChat(
-  systemPrompt: string,
-  messages: { role: 'user' | 'assistant'; content: string }[]
-): Promise<string> {
+async function callGeminiChat(systemPrompt: string, messages: ChatMessage[]): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error('GEMINI_API_KEY não configurada');
 
   const model = process.env.AI_MODEL || 'gemini-1.5-flash';
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-  const contents = messages.map((msg) => ({
-    role: msg.role === 'assistant' ? 'model' : 'user',
-    parts: [{ text: msg.content }],
-  }));
+  const contents = messages.map((msg) => {
+    const parts = Array.isArray(msg.content)
+      ? msg.content.map((part) =>
+          part.type === 'text'
+            ? { text: part.text }
+            : { inlineData: { mimeType: part.mimeType, data: part.data } }
+        )
+      : [{ text: msg.content }];
+    return {
+      role: msg.role === 'assistant' ? 'model' : 'user',
+      parts,
+    };
+  });
 
   const response = await fetch(url, {
     method: 'POST',
@@ -307,10 +347,7 @@ async function callGeminiChat(
   return text;
 }
 
-async function callGroqChat(
-  systemPrompt: string,
-  messages: { role: 'user' | 'assistant'; content: string }[]
-): Promise<string> {
+async function callGroqChat(systemPrompt: string, messages: ChatMessage[]): Promise<string> {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) throw new Error('GROQ_API_KEY não configurada');
 
@@ -319,7 +356,7 @@ async function callGroqChat(
 
   const groqMessages = [
     { role: 'system', content: systemPrompt },
-    ...messages.map((m) => ({ role: m.role, content: m.content })),
+    ...messages.map((m) => ({ role: m.role, content: contentToText(m.content) })),
   ];
 
   const response = await fetch(url, {
@@ -345,10 +382,7 @@ async function callGroqChat(
   return text;
 }
 
-async function callOpenAIChat(
-  systemPrompt: string,
-  messages: { role: 'user' | 'assistant'; content: string }[]
-): Promise<string> {
+async function callOpenAIChat(systemPrompt: string, messages: ChatMessage[]): Promise<string> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error('OPENAI_API_KEY não configurada');
 
@@ -356,9 +390,25 @@ async function callOpenAIChat(
   const apiBase = process.env.OPENAI_API_BASE_URL || 'https://api.openai.com/v1';
   const url = `${apiBase}/chat/completions`;
 
+  // OpenAI supports multimodal via content arrays, but only for image_url parts.
+  // Build the proper shape when images are present.
+  const hasAnyImage = messages.some((m) => contentHasImage(m.content));
   const openAiMessages = [
     { role: 'system', content: systemPrompt },
-    ...messages.map((m) => ({ role: m.role, content: m.content })),
+    ...messages.map((m) => {
+      if (typeof m.content === 'string' || !hasAnyImage) {
+        return { role: m.role, content: contentToText(m.content) };
+      }
+      const parts = m.content.map((part) =>
+        part.type === 'text'
+          ? { type: 'text', text: part.text }
+          : {
+              type: 'image_url',
+              image_url: { url: `data:${part.mimeType};base64,${part.data}` },
+            }
+      );
+      return { role: m.role, content: parts };
+    }),
   ];
 
   const response = await fetch(url, {
@@ -384,17 +434,14 @@ async function callOpenAIChat(
   return text;
 }
 
-async function callOllamaChat(
-  systemPrompt: string,
-  messages: { role: 'user' | 'assistant'; content: string }[]
-): Promise<string> {
+async function callOllamaChat(systemPrompt: string, messages: ChatMessage[]): Promise<string> {
   const apiBase = process.env.OLLAMA_API_BASE_URL || 'http://localhost:11434';
   const model = process.env.OLLAMA_MODEL || process.env.AI_MODEL || 'qwen2.5-coder';
   const url = `${apiBase}/api/chat`;
 
   const ollamaMessages = [
     { role: 'system', content: systemPrompt },
-    ...messages.map((m) => ({ role: m.role, content: m.content })),
+    ...messages.map((m) => ({ role: m.role, content: contentToText(m.content) })),
   ];
 
   const response = await fetch(url, {
@@ -420,7 +467,7 @@ async function callOllamaChat(
 
 export async function generateChatAI(
   systemPrompt: string,
-  messages: { role: 'user' | 'assistant'; content: string }[]
+  messages: ChatMessage[]
 ): Promise<string | null> {
   const provider = getProvider();
   if (!provider) {
