@@ -25,6 +25,7 @@ import {
   Bookmark,
   BadgeCheck,
   MoreHorizontal,
+  Flame,
 } from 'lucide-react';
 import { PostComposerExtras } from '@/components/PostComposerExtras';
 import { MarkdownEditor, type NotionEditorRef } from '@/components/MarkdownEditor';
@@ -625,7 +626,7 @@ export function Sidebar({ user }: SidebarProps) {
           <div className="relative">
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="group w-full flex items-center justify-between p-3.5 rounded-2xl border border-dd-border bg-[#0e0e11]/30 hover:bg-dd-surface/50 transition-all duration-200 cursor-pointer"
+              className="group w-full flex items-center justify-between p-3.5 rounded-2xl border border-transparent hover:border-dd-border hover:bg-dd-surface/40 transition-all duration-200 cursor-pointer"
             >
               <div className="flex items-center gap-3.5 min-w-0 flex-grow">
                 {activeUser.avatar_url ? (
@@ -652,9 +653,7 @@ export function Sidebar({ user }: SidebarProps) {
                     @{activeUser.username.toLowerCase()}
                   </p>
                   <div className="flex items-center gap-2 mt-3 select-none">
-                    <span className="text-2xl animate-tiktok-fire-hover select-none leading-none">
-                      🔥
-                    </span>
+                    <Flame className="w-6 h-6 text-orange-500 fill-orange-500 animate-tiktok-fire-hover shrink-0" />
                     <span className="text-[11px] font-extrabold text-orange-500 leading-none">
                       {activeUser.streak_days ?? activeUser.streak ?? 0}{' '}
                       {(activeUser.streak_days ?? activeUser.streak ?? 0) === 1 ? 'dia' : 'dias'} de
