@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, Space_Grotesk, JetBrains_Mono, Bebas_Neue } from 'next/font/google';
 import './globals.css';
 import './landing.css';
+import Script from 'next/script';
 
 const themeScript = `
   (function() {
@@ -63,9 +64,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <script
+        <Script
           id="theme-script"
-          suppressHydrationWarning
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: themeScript }}
         />
       </head>
