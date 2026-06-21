@@ -662,9 +662,7 @@ export function Sidebar({ user }: SidebarProps) {
                   </div>
                 </div>
               </div>
-              <ChevronDown
-                className={`w-4 h-4 text-dd-muted transition-transform duration-200 shrink-0 mt-1.5 ${dropdownOpen ? 'rotate-180' : ''}`}
-              />
+              <MoreHorizontal className="w-5 h-5 text-dd-muted shrink-0 mt-1.5 transition-colors duration-200 group-hover:text-dd-text" />
             </button>
 
             {dropdownOpen && (
