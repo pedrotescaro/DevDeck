@@ -45,8 +45,14 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputVal, setInputVal] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
+
+  // Syncing with DeepSeek:
+  // - mode 'Rápido' maps to 'Instant' tab
+  // - mode 'Deep Debug' maps to 'Expert' tab
   const [mode, setMode] = useState<'Rápido' | 'Deep Debug'>('Rápido');
-  const [modeDropdownOpen, setModeDropdownOpen] = useState(false);
+  const [deepThinkActive, setDeepThinkActive] = useState(false);
+  const [searchActive, setSearchActive] = useState(false);
+
   const [thinking, setThinking] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -68,6 +74,17 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
     setStars(generated);
   }, []);
 
+  // Sync mode and deepThinkActive
+  useEffect(() => {
+    setDeepThinkActive(mode === 'Deep Debug');
+  }, [mode]);
+
+  const handleDeepThinkToggle = () => {
+    const nextVal = !deepThinkActive;
+    setDeepThinkActive(nextVal);
+    setMode(nextVal ? 'Deep Debug' : 'Rápido');
+  };
+
   // Smooth scroll to bottom of chat
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -84,6 +101,12 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
   const handleSend = async (textToSend: string) => {
     if (!textToSend.trim() || thinking) return;
+
+    // Append Search or DeepThink hints to query internally if active to improve prompt context
+    let finalQuery = textToSend;
+    if (searchActive) {
+      finalQuery = `[Pesquisa ativa] ${finalQuery}`;
+    }
 
     const userMsg: Message = {
       id: Math.random().toString(),
@@ -103,7 +126,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
           language: activeLanguage,
           history: [...messages, userMsg].map((m) => ({
             role: m.sender === 'user' ? 'user' : 'model',
-            content: m.text,
+            content: m.sender === 'user' && m.id === userMsg.id ? finalQuery : m.text,
           })),
         }),
       });
@@ -197,23 +220,11 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
   const initials = user.username.slice(0, 2).toUpperCase() || 'DV';
 
-  const renderInputCapsule = (isCentered: boolean) => {
+  // DeepSeek-style input card
+  const renderInputCard = () => {
     return (
-      <div
-        className={`w-full bg-[#0a0a0c]/80 border border-[#1f1f23] focus-within:border-orange-500/40 rounded-3xl p-2.5 pl-4 flex items-center gap-3 shadow-2xl transition-all duration-300 ${
-          isCentered ? 'mx-auto max-w-2xl' : 'max-w-2xl'
-        } focus-within:shadow-[0_0_25px_rgba(249,115,22,0.15)]`}
-      >
-        {/* Clip Attachment */}
-        <button
-          onClick={() => alert('Envio de arquivos em breve.')}
-          className="p-2 hover:bg-dd-border/30 rounded-full text-[#71767b] hover:text-dd-text transition-all cursor-pointer flex-shrink-0"
-          title="Anexar Arquivo"
-        >
-          <Paperclip className="w-4 h-4" />
-        </button>
-
-        {/* Text Area Input */}
+      <div className="w-full bg-[#131316]/90 border border-[#232329] rounded-2xl p-4 flex flex-col justify-between min-h-[140px] shadow-2xl focus-within:border-blue-500/40 focus-within:shadow-[0_0_25px_rgba(56,109,245,0.12)] transition-all duration-300 max-w-2xl mx-auto backdrop-blur-md">
+        {/* Text area input */}
         <textarea
           ref={inputRef}
           value={inputVal}
@@ -225,99 +236,88 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
             }
           }}
           disabled={thinking}
-          placeholder="Perguntar ao Ducky..."
-          rows={1}
-          className="flex-grow bg-transparent border-0 outline-0 ring-0 text-xs text-dd-text placeholder-[#71767b] resize-none py-2 max-h-32 overflow-y-auto font-sans leading-relaxed focus:ring-0 focus:outline-none"
+          placeholder="Message Ducky..."
+          rows={2}
+          className="w-full bg-transparent border-0 outline-0 ring-0 text-sm text-dd-text placeholder-[#53535f] resize-none py-1.5 max-h-36 overflow-y-auto font-sans leading-relaxed focus:ring-0 focus:outline-none"
         />
 
-        {/* Right Controls */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Dropdown Select Mode */}
-          <div className="relative">
+        {/* Bottom row */}
+        <div className="flex items-center justify-between border-t border-[#1f1f23]/40 pt-3 mt-2 select-none">
+          {/* Left side: Toggles */}
+          <div className="flex items-center gap-2">
+            {/* DeepThink Toggle */}
             <button
-              onClick={() => setModeDropdownOpen(!modeDropdownOpen)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#16161a] hover:bg-[#22222a] border border-[#2f2f37]/80 rounded-full text-[10px] font-semibold text-[#8b8b93] hover:text-dd-text transition-all cursor-pointer select-none"
+              type="button"
+              onClick={handleDeepThinkToggle}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-semibold border transition-all cursor-pointer select-none ${
+                deepThinkActive
+                  ? 'bg-[#1c293e] border-[#2b4c7e] text-[#4f8ff7]'
+                  : 'bg-[#1a1a1f] border-[#232329] text-[#8b8b93] hover:bg-[#232329] hover:text-dd-text'
+              }`}
             >
-              {mode === 'Rápido' ? (
-                <Zap className="w-3 h-3 text-orange-500 fill-orange-500" />
-              ) : (
-                <Terminal className="w-3 h-3 text-purple-400" />
-              )}
-              <span>{mode}</span>
-              <ChevronDown className="w-3 h-3 text-[#71767b]" />
+              <svg
+                viewBox="0 0 24 24"
+                className="w-3.5 h-3.5 fill-none stroke-current"
+                strokeWidth="2"
+              >
+                <circle cx="12" cy="12" r="3" />
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+              </svg>
+              <span>DeepThink</span>
             </button>
 
-            <AnimatePresence>
-              {modeDropdownOpen && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setModeDropdownOpen(false)} />
-                  <motion.div
-                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                    transition={{ duration: 0.1 }}
-                    className="absolute bottom-full right-0 mb-2 w-36 bg-[#0c0c0e] border border-[#1f1f23] rounded-xl shadow-2xl z-20 overflow-hidden divide-y divide-[#1f1f23]/60"
-                  >
-                    <button
-                      onClick={() => {
-                        setMode('Rápido');
-                        setModeDropdownOpen(false);
-                      }}
-                      className={`w-full text-left px-3 py-2.5 text-[10px] font-bold cursor-pointer flex items-center justify-between ${
-                        mode === 'Rápido'
-                          ? 'bg-orange-500/10 text-orange-400'
-                          : 'text-[#8b8b93] hover:bg-dd-border/20'
-                      }`}
-                    >
-                      <span className="flex items-center gap-1.5">
-                        <Zap className="w-3.5 h-3.5" /> Rápido
-                      </span>
-                      {mode === 'Rápido' && <Check className="w-3.5 h-3.5 text-orange-500" />}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setMode('Deep Debug');
-                        setModeDropdownOpen(false);
-                      }}
-                      className={`w-full text-left px-3 py-2.5 text-[10px] font-bold cursor-pointer flex items-center justify-between ${
-                        mode === 'Deep Debug'
-                          ? 'bg-purple-500/10 text-purple-400'
-                          : 'text-[#8b8b93] hover:bg-dd-border/20'
-                      }`}
-                    >
-                      <span className="flex items-center gap-1.5">
-                        <Terminal className="w-3.5 h-3.5" /> Deep Debug
-                      </span>
-                      {mode === 'Deep Debug' && <Check className="w-3.5 h-3.5 text-purple-400" />}
-                    </button>
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
+            {/* Search Toggle */}
+            <button
+              type="button"
+              onClick={() => setSearchActive(!searchActive)}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-semibold border transition-all cursor-pointer select-none ${
+                searchActive
+                  ? 'bg-[#1c293e] border-[#2b4c7e] text-[#4f8ff7]'
+                  : 'bg-[#1a1a1f] border-[#232329] text-[#8b8b93] hover:bg-[#232329] hover:text-dd-text'
+              }`}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="w-3.5 h-3.5 fill-none stroke-current"
+                strokeWidth="2"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10zM2 12h20" />
+              </svg>
+              <span>Search</span>
+            </button>
           </div>
 
-          {/* Send or Voice Button */}
-          {inputVal.trim() ? (
+          {/* Right side: Attachment and Send */}
+          <div className="flex items-center gap-2">
             <button
+              type="button"
+              onClick={() => alert('Envio de arquivos em breve.')}
+              className="p-2 hover:bg-[#232329] rounded-full text-[#8b8b93] hover:text-dd-text transition-all cursor-pointer"
+              title="Anexar arquivo"
+            >
+              <Paperclip className="w-4 h-4" />
+            </button>
+
+            <button
+              type="button"
               onClick={() => handleSend(inputVal)}
-              disabled={thinking}
-              className="p-2 bg-white text-black hover:bg-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-full transition-all cursor-pointer flex items-center justify-center shrink-0"
+              disabled={!inputVal.trim() || thinking}
+              className="p-2 bg-[#386df5] hover:bg-[#4d7df7] disabled:opacity-40 disabled:hover:bg-[#386df5] disabled:cursor-not-allowed text-white rounded-full transition-all cursor-pointer flex items-center justify-center shrink-0 w-8.5 h-8.5 shadow-md"
               title="Enviar"
             >
-              <Send className="w-3.5 h-3.5 fill-black" />
-            </button>
-          ) : (
-            <button
-              onClick={() => alert('Entrada de voz em breve.')}
-              className="p-2 hover:bg-[#1f1f23] rounded-full text-[#71767b] hover:text-dd-text transition-all cursor-pointer flex-shrink-0"
-              title="Entrada de Voz"
-            >
-              <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current" strokeWidth="2">
-                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-                <path d="M19 10v1a7 7 0 0 1-14 0v-1M12 19v3M8 22h8" />
+              <svg
+                viewBox="0 0 24 24"
+                className="w-4.5 h-4.5 fill-none stroke-current"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="12" y1="19" x2="12" y2="5" />
+                <polyline points="5 12 12 5 19 12" />
               </svg>
             </button>
-          )}
+          </div>
         </div>
       </div>
     );
@@ -452,25 +452,76 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
         {/* Chat / Welcome Area */}
         {messages.length === 0 ? (
-          /* EMPTY STATE (Grok Style) */
+          /* EMPTY STATE (DeepSeek Style with Duck Logo) */
           <div className="flex-grow flex flex-col justify-center items-center overflow-y-auto px-4 py-8 max-w-3xl w-full mx-auto relative z-10">
             <div className="w-full max-w-2xl flex flex-col items-center gap-6 text-center -mt-16">
-              {/* Inline branding */}
-              <div className="flex items-center justify-center gap-3.5 select-none mb-1 animate-in fade-in zoom-in-95 duration-500">
+              {/* DeepSeek Logo & Title Area (Replacing Whale with Duck) */}
+              <div className="flex items-center justify-center gap-3 select-none mb-1 animate-in fade-in zoom-in-95 duration-500">
                 <img
-                  src="/Ducky_logo.png"
-                  alt="Ducky Logo"
-                  className="w-14 h-14 object-contain animate-bounce"
+                  src="/Logo_ia_ducky.png"
+                  alt="Ducky IA Logo"
+                  className="w-10 h-10 object-contain animate-bounce"
                 />
-                <span className="text-4xl font-extrabold tracking-tight text-white font-sans uppercase">
-                  Ducky
+                <span className="text-2xl font-bold tracking-tight text-white font-sans">
+                  Start chatting with {mode === 'Rápido' ? 'Instant' : 'Expert'}
                 </span>
               </div>
 
-              {/* Centered Input Capsule */}
-              <div className="w-full">{renderInputCapsule(true)}</div>
+              {/* Mode switch tabs capsule (Instant, Expert, Vision) */}
+              <div className="flex bg-[#111115] border border-[#1f1f23] rounded-full p-1 select-none animate-in fade-in duration-300">
+                <button
+                  onClick={() => {
+                    setMode('Rápido');
+                  }}
+                  className={`flex items-center gap-1.5 px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                    mode === 'Rápido'
+                      ? 'bg-[#1c293e] text-[#4f8ff7] shadow-sm'
+                      : 'text-[#8b8b93] hover:text-dd-text'
+                  }`}
+                >
+                  <Zap
+                    className={`w-3.5 h-3.5 ${mode === 'Rápido' ? 'text-[#4f8ff7] fill-[#4f8ff7]' : ''}`}
+                  />
+                  <span>Instant</span>
+                </button>
 
-              {/* Suggestion pills with icons */}
+                <button
+                  onClick={() => {
+                    setMode('Deep Debug');
+                  }}
+                  className={`flex items-center gap-1.5 px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                    mode === 'Deep Debug'
+                      ? 'bg-[#1e2b42] text-[#4f8ff7] shadow-sm' // blue themed for DeepSeek aesthetic
+                      : 'text-[#8b8b93] hover:text-dd-text'
+                  }`}
+                >
+                  <Terminal
+                    className={`w-3.5 h-3.5 ${mode === 'Deep Debug' ? 'text-[#4f8ff7]' : ''}`}
+                  />
+                  <span>Expert</span>
+                </button>
+
+                <button
+                  onClick={() => alert('Visão computacional em breve!')}
+                  className="flex items-center gap-1.5 px-5 py-2 rounded-full text-xs font-semibold text-[#484852] hover:text-[#8b8b93] cursor-pointer transition-all"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="w-3.5 h-3.5 fill-none stroke-current"
+                    strokeWidth="2"
+                  >
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
+                  </svg>
+                  <span>Vision</span>
+                </button>
+              </div>
+
+              {/* Centered DeepSeek Input Card */}
+              <div className="w-full">{renderInputCard()}</div>
+
+              {/* Minimal Suggestion pills with icons */}
               <div className="flex flex-wrap items-center justify-center gap-2.5 w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <button
                   onClick={() => handleSuggestionClick('Explicar Bug')}
@@ -553,9 +604,9 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                       <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-[#0c0c0e] border border-[#2f2f36]/60 select-none">
                         {isDucky ? (
                           <img
-                            src="/Ducky_logo.png"
+                            src="/Logo_ia_ducky.png"
                             alt="Ducky"
-                            className="w-8 h-8 rounded-full object-cover"
+                            className="w-8 h-8 object-contain"
                           />
                         ) : user.avatar_url ? (
                           <img
@@ -599,9 +650,9 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                   <div className="flex gap-4 items-start w-full py-5 border-b border-[#1f1f23]/10">
                     <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-[#0c0c0e] border border-[#2f2f36]/60 select-none">
                       <img
-                        src="/Ducky_logo.png"
+                        src="/Logo_ia_ducky.png"
                         alt="Ducky thinking"
-                        className="w-8 h-8 rounded-full object-cover animate-bounce"
+                        className="w-8 h-8 object-contain animate-bounce"
                       />
                     </div>
                     <div className="flex-grow min-w-0">
@@ -632,7 +683,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
             {/* Bottom Pinned Input Capsule */}
             <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#060606] via-[#060606]/95 to-transparent z-20">
               <div className="max-w-3xl w-full mx-auto flex flex-col items-center">
-                {renderInputCapsule(false)}
+                {renderInputCard()}
 
                 {/* Premium Promotion Hint */}
                 <div className="mt-2.5 text-[9px] text-[#71767b] max-w-xl text-center flex items-center justify-center gap-1.5 select-none">

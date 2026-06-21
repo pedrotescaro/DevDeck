@@ -556,9 +556,9 @@ export function Sidebar({ user }: SidebarProps) {
                             onClick={() => setMoreMenuOpen(false)}
                           >
                             <img
-                              src="/Ducky_logo.png"
+                              src="/Logo_ia_ducky.png"
                               alt="Ducky"
-                              className="w-4.5 h-4.5 rounded-full object-cover shrink-0"
+                              className="w-4.5 h-4.5 object-contain shrink-0"
                             />
                             Ducky
                           </Link>
