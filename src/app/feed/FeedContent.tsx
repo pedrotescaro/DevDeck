@@ -1748,7 +1748,7 @@ export function FeedContent({
 
             {/* Flame streak */}
             <div className="flex flex-col items-center justify-center py-4 select-none">
-              <Flame className="w-16 h-16 text-orange-500 fill-orange-500 animate-tiktok-fire" />
+              <Flame className="w-16 h-16 text-orange-500 fill-orange-500" />
               <span className="mt-3 text-xs font-bold text-orange-500">
                 {currentStreak} {currentStreak === 1 ? 'dia' : 'dias'} de ofensiva
               </span>

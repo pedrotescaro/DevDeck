@@ -653,7 +653,7 @@ export function Sidebar({ user }: SidebarProps) {
                     @{activeUser.username.toLowerCase()}
                   </p>
                   <div className="flex items-center gap-2 mt-3 select-none">
-                    <Flame className="w-6 h-6 text-orange-500 fill-orange-500 animate-tiktok-fire-hover shrink-0" />
+                    <Flame className="w-6 h-6 text-orange-500 fill-orange-500 shrink-0" />
                     <span className="text-[11px] font-extrabold text-orange-500 leading-none">
                       {activeUser.streak_days ?? activeUser.streak ?? 0}{' '}
                       {(activeUser.streak_days ?? activeUser.streak ?? 0) === 1 ? 'dia' : 'dias'} de
