@@ -32,6 +32,18 @@ import { CodeEditor } from '@/components/CodeEditor';
 import { codemirrorLanguageId } from '@/lib/editor/languages';
 import { runCodeInSandbox } from '@/lib/code-runner';
 import { CHECKPOINTS_DATA } from '@/lib/checkpointData';
+const getLanguageFullName = (code: string) => {
+  const map: Record<string, string> = {
+    JS: 'JavaScript',
+    TS: 'TypeScript',
+    PYTHON: 'Python',
+    RUST: 'Rust',
+    GO: 'Go',
+    JAVA: 'Java',
+  };
+  return map[code.toUpperCase()] || code;
+};
+
 function getLevelFromXp(xp: number) {
   return Math.max(1, Math.floor(xp / 1000) + 1);
 }
@@ -239,12 +251,11 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
   const [duckyInput, setDuckyInput] = useState('');
   const [duckyLoading, setDuckyLoading] = useState(false);
 
-  // Efeito para resetar/atualizar saudação do Ducky com base na linguagem ativa
   useEffect(() => {
     setDuckyMessages([
       {
         role: 'model',
-        content: `Quack! 🦆 Eu sou o Ducky, seu patinho de borracha! Como posso ajudar com a trilha de **${activeLang}** hoje? Pode me enviar um código com bug ou tirar dúvidas!`,
+        content: `Quack! 🦆 Eu sou o Ducky, seu patinho de borracha! Como posso ajudar com a trilha de **${getLanguageFullName(activeLang)}** hoje? Pode me enviar um código com bug ou tirar dúvidas!`,
       },
     ]);
   }, [activeLang]);
@@ -395,7 +406,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
         const slide = slides[checkpointReviewStep];
         welcomeText = `Revisão do checkpoint ativo: **"${slide?.title}"**. Qual conceito você gostaria que eu explicasse melhor?`;
       } else if (checkpointStage === 'exercise') {
-        welcomeText = `Desafio de código ativo: **"${challenge?.title}"**. Se tiver dificuldades com a lógica do desafio ou a sintaxe de ${activeLang}, compartilhe suas dúvidas!`;
+        welcomeText = `Desafio de código ativo: **"${challenge?.title}"**. Se tiver dificuldades com a lógica do desafio ou a sintaxe de ${getLanguageFullName(activeLang)}, compartilhe suas dúvidas!`;
       } else {
         welcomeText = `Checkpoint concluído com sucesso!`;
       }
@@ -424,7 +435,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
       return [
         {
           role: 'assistant',
-          content: `Olá! Sou o **DevAssistant**, seu tutor de IA para **${activeLang}**. ${welcomeText}`,
+          content: `Olá! Sou o **DevAssistant**, seu tutor de IA para **${getLanguageFullName(activeLang)}**. ${welcomeText}`,
         },
       ];
     });
@@ -1144,7 +1155,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
               {['JS', 'TS', 'PYTHON', 'RUST', 'GO', 'JAVA'].map((lang) => {
                 const langCode = lang === 'PYTHON' ? 'PYTHON' : lang;
                 const isSelected = activeLang === (lang === 'PYTHON' ? 'PYTHON' : lang);
-                const label = lang.toUpperCase();
+                const label = getLanguageFullName(lang);
 
                 return (
                   <button
@@ -1169,7 +1180,9 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                   {activeLang.slice(0, 2)}
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-dd-text">Trilha de {activeLang}</h3>
+                  <h3 className="text-sm font-black text-dd-text">
+                    Trilha de {getLanguageFullName(activeLang)}
+                  </h3>
                   <p className="text-xs text-dd-muted uppercase tracking-wider font-bold mt-0.5">
                     Nível {activeTrail.level} • {activeTrail.xp.toLocaleString('pt-BR')} XP
                   </p>
@@ -1203,7 +1216,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                   </h2>
                   <p className="text-xs md:text-sm text-dd-muted font-medium max-w-xl">
                     Domine esta unidade completando os exercícios e checkpoints abaixo para expandir
-                    seu conhecimento em {activeLang}.
+                    seu conhecimento em {getLanguageFullName(activeLang)}.
                   </p>
                 </div>
               </div>
@@ -1884,7 +1897,8 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                             Fase Concluída!
                           </h3>
                           <p className="text-xs text-dd-muted max-w-xs mx-auto">
-                            Você concluiu a Fase {activeLevel.levelNumber} de {activeLang}!
+                            Você concluiu a Fase {activeLevel.levelNumber} de{' '}
+                            {getLanguageFullName(activeLang)}!
                           </p>
                         </div>
 
