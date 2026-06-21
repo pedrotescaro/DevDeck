@@ -165,9 +165,29 @@ export function FeedContent({
   const [activeReactions, setActiveReactions] = useState<Record<string, string | null>>({});
   const [currentXp, setCurrentXp] = useState(initialUser.total_xp);
   const [currentLevel, setCurrentLevel] = useState(getLevelFromXp(initialUser.total_xp));
+  const [currentStreak, setCurrentStreak] = useState(initialUser.streak ?? 0);
   const [levelUpVisible, setLevelUpVisible] = useState(false);
   const [firstPostToastVisible, setFirstPostToastVisible] = useState(false);
   const [feedError, setFeedError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/users/me')
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error();
+      })
+      .then((data) => {
+        if (data) {
+          if (data.total_xp !== undefined) {
+            setCurrentXp(data.total_xp);
+            setCurrentLevel(getLevelFromXp(data.total_xp));
+          }
+          const streakVal = data.streak_days ?? data.streak ?? 0;
+          setCurrentStreak(streakVal);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const [soundEnabled, setSoundEnabled] = useState(true);
 
@@ -1727,18 +1747,11 @@ export function FeedContent({
             </div>
 
             {/* Flame streak */}
-            <div className="flex items-center gap-3 bg-gradient-to-r from-orange-500/10 to-orange-500/0 border border-orange-500/20 rounded-xl p-4">
-              <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xl shadow-[0_0_15px_rgba(249,115,22,0.15)]">
-                <span className="animate-fire-flicker">🔥</span>
-              </div>
-              <div>
-                <h4 className="font-extrabold text-sm text-dd-text font-sans tracking-tight">
-                  {initialUser.streak || 14} Dias de Ofensiva
-                </h4>
-                <p className="text-[10px] text-dd-muted leading-none mt-1">
-                  Resolva quizzes para manter a chama!
-                </p>
-              </div>
+            <div className="flex flex-col items-center justify-center py-4 select-none">
+              <Flame className="w-16 h-16 text-orange-500 fill-orange-500 animate-tiktok-fire" />
+              <span className="mt-3 text-xs font-bold text-orange-500">
+                {currentStreak} {currentStreak === 1 ? 'dia' : 'dias'} de ofensiva
+              </span>
             </div>
 
             <div className="flex justify-between items-center text-xs border-t border-dd-border pt-3 text-dd-muted">
