@@ -21,7 +21,14 @@ import {
   AlertTriangle,
   RotateCcw,
   Info,
+  Loader2,
+  Play,
+  Flag,
 } from 'lucide-react';
+import { CodeEditor } from '@/components/CodeEditor';
+import { codemirrorLanguageId } from '@/lib/editor/languages';
+import { runCodeInSandbox } from '@/lib/code-runner';
+import { CHECKPOINTS_DATA } from '@/lib/checkpointData';
 function getLevelFromXp(xp: number) {
   return Math.max(1, Math.floor(xp / 1000) + 1);
 }
@@ -116,6 +123,15 @@ function getLearnSlidesForLevel(level: TrailLevel) {
     return { title, concept, code, tip };
   });
 }
+function getCheckpointReviewSlides(levels: TrailLevel[]) {
+  return levels.map((level) => {
+    const slides = getLearnSlidesForLevel(level);
+    return {
+      levelTitle: level.title,
+      ...slides[0],
+    };
+  });
+}
 
 interface TrailsContentProps {
   user: {
@@ -160,34 +176,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
   const [trails, setTrails] = useState(initialTrails);
   const [userXp, setUserXp] = useState(user.total_xp);
 
-  // Estados para as Seções e Unidades (Dropdown)
-  const defaultSection = () => {
-    const levels = TRAILS_DATA['JS'] || [];
-    const firstIncompleteLevel = levels.find((level) => {
-      const completedCount = level.questions.filter((q) => initialAttempts[q.id] === true).length;
-      return completedCount < 3;
-    });
-    return firstIncompleteLevel ? firstIncompleteLevel.sectionName : levels[0]?.sectionName || '';
-  };
-
-  const [activeSection, setActiveSection] = useState<string>(defaultSection);
-  const [sectionDropdownOpen, setSectionDropdownOpen] = useState(false);
-
-  // Resetar a seção ativa quando a linguagem selecionada mudar
-  useEffect(() => {
-    if (!activeLang) return;
-    const levels = TRAILS_DATA[activeLang] || [];
-    const firstIncompleteLevel = levels.find((level) => {
-      const completedCount = level.questions.filter((q) => attempts[q.id] === true).length;
-      return completedCount < 3;
-    });
-
-    if (firstIncompleteLevel) {
-      setActiveSection(firstIncompleteLevel.sectionName);
-    } else if (levels.length > 0) {
-      setActiveSection(levels[0].sectionName);
-    }
-  }, [activeLang]);
+  // Trilha Única Contínua - Estados de Seção removidos
 
   // Estados do Modal do Quiz
   const [quizModalOpen, setQuizModalOpen] = useState(false);
@@ -238,6 +227,19 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
   const [aiInput, setAiInput] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
 
+  // Estados para Checkpoints
+  const [checkpointModalOpen, setCheckpointModalOpen] = useState(false);
+  const [activeCheckpointUnit, setActiveCheckpointUnit] = useState<number | null>(null);
+  const [checkpointStage, setCheckpointStage] = useState<'review' | 'exercise' | 'summary'>(
+    'review'
+  );
+  const [checkpointReviewStep, setCheckpointReviewStep] = useState(0);
+  const [checkpointCode, setCheckpointCode] = useState('');
+  const [checkpointOutput, setCheckpointOutput] = useState<string | null>(null);
+  const [checkpointError, setCheckpointError] = useState<string | null>(null);
+  const [checkpointRunning, setCheckpointRunning] = useState(false);
+  const [checkpointSuccess, setCheckpointSuccess] = useState(false);
+
   // Função para renderizar o conteúdo da mensagem com markdown simples
   const renderMessageContent = (content: string) => {
     const parts = content.split(/(\`\`\`[\s\S]*?\`\`\`|\`.*?\`|\*\*.*?\*\*)/g);
@@ -278,23 +280,35 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
 
   // Efeito para atualizar as mensagens de boas-vindas do Tutor de IA dependendo do contexto
   useEffect(() => {
-    if (!quizModalOpen) {
+    if (!quizModalOpen && !checkpointModalOpen) {
       setAiMessages([]);
       setAiChatOpen(false);
       return;
     }
 
-    if (!activeLevel) return;
-
     let welcomeText = '';
-    if (currentStage === 'learn') {
-      const slides = getLearnSlidesForLevel(activeLevel);
-      const slide = slides[learnStep];
-      welcomeText = `Acompanhando você no conceito **"${slide?.title}"**. Como posso te ajudar a entender melhor?`;
-    } else if (currentStage === 'practice' || currentStage === 'challenge') {
-      welcomeText = `Exercício ativo. Se precisar de uma dica sutil sem a resposta direta, basta me pedir!`;
-    } else {
-      welcomeText = `Fase concluída! Quer tirar alguma dúvida final sobre o conteúdo estudado?`;
+
+    if (checkpointModalOpen && activeCheckpointUnit) {
+      const challenge = CHECKPOINTS_DATA[activeLang]?.[activeCheckpointUnit]?.challenge;
+      if (checkpointStage === 'review') {
+        const slides = getCheckpointSlides();
+        const slide = slides[checkpointReviewStep];
+        welcomeText = `Revisão do checkpoint ativo: **"${slide?.title}"**. Qual conceito você gostaria que eu explicasse melhor?`;
+      } else if (checkpointStage === 'exercise') {
+        welcomeText = `Desafio de código ativo: **"${challenge?.title}"**. Se tiver dificuldades com a lógica do desafio ou a sintaxe de ${activeLang}, compartilhe suas dúvidas!`;
+      } else {
+        welcomeText = `Checkpoint concluído com sucesso!`;
+      }
+    } else if (quizModalOpen && activeLevel) {
+      if (currentStage === 'learn') {
+        const slides = getLearnSlidesForLevel(activeLevel);
+        const slide = slides[learnStep];
+        welcomeText = `Acompanhando você no conceito **"${slide?.title}"**. Como posso te ajudar a entender melhor?`;
+      } else if (currentStage === 'practice' || currentStage === 'challenge') {
+        welcomeText = `Exercício ativo. Se precisar de uma dica sutil sem a resposta direta, basta me pedir!`;
+      } else {
+        welcomeText = `Fase concluída! Quer tirar alguma dúvida final sobre o conteúdo estudado?`;
+      }
     }
 
     setAiMessages((prev) => {
@@ -314,12 +328,23 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
         },
       ];
     });
-  }, [quizModalOpen, currentStage, learnStep, currentQuestionIndex, activeLevel, activeLang]);
+  }, [
+    quizModalOpen,
+    checkpointModalOpen,
+    currentStage,
+    learnStep,
+    currentQuestionIndex,
+    activeLevel,
+    activeLang,
+    checkpointStage,
+    checkpointReviewStep,
+    activeCheckpointUnit,
+  ]);
 
   // Função para enviar mensagem para o Tutor de IA
   const handleSendAiMessage = async (customMessage?: string) => {
     const textToSend = customMessage || aiInput;
-    if (!textToSend.trim() || aiLoading || !activeLevel) return;
+    if (!textToSend.trim() || aiLoading || (!activeLevel && !checkpointModalOpen)) return;
 
     const userMessage: ChatMessage = { role: 'user', content: textToSend };
     const updatedMessages = [...aiMessages, userMessage];
@@ -330,22 +355,54 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
 
     try {
       let currentContext: any = {};
-      if (currentStage === 'learn') {
-        const slides = getLearnSlidesForLevel(activeLevel);
-        const slide = slides[learnStep];
-        currentContext = {
-          title: slide.title,
-          concept: slide.concept,
-          code: slide.code,
-          tip: slide.tip,
-        };
-      } else if (currentStage === 'practice' || currentStage === 'challenge') {
-        const question = activeLevel.questions[currentQuestionIndex];
-        currentContext = {
-          question: question.question,
-          options: question.options,
-          correctIndex: question.correctIndex,
-        };
+      let stageToSend = '';
+
+      if (checkpointModalOpen && activeCheckpointUnit) {
+        const challenge = CHECKPOINTS_DATA[activeLang]?.[activeCheckpointUnit]?.challenge;
+        if (checkpointStage === 'review') {
+          const slides = getCheckpointSlides();
+          const slide = slides[checkpointReviewStep];
+          stageToSend = 'checkpoint-review';
+          currentContext = {
+            title: slide?.title || '',
+            concept: slide?.concept || '',
+            code: slide?.code || '',
+            tip: slide?.tip || '',
+            checkpointUnit: activeCheckpointUnit,
+          };
+        } else if (checkpointStage === 'exercise') {
+          stageToSend = 'checkpoint-challenge';
+          currentContext = {
+            challengeTitle: challenge?.title || '',
+            challengeDescription: challenge?.description || '',
+            userCode: checkpointCode,
+            checkpointUnit: activeCheckpointUnit,
+          };
+        } else {
+          stageToSend = 'checkpoint-summary';
+          currentContext = {
+            checkpointUnit: activeCheckpointUnit,
+          };
+        }
+      } else if (activeLevel) {
+        stageToSend = currentStage;
+        if (currentStage === 'learn') {
+          const slides = getLearnSlidesForLevel(activeLevel);
+          const slide = slides[learnStep];
+          currentContext = {
+            title: slide.title,
+            concept: slide.concept,
+            code: slide.code,
+            tip: slide.tip,
+          };
+        } else if (currentStage === 'practice' || currentStage === 'challenge') {
+          const question = activeLevel.questions[currentQuestionIndex];
+          currentContext = {
+            question: question.question,
+            options: question.options,
+            correctIndex: question.correctIndex,
+          };
+        }
       }
 
       const response = await fetch('/api/ai/trails/chat', {
@@ -353,8 +410,8 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           language: activeLang,
-          levelTitle: activeLevel.title,
-          stage: currentStage,
+          levelTitle: activeLevel?.title || `Checkpoint ${activeCheckpointUnit}`,
+          stage: stageToSend,
           currentContext,
           history: updatedMessages.map((m) => ({ role: m.role, content: m.content })),
         }),
@@ -390,36 +447,257 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
 
   const currentLevel = getLevelFromXp(userXp);
 
-  // Seções disponíveis para a trilha atual
-  const sections = Array.from(
-    new Set(TRAILS_DATA[activeLang]?.map((level) => level.sectionName) || [])
-  );
-
-  // Fases da seção atual
-  const sectionLevels =
-    TRAILS_DATA[activeLang]?.filter((level) => level.sectionName === activeSection) || [];
-
-  // Verificar se o nível está desbloqueado (Duolingo-like progression)
+  // Verificar se o nível está desbloqueado (Duolingo-like progression com checkpoints)
   const isLevelUnlocked = (levelIndex: number) => {
     if (levelIndex === 0) return true;
-    const prevLevel = TRAILS_DATA[activeLang][levelIndex - 1];
+
+    const currentLevel = TRAILS_DATA[activeLang]?.[levelIndex];
+    const prevLevel = TRAILS_DATA[activeLang]?.[levelIndex - 1];
+
+    if (currentLevel && prevLevel && currentLevel.unitNumber !== prevLevel.unitNumber) {
+      const prevUnitNumber = prevLevel.unitNumber;
+      const checkpointId = `${activeLang.toLowerCase()}-u${prevUnitNumber}-checkpoint`;
+      return attempts[checkpointId] === true;
+    }
+
     return prevLevel.questions.every((q) => attempts[q.id] === true);
   };
 
-  // Nível recomendado (primeira fase incompleta da linguagem atual que esteja desbloqueada)
-  const recommendedLevel = TRAILS_DATA[activeLang]?.find((level, idx) => {
-    const globalIdx = TRAILS_DATA[activeLang].findIndex((l) => l.levelNumber === level.levelNumber);
-    const unlocked = isLevelUnlocked(globalIdx);
-    const completedCount = level.questions.filter((q) => attempts[q.id] === true).length;
-    return unlocked && completedCount < 3;
+  // Checkpoints da linguagem ativa
+  const activeLangCheckpoints = [1, 2, 3].map((unitNum) => {
+    const checkpointId = `${activeLang.toLowerCase()}-u${unitNum}-checkpoint`;
+    const isCompleted = attempts[checkpointId] === true;
+
+    // Achar o último nível dessa unidade
+    const unitLevels = TRAILS_DATA[activeLang]?.filter((l) => l.unitNumber === unitNum) || [];
+    const lastLevel = unitLevels[unitLevels.length - 1];
+    const isUnlocked = lastLevel && lastLevel.questions.every((q) => attempts[q.id] === true);
+
+    return {
+      unitNumber: unitNum,
+      checkpointId,
+      isCompleted,
+      isUnlocked,
+      data: CHECKPOINTS_DATA[activeLang]?.[unitNum],
+    };
   });
 
-  // Unidade ativa com base no nível recomendado (ou primeiro da seção se todos concluídos)
+  const recommendedCheckpoint = activeLangCheckpoints.find(
+    (cp) => cp.isUnlocked && !cp.isCompleted
+  );
+
+  // Nível recomendado (primeira fase incompleta da linguagem atual que esteja desbloqueada, se não houver checkpoint pendente)
+  const recommendedLevel = recommendedCheckpoint
+    ? null
+    : TRAILS_DATA[activeLang]?.find((level) => {
+        const globalIdx = TRAILS_DATA[activeLang].findIndex(
+          (l) => l.levelNumber === level.levelNumber
+        );
+        const unlocked = isLevelUnlocked(globalIdx);
+        const completedCount = level.questions.filter((q) => attempts[q.id] === true).length;
+        return unlocked && completedCount < 3;
+      });
+
+  // Unidade ativa
+  const activeUnitNumber = recommendedCheckpoint
+    ? recommendedCheckpoint.unitNumber
+    : recommendedLevel
+      ? recommendedLevel.unitNumber
+      : 3;
+
   const activeUnitLevel =
-    sectionLevels.find((level) => {
-      const completedCount = level.questions.filter((q) => attempts[q.id] === true).length;
-      return completedCount < 3;
-    }) || sectionLevels[0];
+    TRAILS_DATA[activeLang]?.find((level) => level.unitNumber === activeUnitNumber) ||
+    TRAILS_DATA[activeLang]?.[0];
+
+  const handleCheckpointClick = (unitNumber: number) => {
+    const checkpointId = `${activeLang.toLowerCase()}-u${unitNumber}-checkpoint`;
+    const isCompleted = attempts[checkpointId] === true;
+
+    // Verificar se o checkpoint está desbloqueado (todas as fases da unidade concluídas)
+    const unitLevels = TRAILS_DATA[activeLang]?.filter((l) => l.unitNumber === unitNumber) || [];
+    const lastLevel = unitLevels[unitLevels.length - 1];
+    const checkpointUnlocked =
+      lastLevel && lastLevel.questions.every((q) => attempts[q.id] === true);
+
+    if (!checkpointUnlocked) {
+      playSound('notification');
+      setConfirmDialog({
+        isOpen: true,
+        title: 'Checkpoint Bloqueado',
+        message:
+          'Este checkpoint está bloqueado! Complete todas as fases e exercícios desta unidade para liberá-lo.',
+        confirmText: 'Entendido',
+        variant: 'info',
+        onConfirm: () => setConfirmDialog((prev) => ({ ...prev, isOpen: false })),
+      });
+      return;
+    }
+
+    if (isCompleted) {
+      setConfirmDialog({
+        isOpen: true,
+        title: 'Refazer Checkpoint?',
+        message:
+          'Você já concluiu este checkpoint e recebeu a recompensa de XP. Deseja refazer a revisão e o exercício prático de código?',
+        confirmText: 'Refazer',
+        cancelText: 'Cancelar',
+        variant: 'warning',
+        onConfirm: () => {
+          setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+          startCheckpoint(unitNumber);
+        },
+        onCancel: () => setConfirmDialog((prev) => ({ ...prev, isOpen: false })),
+      });
+    } else {
+      startCheckpoint(unitNumber);
+    }
+  };
+
+  const startCheckpoint = (unitNumber: number) => {
+    const data = CHECKPOINTS_DATA[activeLang]?.[unitNumber];
+    if (!data) return;
+
+    setActiveCheckpointUnit(unitNumber);
+    setCheckpointStage('review');
+    setCheckpointReviewStep(0);
+    setCheckpointCode(data.challenge.template);
+    setCheckpointOutput(null);
+    setCheckpointError(null);
+    setCheckpointRunning(false);
+    setCheckpointSuccess(false);
+    setCheckpointModalOpen(true);
+  };
+
+  const getCheckpointSlides = () => {
+    if (!activeCheckpointUnit) return [];
+    const unitLevels =
+      TRAILS_DATA[activeLang]?.filter((l) => l.unitNumber === activeCheckpointUnit) || [];
+    return getCheckpointReviewSlides(unitLevels);
+  };
+
+  const handleRunCheckpointCode = async () => {
+    if (!activeCheckpointUnit) return;
+    const challenge = CHECKPOINTS_DATA[activeLang]?.[activeCheckpointUnit]?.challenge;
+    if (!challenge) return;
+
+    setCheckpointRunning(true);
+    setCheckpointOutput(null);
+    setCheckpointError(null);
+
+    const fullCode = checkpointCode + '\n' + challenge.checkCode;
+
+    try {
+      const result = await runCodeInSandbox(fullCode, activeLang);
+
+      setCheckpointOutput(result.output || null);
+      setCheckpointError(result.error || null);
+
+      if (result.ok) {
+        const normalize = (str: string) => str.replace(/\r/g, '').trim();
+
+        const outputLines = normalize(result.output || '')
+          .split('\n')
+          .map((line) => line.trim())
+          .filter(Boolean);
+
+        const expectedLines = normalize(challenge.expectedOutput)
+          .split('\n')
+          .map((line) => line.trim())
+          .filter(Boolean);
+
+        const lastOutputLines = outputLines.slice(-expectedLines.length);
+
+        const isMatch =
+          lastOutputLines.length === expectedLines.length &&
+          lastOutputLines.every((line, idx) => {
+            const normLine = line.replace(/\s+/g, ' ');
+            const normExp = expectedLines[idx].replace(/\s+/g, ' ');
+            return normLine === normExp;
+          });
+
+        if (isMatch) {
+          playSound('quiz_correct');
+          setCheckpointSuccess(true);
+        } else {
+          playSound('quiz_incorrect');
+          setCheckpointError(
+            `Output incorreto.\nEsperado:\n${challenge.expectedOutput}\n\nObtido:\n${result.output}`
+          );
+        }
+      } else {
+        playSound('quiz_incorrect');
+      }
+    } catch (err: any) {
+      playSound('quiz_incorrect');
+      setCheckpointError(err.message || 'Erro ao executar o código.');
+    } finally {
+      setCheckpointRunning(false);
+    }
+  };
+
+  const handleCompleteCheckpoint = async () => {
+    if (!activeCheckpointUnit) return;
+    const checkpointId = `${activeLang.toLowerCase()}-u${activeCheckpointUnit}-checkpoint`;
+
+    setSubmittingAttempt(true);
+
+    try {
+      const res = await fetch('/api/trails/checkpoint', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          checkpointId,
+          language: activeLang,
+          unitNumber: activeCheckpointUnit,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+
+        setAttempts((prev) => ({
+          ...prev,
+          [checkpointId]: true,
+        }));
+
+        if (data.xpResult) {
+          setXpEarned(data.xpEarned || 50);
+          setUserXp(data.xpResult.newTotalXp);
+
+          setTrails((prev) => {
+            return prev.map((t) => {
+              if (t.language === activeLang) {
+                return {
+                  ...t,
+                  xp: data.xpResult.newLanguageXp,
+                  level: data.xpResult.newLanguageLevel,
+                };
+              }
+              return t;
+            });
+          });
+
+          const oldLevel = getLevelFromXp(userXp);
+          const newLevel = getLevelFromXp(data.xpResult.newTotalXp);
+          if (newLevel > oldLevel) {
+            setNewLevelNumber(newLevel);
+            setUnlockedTitle(getLevelTitle(newLevel));
+            setLevelUpVisible(true);
+            playSound('levelup');
+          }
+        }
+
+        setCheckpointStage('summary');
+      } else {
+        const errData = await res.json();
+        console.error('Error saving checkpoint:', errData.error);
+      }
+    } catch (err) {
+      console.error('Network error saving checkpoint:', err);
+    } finally {
+      setSubmittingAttempt(false);
+    }
+  };
 
   const handleResetLevelAttempts = async (level: TrailLevel) => {
     const questionIds = level.questions.map((q) => q.id);
@@ -813,124 +1091,176 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
             </div>
           </div>
 
-          {/* Header Card (Duolingo Style: Dropdown and Active Unit Banner) */}
-          <div className="bg-gradient-to-r from-orange-500/10 via-orange-500/5 to-transparent border border-dd-border rounded-2xl p-7 shadow-md flex flex-col items-center text-center space-y-4.5">
-            {/* Section Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setSectionDropdownOpen(!sectionDropdownOpen)}
-                className="flex items-center gap-2.5 px-4.5 py-2.5 bg-dd-surface border border-dd-border hover:border-orange-500/50 hover:bg-dd-border/30 rounded-xl transition-all cursor-pointer shadow-sm text-xs md:text-sm font-black text-dd-text uppercase tracking-wider"
-              >
-                <span>Nível: {activeSection}</span>
-                <ChevronDown
-                  className={`w-4 h-4 text-orange-500 transition-transform ${sectionDropdownOpen ? 'rotate-180' : ''}`}
-                />
-              </button>
-
-              <AnimatePresence>
-                {sectionDropdownOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-10"
-                      onClick={() => setSectionDropdownOpen(false)}
-                    />
-                    <motion.div
-                      initial={{ opacity: 0, y: -8, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -8, scale: 0.95 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute left-1/2 -translate-x-1/2 mt-2 w-64 bg-dd-surface border border-dd-border rounded-xl shadow-xl z-20 overflow-hidden divide-y divide-dd-border/50"
-                    >
-                      {sections.map((sec) => {
-                        const isSelected = sec === activeSection;
-                        return (
-                          <button
-                            key={sec}
-                            onClick={() => {
-                              setActiveSection(sec);
-                              setSectionDropdownOpen(false);
-                            }}
-                            className={`w-full text-left px-4 py-3 text-xs font-bold transition-all cursor-pointer flex items-center justify-between ${
-                              isSelected
-                                ? 'bg-orange-500/10 text-orange-400 font-black'
-                                : 'text-dd-muted hover:text-dd-text hover:bg-dd-border/30'
-                            }`}
-                          >
-                            <span>{sec}</span>
-                            {isSelected && <Check className="w-3.5 h-3.5 text-orange-500" />}
-                          </button>
-                        );
-                      })}
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Active Unit Title */}
-            {activeUnitLevel && (
+          {/* Header Card (Duolingo Style: Active Unit Banner) */}
+          {activeUnitLevel && (
+            <div className="bg-gradient-to-r from-orange-500/10 via-orange-500/5 to-transparent border border-dd-border rounded-2xl p-7 shadow-md flex flex-col items-center text-center space-y-3">
+              <span className="px-3 py-1 bg-orange-500/15 border border-orange-500/30 text-orange-400 text-[10px] font-black uppercase tracking-wider rounded-full shadow-sm whitespace-nowrap">
+                Unidade Atual
+              </span>
               <div className="space-y-1.5">
                 <h2 className="text-dd-text text-base md:text-lg lg:text-xl font-black uppercase tracking-tight">
-                  Unidade {activeUnitLevel.unitNumber}: {activeUnitLevel.unitTitle}
+                  Unidade {activeUnitNumber}: {activeUnitLevel.unitTitle}
                 </h2>
                 <p className="text-xs md:text-sm text-dd-muted font-medium max-w-xl">
-                  Domine esta unidade completando os exercícios e quizzes abaixo para expandir seu
-                  conhecimento em {activeLang}.
+                  Domine esta unidade completando os exercícios e checkpoints abaixo para expandir
+                  seu conhecimento em {activeLang}.
                 </p>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Winding Trail Path (Duolingo Map) */}
           <div className="relative flex flex-col items-center py-14 bg-dd-surface/5 border border-dd-border/50 border-dashed rounded-2xl overflow-hidden min-h-[550px]">
             <div className="space-y-5 w-full max-w-sm flex flex-col items-center">
               {(() => {
-                let lastUnitNumber: number | null = null;
+                const levels = TRAILS_DATA[activeLang] || [];
+                const elements: React.ReactNode[] = [];
+                let pathNodeIndex = 0;
 
-                return sectionLevels.map((level) => {
-                  const showSeparator = level.unitNumber !== lastUnitNumber;
-                  lastUnitNumber = level.unitNumber;
+                // Group levels by unitNumber
+                const unitsMap = new Map<number, TrailLevel[]>();
+                levels.forEach((level) => {
+                  if (!unitsMap.has(level.unitNumber)) {
+                    unitsMap.set(level.unitNumber, []);
+                  }
+                  unitsMap.get(level.unitNumber)!.push(level);
+                });
 
-                  const globalIdx = TRAILS_DATA[activeLang].findIndex(
-                    (l) => l.levelNumber === level.levelNumber
+                // Iterate over each unit
+                unitsMap.forEach((unitLevels, unitNumber) => {
+                  // Render unit header separator
+                  const firstLevelOfUnit = unitLevels[0];
+                  elements.push(
+                    <div
+                      key={`unit-sep-${unitNumber}`}
+                      className="w-full flex items-center justify-center my-10 max-w-sm px-4"
+                    >
+                      <div className="flex-grow border-t border-dd-border/60"></div>
+                      <span className="px-4.5 py-2 bg-dd-surface border border-dd-border text-dd-text text-[10px] font-extrabold uppercase tracking-wider rounded-full mx-3 text-center shadow-sm whitespace-nowrap">
+                        Unidade {unitNumber}:{' '}
+                        {firstLevelOfUnit?.unitTitle || `Unidade ${unitNumber}`}
+                      </span>
+                      <div className="flex-grow border-t border-dd-border/60"></div>
+                    </div>
                   );
-                  const unlocked = isLevelUnlocked(globalIdx);
-                  const completedCount = level.questions.filter(
-                    (q) => attempts[q.id] === true
-                  ).length;
-                  const isCompleted = completedCount === 3;
 
-                  return (
-                    <div key={level.levelNumber} className="w-full flex flex-col items-center">
-                      {showSeparator && (
-                        <div className="w-full flex items-center justify-center my-10 max-w-sm px-4">
-                          <div className="flex-grow border-t border-dd-border/60"></div>
-                          <span className="px-4.5 py-2 bg-dd-surface border border-dd-border text-dd-text text-[10px] font-extrabold uppercase tracking-wider rounded-full mx-3 text-center shadow-sm whitespace-nowrap">
-                            Unidade {level.unitNumber}: {level.unitTitle}
-                          </span>
-                          <div className="flex-grow border-t border-dd-border/60"></div>
+                  // Render all levels of this unit
+                  unitLevels.forEach((level) => {
+                    const globalIdx = levels.findIndex((l) => l.levelNumber === level.levelNumber);
+                    const unlocked = isLevelUnlocked(globalIdx);
+                    const completedCount = level.questions.filter(
+                      (q) => attempts[q.id] === true
+                    ).length;
+                    const isCompleted = completedCount === 3;
+                    const offsetIdx = pathNodeIndex++;
+
+                    elements.push(
+                      <div
+                        key={`level-${level.levelNumber}`}
+                        className="w-full flex flex-col items-center"
+                      >
+                        <div
+                          className="relative z-10 flex flex-col items-center my-7 transition-transform"
+                          style={getOffsetStyle(offsetIdx)}
+                        >
+                          {/* Estrelas orgânicas/curvadas */}
+                          <div className="flex gap-1.5 justify-center mb-2.5 items-end h-6.5">
+                            {Array.from({ length: 3 }).map((_, starIdx) => {
+                              const isStarEarned = attempts[level.questions[starIdx]?.id] === true;
+                              const isMiddle = starIdx === 1;
+                              const starClass = isMiddle
+                                ? 'w-5.5 h-5.5 -translate-y-0.5 scale-110'
+                                : 'w-5 h-5 translate-y-0.5 ' +
+                                  (starIdx === 0 ? 'rotate-[-12deg]' : 'rotate-[12deg]');
+
+                              return (
+                                <Star
+                                  key={starIdx}
+                                  className={`transition-all ${starClass} ${
+                                    isStarEarned
+                                      ? 'text-yellow-500 fill-yellow-500'
+                                      : 'text-dd-border/70'
+                                  }`}
+                                />
+                              );
+                            })}
+                          </div>
+
+                          {/* Botão 3D da fase (Rounded-Square) */}
+                          <button
+                            onClick={() => handleLevelClick(level, unlocked)}
+                            className={`w-20 h-20 rounded-[22px] flex items-center justify-center transition-all transform cursor-pointer ${
+                              unlocked
+                                ? isCompleted
+                                  ? 'bg-orange-500 text-white border-x-2 border-t-2 border-b-[7px] border-orange-600 hover:bg-orange-400 active:border-b-0 active:translate-y-[7px]'
+                                  : 'bg-dd-surface text-orange-500 border-x-2 border-t-2 border-b-[7px] border-orange-500 hover:bg-dd-border/30 active:border-b-0 active:translate-y-[7px]'
+                                : 'bg-dd-surface/40 text-dd-muted/30 border-x-2 border-t-2 border-b-[7px] border-dd-border/40 cursor-not-allowed'
+                            }`}
+                          >
+                            {unlocked ? (
+                              <BookOpen className="w-8 h-8" />
+                            ) : (
+                              <Lock className="w-7 h-7" />
+                            )}
+                          </button>
+
+                          {/* Título da fase */}
+                          <div className="mt-3 text-center max-w-[170px]">
+                            <p className="text-xs font-black uppercase text-dd-text leading-tight">
+                              Fase {level.levelNumber}
+                            </p>
+                            <p className="text-[10.5px] text-dd-muted font-bold leading-tight mt-1 truncate">
+                              {level.title}
+                            </p>
+                          </div>
                         </div>
-                      )}
+                      </div>
+                    );
+                  });
+
+                  // Render unit Checkpoint at the end of the unit levels
+                  const checkpointId = `${activeLang.toLowerCase()}-u${unitNumber}-checkpoint`;
+                  const isCheckpointCompleted = attempts[checkpointId] === true;
+
+                  const lastLevelOfUnit = unitLevels[unitLevels.length - 1];
+                  const lastLevelCompleted =
+                    lastLevelOfUnit &&
+                    lastLevelOfUnit.questions.every((q) => attempts[q.id] === true);
+                  const checkpointUnlocked = lastLevelCompleted;
+                  const checkpointOffsetIdx = pathNodeIndex++;
+
+                  elements.push(
+                    <div
+                      key={`checkpoint-${unitNumber}`}
+                      className="w-full flex flex-col items-center"
+                    >
+                      {/* Linha pontilhada conectando à bandeira */}
+                      <div className="w-full flex items-center justify-center my-6 max-w-sm px-4">
+                        <div className="flex-grow border-t-2 border-dashed border-dd-border/50"></div>
+                        <span className="px-4 py-1.5 bg-dd-accent/15 border border-orange-500/30 text-orange-400 text-[9px] font-black uppercase tracking-wider rounded-full mx-3 text-center shadow-sm whitespace-nowrap">
+                          Revisão Final & Checkpoint {unitNumber}
+                        </span>
+                        <div className="flex-grow border-t-2 border-dashed border-dd-border/50"></div>
+                      </div>
 
                       <div
-                        className="relative z-10 flex flex-col items-center my-7 transition-transform"
-                        style={getOffsetStyle(globalIdx)}
+                        className="relative z-10 flex flex-col items-center my-6 transition-transform"
+                        style={getOffsetStyle(checkpointOffsetIdx)}
                       >
-                        {/* Estrelas orgânicas/curvadas */}
+                        {/* Três estrelas douradas se concluído, cinzas caso contrário */}
                         <div className="flex gap-1.5 justify-center mb-2.5 items-end h-6.5">
                           {Array.from({ length: 3 }).map((_, starIdx) => {
-                            const isStarEarned = attempts[level.questions[starIdx]?.id] === true;
                             const isMiddle = starIdx === 1;
                             const starClass = isMiddle
                               ? 'w-5.5 h-5.5 -translate-y-0.5 scale-110'
-                              : 'w-5 h-5 translate-y-0.5 ' +
+                              : 'w-5.5 h-5.5 translate-y-0.5 ' +
                                 (starIdx === 0 ? 'rotate-[-12deg]' : 'rotate-[12deg]');
 
                             return (
                               <Star
                                 key={starIdx}
                                 className={`transition-all ${starClass} ${
-                                  isStarEarned
+                                  isCheckpointCompleted
                                     ? 'text-yellow-500 fill-yellow-500'
                                     : 'text-dd-border/70'
                                 }`}
@@ -939,44 +1269,82 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                           })}
                         </div>
 
-                        {/* Botão 3D da fase (Rounded-Square) */}
+                        {/* Botão 3D da bandeira (Checkpoint) */}
                         <button
-                          onClick={() => handleLevelClick(level, unlocked)}
-                          className={`w-20 h-20 rounded-[22px] flex items-center justify-center transition-all transform cursor-pointer ${
-                            unlocked
-                              ? isCompleted
-                                ? 'bg-orange-500 text-white border-x-2 border-t-2 border-b-[7px] border-orange-600 hover:bg-orange-400 active:border-b-0 active:translate-y-[7px]'
+                          onClick={() => handleCheckpointClick(unitNumber)}
+                          className={`w-20 h-20 rounded-[22px] flex items-center justify-center transition-all transform cursor-pointer relative ${
+                            checkpointUnlocked
+                              ? isCheckpointCompleted
+                                ? 'bg-dd-accent text-white border-x-2 border-t-2 border-b-[7px] border-orange-600 hover:bg-orange-500 active:border-b-0 active:translate-y-[7px]'
                                 : 'bg-dd-surface text-orange-500 border-x-2 border-t-2 border-b-[7px] border-orange-500 hover:bg-dd-border/30 active:border-b-0 active:translate-y-[7px]'
-                              : 'bg-dd-surface/40 text-dd-muted/30 border-x-2 border-t-2 border-b-[7px] border-dd-border/40 cursor-not-allowed'
+                              : 'bg-dd-surface/40 text-dd-muted/30 border-x-2 border-t-2 border-b-[7px] border-dd-border/30 cursor-not-allowed'
                           }`}
                         >
-                          {unlocked ? (
-                            <BookOpen className="w-8 h-8" />
-                          ) : (
-                            <Lock className="w-7 h-7" />
+                          <Flag
+                            className={`w-8 h-8 ${checkpointUnlocked && !isCheckpointCompleted ? 'animate-pulse' : ''}`}
+                          />
+                          {!checkpointUnlocked && (
+                            <div className="absolute -top-1 -right-1 bg-dd-surface border border-dd-border p-1 rounded-full text-dd-muted shadow-sm">
+                              <Lock className="w-3.5 h-3.5 text-dd-muted" />
+                            </div>
                           )}
                         </button>
 
-                        {/* Título da fase */}
+                        {/* Título do Checkpoint */}
                         <div className="mt-3 text-center max-w-[170px]">
                           <p className="text-xs font-black uppercase text-dd-text leading-tight">
-                            Fase {level.levelNumber}
+                            Checkpoint
                           </p>
                           <p className="text-[10.5px] text-dd-muted font-bold leading-tight mt-1 truncate">
-                            {level.title}
+                            Unidade {unitNumber}
                           </p>
                         </div>
                       </div>
                     </div>
                   );
                 });
+
+                return elements;
               })()}
             </div>
           </div>
 
           {/* Floating Recommended Level Bar */}
           <AnimatePresence>
-            {recommendedLevel && (
+            {recommendedCheckpoint && (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 30 }}
+                transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+                className="sticky bottom-6 left-0 right-0 z-30 flex justify-center px-4 pointer-events-none"
+              >
+                <div className="pointer-events-auto bg-dd-surface/90 backdrop-blur-md border border-orange-500/30 rounded-2xl px-6 py-5 shadow-xl max-w-lg w-full flex items-center justify-between gap-5">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-extrabold uppercase text-orange-400 tracking-wider">
+                      Próxima Atividade Recomendada
+                    </p>
+                    <h4 className="text-sm font-black text-dd-text truncate mt-0.5">
+                      {recommendedCheckpoint.data?.title ||
+                        `Checkpoint da Unidade ${recommendedCheckpoint.unitNumber}`}
+                    </h4>
+                    <p className="text-xs text-dd-muted truncate mt-0.5">
+                      {recommendedCheckpoint.data?.description ||
+                        'Revisão e desafio prático de código.'}
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => handleCheckpointClick(recommendedCheckpoint.unitNumber)}
+                    className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-orange-500/20 whitespace-nowrap cursor-pointer active:scale-95"
+                  >
+                    Começar
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
+            {!recommendedCheckpoint && recommendedLevel && (
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -1437,6 +1805,498 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                             className="px-2.5 py-1 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
                           >
                             📚 Explicar Teoria
+                          </button>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Chat Input Field */}
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleSendAiMessage();
+                      }}
+                      className="p-3 border-t border-dd-border flex gap-2 items-center bg-dd-surface/80"
+                    >
+                      <input
+                        type="text"
+                        value={aiInput}
+                        onChange={(e) => setAiInput(e.target.value)}
+                        placeholder="Perguntar ao tutor..."
+                        disabled={aiLoading}
+                        className="flex-grow rounded-xl border border-dd-border bg-dd-surface px-3 py-2 text-xs text-dd-text placeholder-dd-muted focus:border-orange-500 focus:outline-none disabled:opacity-50"
+                      />
+                      <button
+                        type="submit"
+                        disabled={aiLoading || !aiInput.trim()}
+                        className="px-3 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition-all disabled:opacity-50 cursor-pointer"
+                      >
+                        Enviar
+                      </button>
+                    </form>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* CHECKPOINT WIZARD MODAL */}
+      <AnimatePresence>
+        {checkpointModalOpen && activeCheckpointUnit && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              variants={fadeVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="fixed inset-0 bg-black/60 backdrop-blur-[8px]"
+              onClick={() => {
+                if (checkpointStage !== 'summary' && !submittingAttempt) {
+                  setConfirmDialog({
+                    isOpen: true,
+                    title: 'Sair do Checkpoint',
+                    message:
+                      'Quer realmente sair do checkpoint? Seu progresso nesta sessão de revisão será perdido.',
+                    confirmText: 'Sair',
+                    cancelText: 'Continuar',
+                    variant: 'danger',
+                    onConfirm: () => {
+                      setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+                      setCheckpointModalOpen(false);
+                    },
+                    onCancel: () => setConfirmDialog((prev) => ({ ...prev, isOpen: false })),
+                  });
+                } else {
+                  setCheckpointModalOpen(false);
+                }
+              }}
+            />
+
+            <motion.div
+              variants={reduced ? fadeVariants : modalContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className={`relative w-full ${aiChatOpen ? 'max-w-4xl' : 'max-w-2xl'} bg-dd-surface border border-dd-border rounded-2xl shadow-2xl z-10 font-sans flex flex-col max-h-[90vh] overflow-hidden transition-all duration-300`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Colored Modal Header */}
+              <div className="bg-gradient-to-r from-dd-accent to-orange-600 text-white p-5 pb-8 relative flex flex-col gap-4">
+                <div className="flex items-center justify-between w-full">
+                  <button
+                    onClick={() => {
+                      if (checkpointStage !== 'summary' && !submittingAttempt) {
+                        setConfirmDialog({
+                          isOpen: true,
+                          title: 'Sair do Checkpoint',
+                          message:
+                            'Quer realmente sair do checkpoint? Seu progresso nesta sessão de revisão será perdido.',
+                          confirmText: 'Sair',
+                          cancelText: 'Continuar',
+                          variant: 'danger',
+                          onConfirm: () => {
+                            setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+                            setCheckpointModalOpen(false);
+                          },
+                          onCancel: () => setConfirmDialog((prev) => ({ ...prev, isOpen: false })),
+                        });
+                      } else {
+                        setCheckpointModalOpen(false);
+                      }
+                    }}
+                    className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition-all cursor-pointer border-none"
+                    aria-label="Fechar checkpoint"
+                  >
+                    <X className="w-4.5 h-4.5" />
+                  </button>
+
+                  <h2 className="text-xs font-black uppercase tracking-wider text-center flex-grow text-white">
+                    {(() => {
+                      if (checkpointStage === 'review') {
+                        return `Revisão da Unidade ${activeCheckpointUnit}: Parte ${checkpointReviewStep + 1} de 3`;
+                      }
+                      if (checkpointStage === 'exercise') {
+                        return `Desafio Prático de Código`;
+                      }
+                      return `Unidade Concluída!`;
+                    })()}
+                  </h2>
+
+                  <button
+                    onClick={() => setAiChatOpen(!aiChatOpen)}
+                    className={`h-7 px-2.5 rounded-full flex items-center gap-1.5 text-[10px] font-bold transition-all cursor-pointer border-none shadow-sm ${
+                      aiChatOpen
+                        ? 'bg-white text-orange-600 hover:bg-white/95 font-black'
+                        : 'bg-white/15 text-white hover:bg-white/25 animate-pulse'
+                    }`}
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>DevAssistant {aiChatOpen ? 'Aberto' : 'IA'}</span>
+                  </button>
+                </div>
+
+                {/* Progress bar */}
+                <div className="flex gap-2 w-full mt-1">
+                  {[0, 1, 2].map((segIdx) => {
+                    let fillPercent = 0;
+                    if (checkpointStage === 'review') {
+                      if (segIdx === 0) {
+                        fillPercent = ((checkpointReviewStep + 1) / 3) * 100;
+                      }
+                    } else if (checkpointStage === 'exercise') {
+                      if (segIdx === 0) fillPercent = 100;
+                      if (segIdx === 1) {
+                        fillPercent = checkpointSuccess ? 100 : 50;
+                      }
+                    } else if (checkpointStage === 'summary') {
+                      fillPercent = 100;
+                    }
+
+                    return (
+                      <div
+                        key={segIdx}
+                        className="h-1.5 flex-grow bg-white/25 rounded-full overflow-hidden relative"
+                      >
+                        <div
+                          className="absolute top-0 left-0 h-full bg-white rounded-full transition-all duration-300"
+                          style={{ width: `${fillPercent}%` }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Split Content Pane */}
+              <div className="flex flex-row flex-grow overflow-hidden relative">
+                {/* Left Column: Checkpoint content */}
+                <div
+                  className={`flex flex-col flex-grow overflow-hidden ${aiChatOpen ? 'md:w-1/2 border-r border-dd-border' : 'w-full'}`}
+                >
+                  {/* Overlapping Content Container */}
+                  <div className="relative -mt-4 rounded-t-2xl bg-dd-surface p-6 flex-grow flex flex-col overflow-y-auto min-h-[420px]">
+                    {checkpointStage === 'review' &&
+                      (() => {
+                        const slides = getCheckpointSlides();
+                        const slide = slides[checkpointReviewStep];
+                        if (!slide) return null;
+                        return (
+                          <div className="space-y-4 py-2">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500 font-bold text-sm">
+                                📚
+                              </div>
+                              <div>
+                                <p className="text-[10px] font-bold text-orange-500 uppercase tracking-wide">
+                                  Revisando: {slide.levelTitle}
+                                </p>
+                                <h3 className="text-sm font-extrabold text-dd-text">
+                                  {slide.title}
+                                </h3>
+                              </div>
+                            </div>
+
+                            <p className="text-xs text-dd-text leading-relaxed font-medium">
+                              {slide.concept}
+                            </p>
+
+                            {slide.code && (
+                              <div className="relative bg-black/40 rounded-xl p-4 border border-dd-border font-mono text-[10px] text-orange-200 overflow-x-auto whitespace-pre leading-relaxed font-semibold">
+                                {slide.code}
+                              </div>
+                            )}
+
+                            {slide.tip && (
+                              <div className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-3 flex items-start gap-2.5">
+                                <span className="text-orange-500 text-xs mt-0.5">💡</span>
+                                <div className="space-y-0.5">
+                                  <h4 className="text-[10px] font-bold text-orange-500 uppercase tracking-wide">
+                                    Dica Pro
+                                  </h4>
+                                  <p className="text-[10px] text-dd-muted leading-relaxed">
+                                    {slide.tip}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
+
+                    {checkpointStage === 'exercise' &&
+                      (() => {
+                        const data = CHECKPOINTS_DATA[activeLang]?.[activeCheckpointUnit];
+                        if (!data) return null;
+                        return (
+                          <div className="space-y-5 py-2 flex flex-col flex-grow min-h-0">
+                            <div>
+                              <span className="px-2 py-0.5 rounded bg-orange-500/10 text-[9px] font-black text-orange-500 uppercase tracking-wider">
+                                Desafio de Código da Unidade {activeCheckpointUnit}
+                              </span>
+                              <h3 className="text-base font-black text-dd-text mt-1">
+                                {data.challenge.title}
+                              </h3>
+                            </div>
+
+                            <p className="text-xs text-dd-text leading-relaxed font-semibold">
+                              {data.challenge.description}
+                            </p>
+
+                            {/* Code Editor */}
+                            <div className="border border-dd-border rounded-xl overflow-hidden bg-dd-bg">
+                              <CodeEditor
+                                value={checkpointCode}
+                                onChange={(val) => setCheckpointCode(val)}
+                                language={codemirrorLanguageId(activeLang)}
+                                height="180px"
+                              />
+                            </div>
+
+                            {/* Execution Console Area */}
+                            <div className="flex-grow min-h-[100px] flex flex-col bg-black/35 rounded-xl border border-dd-border overflow-hidden">
+                              <div className="border-b border-dd-border bg-dd-surface/80 px-3 py-1.5 flex items-center justify-between">
+                                <span className="text-[10px] font-bold text-dd-muted uppercase tracking-wider">
+                                  Console Output
+                                </span>
+                                {checkpointSuccess && (
+                                  <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-1">
+                                    <Check className="w-3.5 h-3.5" /> Sucesso! Teste passou.
+                                  </span>
+                                )}
+                              </div>
+                              <div className="p-3 font-mono text-[11px] overflow-y-auto flex-grow max-h-[140px]">
+                                {checkpointRunning ? (
+                                  <div className="flex items-center gap-2 text-dd-muted">
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    <span>Executando testes...</span>
+                                  </div>
+                                ) : checkpointError ? (
+                                  <pre className="text-red-400 whitespace-pre-wrap leading-relaxed">
+                                    {checkpointError}
+                                  </pre>
+                                ) : checkpointOutput ? (
+                                  <pre className="text-dd-text whitespace-pre-wrap leading-relaxed">
+                                    {checkpointOutput}
+                                  </pre>
+                                ) : (
+                                  <span className="text-dd-muted italic">
+                                    Escreva seu código e clique em executar para ver o resultado.
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                    {checkpointStage === 'summary' && (
+                      <div className="text-center py-8 space-y-6">
+                        <div className="w-20 h-20 bg-orange-500/10 border border-orange-500/20 rounded-full flex items-center justify-center text-orange-400 mx-auto animate-bounce shadow-lg shadow-orange-500/10">
+                          <Trophy className="w-10 h-10" />
+                        </div>
+
+                        <div className="space-y-2">
+                          <h3 className="text-xl font-black text-dd-text uppercase">
+                            Checkpoint Concluído!
+                          </h3>
+                          <p className="text-xs text-dd-muted max-w-sm mx-auto font-medium">
+                            Parabéns! Você completou a revisão e o desafio prático de código da
+                            Unidade {activeCheckpointUnit}!
+                          </p>
+                        </div>
+
+                        <div className="bg-dd-surface border border-dd-border p-4 rounded-xl text-center max-w-xs mx-auto">
+                          <p className="text-[10px] font-black text-dd-muted uppercase">XP Ganho</p>
+                          <p className="text-2xl font-black text-orange-400 mt-1 font-mono">
+                            +50 XP
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Navigation Footer */}
+                  <div className="p-4 border-t border-dd-border flex justify-between items-center bg-dd-surface">
+                    {checkpointStage !== 'summary' ? (
+                      <>
+                        <button
+                          onClick={() => {
+                            if (checkpointStage === 'review') {
+                              if (checkpointReviewStep > 0) {
+                                setCheckpointReviewStep((prev) => prev - 1);
+                              }
+                            } else if (checkpointStage === 'exercise') {
+                              setCheckpointStage('review');
+                              setCheckpointReviewStep(2);
+                            }
+                          }}
+                          disabled={checkpointStage === 'review' && checkpointReviewStep === 0}
+                          className="px-6 py-2.5 bg-transparent border border-dd-border hover:bg-dd-border/20 text-dd-text rounded-full text-xs font-bold transition-all cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed"
+                        >
+                          Anterior
+                        </button>
+
+                        {checkpointStage === 'review' ? (
+                          <button
+                            onClick={() => {
+                              if (checkpointReviewStep < 2) {
+                                setCheckpointReviewStep((prev) => prev + 1);
+                              } else {
+                                setCheckpointStage('exercise');
+                              }
+                            }}
+                            className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                          >
+                            {checkpointReviewStep === 2 ? 'Ir para o Exercício' : 'Próximo'}
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        ) : (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={handleRunCheckpointCode}
+                              disabled={checkpointRunning || checkpointSuccess}
+                              className="px-5 py-2.5 bg-dd-surface border border-orange-500/50 hover:bg-dd-border/30 text-orange-400 rounded-full text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                              {checkpointRunning ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Play className="w-4 h-4" />
+                              )}
+                              Executar e Verificar
+                            </button>
+
+                            <button
+                              onClick={handleCompleteCheckpoint}
+                              disabled={!checkpointSuccess || submittingAttempt}
+                              className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed enabled:animate-pulse"
+                            >
+                              {submittingAttempt ? 'Gravando...' : 'Concluir Checkpoint'}
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => setCheckpointModalOpen(false)}
+                        className="w-full py-2.5 bg-dd-surface border border-dd-border hover:bg-dd-border/30 text-dd-text rounded-full text-xs font-bold transition-all cursor-pointer"
+                      >
+                        Voltar para a Trilha
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Right Column: AI Chat Panel */}
+                {aiChatOpen && (
+                  <div className="w-full md:w-1/2 flex flex-col bg-dd-surface/50 h-full overflow-hidden relative border-t border-dd-border md:border-t-0 select-text">
+                    {/* Header/Title of AI */}
+                    <div className="p-4 border-b border-dd-border flex items-center justify-between bg-dd-surface/70">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-orange-500" />
+                        <span className="text-xs font-bold text-dd-text">DevAssistant IA</span>
+                      </div>
+                      <span className="px-1.5 py-0.5 rounded bg-orange-500/10 text-[8px] font-bold text-orange-500 uppercase tracking-wide">
+                        Online
+                      </span>
+                    </div>
+
+                    {/* Messages Scroll Area */}
+                    <div className="flex-grow p-4 overflow-y-auto space-y-3 scrollbar-thin select-text">
+                      {aiMessages.map((msg, idx) => (
+                        <div
+                          key={idx}
+                          className={`flex gap-2.5 max-w-[85%] ${
+                            msg.role === 'user' ? 'ml-auto flex-row-reverse' : 'mr-auto'
+                          }`}
+                        >
+                          <div
+                            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                              msg.role === 'user'
+                                ? 'bg-orange-500 text-white'
+                                : 'bg-dd-border text-orange-500'
+                            }`}
+                          >
+                            {msg.role === 'user' ? user.username[0].toUpperCase() : '🤖'}
+                          </div>
+                          <div
+                            className={`p-3 rounded-2xl text-[11px] leading-relaxed select-text ${
+                              msg.role === 'user'
+                                ? 'bg-orange-500 text-white rounded-tr-none font-semibold'
+                                : 'bg-dd-border/40 text-dd-text rounded-tl-none border border-dd-border/30 font-medium'
+                            }`}
+                          >
+                            {renderMessageContent(msg.content)}
+                          </div>
+                        </div>
+                      ))}
+                      {aiLoading && (
+                        <div className="flex gap-2.5 max-w-[80%] mr-auto items-center">
+                          <div className="w-7 h-7 rounded-full bg-dd-border text-orange-500 flex items-center justify-center text-xs font-bold shrink-0">
+                            🤖
+                          </div>
+                          <div className="flex gap-1">
+                            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-100" />
+                            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-200" />
+                            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-300" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Quick Suggestion Chips for Checkpoints */}
+                    <div className="px-4 py-2 flex flex-wrap gap-1.5 border-t border-dd-border/50 bg-dd-surface/20">
+                      {checkpointStage === 'review' && (
+                        <>
+                          <button
+                            onClick={() =>
+                              handleSendAiMessage(
+                                'Por favor, explique com mais detalhes este conceito da revisão'
+                              )
+                            }
+                            disabled={aiLoading}
+                            className="px-2.5 py-1 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                          >
+                            💡 Explicar Revisão
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleSendAiMessage(
+                                'Me dê um exemplo prático desse conceito em código'
+                              )
+                            }
+                            disabled={aiLoading}
+                            className="px-2.5 py-1 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                          >
+                            💻 Exemplo de Código
+                          </button>
+                        </>
+                      )}
+                      {checkpointStage === 'exercise' && (
+                        <>
+                          <button
+                            onClick={() =>
+                              handleSendAiMessage(
+                                'Me dê uma dica lógica para resolver este desafio sem me passar código'
+                              )
+                            }
+                            disabled={aiLoading}
+                            className="px-2.5 py-1 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                          >
+                            🔍 Dica de Lógica
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleSendAiMessage(
+                                'Explique o que o meu código atual faz e onde posso ajustar'
+                              )
+                            }
+                            disabled={aiLoading}
+                            className="px-2.5 py-1 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                          >
+                            🐞 Ajudar com o Bug
                           </button>
                         </>
                       )}

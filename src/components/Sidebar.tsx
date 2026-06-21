@@ -421,7 +421,7 @@ export function Sidebar({ user }: SidebarProps) {
       active: pathname === '/explore',
     },
     {
-      label: 'Trilhas',
+      label: 'Aprender com DevDeck',
       href: '/trails',
       icon: BookOpen,
       active: pathname.startsWith('/trails'),
@@ -432,32 +432,6 @@ export function Sidebar({ user }: SidebarProps) {
       icon: Bell,
       active: pathname === '/notifications',
     },
-    {
-      label: 'Bate-papo',
-      href: '/messages',
-      icon: MessageCircle,
-      active: pathname === '/messages',
-    },
-    {
-      label: 'Ducky',
-      href: '/ducky',
-      icon: DuckyIcon,
-      active: pathname === '/ducky',
-    },
-    {
-      label: 'Itens salvos',
-      href: '/bookmarks',
-      icon: Bookmark,
-      active: pathname === '/bookmarks',
-    },
-    /*
-    {
-      label: 'Premium',
-      onClick: () => setPremiumModalOpen(true),
-      icon: BadgeCheck,
-      badge: 'timer' as const,
-    },
-    */
     {
       label: 'Perfil',
       href: activeUser ? `/profile/${activeUser.username}` : '#',
@@ -557,11 +531,35 @@ export function Sidebar({ user }: SidebarProps) {
                         />
                         <div className="absolute bottom-full left-0 w-56 mb-2 rounded-xl border border-dd-border bg-dd-surface/95 backdrop-blur-xl shadow-2xl z-50 py-1.5 font-sans overflow-hidden animate-slide-up">
                           <Link
+                            href="/messages"
+                            className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors border-b border-dd-border/40"
+                            onClick={() => setMoreMenuOpen(false)}
+                          >
+                            <MessageCircle className="w-4.5 h-4.5 text-dd-muted" />
+                            Bate-papo
+                          </Link>
+                          <Link
+                            href="/ducky"
+                            className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors border-b border-dd-border/40"
+                            onClick={() => setMoreMenuOpen(false)}
+                          >
+                            <DuckyIcon className="w-4.5 h-4.5 text-dd-muted" />
+                            Ducky
+                          </Link>
+                          <Link
+                            href="/bookmarks"
+                            className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors border-b border-dd-border/40"
+                            onClick={() => setMoreMenuOpen(false)}
+                          >
+                            <Bookmark className="w-4.5 h-4.5 text-dd-muted" />
+                            Itens salvos
+                          </Link>
+                          <Link
                             href="/duels"
                             className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors border-b border-dd-border/40"
                             onClick={() => setMoreMenuOpen(false)}
                           >
-                            <Swords className="w-4 h-4 text-dd-muted" />
+                            <Swords className="w-4.5 h-4.5 text-dd-muted" />
                             Duelos de Código
                           </Link>
                           <Link
@@ -569,7 +567,7 @@ export function Sidebar({ user }: SidebarProps) {
                             className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors border-b border-dd-border/40"
                             onClick={() => setMoreMenuOpen(false)}
                           >
-                            <Trophy className="w-4 h-4 text-dd-muted" />
+                            <Trophy className="w-4.5 h-4.5 text-dd-muted" />
                             Classificação Geral
                           </Link>
                           <Link
@@ -577,7 +575,7 @@ export function Sidebar({ user }: SidebarProps) {
                             className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors"
                             onClick={() => setMoreMenuOpen(false)}
                           >
-                            <SettingsIcon className="w-4 h-4 text-dd-muted" />
+                            <SettingsIcon className="w-4.5 h-4.5 text-dd-muted" />
                             Configurações
                           </Link>
                         </div>
@@ -765,7 +763,7 @@ export function Sidebar({ user }: SidebarProps) {
               (item) =>
                 item.label === 'Página Inicial' ||
                 item.label === 'Explorar' ||
-                item.label === 'Trilhas' ||
+                item.label === 'Aprender com DevDeck' ||
                 item.label === 'Notificações' ||
                 item.label === 'Perfil'
             )
