@@ -539,124 +539,126 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
         ) : (
           /* CONVERSATION FLOW (Bubble-free clean thread) */
           <>
-            <div className="flex-grow overflow-y-auto px-6 py-6 max-w-3xl w-full mx-auto relative z-10 scrollbar-thin">
-              <div className="flex flex-col w-full pb-6">
-                {isPrivate && (
-                  <div className="mb-4 bg-purple-500/5 border border-purple-500/10 p-3.5 rounded-xl flex items-center gap-2.5 text-purple-400 text-xs select-none">
-                    <ShieldAlert className="w-4 h-4" />
-                    <span>
-                      Você está no <strong>Modo Privado</strong>. Suas conversas não ficam salvas na
-                      conta.
-                    </span>
-                  </div>
-                )}
+            <div className="flex-grow overflow-y-auto scrollbar-ducky relative z-10">
+              <div className="px-6 py-6 max-w-3xl w-full mx-auto">
+                <div className="flex flex-col w-full pb-6">
+                  {isPrivate && (
+                    <div className="mb-4 bg-purple-500/5 border border-purple-500/10 p-3.5 rounded-xl flex items-center gap-2.5 text-purple-400 text-xs select-none">
+                      <ShieldAlert className="w-4 h-4" />
+                      <span>
+                        Você está no <strong>Modo Privado</strong>. Suas conversas não ficam salvas
+                        na conta.
+                      </span>
+                    </div>
+                  )}
 
-                {messages.map((msg) => {
-                  const isDucky = msg.sender === 'ducky';
-                  return isDucky ? (
-                    /* DUCKY (AI) MESSAGE: Left-aligned plain text with icons underneath */
-                    <div
-                      key={msg.id}
-                      className="flex flex-col items-start w-full py-4 border-b border-[#1f1f23]/10 animate-in fade-in duration-200"
-                    >
-                      <div className="max-w-[85%] text-sm text-dd-text leading-relaxed font-sans">
-                        <MarkdownRenderer content={msg.text} />
-                        {msg.isStreaming && (
-                          <span className="inline-block w-1.5 h-3 bg-orange-500 ml-1 animate-pulse" />
+                  {messages.map((msg) => {
+                    const isDucky = msg.sender === 'ducky';
+                    return isDucky ? (
+                      /* DUCKY (AI) MESSAGE: Left-aligned plain text with icons underneath */
+                      <div
+                        key={msg.id}
+                        className="flex flex-col items-start w-full py-4 border-b border-[#1f1f23]/10 animate-in fade-in duration-200"
+                      >
+                        <div className="max-w-[85%] text-sm text-dd-text leading-relaxed font-sans">
+                          <MarkdownRenderer content={msg.text} />
+                          {msg.isStreaming && (
+                            <span className="inline-block w-1.5 h-3 bg-orange-500 ml-1 animate-pulse" />
+                          )}
+                        </div>
+
+                        {/* Action icons below Ducky message */}
+                        {!msg.isStreaming && (
+                          <div className="flex items-center gap-3.5 mt-2.5 text-[#53535f] select-none">
+                            <button
+                              onClick={() => navigator.clipboard.writeText(msg.text)}
+                              className="hover:text-dd-text transition-colors cursor-pointer"
+                              title="Copiar resposta"
+                            >
+                              <Copy className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleSend(msg.text)}
+                              className="hover:text-dd-text transition-colors cursor-pointer"
+                              title="Regenerar"
+                            >
+                              <RotateCw className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              className="hover:text-dd-text transition-colors cursor-pointer"
+                              title="Gostei"
+                            >
+                              <ThumbsUp className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              className="hover:text-dd-text transition-colors cursor-pointer"
+                              title="Não gostei"
+                            >
+                              <ThumbsDown className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              className="hover:text-dd-text transition-colors cursor-pointer"
+                              title="Compartilhar"
+                            >
+                              <Share2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         )}
                       </div>
+                    ) : (
+                      /* USER MESSAGE: Right-aligned speech bubble with icons underneath */
+                      <div
+                        key={msg.id}
+                        className="flex flex-col items-end w-full py-3.5 animate-in fade-in duration-200"
+                      >
+                        <div className="bg-[#1c1c1f] hover:bg-[#232328] border border-[#2c2c35]/40 text-dd-text px-4 py-2 rounded-2xl max-w-[70%] text-sm break-words whitespace-pre-wrap font-sans transition-colors">
+                          {msg.text}
+                        </div>
 
-                      {/* Action icons below Ducky message */}
-                      {!msg.isStreaming && (
-                        <div className="flex items-center gap-3.5 mt-2.5 text-[#53535f] select-none">
+                        {/* Action icons below user message */}
+                        <div className="flex items-center gap-3 mt-1.5 text-[#53535f] select-none mr-2">
                           <button
                             onClick={() => navigator.clipboard.writeText(msg.text)}
                             className="hover:text-dd-text transition-colors cursor-pointer"
-                            title="Copiar resposta"
+                            title="Copiar mensagem"
                           >
                             <Copy className="w-3.5 h-3.5" />
                           </button>
                           <button
-                            onClick={() => handleSend(msg.text)}
+                            onClick={() => {
+                              setInputVal(msg.text);
+                              inputRef.current?.focus();
+                            }}
                             className="hover:text-dd-text transition-colors cursor-pointer"
-                            title="Regenerar"
+                            title="Editar"
                           >
-                            <RotateCw className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            className="hover:text-dd-text transition-colors cursor-pointer"
-                            title="Gostei"
-                          >
-                            <ThumbsUp className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            className="hover:text-dd-text transition-colors cursor-pointer"
-                            title="Não gostei"
-                          >
-                            <ThumbsDown className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            className="hover:text-dd-text transition-colors cursor-pointer"
-                            title="Compartilhar"
-                          >
-                            <Share2 className="w-3.5 h-3.5" />
+                            <Pencil className="w-3.5 h-3.5" />
                           </button>
                         </div>
-                      )}
-                    </div>
-                  ) : (
-                    /* USER MESSAGE: Right-aligned speech bubble with icons underneath */
-                    <div
-                      key={msg.id}
-                      className="flex flex-col items-end w-full py-3.5 animate-in fade-in duration-200"
-                    >
-                      <div className="bg-[#1c1c1f] hover:bg-[#232328] border border-[#2c2c35]/40 text-dd-text px-4 py-2 rounded-2xl max-w-[70%] text-sm break-words whitespace-pre-wrap font-sans transition-colors">
-                        {msg.text}
                       </div>
+                    );
+                  })}
 
-                      {/* Action icons below user message */}
-                      <div className="flex items-center gap-3 mt-1.5 text-[#53535f] select-none mr-2">
-                        <button
-                          onClick={() => navigator.clipboard.writeText(msg.text)}
-                          className="hover:text-dd-text transition-colors cursor-pointer"
-                          title="Copiar mensagem"
-                        >
-                          <Copy className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => {
-                            setInputVal(msg.text);
-                            inputRef.current?.focus();
-                          }}
-                          className="hover:text-dd-text transition-colors cursor-pointer"
-                          title="Editar"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
+                  {/* Thinking Indicator */}
+                  {thinking && (
+                    <div className="flex flex-col items-start w-full py-4 border-b border-[#1f1f23]/10 animate-in fade-in duration-200">
+                      <div className="flex items-center gap-2.5 text-xs text-[#71767b] py-1 font-sans">
+                        <div className="flex gap-1.5">
+                          <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                          <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                          <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce" />
+                        </div>
+                        <span>
+                          {mode === 'Deep Debug'
+                            ? 'Ducky está analisando o escopo do seu projeto...'
+                            : 'Ducky está analisando seu código...'}
+                        </span>
                       </div>
                     </div>
-                  );
-                })}
+                  )}
 
-                {/* Thinking Indicator */}
-                {thinking && (
-                  <div className="flex flex-col items-start w-full py-4 border-b border-[#1f1f23]/10 animate-in fade-in duration-200">
-                    <div className="flex items-center gap-2.5 text-xs text-[#71767b] py-1 font-sans">
-                      <div className="flex gap-1.5">
-                        <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                        <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                        <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce" />
-                      </div>
-                      <span>
-                        {mode === 'Deep Debug'
-                          ? 'Ducky está analisando o escopo do seu projeto...'
-                          : 'Ducky está analisando seu código...'}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                <div ref={chatEndRef} />
+                  <div ref={chatEndRef} />
+                </div>
               </div>
             </div>
 
