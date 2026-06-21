@@ -1379,9 +1379,8 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
               )}
             </AnimatePresence>
           </div>
+          <Footer />
         </main>
-
-        <Footer />
       </div>
 
       {/* QUIZ WIZARD MODAL */}

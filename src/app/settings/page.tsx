@@ -577,8 +577,8 @@ export default function SettingsPage() {
               Sair da Conta (Logout)
             </button>
           </div>
+          <Footer />
         </main>
-        <Footer />
       </div>
     </div>
   );
