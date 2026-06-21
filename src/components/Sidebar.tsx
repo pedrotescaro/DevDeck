@@ -627,7 +627,7 @@ export function Sidebar({ user }: SidebarProps) {
               onClick={() => setDropdownOpen(!dropdownOpen)}
               className="w-full flex items-center justify-between p-3.5 rounded-xl border border-transparent hover:border-dd-border hover:bg-dd-surface transition-all duration-200 cursor-pointer"
             >
-              <div className="flex items-center gap-3.5 min-w-0">
+              <div className="flex items-center gap-3.5 min-w-0 flex-grow">
                 {activeUser.avatar_url ? (
                   <img
                     src={activeUser.avatar_url}
@@ -639,30 +639,32 @@ export function Sidebar({ user }: SidebarProps) {
                     {initials}
                   </div>
                 )}
-                <div className="text-left min-w-0 font-sans">
-                  <p className="text-sm font-bold text-dd-text truncate leading-tight">
-                    {activeUser.username}
-                  </p>
+                <div className="text-left min-w-0 font-sans flex-grow">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <p className="text-sm font-bold text-dd-text truncate leading-tight">
+                      {activeUser.username}
+                    </p>
+                    <span className="px-1.5 py-0.5 rounded bg-orange-500/10 border border-orange-500/30 text-[9.5px] font-extrabold text-orange-500 leading-none shadow-sm shrink-0">
+                      Lvl {Math.max(1, Math.floor((activeUser.total_xp ?? 0) / 1000) + 1)}
+                    </span>
+                  </div>
                   <p className="text-[11px] text-dd-muted font-medium truncate leading-none mt-1">
                     @{activeUser.username.toLowerCase()}
                   </p>
-                  <div className="flex items-center gap-3 mt-3 flex-wrap">
-                    <span className="px-2 py-0.5 rounded bg-orange-500/10 border border-orange-500/30 text-[9.5px] font-extrabold text-orange-500 leading-none shadow-sm">
-                      Lvl {Math.max(1, Math.floor((activeUser.total_xp ?? 0) / 1000) + 1)}
+                  <div className="flex items-center gap-2 mt-3 select-none">
+                    <span className="text-2xl animate-tiktok-fire select-none leading-none">
+                      🔥
                     </span>
-                    <span className="flex items-center gap-1.5 text-[9.5px] text-orange-500 font-extrabold leading-none">
-                      <span className="text-[13px] animate-fire-flicker">🔥</span>{' '}
-                      <span>
-                        {activeUser.streak_days ?? activeUser.streak ?? 0}{' '}
-                        {(activeUser.streak_days ?? activeUser.streak ?? 0) === 1 ? 'dia' : 'dias'}{' '}
-                        de ofensiva
-                      </span>
+                    <span className="text-[11px] font-extrabold text-orange-500 leading-none">
+                      {activeUser.streak_days ?? activeUser.streak ?? 0}{' '}
+                      {(activeUser.streak_days ?? activeUser.streak ?? 0) === 1 ? 'dia' : 'dias'} de
+                      ofensiva
                     </span>
                   </div>
                 </div>
               </div>
               <ChevronDown
-                className={`w-4 h-4 text-dd-muted transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`}
+                className={`w-4 h-4 text-dd-muted transition-transform duration-200 shrink-0 ${dropdownOpen ? 'rotate-180' : ''}`}
               />
             </button>
 
