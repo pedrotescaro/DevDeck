@@ -39,6 +39,7 @@ import {
   MessageSquare,
   Trophy,
   ChevronRight,
+  ChevronLeft,
   ArrowBigDown,
   AlertTriangle,
   Code,
@@ -123,6 +124,7 @@ export function FeedContent({
   const [duels, setDuels] = useState<any[]>(initialDuels);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [leaderboardLanguage, setLeaderboardLanguage] = useState<string>('GLOBAL');
+  const [engagementView, setEngagementView] = useState<'streak' | 'weekly'>('streak');
 
   // Post Form state
   const [postBody, setPostBody] = useState('');
@@ -1738,7 +1740,7 @@ export function FeedContent({
           <div className="rounded-2xl bg-dd-sidebar-bg border border-dd-border p-5 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider">
-                Engajamento
+                ENGAJAMENTO
               </span>
               <span className="flex h-2 w-2 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
@@ -1746,13 +1748,127 @@ export function FeedContent({
               </span>
             </div>
 
-            {/* Flame streak */}
-            <div className="flex flex-col items-center justify-center py-4 select-none">
-              <Flame className="w-16 h-16 text-orange-500 fill-orange-500" />
-              <span className="mt-3 text-xs font-bold text-orange-500">
-                {currentStreak} {currentStreak === 1 ? 'dia' : 'dias'} de ofensiva
-              </span>
-            </div>
+            {engagementView === 'streak' ? (
+              /* Flame streak view */
+              <div className="space-y-4">
+                <div className="flex items-center justify-between py-2 select-none">
+                  <button
+                    onClick={() => setEngagementView('weekly')}
+                    className="p-1.5 hover:bg-dd-surface/60 rounded-full text-dd-muted hover:text-dd-text transition-colors cursor-pointer"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <div className="flex flex-col items-center">
+                    <Flame className="w-14 h-14 text-orange-500 fill-orange-500 animate-pulse" />
+                    <span className="mt-2.5 text-xs font-bold text-orange-500">
+                      {currentStreak} {currentStreak === 1 ? 'dia' : 'dias'} de ofensiva
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setEngagementView('weekly')}
+                    className="p-1.5 hover:bg-dd-surface/60 rounded-full text-dd-muted hover:text-dd-text transition-colors cursor-pointer"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Timeline of milestone flames */}
+                <div className="flex items-center justify-between px-1 py-2 text-[9px] font-bold text-dd-muted border-t border-dd-border/40">
+                  <div className="flex flex-col items-center gap-1 shrink-0">
+                    <Flame
+                      className={`w-4 h-4 text-yellow-500 fill-yellow-500 ${currentStreak >= 5 ? 'opacity-100 filter drop-shadow-[0_0_3px_rgba(234,179,8,0.5)]' : 'opacity-40'}`}
+                    />
+                    <span>5d</span>
+                  </div>
+                  <div
+                    className={`h-[1px] flex-grow mx-1 ${currentStreak >= 10 ? 'bg-orange-500' : 'bg-dd-border/40'}`}
+                  />
+
+                  <div className="flex flex-col items-center gap-1 shrink-0">
+                    <Flame
+                      className={`w-4 h-4 text-orange-500 fill-orange-500 ${currentStreak >= 10 ? 'opacity-100 filter drop-shadow-[0_0_3px_rgba(249,115,22,0.5)]' : 'opacity-40'}`}
+                    />
+                    <span>10d</span>
+                  </div>
+                  <div
+                    className={`h-[1px] flex-grow mx-1 ${currentStreak >= 50 ? 'bg-pink-500' : 'bg-dd-border/40'}`}
+                  />
+
+                  <div className="flex flex-col items-center gap-1 shrink-0">
+                    <Flame
+                      className={`w-4 h-4 text-pink-500 fill-pink-500 ${currentStreak >= 50 ? 'opacity-100 filter drop-shadow-[0_0_3px_rgba(236,72,153,0.5)]' : 'opacity-40'}`}
+                    />
+                    <span>50d</span>
+                  </div>
+                  <div
+                    className={`h-[1px] flex-grow mx-1 ${currentStreak >= 100 ? 'bg-fuchsia-500' : 'bg-dd-border/40'}`}
+                  />
+
+                  <div className="flex flex-col items-center gap-1 shrink-0">
+                    <Flame
+                      className={`w-4 h-4 text-fuchsia-500 fill-fuchsia-500 ${currentStreak >= 100 ? 'opacity-100 filter drop-shadow-[0_0_3px_rgba(217,70,239,0.5)]' : 'opacity-40'}`}
+                    />
+                    <span>100d</span>
+                  </div>
+                  <div
+                    className={`h-[1px] flex-grow mx-1 ${currentStreak >= 200 ? 'bg-purple-500' : 'bg-dd-border/40'}`}
+                  />
+
+                  <div className="flex flex-col items-center gap-1 shrink-0">
+                    <Flame
+                      className={`w-4 h-4 text-purple-500 fill-purple-500 ${currentStreak >= 200 ? 'opacity-100 filter drop-shadow-[0_0_3px_rgba(168,85,247,0.5)]' : 'opacity-40'}`}
+                    />
+                    <span>200d</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* Weekly activity view */
+              <div className="space-y-4">
+                <div className="flex items-center justify-between py-2 select-none">
+                  <button
+                    onClick={() => setEngagementView('streak')}
+                    className="p-1.5 hover:bg-dd-surface/60 rounded-full text-dd-muted hover:text-dd-text transition-colors cursor-pointer"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <div className="flex flex-col items-center">
+                    <Award className="w-14 h-14 text-orange-500 animate-pulse" />
+                    <span className="mt-2.5 text-xs font-bold text-orange-500">
+                      Atividade Semanal
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setEngagementView('streak')}
+                    className="p-1.5 hover:bg-dd-surface/60 rounded-full text-dd-muted hover:text-dd-text transition-colors cursor-pointer"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* 7-day activity blocks */}
+                <div className="flex items-center justify-between px-1 py-3 text-[10px] font-bold text-dd-muted border-t border-dd-border/40">
+                  {['S', 'T', 'Q', 'Q', 'S', 'S', 'D'].map((day, index) => {
+                    // Activate days based on index (e.g. today is Sunday, make some days active)
+                    const isActive = index === 6 || index === 2 || index === 4;
+                    return (
+                      <div key={index} className="flex flex-col items-center gap-1.5">
+                        <span className="text-[9px] font-bold">{day}</span>
+                        <div
+                          className={`w-6 h-6 rounded-md flex items-center justify-center transition-colors ${
+                            isActive
+                              ? 'bg-orange-500 text-black shadow-[0_0_8px_rgba(249,115,22,0.3)]'
+                              : 'bg-dd-surface border border-dd-border text-dd-muted'
+                          }`}
+                        >
+                          {isActive ? '✓' : ''}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className="flex justify-between items-center text-xs border-t border-dd-border pt-3 text-dd-muted">
               <span>XP Acumulado</span>
@@ -1762,8 +1878,8 @@ export function FeedContent({
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.16em] text-dd-muted">
-                <span>Progresso do nivel</span>
-                <span>Lvl {currentLevel}</span>
+                <span>PROGRESSO DO NIVEL</span>
+                <span>LVL {currentLevel}</span>
               </div>
               <XPProgressBar
                 percent={currentLevelPercent}
