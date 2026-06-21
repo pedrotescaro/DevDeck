@@ -1504,49 +1504,72 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
 
           {/* Widget 2: Ducky IA Chat Panel */}
           <div className="bg-dd-sidebar-bg border border-dd-border rounded-2xl p-4 flex flex-col h-[340px]">
-            <div className="flex items-center gap-2 text-orange-500 pb-2 border-b border-dd-border/50 shrink-0">
-              <span className="text-lg">🦆</span>
+            <div className="flex items-center gap-2 pb-2 border-b border-dd-border/50 shrink-0">
+              <img src="/Logo_ia_ducky.png" alt="Ducky" className="w-5 h-5 object-contain" />
               <h3 className="text-sm font-black text-dd-text">Ducky IA Tutor</h3>
             </div>
 
             {/* Messages Scroll Area */}
-            <div className="flex-grow overflow-y-auto py-3 space-y-2.5 scrollbar-thin select-text min-h-0">
-              {duckyMessages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`flex gap-2 max-w-[90%] ${
-                    msg.role === 'user' ? 'ml-auto flex-row-reverse' : 'mr-auto'
-                  }`}
-                >
+            <div className="flex-grow overflow-y-auto py-3 space-y-4 scrollbar-thin select-text min-h-0">
+              {duckyMessages.map((msg, idx) => {
+                const isDucky = msg.role !== 'user';
+                return (
                   <div
-                    className={`w-5.5 h-5.5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
-                      msg.role === 'user'
-                        ? 'bg-orange-500 text-white'
-                        : 'bg-dd-border text-orange-500'
-                    }`}
+                    key={idx}
+                    className="flex gap-2.5 items-start w-full border-b border-dd-border/5 pb-3 last:border-b-0 last:pb-0"
                   >
-                    {msg.role === 'user' ? user.username[0].toUpperCase() : '🦆'}
+                    {/* Avatar */}
+                    <div className="w-6.5 h-6.5 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-[#0c0c0e] border border-dd-border/40 select-none">
+                      {isDucky ? (
+                        <img
+                          src="/Logo_ia_ducky.png"
+                          alt="Ducky"
+                          className="w-5.5 h-5.5 object-contain"
+                        />
+                      ) : user.avatar_url ? (
+                        <img
+                          src={user.avatar_url}
+                          alt={user.username}
+                          className="w-6.5 h-6.5 rounded-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-[9px] font-bold text-dd-muted">
+                          {user.username.slice(0, 2).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Message body */}
+                    <div className="flex-grow min-w-0">
+                      <div className="flex items-center gap-1.5 mb-0.5 select-none">
+                        <span className="text-[10px] font-bold text-dd-text">
+                          {isDucky ? 'Ducky AI' : user.username}
+                        </span>
+                        <span className="text-[8px] text-dd-muted font-medium">
+                          {isDucky ? '@ducky' : `@${user.username.toLowerCase()}`}
+                        </span>
+                      </div>
+
+                      <div className="text-[10px] text-dd-text leading-relaxed font-sans pr-2">
+                        {renderMessageContent(msg.content)}
+                      </div>
+                    </div>
                   </div>
-                  <div
-                    className={`p-2.5 rounded-xl text-[10px] leading-relaxed select-text ${
-                      msg.role === 'user'
-                        ? 'bg-orange-500 text-white rounded-tr-none font-bold'
-                        : 'bg-dd-border/40 text-dd-text rounded-tl-none border border-dd-border/20 font-medium'
-                    }`}
-                  >
-                    {renderMessageContent(msg.content)}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
               {duckyLoading && (
-                <div className="flex gap-2 max-w-[80%] mr-auto items-center">
-                  <div className="w-5.5 h-5.5 rounded-full bg-dd-border text-orange-500 flex items-center justify-center text-[10px] font-bold shrink-0">
-                    🦆
+                <div className="flex gap-2.5 items-start w-full">
+                  <div className="w-6.5 h-6.5 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-[#0c0c0e] border border-dd-border/40 select-none">
+                    <img
+                      src="/Logo_ia_ducky.png"
+                      alt="Ducky"
+                      className="w-5.5 h-5.5 object-contain"
+                    />
                   </div>
-                  <div className="flex gap-1">
-                    <span className="w-1 h-1 bg-orange-500 rounded-full animate-bounce delay-100" />
-                    <span className="w-1 h-1 bg-orange-500 rounded-full animate-bounce delay-200" />
-                    <span className="w-1 h-1 bg-orange-500 rounded-full animate-bounce delay-300" />
+                  <div className="flex gap-1 mt-2.5">
+                    <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-100" />
+                    <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-200" />
+                    <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-300" />
                   </div>
                 </div>
               )}
