@@ -260,7 +260,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
               <span>Deep Debug</span>
             </button>
 
-            {/* Buscar Docs Toggle */}
+            {/* Buscar Dados Toggle */}
             <button
               type="button"
               onClick={() => setSearchActive(!searchActive)}
@@ -278,7 +278,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                 <circle cx="12" cy="12" r="10" />
                 <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10zM2 12h20" />
               </svg>
-              <span>Buscar Docs</span>
+              <span>Buscar Dados</span>
             </button>
           </div>
 
@@ -347,53 +347,10 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
         isFullscreen ? 'p-0' : ''
       }`}
     >
-      {/* Dynamic inline styles for premium animations */}
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.15; transform: scale(0.85); }
-          50% { opacity: 0.85; transform: scale(1.15); }
-        }
-        @keyframes float-nebula {
-          0%, 100% { transform: scale(1) translate(0px, 0px); }
-          50% { transform: scale(1.04) translate(10px, -8px); }
-        }
-      `,
-        }}
-      />
-
       {/* Hide sidebar if in fullscreen focus mode */}
       {!isFullscreen && <Sidebar user={user} />}
 
       <div className="flex-grow flex flex-col min-w-0 bg-[#060606] border-l border-[#1f1f23]/40 relative overflow-hidden">
-        {/* Starry Background & cosmic nebulae */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-          <div
-            className="absolute top-0 left-0 w-[50vw] h-[50vw] bg-[radial-gradient(circle_at_top_left,rgba(124,111,247,0.035)_0%,transparent_70%)]"
-            style={{ animation: 'float-nebula 20s infinite ease-in-out' }}
-          />
-          <div
-            className="absolute bottom-0 right-0 w-[60vw] h-[60vw] bg-[radial-gradient(circle_at_bottom_right,rgba(249,115,22,0.035)_0%,transparent_70%)]"
-            style={{ animation: 'float-nebula 24s infinite ease-in-out' }}
-          />
-
-          {stars.map((star, idx) => (
-            <div
-              key={idx}
-              className="absolute bg-white rounded-full"
-              style={{
-                left: `${star.x}%`,
-                top: `${star.y}%`,
-                width: `${star.size}px`,
-                height: `${star.size}px`,
-                opacity: star.opacity,
-                animation: `twinkle ${star.duration}s ease-in-out ${star.delay}s infinite`,
-              }}
-            />
-          ))}
-        </div>
-
         {/* Top Header */}
         <header className="flex items-center justify-between px-6 py-4 border-b border-[#1f1f23]/40 bg-[#060606]/40 backdrop-blur-md sticky top-0 z-20 relative select-none">
           {/* Top Left: Fullscreen Toggle */}
