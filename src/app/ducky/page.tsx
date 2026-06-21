@@ -26,7 +26,10 @@ export default async function DuckyPage() {
     avatar_url: user.avatar_url,
     total_xp: user.total_xp,
     streak_days: user.streak_days,
-    streak: dbTrails.reduce((max, t) => Math.max(max, t.streak), 0),
+    streak: Math.max(
+      user.streak_days,
+      dbTrails.reduce((max, t) => Math.max(max, t.streak), 0)
+    ),
   };
 
   return <DuckyContent user={serializedUser} activeLanguage={activeLanguage} />;

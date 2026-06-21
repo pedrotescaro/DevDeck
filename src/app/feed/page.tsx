@@ -92,7 +92,10 @@ export default async function FeedPage() {
         username: user.username,
         avatar_url: user.avatar_url,
         total_xp: user.total_xp,
-        streak: trails.reduce((max, t) => Math.max(max, t.streak), 0),
+        streak: Math.max(
+          user.streak_days,
+          trails.reduce((max, t) => Math.max(max, t.streak), 0)
+        ),
         trails: trails,
         badges: user.badges.map((b) => b.badge),
       }}

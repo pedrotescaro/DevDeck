@@ -20,6 +20,7 @@ export async function getAuthUser() {
             badge: true,
           },
         },
+        trails: true,
       },
     });
 
@@ -29,6 +30,43 @@ export async function getAuthUser() {
       );
       await supabase.auth.signOut();
       return null;
+    }
+
+    // Auto-healing logic: sync overall user streak_days and last_active_at from language trails if out of sync
+    const maxTrailStreak = dbUser.trails.reduce((max, t) => Math.max(max, t.streak), 0);
+    const latestTrailActivity = dbUser.trails.reduce((latest: Date | null, t) => {
+      if (!t.last_activity_at) return latest;
+      if (!latest) return t.last_activity_at;
+      return t.last_activity_at.getTime() > latest.getTime() ? t.last_activity_at : latest;
+    }, null);
+
+    let needsUpdate = false;
+    const updateData: any = {};
+
+    if (dbUser.streak_days < maxTrailStreak) {
+      dbUser.streak_days = maxTrailStreak;
+      updateData.streak_days = maxTrailStreak;
+      needsUpdate = true;
+    }
+
+    if (
+      latestTrailActivity &&
+      (!dbUser.last_active_at || dbUser.last_active_at.getTime() < latestTrailActivity.getTime())
+    ) {
+      dbUser.last_active_at = latestTrailActivity;
+      updateData.last_active_at = latestTrailActivity;
+      needsUpdate = true;
+    }
+
+    if (needsUpdate) {
+      try {
+        await prisma.user.update({
+          where: { id: dbUser.id },
+          data: updateData,
+        });
+      } catch (e) {
+        console.error('Failed to auto-heal user streak/activity:', e);
+      }
     }
 
     return dbUser;

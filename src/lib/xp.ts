@@ -38,12 +38,45 @@ export async function awardXP(
   amount: number
 ) {
   if (!language) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { streak_days: true, last_active_at: true },
+    });
+
+    const now = new Date();
+    let newStreakDays = 1;
+
+    if (user?.last_active_at) {
+      const lastActive = new Date(user.last_active_at);
+      const lastDate = new Date(
+        lastActive.getFullYear(),
+        lastActive.getMonth(),
+        lastActive.getDate()
+      );
+      const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      const diffTime = Math.abs(currentDate.getTime() - lastDate.getTime());
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 0) {
+        newStreakDays = user.streak_days;
+      } else if (diffDays === 1) {
+        newStreakDays = user.streak_days + 1;
+      } else {
+        newStreakDays = 1;
+      }
+    } else {
+      newStreakDays = 1;
+    }
+
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
         total_xp: {
           increment: amount,
         },
+        streak_days: newStreakDays,
+        last_active_at: now,
       },
     });
     return {
@@ -51,18 +84,52 @@ export async function awardXP(
       language: null,
       newXp: updatedUser.total_xp,
       newLevel: calculateLevel(updatedUser.total_xp).level,
-      newStreak: 0,
+      newStreak: newStreakDays,
     };
   }
 
   return await prisma.$transaction(async (tx) => {
-    // 1. Atualizar o total_xp do usuário
+    // Buscar usuário primeiro para calcular a ofensiva geral
+    const user = await tx.user.findUnique({
+      where: { id: userId },
+      select: { streak_days: true, last_active_at: true },
+    });
+
+    const now = new Date();
+    let newStreakDays = 1;
+
+    if (user?.last_active_at) {
+      const lastActive = new Date(user.last_active_at);
+      const lastDate = new Date(
+        lastActive.getFullYear(),
+        lastActive.getMonth(),
+        lastActive.getDate()
+      );
+      const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      const diffTime = Math.abs(currentDate.getTime() - lastDate.getTime());
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 0) {
+        newStreakDays = user.streak_days;
+      } else if (diffDays === 1) {
+        newStreakDays = user.streak_days + 1;
+      } else {
+        newStreakDays = 1;
+      }
+    } else {
+      newStreakDays = 1;
+    }
+
+    // 1. Atualizar o total_xp, streak_days, last_active_at do usuário
     await tx.user.update({
       where: { id: userId },
       data: {
         total_xp: {
           increment: amount,
         },
+        streak_days: newStreakDays,
+        last_active_at: now,
       },
     });
 
@@ -73,7 +140,6 @@ export async function awardXP(
       },
     });
 
-    const now = new Date();
     let newXp = amount;
     let newLevel = 1;
     let newStreak = 1;
@@ -95,7 +161,7 @@ export async function awardXP(
         const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
         const diffTime = Math.abs(currentDate.getTime() - lastDate.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
         if (diffDays === 0) {
           // Já fez atividade hoje, mantém a sequência
@@ -137,7 +203,7 @@ export async function awardXP(
     }
 
     // 3. Checar elegibilidade de badges
-    await checkBadgeEligibility(tx, userId, newStreak);
+    await checkBadgeEligibility(tx, userId, Math.max(newStreak, newStreakDays));
 
     return {
       xpEarned: amount,

@@ -35,17 +35,45 @@ export const XpService = {
   async awardXP(userId: string, language: Language | null | undefined, amount: number) {
     const userBefore = await prisma.user.findUnique({
       where: { id: userId },
-      select: { total_xp: true },
+      select: { total_xp: true, streak_days: true, last_active_at: true },
     });
     const oldUserLevel = calculateLevel(userBefore?.total_xp ?? 0).level;
 
     if (!language) {
+      const now = new Date();
+      let newStreakDays = 1;
+
+      if (userBefore?.last_active_at) {
+        const lastActive = new Date(userBefore.last_active_at);
+        const lastDate = new Date(
+          lastActive.getFullYear(),
+          lastActive.getMonth(),
+          lastActive.getDate()
+        );
+        const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        const diffTime = Math.abs(currentDate.getTime() - lastDate.getTime());
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) {
+          newStreakDays = userBefore.streak_days;
+        } else if (diffDays === 1) {
+          newStreakDays = userBefore.streak_days + 1;
+        } else {
+          newStreakDays = 1;
+        }
+      } else {
+        newStreakDays = 1;
+      }
+
       const updatedUser = await prisma.user.update({
         where: { id: userId },
         data: {
           total_xp: {
             increment: amount,
           },
+          streak_days: newStreakDays,
+          last_active_at: now,
         },
       });
 
@@ -76,18 +104,52 @@ export const XpService = {
         language: null,
         newXp: updatedUser.total_xp,
         newLevel: newUserLevel,
-        newStreak: 0,
+        newStreak: newStreakDays,
       };
     }
 
     return await prisma.$transaction(async (tx) => {
-      // 1. Update user total XP
+      // Fetch user stats inside transaction to be safe and accurate
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+        select: { streak_days: true, last_active_at: true },
+      });
+
+      const now = new Date();
+      let newStreakDays = 1;
+
+      if (user?.last_active_at) {
+        const lastActive = new Date(user.last_active_at);
+        const lastDate = new Date(
+          lastActive.getFullYear(),
+          lastActive.getMonth(),
+          lastActive.getDate()
+        );
+        const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        const diffTime = Math.abs(currentDate.getTime() - lastDate.getTime());
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) {
+          newStreakDays = user.streak_days;
+        } else if (diffDays === 1) {
+          newStreakDays = user.streak_days + 1;
+        } else {
+          newStreakDays = 1;
+        }
+      } else {
+        newStreakDays = 1;
+      }
+
+      // 1. Update user total XP, streak_days, last_active_at
       const updatedUser = await tx.user.update({
         where: { id: userId },
         data: {
           total_xp: {
             increment: amount,
           },
+          streak_days: newStreakDays,
+          last_active_at: now,
         },
       });
 
@@ -98,7 +160,6 @@ export const XpService = {
         },
       });
 
-      const now = new Date();
       let newXp = amount;
       let newLevel = 1;
       let newStreak = 1;
@@ -120,7 +181,7 @@ export const XpService = {
           const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
           const diffTime = Math.abs(currentDate.getTime() - lastDate.getTime());
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
           if (diffDays === 0) {
             newStreak = trail.streak;
@@ -156,8 +217,8 @@ export const XpService = {
         });
       }
 
-      // Check badge eligibility
-      await checkBadgeEligibility(tx, userId, newStreak);
+      // Check badge eligibility using the higher of the streaks (trail vs global user streak)
+      await checkBadgeEligibility(tx, userId, Math.max(newStreak, newStreakDays));
 
       // Trigger notifications for level ups
       const newUserLevel = calculateLevel(updatedUser.total_xp).level;

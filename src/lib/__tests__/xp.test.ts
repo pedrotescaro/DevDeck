@@ -6,6 +6,7 @@ vi.mock('@/lib/prisma', () => {
   const mockPrisma = {
     user: {
       update: vi.fn(),
+      findUnique: vi.fn(),
     },
     languageTrail: {
       findUnique: vi.fn(),
@@ -41,6 +42,12 @@ describe('calculateLevel', () => {
 describe('awardXP', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({
+      id: 'user-1',
+      total_xp: 100,
+      streak_days: 5,
+      last_active_at: new Date(2026, 5, 17, 18, 0, 0),
+    } as any);
   });
 
   it('should award general XP (without language) correctly', async () => {
@@ -51,7 +58,11 @@ describe('awardXP', () => {
 
     expect(prisma.user.update).toHaveBeenCalledWith({
       where: { id: 'user-1' },
-      data: { total_xp: { increment: 100 } },
+      data: {
+        total_xp: { increment: 100 },
+        streak_days: expect.any(Number),
+        last_active_at: expect.any(Date),
+      },
     });
     expect(result.newXp).toBe(100);
     expect(result.newLevel).toBe(1);
