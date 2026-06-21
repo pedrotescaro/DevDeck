@@ -453,7 +453,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                 <img
                   src="/Logo_ia_ducky.png"
                   alt="Ducky IA Logo"
-                  className="w-10 h-10 object-contain animate-bounce"
+                  className="w-10 h-10 object-contain"
                 />
                 <span className="text-2xl font-bold tracking-tight text-white font-sans">
                   {mode === 'Rápido'
@@ -647,7 +647,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                       <img
                         src="/Logo_ia_ducky.png"
                         alt="Ducky thinking"
-                        className="w-8 h-8 object-contain animate-bounce"
+                        className="w-8 h-8 object-contain"
                       />
                     </div>
                     <div className="flex-grow min-w-0">
