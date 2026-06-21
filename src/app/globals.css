@@ -814,3 +814,12 @@ body {
   transform-origin: bottom center;
 }
 
+.group:hover .animate-tiktok-fire-hover {
+  animation: tiktok-fire 1.2s infinite ease-in-out;
+}
+
+.animate-tiktok-fire-hover {
+  display: inline-block;
+  transform-origin: bottom center;
+}
+
