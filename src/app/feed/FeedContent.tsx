@@ -1773,7 +1773,7 @@ export function FeedContent({
                 </div>
 
                 {/* Timeline of milestone flames */}
-                <div className="flex items-center justify-between px-1 py-2 text-[9px] font-bold text-dd-muted border-t border-dd-border/40">
+                <div className="flex items-center justify-between px-1 py-[17px] text-[9px] font-bold text-dd-muted border-t border-dd-border/40">
                   <div className="flex flex-col items-center gap-1 shrink-0">
                     <Flame
                       className={`w-4 h-4 text-yellow-500 fill-yellow-500 ${currentStreak >= 5 ? 'opacity-100 filter drop-shadow-[0_0_3px_rgba(234,179,8,0.5)]' : 'opacity-40'}`}
