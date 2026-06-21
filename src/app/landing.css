@@ -675,7 +675,7 @@ html.lp-landing-page::-webkit-scrollbar-thumb:hover {
 
 .side-left {
   position: absolute;
-  background-color: #d1d1d6;
+  background-color: #A9A9A9;
   width: 19px;
   height: 5px;
   transform: skew(0deg, -25deg);
@@ -685,7 +685,7 @@ html.lp-landing-page::-webkit-scrollbar-thumb:hover {
 
 .side-right {
   position: absolute;
-  background-color: #e5e5ea;
+  background-color: #D3D3D3;
   width: 19px;
   height: 5px;
   transform: skew(0deg, 25deg);
@@ -695,9 +695,7 @@ html.lp-landing-page::-webkit-scrollbar-thumb:hover {
 
 .side-top {
   position: absolute;
-  top: 0;
-  left: 0;
-  background-color: #ffffff;
+  background-color: #ffff;
   width: 20px;
   height: 20px;
   rotate: 45deg;
