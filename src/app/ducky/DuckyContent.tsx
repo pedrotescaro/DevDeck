@@ -319,7 +319,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
   const renderBottomBanner = () => {
     return (
-      <div className="absolute bottom-6 right-6 max-w-xs md:max-w-sm bg-[#09090b]/80 border border-[#1f1f23] rounded-2xl p-3 flex items-center justify-between gap-4 shadow-xl z-20 backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-500 select-none">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-xs md:max-w-sm bg-[#09090b]/80 border border-[#1f1f23] rounded-2xl p-3 flex items-center justify-between gap-4 shadow-xl z-20 backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-500 select-none">
         <div className="flex items-center gap-2.5 text-left">
           <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500 text-sm">
             ✨
