@@ -17,6 +17,12 @@ import {
   Zap,
   Lock,
   Unlock,
+  Copy,
+  RotateCw,
+  ThumbsUp,
+  ThumbsDown,
+  Share2,
+  Pencil,
 } from 'lucide-react';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
@@ -547,51 +553,86 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
                 {messages.map((msg) => {
                   const isDucky = msg.sender === 'ducky';
-                  return (
+                  return isDucky ? (
+                    /* DUCKY (AI) MESSAGE: Left-aligned plain text with icons underneath */
                     <div
                       key={msg.id}
-                      className="flex gap-4 items-start w-full py-5 border-b border-[#1f1f23]/30 animate-in fade-in slide-in-from-bottom-1 duration-200"
+                      className="flex flex-col items-start w-full py-4 border-b border-[#1f1f23]/10 animate-in fade-in duration-200"
                     >
-                      {/* Avatar */}
-                      <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-[#0c0c0e] border border-[#2f2f36]/60 select-none">
-                        {isDucky ? (
-                          <img
-                            src="/Logo_ia_ducky.png"
-                            alt="Ducky"
-                            className="w-8 h-8 object-contain"
-                          />
-                        ) : user.avatar_url ? (
-                          <img
-                            src={user.avatar_url}
-                            alt={user.username}
-                            className="w-9 h-9 rounded-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-[10px] font-bold text-[#8b8b93]">{initials}</span>
+                      <div className="max-w-[85%] text-sm text-dd-text leading-relaxed font-sans">
+                        <MarkdownRenderer content={msg.text} />
+                        {msg.isStreaming && (
+                          <span className="inline-block w-1.5 h-3 bg-orange-500 ml-1 animate-pulse" />
                         )}
                       </div>
 
-                      {/* Message body */}
-                      <div className="flex-grow min-w-0">
-                        <div className="flex items-center gap-2 mb-1 select-none">
-                          <span className="text-xs font-bold text-dd-text">
-                            {isDucky ? 'Ducky AI' : user.username}
-                          </span>
-                          <span className="text-[10px] text-[#71767b] font-medium">
-                            {isDucky ? '@ducky' : `@${user.username.toLowerCase()}`}
-                          </span>
+                      {/* Action icons below Ducky message */}
+                      {!msg.isStreaming && (
+                        <div className="flex items-center gap-3.5 mt-2.5 text-[#53535f] select-none">
+                          <button
+                            onClick={() => navigator.clipboard.writeText(msg.text)}
+                            className="hover:text-dd-text transition-colors cursor-pointer"
+                            title="Copiar resposta"
+                          >
+                            <Copy className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleSend(msg.text)}
+                            className="hover:text-dd-text transition-colors cursor-pointer"
+                            title="Regenerar"
+                          >
+                            <RotateCw className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            className="hover:text-dd-text transition-colors cursor-pointer"
+                            title="Gostei"
+                          >
+                            <ThumbsUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            className="hover:text-dd-text transition-colors cursor-pointer"
+                            title="Não gostei"
+                          >
+                            <ThumbsDown className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            className="hover:text-dd-text transition-colors cursor-pointer"
+                            title="Compartilhar"
+                          >
+                            <Share2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
+                      )}
+                    </div>
+                  ) : (
+                    /* USER MESSAGE: Right-aligned speech bubble with icons underneath */
+                    <div
+                      key={msg.id}
+                      className="flex flex-col items-end w-full py-3.5 animate-in fade-in duration-200"
+                    >
+                      <div className="bg-[#1c1c1f] hover:bg-[#232328] border border-[#2c2c35]/40 text-dd-text px-4 py-2 rounded-2xl max-w-[70%] text-sm break-words whitespace-pre-wrap font-sans transition-colors">
+                        {msg.text}
+                      </div>
 
-                        <div className="text-sm text-dd-text leading-relaxed font-sans pr-2">
-                          {isDucky ? (
-                            <MarkdownRenderer content={msg.text} />
-                          ) : (
-                            <div className="whitespace-pre-wrap break-words">{msg.text}</div>
-                          )}
-                          {msg.isStreaming && (
-                            <span className="inline-block w-1.5 h-3 bg-orange-500 ml-1 animate-pulse" />
-                          )}
-                        </div>
+                      {/* Action icons below user message */}
+                      <div className="flex items-center gap-3 mt-1.5 text-[#53535f] select-none mr-2">
+                        <button
+                          onClick={() => navigator.clipboard.writeText(msg.text)}
+                          className="hover:text-dd-text transition-colors cursor-pointer"
+                          title="Copiar mensagem"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setInputVal(msg.text);
+                            inputRef.current?.focus();
+                          }}
+                          className="hover:text-dd-text transition-colors cursor-pointer"
+                          title="Editar"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </div>
                   );
@@ -599,31 +640,18 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
                 {/* Thinking Indicator */}
                 {thinking && (
-                  <div className="flex gap-4 items-start w-full py-5 border-b border-[#1f1f23]/10">
-                    <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-[#0c0c0e] border border-[#2f2f36]/60 select-none">
-                      <img
-                        src="/Logo_ia_ducky.png"
-                        alt="Ducky thinking"
-                        className="w-8 h-8 object-contain"
-                      />
-                    </div>
-                    <div className="flex-grow min-w-0">
-                      <div className="flex items-center gap-2 mb-1 select-none">
-                        <span className="text-xs font-bold text-dd-text">Ducky AI</span>
-                        <span className="text-[10px] text-[#71767b] font-medium">@ducky</span>
+                  <div className="flex flex-col items-start w-full py-4 border-b border-[#1f1f23]/10 animate-in fade-in duration-200">
+                    <div className="flex items-center gap-2.5 text-xs text-[#71767b] py-1 font-sans">
+                      <div className="flex gap-1.5">
+                        <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                        <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                        <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce" />
                       </div>
-                      <div className="flex items-center gap-2.5 text-xs text-[#71767b] py-1 font-sans">
-                        <div className="flex gap-1.5">
-                          <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                          <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                          <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce" />
-                        </div>
-                        <span>
-                          {mode === 'Deep Debug'
-                            ? 'Ducky está analisando o escopo do seu projeto...'
-                            : 'Ducky está analisando seu código...'}
-                        </span>
-                      </div>
+                      <span>
+                        {mode === 'Deep Debug'
+                          ? 'Ducky está analisando o escopo do seu projeto...'
+                          : 'Ducky está analisando seu código...'}
+                      </span>
                     </div>
                   </div>
                 )}
