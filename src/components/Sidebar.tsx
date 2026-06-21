@@ -625,36 +625,38 @@ export function Sidebar({ user }: SidebarProps) {
           <div className="relative">
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="w-full flex items-center justify-between p-3 rounded-xl border border-transparent hover:border-dd-border hover:bg-dd-surface transition-all duration-200 cursor-pointer"
+              className="w-full flex items-center justify-between p-3.5 rounded-xl border border-transparent hover:border-dd-border hover:bg-dd-surface transition-all duration-200 cursor-pointer"
             >
-              <div className="flex items-center gap-3 min-w-0">
+              <div className="flex items-center gap-3.5 min-w-0">
                 {activeUser.avatar_url ? (
                   <img
                     src={activeUser.avatar_url}
                     alt={activeUser.username}
-                    className="w-9 h-9 rounded-full object-cover border border-dd-border"
+                    className="w-10 h-10 rounded-full object-cover border border-dd-border shrink-0"
                   />
                 ) : (
-                  <div className="w-9 h-9 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold border border-orange-500/10">
+                  <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-sm font-bold border border-orange-500/10 shrink-0">
                     {initials}
                   </div>
                 )}
                 <div className="text-left min-w-0 font-sans">
-                  <p className="text-xs font-bold text-dd-text truncate leading-tight">
+                  <p className="text-sm font-bold text-dd-text truncate leading-tight">
                     {activeUser.username}
                   </p>
-                  <p className="text-[10px] text-dd-muted font-semibold truncate leading-none mt-1">
+                  <p className="text-[11px] text-dd-muted font-medium truncate leading-none mt-1">
                     @{activeUser.username.toLowerCase()}
                   </p>
-                  <div className="flex items-center gap-2 mt-2 flex-wrap">
-                    <span className="px-1.5 py-0.5 rounded bg-neutral-900/50 border border-dd-border text-[9.5px] font-bold text-dd-text leading-none">
+                  <div className="flex items-center gap-3 mt-3 flex-wrap">
+                    <span className="px-2 py-0.5 rounded bg-orange-500/10 border border-orange-500/30 text-[9.5px] font-extrabold text-orange-500 leading-none shadow-sm">
                       Lvl {Math.max(1, Math.floor((activeUser.total_xp ?? 0) / 1000) + 1)}
                     </span>
-                    <span className="flex items-center gap-0.5 text-[9.5px] text-orange-500 font-extrabold leading-none">
-                      <span className="animate-fire-flicker">🔥</span>{' '}
-                      {activeUser.streak_days ?? activeUser.streak ?? 0}{' '}
-                      {(activeUser.streak_days ?? activeUser.streak ?? 0) === 1 ? 'dia' : 'dias'} de
-                      ofensiva
+                    <span className="flex items-center gap-1.5 text-[9.5px] text-orange-500 font-extrabold leading-none">
+                      <span className="text-[13px] animate-fire-flicker">🔥</span>{' '}
+                      <span>
+                        {activeUser.streak_days ?? activeUser.streak ?? 0}{' '}
+                        {(activeUser.streak_days ?? activeUser.streak ?? 0) === 1 ? 'dia' : 'dias'}{' '}
+                        de ofensiva
+                      </span>
                     </span>
                   </div>
                 </div>
