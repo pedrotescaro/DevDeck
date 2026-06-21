@@ -755,3 +755,33 @@ body {
 .animate-scale-up {
   animation: dd-scale-up 150ms var(--motion-ease-out) forwards;
 }
+
+@keyframes dd-fire-flicker {
+  0%, 100% {
+    transform: scale(1) rotate(-1deg);
+    filter: drop-shadow(0 0 1px rgba(249, 115, 22, 0.6)) brightness(1);
+  }
+  20% {
+    transform: scale(1.1) rotate(2deg);
+    filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.8)) brightness(1.1);
+  }
+  40% {
+    transform: scale(0.95) rotate(-2deg);
+    filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.7)) brightness(0.95);
+  }
+  60% {
+    transform: scale(1.15) rotate(1deg);
+    filter: drop-shadow(0 0 5px rgba(249, 115, 22, 0.9)) brightness(1.2);
+  }
+  80% {
+    transform: scale(1) rotate(-2deg);
+    filter: drop-shadow(0 0 3px rgba(239, 68, 68, 0.7)) brightness(1.05);
+  }
+}
+
+.animate-fire-flicker {
+  animation: dd-fire-flicker 1.5s infinite ease-in-out;
+  display: inline-block;
+  transform-origin: bottom center;
+}
+

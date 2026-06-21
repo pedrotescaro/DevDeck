@@ -42,6 +42,7 @@ interface SidebarUser {
   username: string;
   avatar_url?: string | null;
   streak?: number;
+  streak_days?: number;
   total_xp?: number;
 }
 
@@ -630,6 +631,17 @@ export function Sidebar({ user }: SidebarProps) {
                   <p className="text-[10px] text-dd-muted font-semibold truncate leading-none mt-1">
                     @{activeUser.username.toLowerCase()}
                   </p>
+                  <div className="flex items-center gap-2 mt-2 flex-wrap">
+                    <span className="px-1.5 py-0.5 rounded bg-neutral-900/50 border border-dd-border text-[9.5px] font-bold text-dd-text leading-none">
+                      Lvl {Math.max(1, Math.floor((activeUser.total_xp ?? 0) / 1000) + 1)}
+                    </span>
+                    <span className="flex items-center gap-0.5 text-[9.5px] text-orange-500 font-extrabold leading-none">
+                      <span className="animate-fire-flicker">🔥</span>{' '}
+                      {activeUser.streak_days ?? activeUser.streak ?? 0}{' '}
+                      {(activeUser.streak_days ?? activeUser.streak ?? 0) === 1 ? 'dia' : 'dias'} de
+                      ofensiva
+                    </span>
+                  </div>
                 </div>
               </div>
               <ChevronDown

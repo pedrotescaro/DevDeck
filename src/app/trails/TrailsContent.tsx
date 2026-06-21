@@ -1909,6 +1909,20 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                           }
 
                           const question = activeLevel.questions[currentQuestionIndex];
+
+                          if (!answered) {
+                            return (
+                              <button
+                                onClick={handleCheckAnswer}
+                                disabled={selectedOption === null || submittingAttempt}
+                                className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 disabled:bg-dd-surface disabled:border disabled:border-dd-border disabled:text-dd-muted text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                              >
+                                {submittingAttempt ? 'Verificando...' : 'Confirmar'}
+                                <ChevronRight className="w-4 h-4" />
+                              </button>
+                            );
+                          }
+
                           const isCorrect = selectedOption === question.correctIndex;
 
                           if (!isCorrect) {
