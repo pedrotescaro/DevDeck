@@ -98,25 +98,25 @@ fn credit_xp(user: &User, action: Action) -> Result<XP, Error> {
             <span>V2.4 · BETA PÚBLICO</span>
           </div>
 
-          <h1 className="lp-font-display text-[11vw] md:text-[8vw] lg:text-[5.2vw] leading-[1.0] mb-8 uppercase text-[var(--lp-fg)]">
-            <span className="overflow-hidden block">
+          <h1 className="lp-font-display text-[11vw] md:text-[8vw] lg:text-[5.2vw] leading-[1.15] mb-8 uppercase text-[var(--lp-fg)]">
+            <span className="overflow-hidden block pt-3 pb-1 -mt-3">
               <motion.span variants={lineReveal} className="inline-block">
                 Stack Overflow
               </motion.span>
             </span>
-            <span className="overflow-hidden block">
+            <span className="overflow-hidden block pt-3 pb-1 -mt-3">
               <motion.span
                 variants={lineReveal}
                 className="inline-block lp-text-stroke"
               >{`não lembra de você.`}</motion.span>
             </span>
-            <span className="overflow-hidden block">
+            <span className="overflow-hidden block pt-3 pb-1 -mt-3">
               <motion.span
                 variants={lineReveal}
                 className="inline-block"
               >{`O GitHub não sabe`}</motion.span>
             </span>
-            <span className="overflow-hidden block">
+            <span className="overflow-hidden block pt-3 pb-1 -mt-3">
               <motion.span variants={lineReveal} className="inline-block">
                 o que você <span style={{ color: 'var(--lp-accent)' }}>aprendeu.</span>
               </motion.span>
