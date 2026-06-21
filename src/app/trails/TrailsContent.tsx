@@ -447,7 +447,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
 
   const currentLevel = getLevelFromXp(userXp);
 
-  // Verificar se o nível está desbloqueado (Duolingo-like progression com checkpoints)
+  // Verificar se o nível está desbloqueado (progressão linear com checkpoints)
   const isLevelUnlocked = (levelIndex: number) => {
     if (levelIndex === 0) return true;
 
@@ -1014,7 +1014,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
   };
 
   const getOffsetStyle = (index: number) => {
-    // Padrão Duolingo: zigue-zague vertical
+    // Padrão sinuoso: zigue-zague vertical
     const values = [0, 50, 95, 50, 0, -50, -95, -50];
     const val = values[index % values.length];
     return { transform: `translateX(${val}px)` };
@@ -1024,160 +1024,246 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
     <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased">
       <Sidebar user={user} />
 
-      <div className="flex-grow flex flex-col min-w-0">
-        <main className="flex-grow max-w-4xl w-full mx-auto px-4 py-8 pb-36 md:pb-48 flex flex-col min-w-0 space-y-8">
-          {/* Header & Title */}
-          <div className="flex items-center justify-between border-b border-dd-border pb-4">
+      <div className="flex-grow flex flex-col md:flex-row min-w-0">
+        <main className="flex-grow max-w-2xl w-full border-r border-dd-border/80 min-h-screen bg-dd-bg pb-24 md:pb-8 flex flex-col">
+          {/* Header (Twitter style: Sticky + Title + Subtitle) */}
+          <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60 px-4 py-3 flex items-center justify-between shrink-0">
             <div>
-              <h1 className="text-dd-text text-xl font-extrabold tracking-tight flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-orange-500" />
+              <h1 className="text-dd-text text-base font-black tracking-tight flex items-center gap-2">
                 Trilhas de Aprendizado
               </h1>
-              <p className="text-dd-muted text-xs">
-                Complete as lições no formato Duolingo e domine as linguagens de programação.
+              <p className="text-dd-muted text-[10px] uppercase font-bold tracking-wider mt-0.5">
+                Complete as lições e domine as linguagens de programação
               </p>
             </div>
           </div>
 
-          {/* Seletor de Linguagens */}
-          <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-            {['JS', 'TS', 'PYTHON', 'RUST', 'GO', 'JAVA'].map((lang) => {
-              const langCode = lang === 'PYTHON' ? 'PYTHON' : lang;
-              const isSelected = activeLang === (lang === 'PYTHON' ? 'PYTHON' : lang);
-              const label = lang.toUpperCase();
+          <div className="p-4 space-y-6 flex flex-col flex-grow">
+            {/* Seletor de Linguagens */}
+            <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+              {['JS', 'TS', 'PYTHON', 'RUST', 'GO', 'JAVA'].map((lang) => {
+                const langCode = lang === 'PYTHON' ? 'PYTHON' : lang;
+                const isSelected = activeLang === (lang === 'PYTHON' ? 'PYTHON' : lang);
+                const label = lang.toUpperCase();
 
-              return (
-                <button
-                  key={lang}
-                  onClick={() => setActiveLang(lang === 'PYTHON' ? 'PYTHON' : lang)}
-                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer border ${
-                    isSelected
-                      ? 'bg-dd-accent border-orange-500 text-white shadow-md shadow-orange-500/10'
-                      : 'bg-dd-surface border-dd-border text-dd-muted hover:text-dd-text hover:bg-dd-border/40'
-                  }`}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
+                return (
+                  <button
+                    key={lang}
+                    onClick={() => setActiveLang(lang === 'PYTHON' ? 'PYTHON' : lang)}
+                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer border ${
+                      isSelected
+                        ? 'bg-dd-accent border-orange-500 text-white shadow-md shadow-orange-500/10'
+                        : 'bg-dd-surface border-dd-border text-dd-muted hover:text-dd-text hover:bg-dd-border/40'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
 
-          {/* Progress Indicator da Trilha Ativa */}
-          <div className="bg-dd-surface border border-dd-border rounded-xl p-6 backdrop-blur-sm shadow-sm flex flex-col md:flex-row items-center justify-between gap-5">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 font-black text-xl">
-                {activeLang.slice(0, 2)}
+            {/* Progress Indicator da Trilha Ativa */}
+            <div className="bg-dd-surface border border-dd-border rounded-xl p-6 backdrop-blur-sm shadow-sm flex flex-col md:flex-row items-center justify-between gap-5">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 font-black text-xl">
+                  {activeLang.slice(0, 2)}
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-dd-text">Trilha de {activeLang}</h3>
+                  <p className="text-xs text-dd-muted uppercase tracking-wider font-bold mt-0.5">
+                    Nível {activeTrail.level} • {activeTrail.xp.toLocaleString('pt-BR')} XP
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-sm font-black text-dd-text">Trilha de {activeLang}</h3>
-                <p className="text-xs text-dd-muted uppercase tracking-wider font-bold mt-0.5">
-                  Nível {activeTrail.level} • {activeTrail.xp.toLocaleString('pt-BR')} XP
-                </p>
+
+              {/* XP progress bar */}
+              <div className="flex-1 w-full max-w-lg">
+                <div className="flex justify-between text-[10.5px] font-bold text-dd-muted mb-1.5 uppercase">
+                  <span>Progresso do Nível</span>
+                  <span>{activeTrail.xp % 500} / 500 XP</span>
+                </div>
+                <div className="h-2.5 w-full bg-dd-border/40 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-orange-500 rounded-full transition-all duration-500"
+                    style={{ width: `${((activeTrail.xp % 500) / 500) * 100}%` }}
+                  />
+                </div>
               </div>
             </div>
 
-            {/* XP progress bar */}
-            <div className="flex-1 w-full max-w-lg">
-              <div className="flex justify-between text-[10.5px] font-bold text-dd-muted mb-1.5 uppercase">
-                <span>Progresso do Nível</span>
-                <span>{activeTrail.xp % 500} / 500 XP</span>
+            {/* Header Card (Active Unit Banner) */}
+            {activeUnitLevel && (
+              <div className="bg-gradient-to-r from-orange-500/10 via-orange-500/5 to-transparent border border-dd-border rounded-2xl p-7 shadow-md flex flex-col items-center text-center space-y-3">
+                <span className="px-3 py-1 bg-orange-500/15 border border-orange-500/30 text-orange-400 text-[10px] font-black uppercase tracking-wider rounded-full shadow-sm whitespace-nowrap">
+                  Unidade Atual
+                </span>
+                <div className="space-y-1.5">
+                  <h2 className="text-dd-text text-base md:text-lg lg:text-xl font-black uppercase tracking-tight">
+                    Unidade {activeUnitNumber}: {activeUnitLevel.unitTitle}
+                  </h2>
+                  <p className="text-xs md:text-sm text-dd-muted font-medium max-w-xl">
+                    Domine esta unidade completando os exercícios e checkpoints abaixo para expandir
+                    seu conhecimento em {activeLang}.
+                  </p>
+                </div>
               </div>
-              <div className="h-2.5 w-full bg-dd-border/40 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-orange-500 rounded-full transition-all duration-500"
-                  style={{ width: `${((activeTrail.xp % 500) / 500) * 100}%` }}
-                />
-              </div>
-            </div>
-          </div>
+            )}
 
-          {/* Header Card (Duolingo Style: Active Unit Banner) */}
-          {activeUnitLevel && (
-            <div className="bg-gradient-to-r from-orange-500/10 via-orange-500/5 to-transparent border border-dd-border rounded-2xl p-7 shadow-md flex flex-col items-center text-center space-y-3">
-              <span className="px-3 py-1 bg-orange-500/15 border border-orange-500/30 text-orange-400 text-[10px] font-black uppercase tracking-wider rounded-full shadow-sm whitespace-nowrap">
-                Unidade Atual
-              </span>
-              <div className="space-y-1.5">
-                <h2 className="text-dd-text text-base md:text-lg lg:text-xl font-black uppercase tracking-tight">
-                  Unidade {activeUnitNumber}: {activeUnitLevel.unitTitle}
-                </h2>
-                <p className="text-xs md:text-sm text-dd-muted font-medium max-w-xl">
-                  Domine esta unidade completando os exercícios e checkpoints abaixo para expandir
-                  seu conhecimento em {activeLang}.
-                </p>
-              </div>
-            </div>
-          )}
+            {/* Winding Trail Path */}
+            <div className="relative flex flex-col items-center py-14 bg-dd-surface/5 border border-dd-border/50 border-dashed rounded-2xl overflow-hidden min-h-[550px]">
+              <div className="space-y-5 w-full max-w-sm flex flex-col items-center">
+                {(() => {
+                  const levels = TRAILS_DATA[activeLang] || [];
+                  const elements: React.ReactNode[] = [];
+                  let pathNodeIndex = 0;
 
-          {/* Winding Trail Path (Duolingo Map) */}
-          <div className="relative flex flex-col items-center py-14 bg-dd-surface/5 border border-dd-border/50 border-dashed rounded-2xl overflow-hidden min-h-[550px]">
-            <div className="space-y-5 w-full max-w-sm flex flex-col items-center">
-              {(() => {
-                const levels = TRAILS_DATA[activeLang] || [];
-                const elements: React.ReactNode[] = [];
-                let pathNodeIndex = 0;
+                  // Group levels by unitNumber
+                  const unitsMap = new Map<number, TrailLevel[]>();
+                  levels.forEach((level) => {
+                    if (!unitsMap.has(level.unitNumber)) {
+                      unitsMap.set(level.unitNumber, []);
+                    }
+                    unitsMap.get(level.unitNumber)!.push(level);
+                  });
 
-                // Group levels by unitNumber
-                const unitsMap = new Map<number, TrailLevel[]>();
-                levels.forEach((level) => {
-                  if (!unitsMap.has(level.unitNumber)) {
-                    unitsMap.set(level.unitNumber, []);
-                  }
-                  unitsMap.get(level.unitNumber)!.push(level);
-                });
+                  // Iterate over each unit
+                  unitsMap.forEach((unitLevels, unitNumber) => {
+                    // Render unit header separator
+                    const firstLevelOfUnit = unitLevels[0];
+                    elements.push(
+                      <div
+                        key={`unit-sep-${unitNumber}`}
+                        className="w-full flex items-center justify-center my-10 max-w-sm px-4"
+                      >
+                        <div className="flex-grow border-t border-dd-border/60"></div>
+                        <span className="px-4.5 py-2 bg-dd-surface border border-dd-border text-dd-text text-[10px] font-extrabold uppercase tracking-wider rounded-full mx-3 text-center shadow-sm whitespace-nowrap">
+                          Unidade {unitNumber}:{' '}
+                          {firstLevelOfUnit?.unitTitle || `Unidade ${unitNumber}`}
+                        </span>
+                        <div className="flex-grow border-t border-dd-border/60"></div>
+                      </div>
+                    );
 
-                // Iterate over each unit
-                unitsMap.forEach((unitLevels, unitNumber) => {
-                  // Render unit header separator
-                  const firstLevelOfUnit = unitLevels[0];
-                  elements.push(
-                    <div
-                      key={`unit-sep-${unitNumber}`}
-                      className="w-full flex items-center justify-center my-10 max-w-sm px-4"
-                    >
-                      <div className="flex-grow border-t border-dd-border/60"></div>
-                      <span className="px-4.5 py-2 bg-dd-surface border border-dd-border text-dd-text text-[10px] font-extrabold uppercase tracking-wider rounded-full mx-3 text-center shadow-sm whitespace-nowrap">
-                        Unidade {unitNumber}:{' '}
-                        {firstLevelOfUnit?.unitTitle || `Unidade ${unitNumber}`}
-                      </span>
-                      <div className="flex-grow border-t border-dd-border/60"></div>
-                    </div>
-                  );
+                    // Render all levels of this unit
+                    unitLevels.forEach((level) => {
+                      const globalIdx = levels.findIndex(
+                        (l) => l.levelNumber === level.levelNumber
+                      );
+                      const unlocked = isLevelUnlocked(globalIdx);
+                      const completedCount = level.questions.filter(
+                        (q) => attempts[q.id] === true
+                      ).length;
+                      const isCompleted = completedCount === 3;
+                      const offsetIdx = pathNodeIndex++;
 
-                  // Render all levels of this unit
-                  unitLevels.forEach((level) => {
-                    const globalIdx = levels.findIndex((l) => l.levelNumber === level.levelNumber);
-                    const unlocked = isLevelUnlocked(globalIdx);
-                    const completedCount = level.questions.filter(
-                      (q) => attempts[q.id] === true
-                    ).length;
-                    const isCompleted = completedCount === 3;
-                    const offsetIdx = pathNodeIndex++;
+                      elements.push(
+                        <div
+                          key={`level-${level.levelNumber}`}
+                          className="w-full flex flex-col items-center"
+                        >
+                          <div
+                            className="relative z-10 flex flex-col items-center my-7 transition-transform"
+                            style={getOffsetStyle(offsetIdx)}
+                          >
+                            {/* Estrelas orgânicas/curvadas */}
+                            <div className="flex gap-1.5 justify-center mb-2.5 items-end h-6.5">
+                              {Array.from({ length: 3 }).map((_, starIdx) => {
+                                const isStarEarned =
+                                  attempts[level.questions[starIdx]?.id] === true;
+                                const isMiddle = starIdx === 1;
+                                const starClass = isMiddle
+                                  ? 'w-5.5 h-5.5 -translate-y-0.5 scale-110'
+                                  : 'w-5 h-5 translate-y-0.5 ' +
+                                    (starIdx === 0 ? 'rotate-[-12deg]' : 'rotate-[12deg]');
+
+                                return (
+                                  <Star
+                                    key={starIdx}
+                                    className={`transition-all ${starClass} ${
+                                      isStarEarned
+                                        ? 'text-yellow-500 fill-yellow-500'
+                                        : 'text-dd-border/70'
+                                    }`}
+                                  />
+                                );
+                              })}
+                            </div>
+
+                            {/* Botão 3D da fase (Rounded-Square) */}
+                            <button
+                              onClick={() => handleLevelClick(level, unlocked)}
+                              className={`w-20 h-20 rounded-[22px] flex items-center justify-center transition-all transform cursor-pointer ${
+                                unlocked
+                                  ? isCompleted
+                                    ? 'bg-orange-500 text-white border-x-2 border-t-2 border-b-[7px] border-orange-600 hover:bg-orange-400 active:border-b-0 active:translate-y-[7px]'
+                                    : 'bg-dd-surface text-orange-500 border-x-2 border-t-2 border-b-[7px] border-orange-500 hover:bg-dd-border/30 active:border-b-0 active:translate-y-[7px]'
+                                  : 'bg-dd-surface/40 text-dd-muted/30 border-x-2 border-t-2 border-b-[7px] border-dd-border/40 cursor-not-allowed'
+                              }`}
+                            >
+                              {unlocked ? (
+                                <BookOpen className="w-8 h-8" />
+                              ) : (
+                                <Lock className="w-7 h-7" />
+                              )}
+                            </button>
+
+                            {/* Título da fase */}
+                            <div className="mt-3 text-center max-w-[170px]">
+                              <p className="text-xs font-black uppercase text-dd-text leading-tight">
+                                Fase {level.levelNumber}
+                              </p>
+                              <p className="text-[10.5px] text-dd-muted font-bold leading-tight mt-1 truncate">
+                                {level.title}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    });
+
+                    // Render unit Checkpoint at the end of the unit levels
+                    const checkpointId = `${activeLang.toLowerCase()}-u${unitNumber}-checkpoint`;
+                    const isCheckpointCompleted = attempts[checkpointId] === true;
+
+                    const lastLevelOfUnit = unitLevels[unitLevels.length - 1];
+                    const lastLevelCompleted =
+                      lastLevelOfUnit &&
+                      lastLevelOfUnit.questions.every((q) => attempts[q.id] === true);
+                    const checkpointUnlocked = lastLevelCompleted;
+                    const checkpointOffsetIdx = pathNodeIndex++;
 
                     elements.push(
                       <div
-                        key={`level-${level.levelNumber}`}
+                        key={`checkpoint-${unitNumber}`}
                         className="w-full flex flex-col items-center"
                       >
+                        {/* Linha pontilhada conectando à bandeira */}
+                        <div className="w-full flex items-center justify-center my-6 max-w-sm px-4">
+                          <div className="flex-grow border-t-2 border-dashed border-dd-border/50"></div>
+                          <span className="px-4 py-1.5 bg-dd-accent/15 border border-orange-500/30 text-orange-400 text-[9px] font-black uppercase tracking-wider rounded-full mx-3 text-center shadow-sm whitespace-nowrap">
+                            Revisão Final & Checkpoint {unitNumber}
+                          </span>
+                          <div className="flex-grow border-t-2 border-dashed border-dd-border/50"></div>
+                        </div>
+
                         <div
-                          className="relative z-10 flex flex-col items-center my-7 transition-transform"
-                          style={getOffsetStyle(offsetIdx)}
+                          className="relative z-10 flex flex-col items-center my-6 transition-transform"
+                          style={getOffsetStyle(checkpointOffsetIdx)}
                         >
-                          {/* Estrelas orgânicas/curvadas */}
+                          {/* Três estrelas douradas se concluído, cinzas caso contrário */}
                           <div className="flex gap-1.5 justify-center mb-2.5 items-end h-6.5">
                             {Array.from({ length: 3 }).map((_, starIdx) => {
-                              const isStarEarned = attempts[level.questions[starIdx]?.id] === true;
                               const isMiddle = starIdx === 1;
                               const starClass = isMiddle
                                 ? 'w-5.5 h-5.5 -translate-y-0.5 scale-110'
-                                : 'w-5 h-5 translate-y-0.5 ' +
+                                : 'w-5.5 h-5.5 translate-y-0.5 ' +
                                   (starIdx === 0 ? 'rotate-[-12deg]' : 'rotate-[12deg]');
 
                               return (
                                 <Star
                                   key={starIdx}
                                   className={`transition-all ${starClass} ${
-                                    isStarEarned
+                                    isCheckpointCompleted
                                       ? 'text-yellow-500 fill-yellow-500'
                                       : 'text-dd-border/70'
                                   }`}
@@ -1186,31 +1272,34 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                             })}
                           </div>
 
-                          {/* Botão 3D da fase (Rounded-Square) */}
+                          {/* Botão 3D da bandeira (Checkpoint) */}
                           <button
-                            onClick={() => handleLevelClick(level, unlocked)}
-                            className={`w-20 h-20 rounded-[22px] flex items-center justify-center transition-all transform cursor-pointer ${
-                              unlocked
-                                ? isCompleted
-                                  ? 'bg-orange-500 text-white border-x-2 border-t-2 border-b-[7px] border-orange-600 hover:bg-orange-400 active:border-b-0 active:translate-y-[7px]'
+                            onClick={() => handleCheckpointClick(unitNumber)}
+                            className={`w-20 h-20 rounded-[22px] flex items-center justify-center transition-all transform cursor-pointer relative ${
+                              checkpointUnlocked
+                                ? isCheckpointCompleted
+                                  ? 'bg-dd-accent text-white border-x-2 border-t-2 border-b-[7px] border-orange-600 hover:bg-orange-500 active:border-b-0 active:translate-y-[7px]'
                                   : 'bg-dd-surface text-orange-500 border-x-2 border-t-2 border-b-[7px] border-orange-500 hover:bg-dd-border/30 active:border-b-0 active:translate-y-[7px]'
-                                : 'bg-dd-surface/40 text-dd-muted/30 border-x-2 border-t-2 border-b-[7px] border-dd-border/40 cursor-not-allowed'
+                                : 'bg-dd-surface/40 text-dd-muted/30 border-x-2 border-t-2 border-b-[7px] border-dd-border/30 cursor-not-allowed'
                             }`}
                           >
-                            {unlocked ? (
-                              <BookOpen className="w-8 h-8" />
-                            ) : (
-                              <Lock className="w-7 h-7" />
+                            <Flag
+                              className={`w-8 h-8 ${checkpointUnlocked && !isCheckpointCompleted ? 'animate-pulse' : ''}`}
+                            />
+                            {!checkpointUnlocked && (
+                              <div className="absolute -top-1 -right-1 bg-dd-surface border border-dd-border p-1 rounded-full text-dd-muted shadow-sm">
+                                <Lock className="w-3.5 h-3.5 text-dd-muted" />
+                              </div>
                             )}
                           </button>
 
-                          {/* Título da fase */}
+                          {/* Título do Checkpoint */}
                           <div className="mt-3 text-center max-w-[170px]">
                             <p className="text-xs font-black uppercase text-dd-text leading-tight">
-                              Fase {level.levelNumber}
+                              Checkpoint
                             </p>
                             <p className="text-[10.5px] text-dd-muted font-bold leading-tight mt-1 truncate">
-                              {level.title}
+                              Unidade {unitNumber}
                             </p>
                           </div>
                         </div>
@@ -1218,163 +1307,78 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                     );
                   });
 
-                  // Render unit Checkpoint at the end of the unit levels
-                  const checkpointId = `${activeLang.toLowerCase()}-u${unitNumber}-checkpoint`;
-                  const isCheckpointCompleted = attempts[checkpointId] === true;
-
-                  const lastLevelOfUnit = unitLevels[unitLevels.length - 1];
-                  const lastLevelCompleted =
-                    lastLevelOfUnit &&
-                    lastLevelOfUnit.questions.every((q) => attempts[q.id] === true);
-                  const checkpointUnlocked = lastLevelCompleted;
-                  const checkpointOffsetIdx = pathNodeIndex++;
-
-                  elements.push(
-                    <div
-                      key={`checkpoint-${unitNumber}`}
-                      className="w-full flex flex-col items-center"
-                    >
-                      {/* Linha pontilhada conectando à bandeira */}
-                      <div className="w-full flex items-center justify-center my-6 max-w-sm px-4">
-                        <div className="flex-grow border-t-2 border-dashed border-dd-border/50"></div>
-                        <span className="px-4 py-1.5 bg-dd-accent/15 border border-orange-500/30 text-orange-400 text-[9px] font-black uppercase tracking-wider rounded-full mx-3 text-center shadow-sm whitespace-nowrap">
-                          Revisão Final & Checkpoint {unitNumber}
-                        </span>
-                        <div className="flex-grow border-t-2 border-dashed border-dd-border/50"></div>
-                      </div>
-
-                      <div
-                        className="relative z-10 flex flex-col items-center my-6 transition-transform"
-                        style={getOffsetStyle(checkpointOffsetIdx)}
-                      >
-                        {/* Três estrelas douradas se concluído, cinzas caso contrário */}
-                        <div className="flex gap-1.5 justify-center mb-2.5 items-end h-6.5">
-                          {Array.from({ length: 3 }).map((_, starIdx) => {
-                            const isMiddle = starIdx === 1;
-                            const starClass = isMiddle
-                              ? 'w-5.5 h-5.5 -translate-y-0.5 scale-110'
-                              : 'w-5.5 h-5.5 translate-y-0.5 ' +
-                                (starIdx === 0 ? 'rotate-[-12deg]' : 'rotate-[12deg]');
-
-                            return (
-                              <Star
-                                key={starIdx}
-                                className={`transition-all ${starClass} ${
-                                  isCheckpointCompleted
-                                    ? 'text-yellow-500 fill-yellow-500'
-                                    : 'text-dd-border/70'
-                                }`}
-                              />
-                            );
-                          })}
-                        </div>
-
-                        {/* Botão 3D da bandeira (Checkpoint) */}
-                        <button
-                          onClick={() => handleCheckpointClick(unitNumber)}
-                          className={`w-20 h-20 rounded-[22px] flex items-center justify-center transition-all transform cursor-pointer relative ${
-                            checkpointUnlocked
-                              ? isCheckpointCompleted
-                                ? 'bg-dd-accent text-white border-x-2 border-t-2 border-b-[7px] border-orange-600 hover:bg-orange-500 active:border-b-0 active:translate-y-[7px]'
-                                : 'bg-dd-surface text-orange-500 border-x-2 border-t-2 border-b-[7px] border-orange-500 hover:bg-dd-border/30 active:border-b-0 active:translate-y-[7px]'
-                              : 'bg-dd-surface/40 text-dd-muted/30 border-x-2 border-t-2 border-b-[7px] border-dd-border/30 cursor-not-allowed'
-                          }`}
-                        >
-                          <Flag
-                            className={`w-8 h-8 ${checkpointUnlocked && !isCheckpointCompleted ? 'animate-pulse' : ''}`}
-                          />
-                          {!checkpointUnlocked && (
-                            <div className="absolute -top-1 -right-1 bg-dd-surface border border-dd-border p-1 rounded-full text-dd-muted shadow-sm">
-                              <Lock className="w-3.5 h-3.5 text-dd-muted" />
-                            </div>
-                          )}
-                        </button>
-
-                        {/* Título do Checkpoint */}
-                        <div className="mt-3 text-center max-w-[170px]">
-                          <p className="text-xs font-black uppercase text-dd-text leading-tight">
-                            Checkpoint
-                          </p>
-                          <p className="text-[10.5px] text-dd-muted font-bold leading-tight mt-1 truncate">
-                            Unidade {unitNumber}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                });
-
-                return elements;
-              })()}
+                  return elements;
+                })()}
+              </div>
             </div>
+
+            {/* Floating Recommended Level Bar */}
+            <AnimatePresence>
+              {recommendedCheckpoint && (
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 30 }}
+                  transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+                  className="sticky bottom-6 left-0 right-0 z-30 flex justify-center px-4 pointer-events-none"
+                >
+                  <div className="pointer-events-auto bg-dd-surface/90 backdrop-blur-md border border-orange-500/30 rounded-2xl px-6 py-5 shadow-xl max-w-lg w-full flex items-center justify-between gap-5">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-extrabold uppercase text-orange-400 tracking-wider">
+                        Próxima Atividade Recomendada
+                      </p>
+                      <h4 className="text-sm font-black text-dd-text truncate mt-0.5">
+                        {recommendedCheckpoint.data?.title ||
+                          `Checkpoint da Unidade ${recommendedCheckpoint.unitNumber}`}
+                      </h4>
+                      <p className="text-xs text-dd-muted truncate mt-0.5">
+                        {recommendedCheckpoint.data?.description ||
+                          'Revisão e desafio prático de código.'}
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => handleCheckpointClick(recommendedCheckpoint.unitNumber)}
+                      className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-orange-500/20 whitespace-nowrap cursor-pointer active:scale-95"
+                    >
+                      Começar
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {!recommendedCheckpoint && recommendedLevel && (
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 30 }}
+                  transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+                  className="sticky bottom-6 left-0 right-0 z-30 flex justify-center px-4 pointer-events-none"
+                >
+                  <div className="pointer-events-auto bg-dd-surface/90 backdrop-blur-md border border-orange-500/30 rounded-2xl px-6 py-5 shadow-xl max-w-lg w-full flex items-center justify-between gap-5">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-extrabold uppercase text-orange-400 tracking-wider">
+                        Próxima Atividade Recomendada
+                      </p>
+                      <h4 className="text-sm font-black text-dd-text truncate mt-0.5">
+                        Fase {recommendedLevel.levelNumber}: {recommendedLevel.title}
+                      </h4>
+                      <p className="text-xs text-dd-muted truncate mt-0.5">
+                        {recommendedLevel.description}
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => handleLevelClick(recommendedLevel, true)}
+                      className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-orange-500/20 whitespace-nowrap cursor-pointer active:scale-95"
+                    >
+                      Começar
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-
-          {/* Floating Recommended Level Bar */}
-          <AnimatePresence>
-            {recommendedCheckpoint && (
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 30 }}
-                transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-                className="sticky bottom-6 left-0 right-0 z-30 flex justify-center px-4 pointer-events-none"
-              >
-                <div className="pointer-events-auto bg-dd-surface/90 backdrop-blur-md border border-orange-500/30 rounded-2xl px-6 py-5 shadow-xl max-w-lg w-full flex items-center justify-between gap-5">
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-extrabold uppercase text-orange-400 tracking-wider">
-                      Próxima Atividade Recomendada
-                    </p>
-                    <h4 className="text-sm font-black text-dd-text truncate mt-0.5">
-                      {recommendedCheckpoint.data?.title ||
-                        `Checkpoint da Unidade ${recommendedCheckpoint.unitNumber}`}
-                    </h4>
-                    <p className="text-xs text-dd-muted truncate mt-0.5">
-                      {recommendedCheckpoint.data?.description ||
-                        'Revisão e desafio prático de código.'}
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={() => handleCheckpointClick(recommendedCheckpoint.unitNumber)}
-                    className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-orange-500/20 whitespace-nowrap cursor-pointer active:scale-95"
-                  >
-                    Começar
-                  </button>
-                </div>
-              </motion.div>
-            )}
-
-            {!recommendedCheckpoint && recommendedLevel && (
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 30 }}
-                transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-                className="sticky bottom-6 left-0 right-0 z-30 flex justify-center px-4 pointer-events-none"
-              >
-                <div className="pointer-events-auto bg-dd-surface/90 backdrop-blur-md border border-orange-500/30 rounded-2xl px-6 py-5 shadow-xl max-w-lg w-full flex items-center justify-between gap-5">
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-extrabold uppercase text-orange-400 tracking-wider">
-                      Próxima Atividade Recomendada
-                    </p>
-                    <h4 className="text-sm font-black text-dd-text truncate mt-0.5">
-                      Fase {recommendedLevel.levelNumber}: {recommendedLevel.title}
-                    </h4>
-                    <p className="text-xs text-dd-muted truncate mt-0.5">
-                      {recommendedLevel.description}
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={() => handleLevelClick(recommendedLevel, true)}
-                    className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-orange-500/20 whitespace-nowrap cursor-pointer active:scale-95"
-                  >
-                    Começar
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </main>
 
         <Footer />
