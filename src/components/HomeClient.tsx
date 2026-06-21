@@ -13,6 +13,7 @@ import LandingDuels from '@/components/landing/LandingDuels';
 import LandingProfiles from '@/components/landing/LandingProfiles';
 import LandingCTA from '@/components/landing/LandingCTA';
 import LandingFooter from '@/components/landing/LandingFooter';
+import BraceLoader from '@/components/BraceLoader';
 
 interface HomeClientProps {
   initialUser: any;
@@ -47,56 +48,7 @@ export default function HomeClient({ initialUser }: HomeClientProps) {
       {/* 3D Stack Loader */}
       {renderLoader && (
         <div className={`loader-container ${!showLoader ? 'fade-out' : ''}`}>
-          <div className="loader">
-            <div className="box box-1">
-              <div className="side-left" />
-              <div className="side-right" />
-              <div className="side-top">
-                <div className="brace">
-                  <svg viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M9,2 C5,2 5,5.5 5,7.5 C5,9.5 5,9.5 2,10 C5,10.5 5,10.5 5,12.5 C5,14.5 5,18 9,18" />
-                    <path d="M15,2 C19,2 19,5.5 19,7.5 C19,9.5 19,9.5 22,10 C19,10.5 19,10.5 19,12.5 C19,14.5 19,18 15,18" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-            <div className="box box-2">
-              <div className="side-left" />
-              <div className="side-right" />
-              <div className="side-top">
-                <div className="brace">
-                  <svg viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M9,2 C5,2 5,5.5 5,7.5 C5,9.5 5,9.5 2,10 C5,10.5 5,10.5 5,12.5 C5,14.5 5,18 9,18" />
-                    <path d="M15,2 C19,2 19,5.5 19,7.5 C19,9.5 19,9.5 22,10 C19,10.5 19,10.5 19,12.5 C19,14.5 19,18 15,18" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-            <div className="box box-3">
-              <div className="side-left" />
-              <div className="side-right" />
-              <div className="side-top">
-                <div className="brace">
-                  <svg viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M9,2 C5,2 5,5.5 5,7.5 C5,9.5 5,9.5 2,10 C5,10.5 5,10.5 5,12.5 C5,14.5 5,18 9,18" />
-                    <path d="M15,2 C19,2 19,5.5 19,7.5 C19,9.5 19,9.5 22,10 C19,10.5 19,10.5 19,12.5 C19,14.5 19,18 15,18" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-            <div className="box box-4">
-              <div className="side-left" />
-              <div className="side-right" />
-              <div className="side-top">
-                <div className="brace">
-                  <svg viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M9,2 C5,2 5,5.5 5,7.5 C5,9.5 5,9.5 2,10 C5,10.5 5,10.5 5,12.5 C5,14.5 5,18 9,18" />
-                    <path d="M15,2 C19,2 19,5.5 19,7.5 C19,9.5 19,9.5 22,10 C19,10.5 19,10.5 19,12.5 C19,14.5 19,18 15,18" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
+          <BraceLoader color="#FF5C00" background="transparent" />
         </div>
       )}
 
