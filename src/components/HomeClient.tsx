@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import LandingNav from '@/components/landing/LandingNav';
 import LandingHero from '@/components/landing/LandingHero';
 import LandingMarquee from '@/components/landing/LandingMarquee';
@@ -19,15 +19,67 @@ interface HomeClientProps {
 }
 
 export default function HomeClient({ initialUser }: HomeClientProps) {
+  const [showLoader, setShowLoader] = useState(true);
+  const [renderLoader, setRenderLoader] = useState(true);
+
   useEffect(() => {
     document.documentElement.classList.add('lp-landing-page');
+
+    // Wait 2.5s for loading, then fade out
+    const fadeTimer = setTimeout(() => {
+      setShowLoader(false);
+    }, 2500);
+
+    // Wait 3.0s to completely unmount
+    const removeTimer = setTimeout(() => {
+      setRenderLoader(false);
+    }, 3000);
+
     return () => {
       document.documentElement.classList.remove('lp-landing-page');
+      clearTimeout(fadeTimer);
+      clearTimeout(removeTimer);
     };
   }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-[#0E0D0B] text-[#F4F1EB] antialiased selection:bg-[var(--lp-accent)]/30 selection:text-white">
+      {/* 3D Stack Loader */}
+      {renderLoader && (
+        <div className={`loader-container ${!showLoader ? 'fade-out' : ''}`}>
+          <div className="loader">
+            <div className="box box-1">
+              <div className="side-left" />
+              <div className="side-right" />
+              <div className="side-top">
+                <span className="loader-braces">{'{ }'}</span>
+              </div>
+            </div>
+            <div className="box box-2">
+              <div className="side-left" />
+              <div className="side-right" />
+              <div className="side-top">
+                <span className="loader-braces">{'{ }'}</span>
+              </div>
+            </div>
+            <div className="box box-3">
+              <div className="side-left" />
+              <div className="side-right" />
+              <div className="side-top">
+                <span className="loader-braces">{'{ }'}</span>
+              </div>
+            </div>
+            <div className="box box-4">
+              <div className="side-left" />
+              <div className="side-right" />
+              <div className="side-top">
+                <span className="loader-braces">{'{ }'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Background grain texture */}
       <div className="lp-grain" />
 
