@@ -695,11 +695,33 @@ html.lp-landing-page::-webkit-scrollbar-thumb:hover {
 
 .side-top {
   position: absolute;
-  background-color: #ffff;
+  background-color: #fff;
   width: 20px;
   height: 20px;
   rotate: 45deg;
   transform: skew(-20deg, -20deg);
+}
+
+.brace {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brace svg {
+  width: 15px;
+  height: 13px;
+  overflow: visible;
+}
+
+.brace path {
+  fill: none;
+  stroke: #FF5C00;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .box-1 {
