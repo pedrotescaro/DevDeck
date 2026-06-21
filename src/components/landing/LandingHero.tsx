@@ -124,19 +124,16 @@ fn credit_xp(user: &User, action: Action) -> Result<XP, Error> {
           </h1>
 
           <motion.p
-            className="max-w-xl text-base md:text-lg leading-relaxed mb-8"
+            className="max-w-lg text-sm md:text-base leading-relaxed mb-8"
             style={{ color: 'var(--lp-fg-dim)' }}
             variants={{
               hidden: { opacity: 0, y: 20 },
               show: { opacity: 1, y: 0, transition: { duration: 0.7, delay: 0.3 } },
             }}
           >
-            Poste um problema real. Ganhe XP quando a comunidade votar na sua resposta. Uma IA gera
-            um quiz da sua própria discussão — outra pessoa evolui com o seu trabalho.{' '}
-            <span style={{ color: 'var(--lp-fg)' }}>
-              Trilhas de linguagem se preenchem. Ofensivas se acumulam. Duelos são disputados.
-            </span>{' '}
-            Seu perfil deixa de ser um currículo e passa a ser prova real de habilidade.
+            Poste problemas reais, ganhe XP com a comunidade e resolva quizzes gerados por IA. Seu
+            perfil deixa de ser apenas um currículo e se torna{' '}
+            <span style={{ color: 'var(--lp-fg)' }}>prova real de suas habilidades</span>.
           </motion.p>
 
           {/* Circular avatar social proof stack */}

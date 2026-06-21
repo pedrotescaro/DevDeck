@@ -81,7 +81,9 @@ const BraceLoader: React.FC<BraceLoaderProps> = ({ color = '#FF5C00', background
         }
         .side-left {
           position: absolute;
-          background-color: #A9A9A9;
+          background-color: #0E0D0B;
+          border: 1px solid #A9A9A9;
+          box-sizing: border-box;
           width: 19px;
           height: 5px;
           transform: skew(0deg, -25deg);
@@ -90,7 +92,9 @@ const BraceLoader: React.FC<BraceLoaderProps> = ({ color = '#FF5C00', background
         }
         .side-right {
           position: absolute;
-          background-color: #D3D3D3;
+          background-color: #0E0D0B;
+          border: 1px solid #D3D3D3;
+          box-sizing: border-box;
           width: 19px;
           height: 5px;
           transform: skew(0deg, 25deg);
@@ -99,7 +103,9 @@ const BraceLoader: React.FC<BraceLoaderProps> = ({ color = '#FF5C00', background
         }
         .side-top {
           position: absolute;
-          background-color: #fff;
+          background-color: #0E0D0B;
+          border: 1px solid #fff;
+          box-sizing: border-box;
           width: 20px;
           height: 20px;
           rotate: 45deg;
