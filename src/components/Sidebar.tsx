@@ -99,10 +99,19 @@ export function Sidebar({ user }: SidebarProps) {
 
   useEffect(() => {
     if (user) {
-      setActiveUser(user);
-      inMemoryUser = user;
+      setActiveUser((prev) => {
+        const merged = { ...prev, ...user };
+        // Preserve values if new user object lacks them
+        if (prev) {
+          if (user.total_xp === undefined) merged.total_xp = prev.total_xp;
+          if (user.streak === undefined) merged.streak = prev.streak;
+          if (user.streak_days === undefined) merged.streak_days = prev.streak_days;
+        }
+        return merged;
+      });
+      inMemoryUser = { ...inMemoryUser, ...user };
       if (typeof window !== 'undefined') {
-        sessionStorage.setItem('devdeck_user', JSON.stringify(user));
+        sessionStorage.setItem('devdeck_user', JSON.stringify(inMemoryUser));
       }
     } else {
       if (typeof window !== 'undefined') {
@@ -117,28 +126,30 @@ export function Sidebar({ user }: SidebarProps) {
           }
         }
       }
+    }
 
-      // Async background fetch
-      fetch('/api/users/me')
-        .then((res) => {
-          if (res.ok) return res.json();
-          throw new Error('Not logged in');
-        })
-        .then((data) => {
-          setActiveUser(data);
-          inMemoryUser = data;
-          if (typeof window !== 'undefined') {
-            sessionStorage.setItem('devdeck_user', JSON.stringify(data));
-          }
-        })
-        .catch(() => {
+    // Always fetch the full user profile from /api/users/me in background to keep data fresh and accurate
+    fetch('/api/users/me')
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error('Not logged in');
+      })
+      .then((data) => {
+        setActiveUser(data);
+        inMemoryUser = data;
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('devdeck_user', JSON.stringify(data));
+        }
+      })
+      .catch(() => {
+        if (!user) {
           setActiveUser(null);
           inMemoryUser = null;
           if (typeof window !== 'undefined') {
             sessionStorage.removeItem('devdeck_user');
           }
-        });
-    }
+        }
+      });
   }, [user]);
 
   // Theme state & toggler

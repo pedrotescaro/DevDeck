@@ -1728,8 +1728,8 @@ export function FeedContent({
 
             {/* Flame streak */}
             <div className="flex items-center gap-3 bg-gradient-to-r from-orange-500/10 to-orange-500/0 border border-orange-500/20 rounded-xl p-4">
-              <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xl shadow-[0_0_15px_rgba(249,115,22,0.15)] animate-pulse">
-                🔥
+              <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xl shadow-[0_0_15px_rgba(249,115,22,0.15)]">
+                <span className="animate-fire-flicker">🔥</span>
               </div>
               <div>
                 <h4 className="font-extrabold text-sm text-dd-text font-sans tracking-tight">

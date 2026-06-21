@@ -148,7 +148,13 @@ Como posso te ajudar hoje? Você pode me perguntar sobre:
 
 export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
   const reduced = useReducedMotion();
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(() => [
+    {
+      id: 'welcome',
+      sender: 'ducky',
+      text: `Quack! 🦆 Eu sou o Ducky, seu patinho de borracha! Como posso ajudar com a trilha de **${activeLanguage}** hoje? Pode me enviar um código com bug ou tirar dúvidas!`,
+    },
+  ]);
   const [inputVal, setInputVal] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
   const [mode, setMode] = useState<'Rápido' | 'Deep Debug'>('Rápido');
@@ -157,6 +163,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Rolagem suave para o final do chat
   useEffect(() => {
@@ -254,11 +261,20 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
   const handleSuggestionClick = (prefix: string) => {
     setInputVal(prefix);
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 50);
   };
 
   const clearHistory = () => {
     if (confirm('Deseja apagar o histórico de conversa com o Ducky?')) {
-      setMessages([]);
+      setMessages([
+        {
+          id: 'welcome',
+          sender: 'ducky',
+          text: `Quack! 🦆 Eu sou o Ducky, seu patinho de borracha! Como posso ajudar com a trilha de **${activeLanguage}** hoje? Pode me enviar um código com bug ou tirar dúvidas!`,
+        },
+      ]);
     }
   };
 
@@ -329,86 +345,23 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
         {/* Chat / Welcome Area */}
         <div className="flex-grow flex flex-col justify-between overflow-y-auto px-4 py-8 max-w-3xl w-full mx-auto pb-32">
-          {messages.length === 0 ? (
-            // WELCOME / EMPTY STATE (Grok Style)
-            <div className="flex-grow flex flex-col items-center justify-center text-center my-auto space-y-8 py-12">
-              <div className="w-20 h-20 bg-orange-500/10 border border-orange-500/20 text-orange-500 rounded-full flex items-center justify-center shadow-lg shadow-orange-500/5 animate-pulse">
-                <DuckyLogo className="w-10 h-10 fill-orange-500/10" />
+          {/* CONVERSATION FLOW */}
+          <div className="space-y-6 w-full flex flex-col">
+            {isPrivate && (
+              <div className="bg-purple-500/5 border border-purple-500/10 p-3.5 rounded-xl flex items-center gap-2.5 text-purple-400 text-xs">
+                <ShieldAlert className="w-4 h-4" />
+                <span>
+                  Você está no <strong>Modo Privado</strong>. Suas conversas não ficam salvas na
+                  conta.
+                </span>
               </div>
+            )}
 
-              <div className="space-y-2">
-                <h2 className="text-xl font-black text-dd-text tracking-tight uppercase">
-                  Como posso ajudar a codar hoje?
-                </h2>
-                <p className="text-xs text-dd-muted max-w-sm mx-auto">
-                  Eu sou o seu patinho de borracha com inteligência artificial. Explique seu código
-                  e tire dúvidas técnicas.
-                </p>
-              </div>
-
-              {/* Sugestões rápidas */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl">
-                <button
-                  onClick={() =>
-                    handleSuggestionClick('🐛 Quero ajuda para encontrar um bug neste código: \n\n')
-                  }
-                  className="p-4 border border-dd-border/60 bg-dd-surface/40 hover:bg-dd-border/30 hover:border-orange-500/30 rounded-xl text-left transition-all cursor-pointer text-xs group"
-                >
-                  <span className="font-bold text-dd-text block group-hover:text-orange-400">
-                    Explicar Bug
-                  </span>
-                  <span className="text-[10px] text-dd-muted mt-1 block">
-                    Encontre erros lógicos ou exceções.
-                  </span>
-                </button>
-                <button
-                  onClick={() =>
-                    handleSuggestionClick('⚡ Como posso refatorar e otimizar este código: \n\n')
-                  }
-                  className="p-4 border border-dd-border/60 bg-dd-surface/40 hover:bg-dd-border/30 hover:border-orange-500/30 rounded-xl text-left transition-all cursor-pointer text-xs group"
-                >
-                  <span className="font-bold text-dd-text block group-hover:text-orange-400">
-                    Refatorar
-                  </span>
-                  <span className="text-[10px] text-dd-muted mt-1 block">
-                    Melhore performance e legibilidade.
-                  </span>
-                </button>
-                <button
-                  onClick={() =>
-                    handleSuggestionClick(
-                      '📝 Escreva testes unitários para a seguinte função: \n\n'
-                    )
-                  }
-                  className="p-4 border border-dd-border/60 bg-dd-surface/40 hover:bg-dd-border/30 hover:border-orange-500/30 rounded-xl text-left transition-all cursor-pointer text-xs group"
-                >
-                  <span className="font-bold text-dd-text block group-hover:text-orange-400">
-                    Escrever Teste
-                  </span>
-                  <span className="text-[10px] text-dd-muted mt-1 block">
-                    Gere testes Jest/Vitest robustos.
-                  </span>
-                </button>
-              </div>
-            </div>
-          ) : (
-            // CONVERSATION FLOW
-            <div className="space-y-6 w-full flex flex-col">
-              {isPrivate && (
-                <div className="bg-purple-500/5 border border-purple-500/10 p-3.5 rounded-xl flex items-center gap-2.5 text-purple-400 text-xs">
-                  <ShieldAlert className="w-4 h-4" />
-                  <span>
-                    Você está no <strong>Modo Privado</strong>. Suas conversas não ficam salvas na
-                    conta.
-                  </span>
-                </div>
-              )}
-
-              {messages.map((msg) => {
-                const isDucky = msg.sender === 'ducky';
-                return (
+            {messages.map((msg) => {
+              const isDucky = msg.sender === 'ducky';
+              return (
+                <div key={msg.id} className="flex flex-col space-y-4 w-full">
                   <div
-                    key={msg.id}
                     className={`flex gap-3 max-w-[85%] ${isDucky ? 'self-start' : 'self-end flex-row-reverse'}`}
                   >
                     {/* Avatar */}
@@ -430,8 +383,8 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                     <div
                       className={`rounded-2xl p-4 border text-xs leading-relaxed ${
                         isDucky
-                          ? 'bg-dd-surface/30 border-dd-border/40 text-dd-text whitespace-pre-wrap'
-                          : 'bg-orange-500/10 border-orange-500/20 text-dd-text whitespace-pre-wrap'
+                          ? 'bg-dd-surface/30 border-dd-border/40 text-dd-text whitespace-pre-wrap font-sans'
+                          : 'bg-orange-500/10 border-orange-500/20 text-dd-text whitespace-pre-wrap font-sans'
                       }`}
                     >
                       {msg.text}
@@ -440,33 +393,83 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                       )}
                     </div>
                   </div>
-                );
-              })}
 
-              {/* Thinking Indicator */}
-              {thinking && (
-                <div className="flex gap-3 self-start max-w-[85%]">
-                  <div className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center flex-shrink-0">
-                    <DuckyLogo className="w-4 h-4 animate-bounce" />
-                  </div>
-                  <div className="bg-dd-surface/30 border border-dd-border/40 rounded-2xl p-4 text-xs text-dd-muted flex items-center gap-2">
-                    <div className="flex gap-1">
-                      <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                      <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                      <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce" />
+                  {msg.id === 'welcome' && messages.length === 1 && (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl pl-11 self-start animate-in fade-in slide-in-from-bottom-2 duration-200">
+                      <button
+                        onClick={() =>
+                          handleSuggestionClick(
+                            '🐛 Quero ajuda para encontrar um bug neste código: \n\n'
+                          )
+                        }
+                        className="p-4 border border-dd-border/60 bg-dd-surface/40 hover:bg-dd-border/30 hover:border-orange-500/30 rounded-xl text-left transition-all cursor-pointer text-xs group"
+                      >
+                        <span className="font-bold text-dd-text block group-hover:text-orange-400">
+                          Explicar Bug
+                        </span>
+                        <span className="text-[10px] text-dd-muted mt-1 block">
+                          Encontre erros lógicos ou exceções.
+                        </span>
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleSuggestionClick(
+                            '⚡ Como posso refatorar e otimizar este código: \n\n'
+                          )
+                        }
+                        className="p-4 border border-dd-border/60 bg-dd-surface/40 hover:bg-dd-border/30 hover:border-orange-500/30 rounded-xl text-left transition-all cursor-pointer text-xs group"
+                      >
+                        <span className="font-bold text-dd-text block group-hover:text-orange-400">
+                          Refatorar
+                        </span>
+                        <span className="text-[10px] text-dd-muted mt-1 block">
+                          Melhore performance e legibilidade.
+                        </span>
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleSuggestionClick(
+                            '📝 Escreva testes unitários para a seguinte função: \n\n'
+                          )
+                        }
+                        className="p-4 border border-dd-border/60 bg-dd-surface/40 hover:bg-dd-border/30 hover:border-orange-500/30 rounded-xl text-left transition-all cursor-pointer text-xs group"
+                      >
+                        <span className="font-bold text-dd-text block group-hover:text-orange-400">
+                          Escrever Teste
+                        </span>
+                        <span className="text-[10px] text-dd-muted mt-1 block">
+                          Gere testes Jest/Vitest robustos.
+                        </span>
+                      </button>
                     </div>
-                    <span>
-                      {mode === 'Deep Debug'
-                        ? 'Ducky está analisando o escopo do seu projeto...'
-                        : 'Ducky está analisando seu código...'}
-                    </span>
-                  </div>
+                  )}
                 </div>
-              )}
+              );
+            })}
 
-              <div ref={chatEndRef} />
-            </div>
-          )}
+            {/* Thinking Indicator */}
+            {thinking && (
+              <div className="flex gap-3 self-start max-w-[85%]">
+                <div className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center flex-shrink-0">
+                  <DuckyLogo className="w-4 h-4 animate-bounce" />
+                </div>
+                <div className="bg-dd-surface/30 border border-dd-border/40 rounded-2xl p-4 text-xs text-dd-muted flex items-center gap-2">
+                  <div className="flex gap-1">
+                    <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                    <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                    <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce" />
+                  </div>
+                  <span>
+                    {mode === 'Deep Debug'
+                      ? 'Ducky está analisando o escopo do seu projeto...'
+                      : 'Ducky está analisando seu código...'}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div ref={chatEndRef} />
+          </div>
         </div>
 
         {/* Bottom Chat Input Form (Grok Style) */}
@@ -484,18 +487,20 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
               </button>
 
               {/* Text Area Input */}
-              <input
-                type="text"
+              <textarea
+                ref={inputRef}
                 value={inputVal}
                 onChange={(e) => setInputVal(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
                     handleSend(inputVal);
                   }
                 }}
                 disabled={thinking}
-                placeholder="Perguntar ao Ducky..."
-                className="flex-grow bg-transparent border-0 outline-0 ring-0 text-xs text-dd-text placeholder-dd-muted h-10 resize-none py-2"
+                placeholder="Perguntar ao Ducky... (Shift+Enter para quebra de linha)"
+                rows={1}
+                className="flex-grow bg-transparent border-0 outline-0 ring-0 text-xs text-dd-text placeholder-dd-muted resize-none py-2.5 max-h-32 overflow-y-auto font-sans"
               />
 
               {/* Dropdown Select Mode (Grok Style) */}
