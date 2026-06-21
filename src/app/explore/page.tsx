@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { Sidebar } from '@/components/Sidebar';
 import { PostCard } from '@/components/PostCard';
@@ -177,48 +178,180 @@ export default function ExplorePage() {
     }
   };
 
-  const trends = [
-    {
-      rank: 1,
-      language: 'TS',
-      languageLabel: 'TypeScript',
-      title: 'Server Components vs Client Components no Next.js 16',
-      views: 91,
-      answers: 0,
-    },
-    {
-      rank: 2,
-      language: 'RUST',
-      languageLabel: 'Rust',
-      title: "Ownership e lifetimes em Rust: quando usar &'static?",
-      views: 55,
-      answers: 1,
-    },
-    {
-      rank: 3,
-      language: 'TS',
-      languageLabel: 'TypeScript',
-      title: 'Como tipar corretamente generics com constraints em TypeScript?',
-      views: 43,
-      answers: 2,
-    },
-    {
-      rank: 4,
-      language: 'GO',
-      languageLabel: 'Go',
-      title: 'Goroutines vazando memória — como debugar?',
-      views: 34,
-      answers: 1,
-    },
-    {
-      rank: 5,
-      language: 'PYTHON',
-      languageLabel: 'Python',
-      title: 'Melhor forma de lidar com async generators em Python 3.12?',
-      views: 38,
-      answers: 0,
-    },
-  ];
+  const trendsByTab = {
+    para_voce: [
+      {
+        rank: 1,
+        language: 'TS',
+        languageLabel: 'TypeScript',
+        title: 'Como tipar corretamente generics com constraints em TypeScript?',
+        views: 43,
+        answers: 2,
+      },
+      {
+        rank: 2,
+        language: 'PYTHON',
+        languageLabel: 'Python',
+        title: 'Melhor forma de lidar com async generators em Python 3.12?',
+        views: 38,
+        answers: 0,
+      },
+      {
+        rank: 3,
+        language: 'RUST',
+        languageLabel: 'Rust',
+        title: "Ownership e lifetimes em Rust: quando usar &'static?",
+        views: 55,
+        answers: 1,
+      },
+    ],
+    assuntos: [
+      {
+        rank: 1,
+        language: 'TS',
+        languageLabel: 'TypeScript',
+        title: 'Server Components vs Client Components no Next.js 16',
+        views: 91,
+        answers: 0,
+      },
+      {
+        rank: 2,
+        language: 'RUST',
+        languageLabel: 'Rust',
+        title: "Ownership e lifetimes em Rust: quando usar &'static?",
+        views: 55,
+        answers: 1,
+      },
+      {
+        rank: 3,
+        language: 'TS',
+        languageLabel: 'TypeScript',
+        title: 'Como tipar corretamente generics com constraints em TypeScript?',
+        views: 43,
+        answers: 2,
+      },
+      {
+        rank: 4,
+        language: 'GO',
+        languageLabel: 'Go',
+        title: 'Goroutines vazando memória — como debugar?',
+        views: 34,
+        answers: 1,
+      },
+      {
+        rank: 5,
+        language: 'PYTHON',
+        languageLabel: 'Python',
+        title: 'Melhor forma de lidar com async generators em Python 3.12?',
+        views: 38,
+        answers: 0,
+      },
+    ],
+    noticias: [
+      {
+        rank: 1,
+        language: 'JS',
+        languageLabel: 'JavaScript',
+        title: 'Next.js 16 lançado oficialmente com melhorias de performance no Turbopack',
+        views: 120,
+        answers: 3,
+      },
+      {
+        rank: 2,
+        language: 'TS',
+        languageLabel: 'TypeScript',
+        title: 'React 19 está estável: o que muda com React Server Actions?',
+        views: 98,
+        answers: 1,
+      },
+      {
+        rank: 3,
+        language: 'JS',
+        languageLabel: 'JavaScript',
+        title: 'Prisma 6 introduz suporte completo a novas extensões do Postgres',
+        views: 76,
+        answers: 0,
+      },
+      {
+        rank: 4,
+        language: 'TS',
+        languageLabel: 'TypeScript',
+        title: 'GitHub Copilot Workspace: o futuro do desenvolvimento assistido por IA',
+        views: 154,
+        answers: 4,
+      },
+    ],
+    open_source: [
+      {
+        rank: 1,
+        language: 'JS',
+        languageLabel: 'JavaScript',
+        title: 'Como fazer sua primeira contribuição em projetos de código aberto',
+        views: 64,
+        answers: 2,
+      },
+      {
+        rank: 2,
+        language: 'RUST',
+        languageLabel: 'Rust',
+        title: 'Por que Rust é a linguagem favorita para novos projetos Open Source?',
+        views: 89,
+        answers: 5,
+      },
+      {
+        rank: 3,
+        language: 'JS',
+        languageLabel: 'JavaScript',
+        title: 'O estado do Open Source em 2026: sustentabilidade e IA',
+        views: 47,
+        answers: 1,
+      },
+      {
+        rank: 4,
+        language: 'GO',
+        languageLabel: 'Go',
+        title: 'Principais repositórios Git para treinar habilidades de desenvolvimento',
+        views: 52,
+        answers: 0,
+      },
+    ],
+    carreira: [
+      {
+        rank: 1,
+        language: 'TS',
+        languageLabel: 'TypeScript',
+        title: 'Como passar em interviews de System Design para vagas sênior',
+        views: 180,
+        answers: 8,
+      },
+      {
+        rank: 2,
+        language: 'JS',
+        languageLabel: 'JavaScript',
+        title: 'O que as empresas realmente buscam em um currículo de desenvolvedor júnior',
+        views: 142,
+        answers: 12,
+      },
+      {
+        rank: 3,
+        language: 'PYTHON',
+        languageLabel: 'Python',
+        title: 'Dicas essenciais para negociar salário na área de tecnologia',
+        views: 99,
+        answers: 3,
+      },
+      {
+        rank: 4,
+        language: 'RUST',
+        languageLabel: 'Rust',
+        title: 'Como transicionar de desenvolvedor pleno para sênior em 1 ano',
+        views: 115,
+        answers: 4,
+      },
+    ],
+  };
+
+  const currentTrends = trendsByTab[activeTab] || [];
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased">
@@ -415,7 +548,11 @@ export default function ExplorePage() {
                                 : 'Carreira'}
                       </span>
                       {activeTab === tab && (
-                        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 rounded-full bg-orange-500" />
+                        <motion.div
+                          layoutId="exploreTabIndicator"
+                          className="absolute bottom-0 left-3 right-3 h-0.5 bg-orange-500 rounded-full"
+                          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                        />
                       )}
                     </button>
                   )
@@ -424,7 +561,7 @@ export default function ExplorePage() {
 
               {/* Trends List */}
               <div className="divide-y divide-dd-border/40">
-                {trends.map((trend, idx) => (
+                {currentTrends.map((trend, idx) => (
                   <div
                     key={idx}
                     onClick={() => {
