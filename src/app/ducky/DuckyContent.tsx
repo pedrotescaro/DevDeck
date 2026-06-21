@@ -349,14 +349,14 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
   return (
     <div
-      className={`flex flex-col md:flex-row min-h-screen bg-[#060606] text-dd-text antialiased transition-all ${
+      className={`flex flex-col md:flex-row h-screen bg-[#060606] text-dd-text antialiased transition-all overflow-hidden ${
         isFullscreen ? 'p-0' : ''
       }`}
     >
       {/* Hide sidebar if in fullscreen focus mode */}
       {!isFullscreen && <Sidebar user={user} />}
 
-      <div className="flex-grow flex flex-col min-w-0 bg-[#060606] border-l border-[#1f1f23]/40 relative overflow-hidden">
+      <div className="flex-grow flex flex-col min-h-0 min-w-0 bg-[#060606] border-l border-[#1f1f23]/40 relative overflow-hidden">
         {/* Top Header */}
         <header className="flex items-center justify-between px-6 py-4 border-b border-[#1f1f23]/40 bg-[#060606]/40 backdrop-blur-md sticky top-0 z-20 relative select-none">
           {/* Top Left: Fullscreen Toggle */}
@@ -540,7 +540,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
           /* CONVERSATION FLOW (Bubble-free clean thread) */
           <>
             <div className="flex-grow overflow-y-auto px-6 py-6 max-w-3xl w-full mx-auto relative z-10 scrollbar-thin">
-              <div className="flex flex-col w-full pb-36">
+              <div className="flex flex-col w-full pb-6">
                 {isPrivate && (
                   <div className="mb-4 bg-purple-500/5 border border-purple-500/10 p-3.5 rounded-xl flex items-center gap-2.5 text-purple-400 text-xs select-none">
                     <ShieldAlert className="w-4 h-4" />
@@ -660,8 +660,8 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
               </div>
             </div>
 
-            {/* Bottom Pinned Input Card */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#060606] via-[#060606]/95 to-transparent z-20">
+            {/* Bottom Fixed Input Card */}
+            <div className="shrink-0 bg-gradient-to-t from-[#060606] via-[#060606] to-[#060606]/80 px-4 pt-2 pb-4 z-20 border-t border-[#1f1f23]/40">
               <div className="max-w-3xl w-full mx-auto flex flex-col items-center">
                 {renderInputCard()}
 
