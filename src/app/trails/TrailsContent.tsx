@@ -24,7 +24,10 @@ import {
   Loader2,
   Play,
   Flag,
+  Swords,
+  Send,
 } from 'lucide-react';
+import Link from 'next/link';
 import { CodeEditor } from '@/components/CodeEditor';
 import { codemirrorLanguageId } from '@/lib/editor/languages';
 import { runCodeInSandbox } from '@/lib/code-runner';
@@ -226,6 +229,103 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
   const [aiMessages, setAiMessages] = useState<ChatMessage[]>([]);
   const [aiInput, setAiInput] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
+
+  // Estados para o Ducky IA na barra lateral
+  interface DuckyMessage {
+    role: 'user' | 'model';
+    content: string;
+  }
+  const [duckyMessages, setDuckyMessages] = useState<DuckyMessage[]>([]);
+  const [duckyInput, setDuckyInput] = useState('');
+  const [duckyLoading, setDuckyLoading] = useState(false);
+
+  // Efeito para resetar/atualizar saudação do Ducky com base na linguagem ativa
+  useEffect(() => {
+    setDuckyMessages([
+      {
+        role: 'model',
+        content: `Quack! 🦆 Eu sou o Ducky, seu patinho de borracha! Como posso ajudar com a trilha de **${activeLang}** hoje? Pode me enviar um código com bug ou tirar dúvidas!`,
+      },
+    ]);
+  }, [activeLang]);
+
+  // Enviar mensagem para o Ducky IA
+  const handleSendDuckyMessage = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!duckyInput.trim() || duckyLoading) return;
+
+    const userMsg: DuckyMessage = { role: 'user', content: duckyInput };
+    const updatedMessages = [...duckyMessages, userMsg];
+    setDuckyMessages(updatedMessages);
+    setDuckyInput('');
+    setDuckyLoading(true);
+
+    try {
+      const response = await fetch('/api/ai/ducky/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          language: activeLang,
+          history: updatedMessages,
+        }),
+      });
+
+      const data = await response.json();
+      setDuckyLoading(false);
+
+      if (response.ok && data.text) {
+        setDuckyMessages((prev) => [...prev, { role: 'model', content: data.text }]);
+      } else {
+        setDuckyMessages((prev) => [
+          ...prev,
+          {
+            role: 'model',
+            content:
+              'Quack... Desculpe, tive um problema ao processar sua dúvida. Pode tentar novamente?',
+          },
+        ]);
+      }
+    } catch (err) {
+      setDuckyLoading(false);
+      setDuckyMessages((prev) => [
+        ...prev,
+        {
+          role: 'model',
+          content: 'Quack... Não consegui me conectar com os servidores de IA.',
+        },
+      ]);
+    }
+  };
+
+  // Estado para o ranking/classificação geral na barra lateral
+  interface LeaderboardUser {
+    rank: number;
+    username: string;
+    avatar_url?: string | null;
+    xp: number;
+    level: number;
+  }
+  const [topUsers, setTopUsers] = useState<LeaderboardUser[]>([]);
+  const [topUsersLoading, setTopUsersLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    setTopUsersLoading(true);
+    fetch('/api/leaderboard')
+      .then((res) => res.json())
+      .then((data) => {
+        if (active && Array.isArray(data)) {
+          setTopUsers(data.slice(0, 3));
+        }
+      })
+      .catch((err) => console.error('Erro ao buscar ranking na sidebar:', err))
+      .finally(() => {
+        if (active) setTopUsersLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Estados para Checkpoints
   const [checkpointModalOpen, setCheckpointModalOpen] = useState(false);
@@ -1381,6 +1481,159 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
           </div>
           <Footer />
         </main>
+
+        {/* Right Sidebar: Duelos, Ducky Chat, Leaderboard */}
+        <aside className="hidden lg:flex w-80 shrink-0 flex-col gap-4 p-4 sticky top-0 h-screen overflow-y-auto">
+          {/* Widget 1: Duelos de Código */}
+          <div className="bg-dd-sidebar-bg border border-dd-border rounded-2xl p-4 space-y-3">
+            <div className="flex items-center gap-2 text-orange-500">
+              <Swords className="w-5 h-5" />
+              <h3 className="text-sm font-black text-dd-text">Duelos de Código</h3>
+            </div>
+            <p className="text-xs text-dd-muted leading-relaxed font-semibold">
+              Desafie outros desenvolvedores em batalhas em tempo real e teste suas habilidades sob
+              pressão!
+            </p>
+            <Link
+              href="/duels"
+              className="flex items-center justify-center w-full py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-orange-500/20 active:scale-95"
+            >
+              Buscar Duelo
+            </Link>
+          </div>
+
+          {/* Widget 2: Ducky IA Chat Panel */}
+          <div className="bg-dd-sidebar-bg border border-dd-border rounded-2xl p-4 flex flex-col h-[340px]">
+            <div className="flex items-center gap-2 text-orange-500 pb-2 border-b border-dd-border/50 shrink-0">
+              <span className="text-lg">🦆</span>
+              <h3 className="text-sm font-black text-dd-text">Ducky IA Tutor</h3>
+            </div>
+
+            {/* Messages Scroll Area */}
+            <div className="flex-grow overflow-y-auto py-3 space-y-2.5 scrollbar-thin select-text min-h-0">
+              {duckyMessages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  className={`flex gap-2 max-w-[90%] ${
+                    msg.role === 'user' ? 'ml-auto flex-row-reverse' : 'mr-auto'
+                  }`}
+                >
+                  <div
+                    className={`w-5.5 h-5.5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
+                      msg.role === 'user'
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-dd-border text-orange-500'
+                    }`}
+                  >
+                    {msg.role === 'user' ? user.username[0].toUpperCase() : '🦆'}
+                  </div>
+                  <div
+                    className={`p-2.5 rounded-xl text-[10px] leading-relaxed select-text ${
+                      msg.role === 'user'
+                        ? 'bg-orange-500 text-white rounded-tr-none font-bold'
+                        : 'bg-dd-border/40 text-dd-text rounded-tl-none border border-dd-border/20 font-medium'
+                    }`}
+                  >
+                    {renderMessageContent(msg.content)}
+                  </div>
+                </div>
+              ))}
+              {duckyLoading && (
+                <div className="flex gap-2 max-w-[80%] mr-auto items-center">
+                  <div className="w-5.5 h-5.5 rounded-full bg-dd-border text-orange-500 flex items-center justify-center text-[10px] font-bold shrink-0">
+                    🦆
+                  </div>
+                  <div className="flex gap-1">
+                    <span className="w-1 h-1 bg-orange-500 rounded-full animate-bounce delay-100" />
+                    <span className="w-1 h-1 bg-orange-500 rounded-full animate-bounce delay-200" />
+                    <span className="w-1 h-1 bg-orange-500 rounded-full animate-bounce delay-300" />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Input form */}
+            <form
+              onSubmit={handleSendDuckyMessage}
+              className="pt-2 border-t border-dd-border/50 flex gap-1.5 shrink-0"
+            >
+              <input
+                type="text"
+                value={duckyInput}
+                onChange={(e) => setDuckyInput(e.target.value)}
+                placeholder="Perguntar ao patinho..."
+                disabled={duckyLoading}
+                className="flex-grow rounded-lg border border-dd-border bg-dd-bg px-2.5 py-1.5 text-[10.5px] text-dd-text placeholder-dd-muted focus:border-orange-500 focus:outline-none disabled:opacity-50"
+              />
+              <button
+                type="submit"
+                disabled={duckyLoading || !duckyInput.trim()}
+                className="p-1.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center shrink-0 animate-in fade-in duration-100"
+              >
+                <Send className="w-3.5 h-3.5" />
+              </button>
+            </form>
+          </div>
+
+          {/* Widget 3: Classificação Geral (Leaderboard Top 3) */}
+          <div className="bg-dd-sidebar-bg border border-dd-border rounded-2xl p-4 space-y-3.5">
+            <div className="flex items-center gap-2 text-orange-500">
+              <Trophy className="w-5 h-5" />
+              <h3 className="text-sm font-black text-dd-text">Classificação Geral</h3>
+            </div>
+
+            <div className="space-y-3">
+              {topUsersLoading ? (
+                <div className="flex items-center gap-2 justify-center py-4 text-xs text-dd-muted">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Carregando ranking...</span>
+                </div>
+              ) : topUsers.length === 0 ? (
+                <p className="text-xs text-dd-muted text-center py-2">Nenhum competidor ainda.</p>
+              ) : (
+                topUsers.map((u) => (
+                  <div key={u.username} className="flex items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span
+                        className={`font-mono font-black ${
+                          u.rank === 1
+                            ? 'text-yellow-500'
+                            : u.rank === 2
+                              ? 'text-slate-400'
+                              : 'text-amber-600'
+                        }`}
+                      >
+                        {u.rank}º
+                      </span>
+                      <div className="w-6 h-6 rounded-full bg-dd-border flex items-center justify-center text-[10px] font-black shrink-0 text-orange-500 uppercase overflow-hidden border border-dd-border/50">
+                        {u.avatar_url ? (
+                          <img
+                            src={u.avatar_url}
+                            alt={u.username}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          u.username[0]
+                        )}
+                      </div>
+                      <span className="font-bold text-dd-text truncate">@{u.username}</span>
+                    </div>
+                    <span className="font-mono font-black text-orange-400 shrink-0 text-[11px]">
+                      {u.xp} XP
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <Link
+              href="/leaderboard"
+              className="block text-center text-[10.5px] font-bold text-orange-400 hover:text-orange-300 transition-colors pt-1 border-t border-dd-border/50"
+            >
+              Ver classificação completa →
+            </Link>
+          </div>
+        </aside>
       </div>
 
       {/* QUIZ WIZARD MODAL */}

@@ -48,6 +48,7 @@ interface DuckyContentProps {
     avatar_url?: string | null;
     total_xp: number;
   };
+  activeLanguage: string;
 }
 
 interface Message {
@@ -145,7 +146,7 @@ Como posso te ajudar hoje? Você pode me perguntar sobre:
 - Como escrever testes unitários`;
 };
 
-export function DuckyContent({ user }: DuckyContentProps) {
+export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
   const reduced = useReducedMotion();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputVal, setInputVal] = useState('');
@@ -175,46 +176,80 @@ export function DuckyContent({ user }: DuckyContentProps) {
     setInputVal('');
     setThinking(true);
 
-    // Tempo de resposta dinâmico baseado no modo
-    const responseDelay = mode === 'Deep Debug' ? 3000 : 1200;
+    try {
+      const response = await fetch('/api/ai/ducky/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          language: activeLanguage,
+          history: [...messages, userMsg].map((m) => ({
+            role: m.sender === 'user' ? 'user' : 'model',
+            content: m.text,
+          })),
+        }),
+      });
 
-    setTimeout(() => {
+      const data = await response.json();
       setThinking(false);
-      const fullResponseText = getDuckyResponse(textToSend);
 
-      const duckyMsgId = Math.random().toString();
-      const newDuckyMsg: Message = {
-        id: duckyMsgId,
-        sender: 'ducky',
-        text: '',
-        isStreaming: true,
-      };
+      if (response.ok && data.text) {
+        const duckyMsgId = Math.random().toString();
+        const newDuckyMsg: Message = {
+          id: duckyMsgId,
+          sender: 'ducky',
+          text: '',
+          isStreaming: true,
+        };
 
-      setMessages((prev) => [...prev, newDuckyMsg]);
+        setMessages((prev) => [...prev, newDuckyMsg]);
 
-      // Efeito de stream de digitação
-      let currentIdx = 0;
-      const interval = setInterval(() => {
-        setMessages((prev) =>
-          prev.map((msg) => {
-            if (msg.id === duckyMsgId) {
-              const nextText = fullResponseText.slice(0, currentIdx + 5);
-              const done = nextText.length === fullResponseText.length;
-              if (done) {
-                clearInterval(interval);
+        // Efeito de stream de digitação
+        let currentIdx = 0;
+        const interval = setInterval(() => {
+          setMessages((prev) =>
+            prev.map((msg) => {
+              if (msg.id === duckyMsgId) {
+                const nextText = data.text.slice(0, currentIdx + 5);
+                const done = nextText.length === data.text.length;
+                if (done) {
+                  clearInterval(interval);
+                }
+                return {
+                  ...msg,
+                  text: nextText,
+                  isStreaming: !done,
+                };
               }
-              return {
-                ...msg,
-                text: nextText,
-                isStreaming: !done,
-              };
-            }
-            return msg;
-          })
-        );
-        currentIdx += 5;
-      }, 30);
-    }, responseDelay);
+              return msg;
+            })
+          );
+          currentIdx += 5;
+        }, 20);
+      } else {
+        const duckyMsgId = Math.random().toString();
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: duckyMsgId,
+            sender: 'ducky',
+            text:
+              data.text ||
+              'Quack... Tive um problema ao processar seu código. Pode tentar de novo?',
+          },
+        ]);
+      }
+    } catch (err) {
+      setThinking(false);
+      const duckyMsgId = Math.random().toString();
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: duckyMsgId,
+          sender: 'ducky',
+          text: 'Quack... Tive um problema ao me conectar com os servidores de IA.',
+        },
+      ]);
+    }
   };
 
   const handleSuggestionClick = (prefix: string) => {
