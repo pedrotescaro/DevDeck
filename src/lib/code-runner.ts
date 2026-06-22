@@ -8,7 +8,9 @@ export async function runCodeInSandbox(
   code: string,
   language?: string | null
 ): Promise<CodeRunResult> {
-  const normalized = language?.toLowerCase() ?? 'typescript';
+  let normalized = language?.toLowerCase() ?? 'typescript';
+  if (normalized === 'js') normalized = 'javascript';
+  if (normalized === 'ts') normalized = 'typescript';
 
   if (normalized === 'javascript' || normalized === 'typescript') {
     return runJsInBrowser(code, normalized);
