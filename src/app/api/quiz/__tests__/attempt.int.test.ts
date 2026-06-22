@@ -90,4 +90,68 @@ describe('POST /api/quiz/[id]/attempt integration', () => {
     expect(XpService.awardXP).toHaveBeenCalledWith('user-123', 'TS', 15);
     expect(json.xpResult.newTotalXp).toBe(115);
   });
+
+  it('should award language XP on the first attempt for an existing trail quiz', async () => {
+    const mockUser = { id: 'user-123', username: 'testuser', total_xp: 100 };
+    vi.mocked(getAuthUser).mockResolvedValue(mockUser as any);
+
+    vi.mocked(prisma.quiz.findUnique).mockResolvedValue({
+      id: 'js-l1-q1',
+      correct_index: 1,
+      post: null,
+    } as any);
+    vi.mocked(prisma.quizAttempt.findUnique).mockResolvedValue(null);
+    vi.mocked(prisma.quizAttempt.create).mockResolvedValue({
+      id: 'attempt-123',
+      user_id: 'user-123',
+      quiz_id: 'js-l1-q1',
+      selected_index: 1,
+      is_correct: true,
+      xp_earned: 15,
+    } as any);
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({ total_xp: 115 } as any);
+
+    const request = new Request('http://localhost:3000/api/quiz/js-l1-q1/attempt', {
+      method: 'POST',
+      body: JSON.stringify({ selected_index: 1 }),
+    });
+
+    const response = await POST(request, { params: Promise.resolve({ id: 'js-l1-q1' }) });
+
+    expect(response.status).toBe(200);
+    expect(XpService.awardXP).toHaveBeenCalledWith('user-123', 'JS', 15);
+  });
+
+  it('should not overwrite an existing quiz attempt', async () => {
+    const mockUser = { id: 'user-123', username: 'testuser', total_xp: 100 };
+    vi.mocked(getAuthUser).mockResolvedValue(mockUser as any);
+
+    vi.mocked(prisma.quiz.findUnique).mockResolvedValue({
+      id: 'js-l1-q1',
+      correct_index: 1,
+      post: null,
+    } as any);
+    vi.mocked(prisma.quizAttempt.findUnique).mockResolvedValue({
+      id: 'attempt-123',
+      user_id: 'user-123',
+      quiz_id: 'js-l1-q1',
+      selected_index: 0,
+      is_correct: false,
+      xp_earned: 0,
+    } as any);
+
+    const request = new Request('http://localhost:3000/api/quiz/js-l1-q1/attempt', {
+      method: 'POST',
+      body: JSON.stringify({ selected_index: 1 }),
+    });
+
+    const response = await POST(request, { params: Promise.resolve({ id: 'js-l1-q1' }) });
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json.is_correct).toBe(false);
+    expect(json.attempt.selected_index).toBe(0);
+    expect(prisma.quizAttempt.update).not.toHaveBeenCalled();
+    expect(XpService.awardXP).not.toHaveBeenCalled();
+  });
 });

@@ -89,6 +89,7 @@ export const QuizService = {
   },
 
   async validateQuizAnswer(userId: string, quizId: string, selectedIndex: number) {
+    const trailInfo = findTrailQuestionById(quizId);
     let quiz = await prisma.quiz.findUnique({
       where: { id: quizId },
       include: {
@@ -100,7 +101,6 @@ export const QuizService = {
     let language: string | null = null;
 
     if (!quiz) {
-      const trailInfo = findTrailQuestionById(quizId);
       if (!trailInfo) {
         throw new Error('QUIZ_NOT_FOUND');
       }
@@ -123,10 +123,11 @@ export const QuizService = {
       language = trailInfo.language;
     } else {
       correctIndex = quiz.correct_index;
-      language = quiz.post ? quiz.post.language : null;
+      language = quiz.post?.language ?? trailInfo?.language ?? null;
     }
 
-    const isCorrect = selectedIndex === correctIndex;
+    const selectedAnswerIsCorrect = selectedIndex === correctIndex;
+    let isCorrect = selectedAnswerIsCorrect;
 
     const existingAttempt = await prisma.quizAttempt.findUnique({
       where: {
@@ -142,42 +143,25 @@ export const QuizService = {
     let xpResult = null;
 
     if (existingAttempt) {
-      if (existingAttempt.is_correct) {
-        attempt = await prisma.quizAttempt.update({
-          where: { id: existingAttempt.id },
-          data: { selected_index: selectedIndex },
-        });
-      } else {
-        xpAmount = isCorrect ? 15 : 0;
-        attempt = await prisma.quizAttempt.update({
-          where: { id: existingAttempt.id },
-          data: {
-            selected_index: selectedIndex,
-            is_correct: isCorrect,
-            xp_earned: xpAmount,
-          },
-        });
-        if (isCorrect) {
-          xpResult = await XpService.awardXP(userId, language as any, xpAmount);
-        }
-      }
+      attempt = existingAttempt;
+      isCorrect = existingAttempt.is_correct;
     } else {
-      xpAmount = isCorrect ? 15 : 0;
+      xpAmount = selectedAnswerIsCorrect ? 15 : 0;
       attempt = await prisma.quizAttempt.create({
         data: {
           user_id: userId,
           quiz_id: quiz.id,
           selected_index: selectedIndex,
-          is_correct: isCorrect,
+          is_correct: selectedAnswerIsCorrect,
           xp_earned: xpAmount,
         },
       });
-      if (isCorrect) {
+      if (selectedAnswerIsCorrect) {
         xpResult = await XpService.awardXP(userId, language as any, xpAmount);
       }
     }
 
-    if (isCorrect) {
+    if (xpAmount > 0) {
       try {
         await NotificationService.create({
           userId,

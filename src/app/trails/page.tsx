@@ -23,13 +23,16 @@ export default async function TrailsPage() {
     select: {
       quiz_id: true,
       is_correct: true,
+      selected_index: true,
     },
   });
 
   // Mapear tentativas para serialização fácil no cliente
   const attemptsMap: Record<string, boolean> = {};
+  const attemptSelectionsMap: Record<string, number> = {};
   dbAttempts.forEach((att) => {
     attemptsMap[att.quiz_id] = att.is_correct;
+    attemptSelectionsMap[att.quiz_id] = att.selected_index;
   });
 
   // Serializar usuário
@@ -52,6 +55,7 @@ export default async function TrailsPage() {
       user={serializedUser}
       initialTrails={serializedTrails}
       initialAttempts={attemptsMap}
+      initialAttemptSelections={attemptSelectionsMap}
     />
   );
 }

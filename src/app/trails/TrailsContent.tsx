@@ -161,9 +161,15 @@ interface TrailsContentProps {
     level: number;
   }[];
   initialAttempts: Record<string, boolean>;
+  initialAttemptSelections: Record<string, number>;
 }
 
-export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsContentProps) {
+export function TrailsContent({
+  user,
+  initialTrails,
+  initialAttempts,
+  initialAttemptSelections,
+}: TrailsContentProps) {
   const reduced = useReducedMotion();
   const [soundEnabled, setSoundEnabled] = useState(true);
 
@@ -188,6 +194,8 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
   // Estados principais
   const [activeLang, setActiveLang] = useState<string>('JS');
   const [attempts, setAttempts] = useState<Record<string, boolean>>(initialAttempts);
+  const [attemptSelections, setAttemptSelections] =
+    useState<Record<string, number>>(initialAttemptSelections);
   const [trails, setTrails] = useState(initialTrails);
   const [userXp, setUserXp] = useState(user.total_xp);
 
@@ -557,6 +565,24 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
   };
 
   const currentLevel = getLevelFromXp(userXp);
+  const hasAnsweredQuestion = (questionId: string) =>
+    Object.prototype.hasOwnProperty.call(attempts, questionId);
+  const getSavedSelectedOption = (question: TrailQuestion) => {
+    if (!hasAnsweredQuestion(question.id)) return null;
+    return attemptSelections[question.id] ?? (attempts[question.id] ? question.correctIndex : null);
+  };
+  const loadQuestionState = (level: TrailLevel, questionIndex: number) => {
+    const question = level.questions[questionIndex];
+
+    if (!question || !hasAnsweredQuestion(question.id)) {
+      setSelectedOption(null);
+      setAnswered(false);
+      return;
+    }
+
+    setSelectedOption(getSavedSelectedOption(question));
+    setAnswered(true);
+  };
 
   // Verificar se o nível está desbloqueado (progressão linear com checkpoints)
   const isLevelUnlocked = (levelIndex: number) => {
@@ -606,7 +632,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
         );
         const unlocked = isLevelUnlocked(globalIdx);
         const completedCount = level.questions.filter((q) => attempts[q.id] === true).length;
-        return unlocked && completedCount < 3;
+        return unlocked && completedCount < level.questions.length;
       });
 
   // Unidade ativa
@@ -684,6 +710,57 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
     const unitLevels =
       TRAILS_DATA[activeLang]?.filter((l) => l.unitNumber === activeCheckpointUnit) || [];
     return getCheckpointReviewSlides(unitLevels);
+  };
+
+  const openLevelFromStart = (level: TrailLevel) => {
+    setActiveLevel(level);
+    setCurrentStage('learn');
+    setLearnStep(0);
+    setPracticeStep(0);
+    setCurrentQuestionIndex(0);
+    setSelectedOption(null);
+    setAnswered(false);
+    setCorrectCount(0);
+    setXpEarned(0);
+    setQuizError(null);
+    setQuizModalOpen(true);
+  };
+
+  const openLevelAtSavedProgress = (level: TrailLevel) => {
+    const completedCount = level.questions.filter((q) => attempts[q.id] === true).length;
+    const firstPendingQuestionIndex = level.questions.findIndex((q) => !hasAnsweredQuestion(q.id));
+
+    setActiveLevel(level);
+    setCorrectCount(completedCount);
+    setXpEarned(0);
+    setQuizError(null);
+    setQuizModalOpen(true);
+
+    if (firstPendingQuestionIndex === -1) {
+      const lastQuestionIndex = Math.max(level.questions.length - 1, 0);
+      const lastQuestion = level.questions[lastQuestionIndex];
+
+      setCurrentStage('summary');
+      setLearnStep(Math.max(level.questions.length - 1, 0));
+      setPracticeStep(Math.max(level.questions.length - 2, 0));
+      setCurrentQuestionIndex(lastQuestionIndex);
+      setSelectedOption(lastQuestion ? getSavedSelectedOption(lastQuestion) : null);
+      setAnswered(true);
+      return;
+    }
+
+    setLearnStep(Math.max(level.questions.length - 1, 0));
+    setCurrentQuestionIndex(firstPendingQuestionIndex);
+    setSelectedOption(null);
+    setAnswered(false);
+
+    if (firstPendingQuestionIndex >= 2) {
+      setCurrentStage('challenge');
+      setPracticeStep(Math.max(level.questions.length - 2, 0));
+    } else {
+      setCurrentStage('practice');
+      setPracticeStep(firstPendingQuestionIndex);
+    }
   };
 
   const handleRunCheckpointCode = async () => {
@@ -828,18 +905,15 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
           });
           return next;
         });
+        setAttemptSelections((prev) => {
+          const next = { ...prev };
+          questionIds.forEach((id) => {
+            delete next[id];
+          });
+          return next;
+        });
 
-        setActiveLevel(level);
-        setCurrentStage('learn');
-        setLearnStep(0);
-        setPracticeStep(0);
-        setCurrentQuestionIndex(0);
-        setSelectedOption(null);
-        setAnswered(false);
-        setCorrectCount(0);
-        setXpEarned(0);
-        setQuizModalOpen(true);
-        setQuizError(null);
+        openLevelFromStart(level);
       } else {
         setConfirmDialog({
           isOpen: true,
@@ -878,12 +952,13 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
       return;
     }
 
+    const answeredCount = level.questions.filter((q) => hasAnsweredQuestion(q.id)).length;
     const completedCount = level.questions.filter((q) => attempts[q.id] === true).length;
-    if (completedCount > 0) {
+    if (answeredCount > 0) {
       setConfirmDialog({
         isOpen: true,
         title: 'Refazer do Zero?',
-        message: `Você já respondeu a esta fase anteriormente e obteve ${completedCount} de 3 estrelas. Deseja refazer do zero para tentar obter as 3 estrelas?`,
+        message: `Você já respondeu ${answeredCount} de ${level.questions.length} questões desta fase e obteve ${completedCount} estrelas. Deseja refazer do zero para tentar obter todas as estrelas?`,
         confirmText: 'Refazer do Zero',
         cancelText: 'Continuar Progresso',
         variant: 'warning',
@@ -893,33 +968,13 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
         },
         onCancel: () => {
           setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
-          setActiveLevel(level);
-          setCurrentStage('learn');
-          setLearnStep(0);
-          setPracticeStep(0);
-          setCurrentQuestionIndex(0);
-          setSelectedOption(null);
-          setAnswered(false);
-          setCorrectCount(0);
-          setXpEarned(0);
-          setQuizModalOpen(true);
-          setQuizError(null);
+          openLevelAtSavedProgress(level);
         },
       });
       return;
     }
 
-    setActiveLevel(level);
-    setCurrentStage('learn');
-    setLearnStep(0);
-    setPracticeStep(0);
-    setCurrentQuestionIndex(0);
-    setSelectedOption(null);
-    setAnswered(false);
-    setCorrectCount(0);
-    setXpEarned(0);
-    setQuizModalOpen(true);
-    setQuizError(null);
+    openLevelFromStart(level);
   };
 
   const handleCloseQuizRequest = () => {
@@ -954,20 +1009,17 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
         setCurrentStage('practice');
         setPracticeStep(0);
         setCurrentQuestionIndex(0);
-        setSelectedOption(null);
-        setAnswered(false);
+        loadQuestionState(activeLevel, 0);
       }
     } else if (currentStage === 'practice') {
       if (practiceStep < 1) {
         setPracticeStep((prev) => prev + 1);
         setCurrentQuestionIndex(1);
-        setSelectedOption(null);
-        setAnswered(false);
+        loadQuestionState(activeLevel, 1);
       } else {
         setCurrentStage('challenge');
         setCurrentQuestionIndex(2);
-        setSelectedOption(null);
-        setAnswered(false);
+        loadQuestionState(activeLevel, 2);
       }
     } else if (currentStage === 'challenge') {
       setCurrentStage('summary');
@@ -985,8 +1037,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
       if (practiceStep > 0) {
         setPracticeStep((prev) => prev - 1);
         setCurrentQuestionIndex(0);
-        setSelectedOption(null);
-        setAnswered(false);
+        loadQuestionState(activeLevel, 0);
       } else {
         setCurrentStage('learn');
         setLearnStep(2);
@@ -997,8 +1048,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
       setCurrentStage('practice');
       setPracticeStep(1);
       setCurrentQuestionIndex(1);
-      setSelectedOption(null);
-      setAnswered(false);
+      loadQuestionState(activeLevel, 1);
     }
   };
 
@@ -1007,30 +1057,26 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
     setSelectedOption(optionIdx);
   };
 
-  const handleRetryQuestion = () => {
-    setAnswered(false);
-    setSelectedOption(null);
-    setQuizError(null);
-  };
-
   useEffect(() => {
     if (!activeLevel || !quizModalOpen) return;
     const question = activeLevel.questions[currentQuestionIndex];
     if (!question) return;
 
-    if (attempts[question.id] === true) {
+    if (Object.prototype.hasOwnProperty.call(attempts, question.id)) {
       setAnswered(true);
-      setSelectedOption(question.correctIndex);
+      setSelectedOption(
+        attemptSelections[question.id] ?? (attempts[question.id] ? question.correctIndex : null)
+      );
     } else {
       setAnswered(false);
       setSelectedOption(null);
     }
-  }, [currentQuestionIndex, activeLevel, quizModalOpen, attempts]);
+  }, [currentQuestionIndex, activeLevel, quizModalOpen, attempts, attemptSelections]);
 
   const handleCheckAnswer = async () => {
     if (selectedOption === null || answered || !activeLevel) return;
     const question = activeLevel.questions[currentQuestionIndex];
-    if (attempts[question.id] === true) return;
+    if (hasAnsweredQuestion(question.id)) return;
 
     setAnswered(true);
     setSubmittingAttempt(true);
@@ -1052,11 +1098,16 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
 
       if (res.ok) {
         const data = await res.json();
+        const answerIsCorrect = Boolean(data.is_correct);
 
         // Atualizar tentativas localmente
         setAttempts((prev) => ({
           ...prev,
-          [question.id]: isCorrect,
+          [question.id]: answerIsCorrect,
+        }));
+        setAttemptSelections((prev) => ({
+          ...prev,
+          [question.id]: data.attempt?.selected_index ?? selectedOption,
         }));
 
         // Se ganhou XP
@@ -1266,7 +1317,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                       const completedCount = level.questions.filter(
                         (q) => attempts[q.id] === true
                       ).length;
-                      const isCompleted = completedCount === 3;
+                      const isCompleted = completedCount === level.questions.length;
                       const offsetIdx = pathNodeIndex++;
 
                       elements.push(
@@ -1280,7 +1331,7 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                           >
                             {/* Estrelas orgânicas/curvadas */}
                             <div className="flex gap-1.5 justify-center mb-2.5 items-end h-6.5">
-                              {Array.from({ length: 3 }).map((_, starIdx) => {
+                              {Array.from({ length: level.questions.length }).map((_, starIdx) => {
                                 const isStarEarned =
                                   attempts[level.questions[starIdx]?.id] === true;
                                 const isMiddle = starIdx === 1;
@@ -1965,10 +2016,10 @@ export function TrailsContent({ user, initialTrails, initialAttempts }: TrailsCo
                           if (!isCorrect) {
                             return (
                               <button
-                                onClick={handleRetryQuestion}
-                                className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                                onClick={handleNextStageOrStep}
+                                className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
                               >
-                                Tentar Novamente
+                                {currentStage === 'challenge' ? 'Ver Resultado' : 'Avançar'}
                                 <ChevronRight className="w-4 h-4" />
                               </button>
                             );
