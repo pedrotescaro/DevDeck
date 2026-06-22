@@ -26,6 +26,12 @@ import {
   Flag,
   Swords,
   Send,
+  Lightbulb,
+  Code2,
+  Search,
+  BookText,
+  Bug,
+  Library,
 } from 'lucide-react';
 import Link from 'next/link';
 import { CodeEditor } from '@/components/CodeEditor';
@@ -1861,7 +1867,7 @@ export function TrailsContent({
                           <div className="space-y-4 py-2">
                             <div className="flex items-center gap-2">
                               <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500 font-bold text-sm">
-                                💡
+                                <Lightbulb className="w-4 h-4" />
                               </div>
                               <h3 className="text-sm font-extrabold text-dd-text">{slide.title}</h3>
                             </div>
@@ -1878,7 +1884,7 @@ export function TrailsContent({
 
                             {slide.tip && (
                               <div className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-3 flex items-start gap-2.5">
-                                <span className="text-orange-500 text-xs mt-0.5">💡</span>
+                                <Lightbulb className="w-3.5 h-3.5 text-orange-500 mt-0.5 shrink-0" />
                                 <div className="space-y-0.5">
                                   <h4 className="text-[10px] font-bold text-orange-500 uppercase tracking-wide">
                                     Dica Pro
@@ -2165,9 +2171,9 @@ export function TrailsContent({
                               handleSendAiMessage('Explicar este conceito de forma mais detalhada')
                             }
                             disabled={aiLoading}
-                            className="px-2.5 py-1 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
                           >
-                            💡 Explicar Conceito
+                            <Lightbulb className="w-3 h-3 text-orange-500/80" /> Explicar Conceito
                           </button>
                           <button
                             onClick={() =>
@@ -2176,9 +2182,9 @@ export function TrailsContent({
                               )
                             }
                             disabled={aiLoading}
-                            className="px-2.5 py-1 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
                           >
-                            💻 Exemplo de Código
+                            <Code2 className="w-3 h-3 text-orange-500/80" /> Exemplo de Código
                           </button>
                         </>
                       )}
@@ -2191,18 +2197,18 @@ export function TrailsContent({
                               )
                             }
                             disabled={aiLoading}
-                            className="px-2.5 py-1 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
                           >
-                            🔍 Dica Sutil
+                            <Search className="w-3 h-3 text-orange-500/80" /> Dica Sutil
                           </button>
                           <button
                             onClick={() =>
                               handleSendAiMessage('Explique a teoria por trás desta pergunta')
                             }
                             disabled={aiLoading}
-                            className="px-2.5 py-1 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
                           >
-                            📚 Explicar Teoria
+                            <BookText className="w-3 h-3 text-orange-500/80" /> Explicar Teoria
                           </button>
                         </>
                       )}
@@ -2388,7 +2394,7 @@ export function TrailsContent({
                           <div className="space-y-4 py-2">
                             <div className="flex items-center gap-2">
                               <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500 font-bold text-sm">
-                                📚
+                                <Library className="w-4 h-4" />
                               </div>
                               <div>
                                 <p className="text-[10px] font-bold text-orange-500 uppercase tracking-wide">
@@ -2412,7 +2418,7 @@ export function TrailsContent({
 
                             {slide.tip && (
                               <div className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-3 flex items-start gap-2.5">
-                                <span className="text-orange-500 text-xs mt-0.5">💡</span>
+                                <Lightbulb className="w-3.5 h-3.5 text-orange-500 mt-0.5 shrink-0" />
                                 <div className="space-y-0.5">
                                   <h4 className="text-[10px] font-bold text-orange-500 uppercase tracking-wide">
                                     Dica Pro
@@ -2676,9 +2682,9 @@ export function TrailsContent({
                               )
                             }
                             disabled={aiLoading}
-                            className="px-2.5 py-1 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
                           >
-                            💡 Explicar Revisão
+                            <Lightbulb className="w-3 h-3 text-orange-500/80" /> Explicar Revisão
                           </button>
                           <button
                             onClick={() =>
@@ -2687,9 +2693,9 @@ export function TrailsContent({
                               )
                             }
                             disabled={aiLoading}
-                            className="px-2.5 py-1 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
                           >
-                            💻 Exemplo de Código
+                            <Code2 className="w-3 h-3 text-orange-500/80" /> Exemplo de Código
                           </button>
                         </>
                       )}
@@ -2702,9 +2708,9 @@ export function TrailsContent({
                               )
                             }
                             disabled={aiLoading}
-                            className="px-2.5 py-1 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
                           >
-                            🔍 Dica de Lógica
+                            <Search className="w-3 h-3 text-orange-500/80" /> Dica de Lógica
                           </button>
                           <button
                             onClick={() =>
@@ -2713,9 +2719,9 @@ export function TrailsContent({
                               )
                             }
                             disabled={aiLoading}
-                            className="px-2.5 py-1 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
                           >
-                            🐞 Ajudar com o Bug
+                            <Bug className="w-3 h-3 text-orange-500/80" /> Ajudar com o Bug
                           </button>
                         </>
                       )}
