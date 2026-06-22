@@ -69,7 +69,7 @@ export default function LandingNav({ initialUser }: LandingNavProps) {
               className="lp-font-heading font-semibold text-sm px-5 py-2 rounded-md transition-colors"
               style={{
                 background: 'var(--lp-accent)',
-                color: '#0E0D0B',
+                color: '#0A0A0A',
               }}
             >
               Ir para o Feed
@@ -88,7 +88,7 @@ export default function LandingNav({ initialUser }: LandingNavProps) {
                 className="lp-font-heading font-semibold text-sm px-5 py-2 rounded-md transition-colors"
                 style={{
                   background: 'var(--lp-accent)',
-                  color: '#0E0D0B',
+                  color: '#0A0A0A',
                 }}
               >
                 Cadastrar-se

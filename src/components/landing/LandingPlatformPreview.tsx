@@ -67,7 +67,7 @@ export default function LandingPlatformPreview() {
 
   return (
     <section
-      className="relative py-28 lg:py-36 bg-[#0E0D0B] overflow-hidden"
+      className="relative py-28 lg:py-36 bg-[var(--lp-bg)] overflow-hidden"
       id="platform"
       style={{
         borderTop: '1px solid var(--lp-border)',
@@ -126,7 +126,7 @@ export default function LandingPlatformPreview() {
                 className={`flex items-center gap-2.5 px-4.5 py-3.5 lp-font-heading font-medium text-xs tracking-wider uppercase border rounded-md transition-all duration-300 whitespace-nowrap cursor-pointer ${
                   isActive
                     ? 'bg-[var(--lp-accent)] text-black border-[var(--lp-accent)] shadow-md shadow-[var(--lp-accent)]/10 scale-[1.02]'
-                    : 'text-[var(--lp-fg-dim)] bg-[#141311] border-[var(--lp-border)] hover:bg-[#1A1815] hover:text-[var(--lp-fg)]'
+                    : 'text-[var(--lp-fg-dim)] bg-[var(--lp-bg-card)] border-[var(--lp-border)] hover:bg-[var(--lp-bg-card-hover)] hover:text-[var(--lp-fg)]'
                 }`}
               >
                 <Icon size={14} />
@@ -141,13 +141,13 @@ export default function LandingPlatformPreview() {
           {/* Left: Window Screen */}
           <div className="lg:col-span-8">
             <div
-              className="rounded-lg overflow-hidden border border-[var(--lp-border)] bg-[#141311] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] relative"
+              className="rounded-lg overflow-hidden border border-[var(--lp-border)] bg-[var(--lp-bg-card)] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] relative"
               style={{
                 boxShadow: '0 40px 80px -25px rgba(0,0,0,0.85), 0 0 0 1px var(--lp-border-light)',
               }}
             >
               {/* Browser Window Header */}
-              <div className="flex items-center justify-between px-4 py-3 bg-[#1A1815] border-b border-[var(--lp-border)]">
+              <div className="flex items-center justify-between px-4 py-3 bg-[var(--lp-bg-card-hover)] border-b border-[var(--lp-border)]">
                 {/* Dots */}
                 <div className="flex gap-1.5">
                   <span className="w-3 h-3 rounded-full bg-[#EF4444]/60" />
@@ -155,7 +155,7 @@ export default function LandingPlatformPreview() {
                   <span className="w-3 h-3 rounded-full bg-[#10B981]/60" />
                 </div>
                 {/* Address */}
-                <div className="flex items-center gap-1 px-4 py-1 rounded bg-[#0E0D0B] border border-[var(--lp-border)] text-[10px] lp-font-mono text-[var(--lp-muted)] w-48 sm:w-64 justify-center">
+                <div className="flex items-center gap-1 px-4 py-1 rounded bg-[var(--lp-bg)] border border-[var(--lp-border)] text-[10px] lp-font-mono text-[var(--lp-muted)] w-48 sm:w-64 justify-center">
                   <span className="text-[var(--lp-accent)]">https://</span>
                   <span>devdeck.com/{currentItem.id}</span>
                 </div>
@@ -164,7 +164,7 @@ export default function LandingPlatformPreview() {
               </div>
 
               {/* Window Content */}
-              <div className="bg-[#0E0D0B] aspect-[16/10] relative overflow-hidden flex items-center justify-center">
+              <div className="bg-[var(--lp-bg)] aspect-[16/10] relative overflow-hidden flex items-center justify-center">
                 <AnimatePresence mode="wait">
                   <motion.img
                     key={currentItem.id}

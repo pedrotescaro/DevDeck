@@ -5,7 +5,7 @@ import Link from 'next/link';
 export default function LandingFooter() {
   return (
     <footer
-      className="border-t py-12 text-xs text-[var(--lp-muted)] bg-[#0E0D0B]"
+      className="border-t py-12 text-xs text-[var(--lp-muted)] bg-[var(--lp-bg)]"
       style={{ borderColor: 'var(--lp-border)' }}
     >
       <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-6">

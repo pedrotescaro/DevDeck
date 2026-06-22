@@ -40,7 +40,7 @@ export default function LandingHero({ initialUser }: LandingHeroProps) {
 
   return (
     <section
-      className="relative min-h-screen w-full overflow-hidden pt-32 pb-20 bg-[#0E0D0B]"
+      className="relative min-h-screen w-full overflow-hidden pt-32 pb-20 bg-[var(--lp-bg)]"
       id="hero"
     >
       {/* Background Slideshow Frames */}
@@ -150,12 +150,12 @@ fn credit_xp(user: &User, action: Action) -> Result<XP, Error> {
                   key={i}
                   src={src}
                   alt={`Dev ${i + 1}`}
-                  className="w-9 h-9 rounded-full border-2 border-[#0E0D0B] object-cover"
+                  className="w-9 h-9 rounded-full border-2 border-[var(--lp-bg)] object-cover"
                   whileHover={{ y: -4, zIndex: 10 }}
                   transition={{ duration: 0.2 }}
                 />
               ))}
-              <div className="w-9 h-9 rounded-full border-2 border-[#0E0D0B] bg-[var(--lp-accent)] flex items-center justify-center lp-font-mono font-bold text-[9px] text-[#0E0D0B]">
+              <div className="w-9 h-9 rounded-full border-2 border-[var(--lp-bg)] bg-[var(--lp-accent)] flex items-center justify-center lp-font-mono font-bold text-[9px] text-[var(--lp-bg)]">
                 +1.8k
               </div>
             </div>

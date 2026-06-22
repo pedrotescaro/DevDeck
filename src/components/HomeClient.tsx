@@ -44,7 +44,7 @@ export default function HomeClient({ initialUser }: HomeClientProps) {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#0E0D0B] text-[#F4F1EB] antialiased selection:bg-[var(--lp-accent)]/30 selection:text-white">
+    <div className="flex flex-col min-h-screen bg-[var(--lp-bg)] text-[var(--lp-fg)] antialiased selection:bg-[var(--lp-accent)]/30 selection:text-white">
       {/* 3D Stack Loader */}
       {renderLoader && (
         <div className={`loader-container ${!showLoader ? 'fade-out' : ''}`}>
