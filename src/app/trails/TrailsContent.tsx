@@ -1760,11 +1760,11 @@ export function TrailsContent({
               initial="hidden"
               animate="visible"
               exit="exit"
-              className={`relative w-full ${aiChatOpen ? 'max-w-4xl' : 'max-w-lg'} bg-dd-surface border border-dd-border rounded-2xl shadow-2xl z-10 font-sans flex flex-col max-h-[90vh] overflow-hidden transition-all duration-300`}
+              className={`relative w-full ${aiChatOpen ? 'max-w-4xl' : 'max-w-lg'} bg-dd-surface border border-dd-border rounded-2xl shadow-2xl z-10 font-sans flex flex-col h-[90vh] overflow-hidden transition-all duration-300`}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Colored Modal Header */}
-              <div className="bg-gradient-to-r from-orange-500 to-amber-600 text-white p-5 pb-8 relative flex flex-col gap-4">
+              <div className="shrink-0 bg-gradient-to-r from-orange-500 to-amber-600 text-white p-5 pb-8 relative flex flex-col gap-4">
                 <div className="flex items-center justify-between w-full">
                   <button
                     onClick={handleCloseQuizRequest}
@@ -1849,7 +1849,7 @@ export function TrailsContent({
               <div className="flex flex-col md:flex-row flex-grow overflow-hidden relative min-h-0">
                 {/* Left Column: Study content */}
                 <div
-                  className={`flex flex-col flex-grow overflow-hidden min-h-0 ${aiChatOpen ? 'md:w-1/2 border-b md:border-b-0 md:border-r border-dd-border' : 'w-full'}`}
+                  className={`flex flex-col flex-grow overflow-hidden min-h-0 ${aiChatOpen ? 'border-b md:border-b-0 md:border-r border-dd-border' : 'w-full'}`}
                 >
                   {/* Overlapping Content Container */}
                   <div className="relative -mt-4 rounded-t-2xl bg-dd-surface p-6 flex-grow flex flex-col overflow-y-auto min-h-[350px]">
@@ -1995,7 +1995,7 @@ export function TrailsContent({
                   </div>
 
                   {/* Navigation Footer */}
-                  <div className="p-4 border-t border-dd-border flex justify-between items-center bg-dd-surface">
+                  <div className="shrink-0 p-4 border-t border-dd-border flex justify-between items-center bg-dd-surface">
                     {currentStage !== 'summary' ? (
                       <>
                         <button
@@ -2084,9 +2084,9 @@ export function TrailsContent({
 
                 {/* Right Column: AI Chat Panel */}
                 {aiChatOpen && (
-                  <div className="w-full md:w-1/2 flex flex-col bg-dd-surface/50 flex-grow md:h-full overflow-hidden relative border-t border-dd-border md:border-t-0 select-text min-h-0">
+                  <div className="w-full md:w-[320px] shrink-0 flex flex-col bg-dd-surface/50 flex-grow md:flex-grow-0 md:h-full overflow-hidden relative border-t border-dd-border md:border-t-0 select-text min-h-0">
                     {/* Header/Title of AI */}
-                    <div className="p-4 border-b border-dd-border flex items-center justify-between bg-dd-surface/70">
+                    <div className="shrink-0 p-4 border-b border-dd-border flex items-center justify-between bg-dd-surface/70">
                       <div className="flex items-center gap-2">
                         <img
                           src="/Logo_ia_ducky.png"
@@ -2157,7 +2157,7 @@ export function TrailsContent({
                     </div>
 
                     {/* Quick Suggestion Chips */}
-                    <div className="px-4 py-2 flex flex-wrap gap-1.5 border-t border-dd-border/50 bg-dd-surface/20">
+                    <div className="shrink-0 px-4 py-2 flex flex-wrap gap-1.5 border-t border-dd-border/50 bg-dd-surface/20">
                       {currentStage === 'learn' && (
                         <>
                           <button
@@ -2214,7 +2214,7 @@ export function TrailsContent({
                         e.preventDefault();
                         handleSendAiMessage();
                       }}
-                      className="p-3 border-t border-dd-border flex gap-2 items-center bg-dd-surface/80"
+                      className="shrink-0 p-3 border-t border-dd-border flex gap-2 items-center bg-dd-surface/80"
                     >
                       <input
                         type="text"
@@ -2277,11 +2277,11 @@ export function TrailsContent({
               initial="hidden"
               animate="visible"
               exit="exit"
-              className={`relative w-full ${aiChatOpen ? 'max-w-4xl' : 'max-w-2xl'} bg-dd-surface border border-dd-border rounded-2xl shadow-2xl z-10 font-sans flex flex-col max-h-[90vh] overflow-hidden transition-all duration-300`}
+              className={`relative w-full ${aiChatOpen ? 'max-w-4xl' : 'max-w-2xl'} bg-dd-surface border border-dd-border rounded-2xl shadow-2xl z-10 font-sans flex flex-col h-[90vh] overflow-hidden transition-all duration-300`}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Colored Modal Header */}
-              <div className="bg-gradient-to-r from-dd-accent to-orange-600 text-white p-5 pb-8 relative flex flex-col gap-4">
+              <div className="shrink-0 bg-gradient-to-r from-dd-accent to-orange-600 text-white p-5 pb-8 relative flex flex-col gap-4">
                 <div className="flex items-center justify-between w-full">
                   <button
                     onClick={() => {
@@ -2375,7 +2375,7 @@ export function TrailsContent({
               <div className="flex flex-col md:flex-row flex-grow overflow-hidden relative min-h-0">
                 {/* Left Column: Checkpoint content */}
                 <div
-                  className={`flex flex-col flex-grow overflow-hidden min-h-0 ${aiChatOpen ? 'md:w-1/2 border-b md:border-b-0 md:border-r border-dd-border' : 'w-full'}`}
+                  className={`flex flex-col flex-grow overflow-hidden min-h-0 ${aiChatOpen ? 'border-b md:border-b-0 md:border-r border-dd-border' : 'w-full'}`}
                 >
                   {/* Overlapping Content Container */}
                   <div className="relative -mt-4 rounded-t-2xl bg-dd-surface p-6 flex-grow flex flex-col overflow-y-auto min-h-[420px]">
@@ -2520,7 +2520,7 @@ export function TrailsContent({
                   </div>
 
                   {/* Navigation Footer */}
-                  <div className="p-4 border-t border-dd-border flex justify-between items-center bg-dd-surface">
+                  <div className="shrink-0 p-4 border-t border-dd-border flex justify-between items-center bg-dd-surface">
                     {checkpointStage !== 'summary' ? (
                       <>
                         <button
@@ -2593,9 +2593,9 @@ export function TrailsContent({
 
                 {/* Right Column: AI Chat Panel */}
                 {aiChatOpen && (
-                  <div className="w-full md:w-1/2 flex flex-col bg-dd-surface/50 flex-grow md:h-full overflow-hidden relative border-t border-dd-border md:border-t-0 select-text min-h-0">
+                  <div className="w-full md:w-[320px] shrink-0 flex flex-col bg-dd-surface/50 flex-grow md:flex-grow-0 md:h-full overflow-hidden relative border-t border-dd-border md:border-t-0 select-text min-h-0">
                     {/* Header/Title of AI */}
-                    <div className="p-4 border-b border-dd-border flex items-center justify-between bg-dd-surface/70">
+                    <div className="shrink-0 p-4 border-b border-dd-border flex items-center justify-between bg-dd-surface/70">
                       <div className="flex items-center gap-2">
                         <img
                           src="/Logo_ia_ducky.png"
@@ -2666,7 +2666,7 @@ export function TrailsContent({
                     </div>
 
                     {/* Quick Suggestion Chips for Checkpoints */}
-                    <div className="px-4 py-2 flex flex-wrap gap-1.5 border-t border-dd-border/50 bg-dd-surface/20">
+                    <div className="shrink-0 px-4 py-2 flex flex-wrap gap-1.5 border-t border-dd-border/50 bg-dd-surface/20">
                       {checkpointStage === 'review' && (
                         <>
                           <button
@@ -2727,7 +2727,7 @@ export function TrailsContent({
                         e.preventDefault();
                         handleSendAiMessage();
                       }}
-                      className="p-3 border-t border-dd-border flex gap-2 items-center bg-dd-surface/80"
+                      className="shrink-0 p-3 border-t border-dd-border flex gap-2 items-center bg-dd-surface/80"
                     >
                       <input
                         type="text"
