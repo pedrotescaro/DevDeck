@@ -1846,10 +1846,10 @@ export function TrailsContent({
               </div>
 
               {/* Split Content Pane */}
-              <div className="flex flex-row flex-grow overflow-hidden relative">
+              <div className="flex flex-col md:flex-row flex-grow overflow-hidden relative min-h-0">
                 {/* Left Column: Study content */}
                 <div
-                  className={`flex flex-col flex-grow overflow-hidden ${aiChatOpen ? 'md:w-1/2 border-r border-dd-border' : 'w-full'}`}
+                  className={`flex flex-col flex-grow overflow-hidden min-h-0 ${aiChatOpen ? 'md:w-1/2 border-b md:border-b-0 md:border-r border-dd-border' : 'w-full'}`}
                 >
                   {/* Overlapping Content Container */}
                   <div className="relative -mt-4 rounded-t-2xl bg-dd-surface p-6 flex-grow flex flex-col overflow-y-auto min-h-[350px]">
@@ -2084,7 +2084,7 @@ export function TrailsContent({
 
                 {/* Right Column: AI Chat Panel */}
                 {aiChatOpen && (
-                  <div className="w-full md:w-1/2 flex flex-col bg-dd-surface/50 h-full overflow-hidden relative border-t border-dd-border md:border-t-0 select-text">
+                  <div className="w-full md:w-1/2 flex flex-col bg-dd-surface/50 flex-grow md:h-full overflow-hidden relative border-t border-dd-border md:border-t-0 select-text min-h-0">
                     {/* Header/Title of AI */}
                     <div className="p-4 border-b border-dd-border flex items-center justify-between bg-dd-surface/70">
                       <div className="flex items-center gap-2">
@@ -2372,10 +2372,10 @@ export function TrailsContent({
               </div>
 
               {/* Split Content Pane */}
-              <div className="flex flex-row flex-grow overflow-hidden relative">
+              <div className="flex flex-col md:flex-row flex-grow overflow-hidden relative min-h-0">
                 {/* Left Column: Checkpoint content */}
                 <div
-                  className={`flex flex-col flex-grow overflow-hidden ${aiChatOpen ? 'md:w-1/2 border-r border-dd-border' : 'w-full'}`}
+                  className={`flex flex-col flex-grow overflow-hidden min-h-0 ${aiChatOpen ? 'md:w-1/2 border-b md:border-b-0 md:border-r border-dd-border' : 'w-full'}`}
                 >
                   {/* Overlapping Content Container */}
                   <div className="relative -mt-4 rounded-t-2xl bg-dd-surface p-6 flex-grow flex flex-col overflow-y-auto min-h-[420px]">
@@ -2593,7 +2593,7 @@ export function TrailsContent({
 
                 {/* Right Column: AI Chat Panel */}
                 {aiChatOpen && (
-                  <div className="w-full md:w-1/2 flex flex-col bg-dd-surface/50 h-full overflow-hidden relative border-t border-dd-border md:border-t-0 select-text">
+                  <div className="w-full md:w-1/2 flex flex-col bg-dd-surface/50 flex-grow md:h-full overflow-hidden relative border-t border-dd-border md:border-t-0 select-text min-h-0">
                     {/* Header/Title of AI */}
                     <div className="p-4 border-b border-dd-border flex items-center justify-between bg-dd-surface/70">
                       <div className="flex items-center gap-2">
