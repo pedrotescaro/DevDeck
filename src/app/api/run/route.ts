@@ -99,7 +99,12 @@ export const POST = apiHandler(async (req) => {
   const { code, language } = runSchema.parse(body);
   const normalized = language.toLowerCase();
 
-  if (normalized === 'javascript' || normalized === 'typescript') {
+  if (
+    normalized === 'javascript' ||
+    normalized === 'typescript' ||
+    normalized === 'js' ||
+    normalized === 'ts'
+  ) {
     return NextResponse.json(
       { ok: false, output: '', error: 'JavaScript e TypeScript rodam no navegador.' },
       { status: 400 }
