@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Footer } from '@/components/Footer';
 import { TRAILS_DATA, TrailLevel, TrailQuestion } from '@/lib/trailsData';
@@ -259,6 +259,25 @@ export function TrailsContent({
   const [duckyInput, setDuckyInput] = useState('');
   const [duckyLoading, setDuckyLoading] = useState(false);
 
+  const aiChatEndRef = useRef<HTMLDivElement>(null);
+  const sidebarChatEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll para mensagens nos modals
+  useEffect(() => {
+    if (aiChatOpen) {
+      setTimeout(() => {
+        aiChatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 80);
+    }
+  }, [aiMessages, aiLoading, aiChatOpen]);
+
+  // Auto-scroll para mensagens na sidebar principal
+  useEffect(() => {
+    setTimeout(() => {
+      sidebarChatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 80);
+  }, [duckyMessages, duckyLoading]);
+
   useEffect(() => {
     setDuckyMessages([
       {
@@ -443,7 +462,7 @@ export function TrailsContent({
       return [
         {
           role: 'assistant',
-          content: `Olá! Sou o **DevAssistant**, seu tutor de IA para **${getLanguageFullName(activeLang)}**. ${welcomeText}`,
+          content: `Quack! 🦆 Eu sou o **Ducky**, seu tutor de IA para **${getLanguageFullName(activeLang)}**. ${welcomeText}`,
         },
       ];
     });
@@ -1574,7 +1593,7 @@ export function TrailsContent({
             </div>
 
             {/* Messages Scroll Area */}
-            <div className="flex-grow overflow-y-auto py-3 space-y-4 scrollbar-thin select-text min-h-0">
+            <div className="flex-grow overflow-y-auto py-3 space-y-4 scrollbar-ducky select-text min-h-0">
               {duckyMessages.map((msg, idx) => {
                 const isDucky = msg.role !== 'user';
                 return (
@@ -1778,8 +1797,12 @@ export function TrailsContent({
                         : 'bg-white/15 text-white hover:bg-white/25 animate-pulse'
                     }`}
                   >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>DevAssistant {aiChatOpen ? 'Aberto' : 'IA'}</span>
+                    <img
+                      src="/Logo_ia_ducky.png"
+                      alt="Ducky"
+                      className="w-3.5 h-3.5 object-contain"
+                    />
+                    <span>Ducky {aiChatOpen ? 'Aberto' : 'IA'}</span>
                   </button>
                 </div>
 
@@ -2065,8 +2088,12 @@ export function TrailsContent({
                     {/* Header/Title of AI */}
                     <div className="p-4 border-b border-dd-border flex items-center justify-between bg-dd-surface/70">
                       <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-orange-500" />
-                        <span className="text-xs font-bold text-dd-text">DevAssistant IA</span>
+                        <img
+                          src="/Logo_ia_ducky.png"
+                          alt="Ducky"
+                          className="w-4 h-4 object-contain"
+                        />
+                        <span className="text-xs font-bold text-dd-text">Ducky IA</span>
                       </div>
                       <span className="px-1.5 py-0.5 rounded bg-orange-500/10 text-[8px] font-bold text-orange-500 uppercase tracking-wide">
                         Online
@@ -2074,7 +2101,7 @@ export function TrailsContent({
                     </div>
 
                     {/* Messages Scroll Area */}
-                    <div className="flex-grow p-4 overflow-y-auto space-y-3 scrollbar-thin select-text">
+                    <div className="flex-grow p-4 overflow-y-auto overflow-x-hidden space-y-3 scrollbar-ducky select-text">
                       {aiMessages.map((msg, idx) => (
                         <div
                           key={idx}
@@ -2083,16 +2110,24 @@ export function TrailsContent({
                           }`}
                         >
                           <div
-                            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden ${
                               msg.role === 'user'
                                 ? 'bg-orange-500 text-white'
-                                : 'bg-dd-border text-orange-500'
+                                : 'bg-[#0c0c0e] border border-dd-border/40'
                             }`}
                           >
-                            {msg.role === 'user' ? user.username[0].toUpperCase() : '🤖'}
+                            {msg.role === 'user' ? (
+                              user.username[0].toUpperCase()
+                            ) : (
+                              <img
+                                src="/Logo_ia_ducky.png"
+                                alt="Ducky"
+                                className="w-5.5 h-5.5 object-contain"
+                              />
+                            )}
                           </div>
                           <div
-                            className={`p-3 rounded-2xl text-[11px] leading-relaxed select-text ${
+                            className={`p-3 rounded-2xl text-[11px] leading-relaxed select-text break-words ${
                               msg.role === 'user'
                                 ? 'bg-orange-500 text-white rounded-tr-none font-semibold'
                                 : 'bg-dd-border/40 text-dd-text rounded-tl-none border border-dd-border/30 font-medium'
@@ -2104,8 +2139,12 @@ export function TrailsContent({
                       ))}
                       {aiLoading && (
                         <div className="flex gap-2.5 max-w-[80%] mr-auto items-center">
-                          <div className="w-7 h-7 rounded-full bg-dd-border text-orange-500 flex items-center justify-center text-xs font-bold shrink-0">
-                            🤖
+                          <div className="w-7 h-7 rounded-full bg-[#0c0c0e] border border-dd-border/40 flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden">
+                            <img
+                              src="/Logo_ia_ducky.png"
+                              alt="Ducky"
+                              className="w-5.5 h-5.5 object-contain"
+                            />
                           </div>
                           <div className="flex gap-1">
                             <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-100" />
@@ -2114,6 +2153,7 @@ export function TrailsContent({
                           </div>
                         </div>
                       )}
+                      <div ref={aiChatEndRef} />
                     </div>
 
                     {/* Quick Suggestion Chips */}
@@ -2290,8 +2330,12 @@ export function TrailsContent({
                         : 'bg-white/15 text-white hover:bg-white/25 animate-pulse'
                     }`}
                   >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>DevAssistant {aiChatOpen ? 'Aberto' : 'IA'}</span>
+                    <img
+                      src="/Logo_ia_ducky.png"
+                      alt="Ducky"
+                      className="w-3.5 h-3.5 object-contain"
+                    />
+                    <span>Ducky {aiChatOpen ? 'Aberto' : 'IA'}</span>
                   </button>
                 </div>
 
@@ -2553,8 +2597,12 @@ export function TrailsContent({
                     {/* Header/Title of AI */}
                     <div className="p-4 border-b border-dd-border flex items-center justify-between bg-dd-surface/70">
                       <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-orange-500" />
-                        <span className="text-xs font-bold text-dd-text">DevAssistant IA</span>
+                        <img
+                          src="/Logo_ia_ducky.png"
+                          alt="Ducky"
+                          className="w-4 h-4 object-contain"
+                        />
+                        <span className="text-xs font-bold text-dd-text">Ducky IA</span>
                       </div>
                       <span className="px-1.5 py-0.5 rounded bg-orange-500/10 text-[8px] font-bold text-orange-500 uppercase tracking-wide">
                         Online
@@ -2562,7 +2610,7 @@ export function TrailsContent({
                     </div>
 
                     {/* Messages Scroll Area */}
-                    <div className="flex-grow p-4 overflow-y-auto space-y-3 scrollbar-thin select-text">
+                    <div className="flex-grow p-4 overflow-y-auto overflow-x-hidden space-y-3 scrollbar-ducky select-text">
                       {aiMessages.map((msg, idx) => (
                         <div
                           key={idx}
@@ -2571,16 +2619,24 @@ export function TrailsContent({
                           }`}
                         >
                           <div
-                            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden ${
                               msg.role === 'user'
                                 ? 'bg-orange-500 text-white'
-                                : 'bg-dd-border text-orange-500'
+                                : 'bg-[#0c0c0e] border border-dd-border/40'
                             }`}
                           >
-                            {msg.role === 'user' ? user.username[0].toUpperCase() : '🤖'}
+                            {msg.role === 'user' ? (
+                              user.username[0].toUpperCase()
+                            ) : (
+                              <img
+                                src="/Logo_ia_ducky.png"
+                                alt="Ducky"
+                                className="w-5.5 h-5.5 object-contain"
+                              />
+                            )}
                           </div>
                           <div
-                            className={`p-3 rounded-2xl text-[11px] leading-relaxed select-text ${
+                            className={`p-3 rounded-2xl text-[11px] leading-relaxed select-text break-words ${
                               msg.role === 'user'
                                 ? 'bg-orange-500 text-white rounded-tr-none font-semibold'
                                 : 'bg-dd-border/40 text-dd-text rounded-tl-none border border-dd-border/30 font-medium'
@@ -2592,8 +2648,12 @@ export function TrailsContent({
                       ))}
                       {aiLoading && (
                         <div className="flex gap-2.5 max-w-[80%] mr-auto items-center">
-                          <div className="w-7 h-7 rounded-full bg-dd-border text-orange-500 flex items-center justify-center text-xs font-bold shrink-0">
-                            🤖
+                          <div className="w-7 h-7 rounded-full bg-[#0c0c0e] border border-dd-border/40 flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden">
+                            <img
+                              src="/Logo_ia_ducky.png"
+                              alt="Ducky"
+                              className="w-5.5 h-5.5 object-contain"
+                            />
                           </div>
                           <div className="flex gap-1">
                             <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-100" />
@@ -2602,6 +2662,7 @@ export function TrailsContent({
                           </div>
                         </div>
                       )}
+                      <div ref={aiChatEndRef} />
                     </div>
 
                     {/* Quick Suggestion Chips for Checkpoints */}
