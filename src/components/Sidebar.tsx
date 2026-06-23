@@ -173,8 +173,8 @@ export function Sidebar({ user }: SidebarProps) {
           const data = await res.json();
           setUnreadCount(data.count);
         }
-      } catch (err) {
-        console.error('Failed to fetch unread count:', err);
+      } catch {
+        // Silently ignore fetch failures (CSP, network, etc.)
       }
     };
     fetchUnreadCount();

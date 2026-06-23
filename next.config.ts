@@ -33,7 +33,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' blob: data: https://images.unsplash.com https://api.dicebear.com https: http:",
       "font-src 'self' data: https://fonts.gstatic.com",
-      "connect-src 'self' https://*.supabase.co https://api.github.com https://emkc.org https://generativelanguage.googleapis.com https://api.groq.com https://api.openai.com http://localhost:11434",
+      "connect-src 'self' ws: wss: https://*.supabase.co https://api.github.com https://emkc.org https://generativelanguage.googleapis.com https://api.groq.com https://api.openai.com http://localhost:11434",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
