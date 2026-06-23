@@ -164,14 +164,14 @@ async function main() {
     }
   }
 
-  const seedPassword = process.env.SEED_DEFAULT_PASSWORD || 'ChangeMe123!';
-  if (!process.env.SEED_DEFAULT_PASSWORD) {
-    console.warn(
-      "⚠️ Warning: SEED_DEFAULT_PASSWORD não definida no .env.local. Usando fallback padrão: 'ChangeMe123!'."
+  const seedPassword = process.env.SEED_DEFAULT_PASSWORD;
+  if (!seedPassword) {
+    throw new Error(
+      '❌ SEED_DEFAULT_PASSWORD obrigatória. Defina no .env.local com no mínimo 12 caracteres.'
     );
   }
-  if (seedPassword.length < 6) {
-    throw new Error('SEED_DEFAULT_PASSWORD deve ter pelo menos 6 caracteres.');
+  if (seedPassword.length < 12) {
+    throw new Error('❌ SEED_DEFAULT_PASSWORD deve ter pelo menos 12 caracteres para segurança.');
   }
 
   const usersToCreate = [

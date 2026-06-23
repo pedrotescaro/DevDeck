@@ -208,12 +208,25 @@ export const HERO_AVATAR_IMAGES = [
 /* ── JWT Configuration ───────────────────────────────────────── */
 
 /**
- * Secret key for signing JWT tokens.
- * In production, MUST be set via JWT_SECRET env var (use `openssl rand -hex 32` to generate).
- * In development, falls back to a deterministic dev-only key.
+ * Resolve the JWT secret key.
+ * - In production, MUST be set via JWT_SECRET env var (use `openssl rand -hex 32` to generate).
+ * - In development, falls back to a deterministic dev-only key.
+ *
+ * ⚠️  Never run in production without setting this env var.
  */
-export const JWT_SECRET =
-  process.env.JWT_SECRET || 'devdeck-dev-only-secret-do-not-use-in-production';
+function resolveJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (secret) return secret;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'JWT_SECRET is required in production. Generate one with: openssl rand -hex 32'
+    );
+  }
+  // Dev-only fallback — never use in production
+  return 'devdeck-dev-only-secret-do-not-use-in-production';
+}
+
+export const JWT_SECRET = resolveJwtSecret();
 
 /** JWT token expiration time. Default: 7 days. */
 export const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';

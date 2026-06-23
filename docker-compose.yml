@@ -7,7 +7,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres_devdeck_2024}
       POSTGRES_DB: devdeck
     ports:
       - "5432:5432"
@@ -25,8 +25,8 @@ services:
     env_file:
       - .env.local
     environment:
-      DATABASE_URL: postgresql://postgres:password@db:5432/devdeck?schema=public
-      DIRECT_URL: postgresql://postgres:password@db:5432/devdeck?schema=public
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-postgres_devdeck_2024}@db:5432/devdeck?schema=public
+      DIRECT_URL: postgresql://postgres:${DB_PASSWORD:-postgres_devdeck_2024}@db:5432/devdeck?schema=public
     depends_on:
       - db
 

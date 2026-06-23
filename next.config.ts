@@ -30,8 +30,10 @@ const securityHeaders = [
     value: [
       "default-src 'self'",
       "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+      // Note: 'unsafe-inline' é necessário para scripts inline do Next.js.
+      // Para maior segurança, implementar nonce-based CSP (requer middleware).
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' blob: data: https://images.unsplash.com https://api.dicebear.com https: http:",
+      "img-src 'self' blob: data: https://images.unsplash.com https://api.dicebear.com",
       "font-src 'self' data: https://fonts.gstatic.com",
       "connect-src 'self' ws: wss: https://*.supabase.co https://api.github.com https://emkc.org https://generativelanguage.googleapis.com https://api.groq.com https://api.openai.com http://localhost:11434",
       "object-src 'none'",
