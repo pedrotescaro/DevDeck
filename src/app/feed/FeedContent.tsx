@@ -125,6 +125,7 @@ export function FeedContent({
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [leaderboardLanguage, setLeaderboardLanguage] = useState<string>('GLOBAL');
   const [engagementView, setEngagementView] = useState<'streak' | 'weekly'>('streak');
+  const [weeklyActivity, setWeeklyActivity] = useState<Set<number>>(new Set());
 
   // Post Form state
   const [postBody, setPostBody] = useState('');
@@ -433,6 +434,27 @@ export function FeedContent({
       }
     };
     fetchDailyQuiz();
+  }, []);
+
+  // Fetch weekly activity data (days with quiz answers)
+  useEffect(() => {
+    const fetchWeeklyActivity = async () => {
+      try {
+        const res = await fetch('/api/quiz/weekly-activity');
+        if (res.ok) {
+          const data = await res.json();
+          const activeDays = new Set<number>(
+            (data.weekDays as Array<{ index: number; active: boolean }>)
+              .filter((d) => d.active)
+              .map((d) => d.index)
+          );
+          setWeeklyActivity(activeDays);
+        }
+      } catch (err) {
+        console.error('Error loading weekly activity:', err);
+      }
+    };
+    fetchWeeklyActivity();
   }, []);
 
   const handleBodyChange = async (val: string, inputType: 'inline' | 'modal') => {
@@ -1849,8 +1871,7 @@ export function FeedContent({
                 {/* 7-day activity blocks */}
                 <div className="flex items-center justify-between px-1 py-3 text-[10px] font-bold text-dd-muted border-t border-dd-border/40">
                   {['S', 'T', 'Q', 'Q', 'S', 'S', 'D'].map((day, index) => {
-                    // Activate days based on index (e.g. today is Sunday, make some days active)
-                    const isActive = index === 6 || index === 2 || index === 4;
+                    const isActive = weeklyActivity.has(index);
                     return (
                       <div key={index} className="flex flex-col items-center gap-1.5">
                         <span className="text-[9px] font-bold">{day}</span>
