@@ -437,7 +437,8 @@ export function PostDetailContent({
           <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60 px-4 py-3 flex items-center gap-4">
             <button
               onClick={() => router.back()}
-              className="p-2 border border-dd-border bg-dd-surface hover:bg-dd-border/50 text-dd-muted hover:text-dd-text rounded-xl transition-all cursor-pointer"
+              className="flex items-center text-dd-muted hover:text-dd-text transition-colors cursor-pointer"
+              style={{ background: 'transparent', border: 'none', padding: '4px' }}
               title="Voltar"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -452,22 +453,22 @@ export function PostDetailContent({
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dd-border/50 pb-3">
               <Link
                 href={`/profile/${post.author.username}`}
-                className="flex items-center gap-3 hover:opacity-85 transition-opacity"
+                className="flex items-center gap-2 hover:opacity-85 transition-opacity"
               >
                 <AuthorAvatar
                   username={post.author.username}
                   avatar_url={post.author.avatar_url}
                   size="md"
                 />
-                <div>
+                <div className="flex items-center gap-2">
                   <p className="text-xs font-bold text-dd-text">@{post.author.username}</p>
+                  <span className="text-[9px] bg-dd-surface border border-dd-border px-2 py-0.5 rounded text-dd-muted font-mono font-semibold">
+                    Lvl {Math.max(1, Math.floor(post.author.total_xp / 1000) + 1)}
+                  </span>
                 </div>
               </Link>
 
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[9px] bg-dd-surface border border-dd-border px-2 py-0.5 rounded text-dd-muted font-mono font-semibold">
-                  Lvl {Math.max(1, Math.floor(post.author.total_xp / 1000) + 1)}
-                </span>
                 <LanguageTag language={post.language} size="sm" />
               </div>
             </div>
