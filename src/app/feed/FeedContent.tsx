@@ -125,7 +125,7 @@ export function FeedContent({
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [leaderboardLanguage, setLeaderboardLanguage] = useState<string>('GLOBAL');
   const [engagementView, setEngagementView] = useState<'streak' | 'weekly'>('streak');
-  const [weeklyActivity, setWeeklyActivity] = useState<Set<number>>(new Set());
+  const [weeklyActivity, setWeeklyActivity] = useState<Map<number, number>>(new Map());
 
   // Post Form state
   const [postBody, setPostBody] = useState('');
@@ -437,25 +437,25 @@ export function FeedContent({
   }, []);
 
   // Fetch weekly activity data (days with quiz answers)
-  useEffect(() => {
-    const fetchWeeklyActivity = async () => {
-      try {
-        const res = await fetch('/api/quiz/weekly-activity');
-        if (res.ok) {
-          const data = await res.json();
-          const activeDays = new Set<number>(
-            (data.weekDays as Array<{ index: number; active: boolean }>)
-              .filter((d) => d.active)
-              .map((d) => d.index)
-          );
-          setWeeklyActivity(activeDays);
-        }
-      } catch (err) {
-        console.error('Error loading weekly activity:', err);
+  const refetchWeeklyActivity = useCallback(async () => {
+    try {
+      const res = await fetch('/api/quiz/weekly-activity');
+      if (res.ok) {
+        const data = await res.json();
+        const counts = new Map<number, number>();
+        (data.weekDays as Array<{ index: number; count: number }>).forEach((d) => {
+          counts.set(d.index, d.count);
+        });
+        setWeeklyActivity(counts);
       }
-    };
-    fetchWeeklyActivity();
+    } catch (err) {
+      console.error('Error loading weekly activity:', err);
+    }
   }, []);
+
+  useEffect(() => {
+    refetchWeeklyActivity();
+  }, [refetchWeeklyActivity]);
 
   const handleBodyChange = async (val: string, inputType: 'inline' | 'modal') => {
     setPostBody(val);
@@ -1466,6 +1466,7 @@ export function FeedContent({
                         selected_index: selectedIndex,
                         is_correct: isCorrect,
                       });
+                      refetchWeeklyActivity();
                       if (isCorrect) {
                         showXPToast(15, 'Global');
                       }
@@ -1531,6 +1532,7 @@ export function FeedContent({
                                   return p;
                                 })
                               );
+                              refetchWeeklyActivity();
                               if (isCorrect) {
                                 showXPToast(15, post.language || 'Global');
                               }
@@ -1871,11 +1873,16 @@ export function FeedContent({
                 {/* 7-day activity blocks */}
                 <div className="flex items-center justify-between px-1 py-3 text-[10px] font-bold text-dd-muted border-t border-dd-border/40">
                   {['S', 'T', 'Q', 'Q', 'S', 'S', 'D'].map((day, index) => {
-                    const isActive = weeklyActivity.has(index);
+                    const count = weeklyActivity.get(index) || 0;
+                    const isActive = count > 0;
+                    const tooltipText = isActive
+                      ? `${count} ${count === 1 ? 'quiz respondido' : 'quizzes respondidos'}`
+                      : 'Nenhum quiz respondido';
                     return (
-                      <div key={index} className="flex flex-col items-center gap-1.5">
+                      <div key={index} className="flex flex-col items-center gap-1.5 group">
                         <span className="text-[9px] font-bold">{day}</span>
                         <div
+                          title={tooltipText}
                           className={`w-6 h-6 rounded-md flex items-center justify-center transition-colors ${
                             isActive
                               ? 'bg-orange-500 text-black shadow-[0_0_8px_rgba(249,115,22,0.3)]'

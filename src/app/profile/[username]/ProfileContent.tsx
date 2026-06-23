@@ -86,6 +86,7 @@ export function ProfileContent({
   followingCount,
 }: ProfileContentProps) {
   const router = useRouter();
+  const [weeklyActivity, setWeeklyActivity] = useState<Map<number, number>>(new Map());
   const [posts, setPosts] = useState<{ tab: string; items: any[] }>({ tab: 'posts', items: [] });
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -174,6 +175,28 @@ export function ProfileContent({
       setLoading(false);
     }
   };
+
+  // Fetch weekly activity data for this profile user
+  useEffect(() => {
+    const fetchWeeklyActivity = async () => {
+      try {
+        const res = await fetch(`/api/quiz/weekly-activity?userId=${profileUser.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          const counts = new Map<number, number>();
+          (data.weekDays as Array<{ index: number; count: number }>).forEach((d) => {
+            counts.set(d.index, d.count);
+          });
+          setWeeklyActivity(counts);
+        }
+      } catch (err) {
+        console.error('Error loading weekly activity:', err);
+      }
+    };
+    if (activeTab === 'stats') {
+      fetchWeeklyActivity();
+    }
+  }, [profileUser.id, activeTab]);
 
   useEffect(() => {
     if (activeTab === 'posts' || activeTab === 'likes' || activeTab === 'replies') {
@@ -516,6 +539,40 @@ export function ProfileContent({
                       <Check className="w-3.5 h-3.5 text-orange-500" />
                       <span>Aceitas</span>
                     </div>
+                  </div>
+                </div>
+
+                {/* Weekly Quiz Activity */}
+                <div className="bg-dd-surface/40 border border-dd-border/60 rounded-2xl p-5 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-dd-muted flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-orange-500" />
+                      Atividade Semanal (Quizzes)
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between px-1">
+                    {['S', 'T', 'Q', 'Q', 'S', 'S', 'D'].map((day, index) => {
+                      const count = weeklyActivity.get(index) || 0;
+                      const isActive = count > 0;
+                      const tooltipText = isActive
+                        ? `${count} ${count === 1 ? 'quiz respondido' : 'quizzes respondidos'}`
+                        : 'Nenhum quiz respondido';
+                      return (
+                        <div key={index} className="flex flex-col items-center gap-1.5 group">
+                          <span className="text-[9px] font-bold text-dd-muted">{day}</span>
+                          <div
+                            title={tooltipText}
+                            className={`w-7 h-7 rounded-md flex items-center justify-center transition-colors text-xs font-bold ${
+                              isActive
+                                ? 'bg-orange-500 text-black shadow-[0_0_8px_rgba(249,115,22,0.3)]'
+                                : 'bg-dd-surface border border-dd-border text-dd-muted'
+                            }`}
+                          >
+                            {isActive ? count : ''}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
