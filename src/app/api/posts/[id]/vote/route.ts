@@ -26,34 +26,36 @@ export const POST = apiHandler(async (req, { params }) => {
   }
 
   // 2. Update or delete PostVote
+  const existingVote = await prisma.postVote.findFirst({
+    where: {
+      post_id: postId,
+      user_id: user.id,
+    },
+  });
+
   if (value === 0) {
-    await prisma.postVote
-      .delete({
-        where: {
-          post_id_user_id: {
-            post_id: postId,
-            user_id: user.id,
-          },
-        },
-      })
-      .catch(() => {
-        // Silently ignore if not found
-      });
+    if (existingVote) {
+      await prisma.postVote
+        .delete({
+          where: { id: existingVote.id },
+        })
+        .catch(() => {});
+    }
   } else {
-    await prisma.postVote.upsert({
-      where: {
-        post_id_user_id: {
+    if (existingVote) {
+      await prisma.postVote.update({
+        where: { id: existingVote.id },
+        data: { value },
+      });
+    } else {
+      await prisma.postVote.create({
+        data: {
           post_id: postId,
           user_id: user.id,
+          value,
         },
-      },
-      update: { value },
-      create: {
-        post_id: postId,
-        user_id: user.id,
-        value,
-      },
-    });
+      });
+    }
   }
 
   // 3. Aggregate total upvote count

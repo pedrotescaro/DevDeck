@@ -1,61 +1,39 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getAuthUser } from '@/lib/auth';
+import { apiHandler } from '@/lib/api-handler';
+import { requireAuth } from '@/lib/auth';
 
-export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const user = await getAuthUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-    }
+export const POST = apiHandler(async (req, { params }) => {
+  const user = await requireAuth();
+  const { id: postId } = await params;
 
-    const { id: postId } = await params;
+  const post = await prisma.post.findUnique({
+    where: { id: postId },
+  });
 
-    // Verificar se o post existe
-    const post = await prisma.post.findUnique({
-      where: { id: postId },
+  if (!post) {
+    return NextResponse.json({ error: 'Postagem não encontrada' }, { status: 404 });
+  }
+
+  const existingBookmark = await prisma.bookmark.findFirst({
+    where: {
+      user_id: user.id,
+      post_id: postId,
+    },
+  });
+
+  if (existingBookmark) {
+    await prisma.bookmark.delete({
+      where: { id: existingBookmark.id },
     });
-
-    if (!post) {
-      return NextResponse.json({ error: 'Postagem não encontrada' }, { status: 404 });
-    }
-
-    // Verificar se já está salvo nos bookmarks
-    const existingBookmark = await prisma.bookmark.findUnique({
-      where: {
-        user_id_post_id: {
-          user_id: user.id,
-          post_id: postId,
-        },
+    return NextResponse.json({ success: true, bookmarked: false });
+  } else {
+    await prisma.bookmark.create({
+      data: {
+        user_id: user.id,
+        post_id: postId,
       },
     });
-
-    if (existingBookmark) {
-      // Remover dos bookmarks
-      await prisma.bookmark.delete({
-        where: {
-          user_id_post_id: {
-            user_id: user.id,
-            post_id: postId,
-          },
-        },
-      });
-      return NextResponse.json({ success: true, bookmarked: false });
-    } else {
-      // Adicionar aos bookmarks
-      await prisma.bookmark.create({
-        data: {
-          user_id: user.id,
-          post_id: postId,
-        },
-      });
-      return NextResponse.json({ success: true, bookmarked: true });
-    }
-  } catch (error: any) {
-    console.error('Error toggling bookmark:', error);
-    return NextResponse.json(
-      { error: error.message || 'Erro ao processar salvamento' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, bookmarked: true });
   }
-}
+});

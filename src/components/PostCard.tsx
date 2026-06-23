@@ -199,10 +199,10 @@ export function PostCard({
       });
 
       if (!res.ok) {
-        throw new Error('Falha ao salvar bookmark');
+        setBookmarked(!newBookmarked);
+        onBookmarkToggle?.(post.id, !newBookmarked);
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       setBookmarked(!newBookmarked);
       onBookmarkToggle?.(post.id, !newBookmarked);
     }

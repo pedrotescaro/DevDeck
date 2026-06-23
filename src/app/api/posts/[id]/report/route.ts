@@ -27,22 +27,28 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
 
     // Create report (upsert or create)
-    const report = await prisma.report.upsert({
+    const existingReport = await prisma.report.findFirst({
       where: {
-        user_id_post_id: {
-          user_id: user.id,
-          post_id: postId,
-        },
-      },
-      update: {
-        reason: reason.trim(),
-      },
-      create: {
         user_id: user.id,
         post_id: postId,
-        reason: reason.trim(),
       },
     });
+
+    let report;
+    if (existingReport) {
+      report = await prisma.report.update({
+        where: { id: existingReport.id },
+        data: { reason: reason.trim() },
+      });
+    } else {
+      report = await prisma.report.create({
+        data: {
+          user_id: user.id,
+          post_id: postId,
+          reason: reason.trim(),
+        },
+      });
+    }
 
     return NextResponse.json({ success: true, report });
   } catch (error: any) {
