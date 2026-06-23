@@ -800,7 +800,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
           setMessages((prev) =>
             prev.map((msg) => {
               if (msg.id === duckyMsgId) {
-                const nextText = data.text.slice(0, currentIdx + 5);
+                const nextText = data.text.slice(0, currentIdx + 15);
                 const done = nextText.length === data.text.length;
                 if (done) {
                   clearInterval(interval);
@@ -814,8 +814,8 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
               return msg;
             })
           );
-          currentIdx += 5;
-        }, 20);
+          currentIdx += 15;
+        }, 10);
       } else {
         const duckyMsgId = Math.random().toString();
         setMessages((prev) => [
@@ -894,7 +894,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
           setMessages((prev) =>
             prev.map((msg) => {
               if (msg.id === duckyMsgId) {
-                const nextText = data.text.slice(0, currentIdx + 5);
+                const nextText = data.text.slice(0, currentIdx + 15);
                 const done = nextText.length === data.text.length;
                 if (done) clearInterval(interval);
                 return { ...msg, text: nextText, isStreaming: !done };
@@ -902,8 +902,8 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
               return msg;
             })
           );
-          currentIdx += 5;
-        }, 20);
+          currentIdx += 15;
+        }, 10);
       }
     } catch (err) {
       setThinking(false);
