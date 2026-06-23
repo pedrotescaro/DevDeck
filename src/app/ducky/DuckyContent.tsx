@@ -474,74 +474,78 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
     }
   }, []);
 
-  // Auto-save active chat to history
+  // Auto-save active chat to history (debounced to avoid infinite loops during streaming)
   useEffect(() => {
     if (isPrivate || messages.length === 0) return;
 
-    // Find first user message to determine title
-    const userMsgs = messages.filter((m) => m.sender === 'user');
-    if (userMsgs.length === 0) return;
+    const timeout = setTimeout(() => {
+      // Find first user message to determine title
+      const userMsgs = messages.filter((m) => m.sender === 'user');
+      if (userMsgs.length === 0) return;
 
-    let rawTitle = userMsgs[0].text;
-    if (rawTitle.startsWith('[Pesquisa ativa] ')) {
-      rawTitle = rawTitle.replace('[Pesquisa ativa] ', '');
-    }
-    if (rawTitle.startsWith('🔍 Analisar repositório: ')) {
-      rawTitle = rawTitle.replace('🔍 Analisar repositório: ', '');
-    }
-    const derivedTitle = rawTitle.trim()
-      ? rawTitle.length > 50
-        ? rawTitle.slice(0, 50) + '...'
-        : rawTitle
-      : 'Conversa com arquivos';
+      let rawTitle = userMsgs[0].text;
+      if (rawTitle.startsWith('[Pesquisa ativa] ')) {
+        rawTitle = rawTitle.replace('[Pesquisa ativa] ', '');
+      }
+      if (rawTitle.startsWith('🔍 Analisar repositório: ')) {
+        rawTitle = rawTitle.replace('🔍 Analisar repositório: ', '');
+      }
+      const derivedTitle = rawTitle.trim()
+        ? rawTitle.length > 50
+          ? rawTitle.slice(0, 50) + '...'
+          : rawTitle
+        : 'Conversa com arquivos';
 
-    if (!activeChatId) {
-      const newId = 'ducky-chat-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9);
-      const newSession: DuckyChatSession = {
-        id: newId,
-        title: derivedTitle,
-        messages: messages,
-        activeRepo: activeRepo,
-        mode: mode,
-        createdAt: Date.now(),
-      };
-      setActiveChatId(newId);
-      setHistory((prev) => {
-        const next = [newSession, ...prev];
-        localStorage.setItem('devdeck-ducky-history', JSON.stringify(next));
-        return next;
-      });
-    } else {
-      setHistory((prev) => {
-        const updated = prev.map((s) => {
-          if (s.id === activeChatId) {
-            return {
-              ...s,
-              title: s.title || derivedTitle,
+      if (!activeChatId) {
+        const newId = 'ducky-chat-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9);
+        const newSession: DuckyChatSession = {
+          id: newId,
+          title: derivedTitle,
+          messages: messages,
+          activeRepo: activeRepo,
+          mode: mode,
+          createdAt: Date.now(),
+        };
+        setActiveChatId(newId);
+        setHistory((prev) => {
+          const next = [newSession, ...prev];
+          localStorage.setItem('devdeck-ducky-history', JSON.stringify(next));
+          return next;
+        });
+      } else {
+        setHistory((prev) => {
+          const updated = prev.map((s) => {
+            if (s.id === activeChatId) {
+              return {
+                ...s,
+                title: s.title || derivedTitle,
+                messages: messages,
+                activeRepo: activeRepo,
+                mode: mode,
+              };
+            }
+            return s;
+          });
+          const exists = updated.some((s) => s.id === activeChatId);
+          let finalHistory = updated;
+          if (!exists) {
+            const newSession: DuckyChatSession = {
+              id: activeChatId,
+              title: derivedTitle,
               messages: messages,
               activeRepo: activeRepo,
               mode: mode,
+              createdAt: Date.now(),
             };
+            finalHistory = [newSession, ...updated];
           }
-          return s;
+          localStorage.setItem('devdeck-ducky-history', JSON.stringify(finalHistory));
+          return finalHistory;
         });
-        const exists = updated.some((s) => s.id === activeChatId);
-        let finalHistory = updated;
-        if (!exists) {
-          const newSession: DuckyChatSession = {
-            id: activeChatId,
-            title: derivedTitle,
-            messages: messages,
-            activeRepo: activeRepo,
-            mode: mode,
-            createdAt: Date.now(),
-          };
-          finalHistory = [newSession, ...updated];
-        }
-        localStorage.setItem('devdeck-ducky-history', JSON.stringify(finalHistory));
-        return finalHistory;
-      });
-    }
+      }
+    }, 500);
+
+    return () => clearTimeout(timeout);
   }, [messages, activeChatId, mode, activeRepo, isPrivate]);
 
   const handleSelectSession = (session: DuckyChatSession) => {
