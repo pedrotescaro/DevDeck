@@ -204,3 +204,28 @@ export const HERO_AVATAR_IMAGES = [
   'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&h=100&q=80',
   'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=100&h=100&q=80',
 ];
+
+/* ── JWT Configuration ───────────────────────────────────────── */
+
+/**
+ * Secret key for signing JWT tokens.
+ * In production, MUST be set via JWT_SECRET env var (use `openssl rand -hex 32` to generate).
+ * In development, falls back to a deterministic dev-only key.
+ */
+export const JWT_SECRET =
+  process.env.JWT_SECRET || 'devdeck-dev-only-secret-do-not-use-in-production';
+
+/** JWT token expiration time. Default: 7 days. */
+export const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+
+/** JWT cookie name used for the secondary auth token. */
+export const JWT_COOKIE_NAME = 'devdeck-jwt';
+
+/** Cookie configuration for the JWT token. */
+export const JWT_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax' as const,
+  path: '/',
+  maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
+};

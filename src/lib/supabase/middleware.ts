@@ -1,6 +1,8 @@
 import './dev-ssl';
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { verifyJwt } from '@/lib/jwt';
+import { JWT_COOKIE_NAME } from '@/lib/config';
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -31,16 +33,32 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // IMPORTANT: DO NOT remove getUser().
-  // It is required to refresh the session and prevent random logouts.
+  // ── Authentication check ─────────────────────────────────────
+  // Strategy 1: JWT cookie (fast, no external call)
+  // Strategy 2: Supabase session (fallback)
   let user = null;
-  try {
-    const {
-      data: { user: supabaseUser },
-    } = await supabase.auth.getUser();
-    user = supabaseUser;
-  } catch (error) {
-    console.error('Supabase auth error in middleware:', error);
+
+  const jwtToken = request.cookies.get(JWT_COOKIE_NAME)?.value;
+  if (jwtToken) {
+    const jwtPayload = verifyJwt(jwtToken);
+    if (jwtPayload?.sub) {
+      // JWT is valid — treat as authenticated
+      // We trust the JWT for middleware-level route protection.
+      // The full user object is resolved in getAuthUser() on the server.
+      user = { id: jwtPayload.sub } as any;
+    }
+  }
+
+  // Fall back to Supabase if JWT is missing/invalid
+  if (!user) {
+    try {
+      const {
+        data: { user: supabaseUser },
+      } = await supabase.auth.getUser();
+      user = supabaseUser;
+    } catch (error) {
+      console.error('Supabase auth error in middleware:', error);
+    }
   }
 
   const pathname = request.nextUrl.pathname;

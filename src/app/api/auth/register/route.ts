@@ -5,6 +5,8 @@ import { registerSchema } from '@/lib/validators';
 import { rateLimit } from '@/lib/ratelimit';
 import { apiHandler } from '@/lib/api-handler';
 import { AVATAR_API_URL, DEFAULT_LANGUAGE_TRAILS, RATE_LIMIT_REGISTER } from '@/lib/config';
+import { signJwt, setJwtCookie } from '@/lib/jwt';
+import { logger } from '@/lib/logger';
 
 export const POST = apiHandler(async (request) => {
   const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
@@ -90,6 +92,20 @@ export const POST = apiHandler(async (request) => {
       streak: 0,
     })),
   });
+
+  // 4. Issue JWT token for secondary auth layer
+  try {
+    const token = signJwt({
+      userId: dbUser.id,
+      username: dbUser.username,
+      email: dbUser.email,
+    });
+    await setJwtCookie(token);
+    logger.info('JWT issued after registration', { userId: dbUser.id });
+  } catch (jwtError) {
+    logger.error('Failed to issue JWT after registration', { error: String(jwtError) });
+    // Non-fatal — Supabase session still works
+  }
 
   return NextResponse.json({ success: true, user: dbUser });
 });

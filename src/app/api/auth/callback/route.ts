@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
 import { AVATAR_API_URL, DEFAULT_LANGUAGE_TRAILS } from '@/lib/config';
+import { signJwt, setJwtCookie } from '@/lib/jwt';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -13,7 +15,7 @@ export async function GET(request: Request) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (error) {
-      console.error('OAuth Code Exchange Error:', error);
+      logger.error('OAuth Code Exchange Error', { error: error.message });
       return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`);
     }
 
@@ -32,9 +34,10 @@ export async function GET(request: Request) {
           where: { id: data.user.id },
         });
 
+        let finalUsername = username;
+
         if (!existingUser) {
           // Garantir que o username é único no banco
-          let finalUsername = username;
           const userWithSameName = await prisma.user.findUnique({
             where: { username: finalUsername },
           });
@@ -79,9 +82,25 @@ export async function GET(request: Request) {
               streak: 0,
             })),
           });
+        } else {
+          finalUsername = existingUser.username;
+        }
+
+        // ── Issue JWT token for secondary auth layer ───────────
+        try {
+          const token = signJwt({
+            userId: data.user.id,
+            username: finalUsername,
+            email: email!,
+          });
+          await setJwtCookie(token);
+          logger.info('JWT issued after OAuth login', { userId: data.user.id });
+        } catch (jwtError) {
+          logger.error('Failed to issue JWT after OAuth', { error: String(jwtError) });
+          // Non-fatal — Supabase session still works
         }
       } catch (dbError) {
-        console.error('Database sync error during OAuth signup:', dbError);
+        logger.error('Database sync error during OAuth signup', { error: String(dbError) });
         return NextResponse.redirect(
           `${origin}/login?error=${encodeURIComponent('Erro ao sincronizar dados com o banco de dados.')}`
         );
