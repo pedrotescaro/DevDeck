@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { cache } from 'react';
 import { ForbiddenError, UnauthorizedError } from './errors';
-import { getJwtUser, signJwt, setJwtCookie } from './jwt';
+import { getJwtUser } from './jwt';
 import { logger } from '@/lib/logger';
 
 /**
@@ -61,20 +61,8 @@ export const getAuthUser = cache(async () => {
       return null;
     }
 
-    // ── Issue JWT for future requests ─────────────────────────
-    try {
-      const token = signJwt({
-        userId: dbUser.id,
-        username: dbUser.username,
-        email: dbUser.email,
-      });
-      await setJwtCookie(token);
-    } catch (err) {
-      logger.error('Failed to issue JWT after Supabase auth', {
-        error: String(err),
-      });
-      // Non-fatal — Supabase session still works
-    }
+    // NOTE: JWT issuance happens in Route Handlers only (callback, register),
+    // where Next.js allows cookie modification.
 
     syncUserStreaks(dbUser);
     return dbUser;
