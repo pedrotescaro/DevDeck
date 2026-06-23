@@ -26,6 +26,7 @@ import {
   BadgeCheck,
   MoreHorizontal,
   Flame,
+  Users,
 } from 'lucide-react';
 import { PostComposerExtras } from '@/components/PostComposerExtras';
 import { MarkdownEditor, type NotionEditorRef } from '@/components/MarkdownEditor';
@@ -245,8 +246,7 @@ export function Sidebar({ user }: SidebarProps) {
 
   const handleSignOut = async () => {
     try {
-      const supabase = createClient();
-      await supabase.auth.signOut();
+      await fetch('/api/auth/logout', { method: 'POST' });
       inMemoryUser = null;
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem('devdeck_user');
@@ -562,6 +562,14 @@ export function Sidebar({ user }: SidebarProps) {
                               className="w-4.5 h-4.5 object-contain shrink-0"
                             />
                             Ducky
+                          </Link>
+                          <Link
+                            href="/guilds"
+                            className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors border-b border-dd-border/40"
+                            onClick={() => setMoreMenuOpen(false)}
+                          >
+                            <Users className="w-4.5 h-4.5 text-dd-muted" />
+                            Guildas
                           </Link>
                           <Link
                             href="/bookmarks"
