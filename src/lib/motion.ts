@@ -1,4 +1,5 @@
 import { Variants } from 'framer-motion';
+import { POST_CHAR_LIMIT } from '@/lib/config';
 
 /* ── Spring Configs ── */
 export const springSnappy = { type: 'spring' as const, stiffness: 500, damping: 28, mass: 0.8 };
@@ -136,4 +137,4 @@ export const notifItemVariants: Variants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] } },
 };
 
-export const POST_CHAR_LIMIT = 5000;
+export { POST_CHAR_LIMIT };

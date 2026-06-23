@@ -1,10 +1,10 @@
 import { prisma } from '@/lib/prisma';
-import { z } from 'zod';
 import { logger } from '@/lib/logger';
 import { XpService } from './xp.service';
 import { findTrailQuestionById } from '@/lib/trailsData';
 import { NotificationService } from './notification.service';
 import { generateQuizAI, AIQuizResponse } from '@/lib/ai';
+import { FALLBACK_QUIZZES, XP_QUIZ_CORRECT } from '@/lib/config';
 
 export const QuizService = {
   async generateDaily(scheduledFor: Date) {
@@ -146,7 +146,7 @@ export const QuizService = {
       attempt = existingAttempt;
       isCorrect = existingAttempt.is_correct;
     } else {
-      xpAmount = selectedAnswerIsCorrect ? 15 : 0;
+      xpAmount = selectedAnswerIsCorrect ? XP_QUIZ_CORRECT : 0;
       attempt = await prisma.quizAttempt.create({
         data: {
           user_id: userId,
@@ -233,78 +233,7 @@ Formato do JSON esperado:
     }
 
     if (!quizCreated) {
-      // Fallback quizzes list
-      const fallbackQuizzes: Record<
-        string,
-        { question: string; options: string[]; correct_index: number }
-      > = {
-        TS: {
-          question:
-            'Qual das opções abaixo é usada para definir uma constraint (restrição) em um generic no TypeScript?',
-          options: [
-            'T extends SomeType',
-            'T implements SomeType',
-            'T requires SomeType',
-            'T interface SomeType',
-          ],
-          correct_index: 0,
-        },
-        JS: {
-          question: "Qual o resultado de 'typeof null' no JavaScript?",
-          options: ["'null'", "'undefined'", "'object'", "'string'"],
-          correct_index: 2,
-        },
-        PYTHON: {
-          question: 'Qual dessas opções é usada para criar uma lista de forma concisa em Python?',
-          options: ['Map generator', 'List comprehension', 'List compiler', 'Lambda definition'],
-          correct_index: 1,
-        },
-        JAVA: {
-          question:
-            'Qual classe é utilizada para criar strings mutáveis em Java de forma eficiente?',
-          options: ['String', 'StringBuffer', 'StringBuilder', 'StringWriter'],
-          correct_index: 2,
-        },
-        RUST: {
-          question:
-            'Qual conceito do Rust garante a segurança de memória em tempo de compilação sem Garbage Collector?',
-          options: [
-            'Ownership & Borrowing',
-            'Smart Pointers',
-            'Automatic Reference Counting',
-            'Manual Freeing',
-          ],
-          correct_index: 0,
-        },
-        GO: {
-          question: 'Como declaramos concorrência em Go?',
-          options: [
-            'async/await',
-            "Utilizando go-routines (palavra-chave 'go')",
-            'Threads nativas',
-            'Promessas',
-          ],
-          correct_index: 1,
-        },
-        KOTLIN: {
-          question: 'Qual o operador usado em Kotlin para chamadas seguras (null safety)?',
-          options: ['!!', '?.', '?:', '.*'],
-          correct_index: 1,
-        },
-        SWIFT: {
-          question: 'Qual palavra-chave é usada para definir propriedades constantes em Swift?',
-          options: ['let', 'var', 'const', 'val'],
-          correct_index: 0,
-        },
-        CPP: {
-          question:
-            "Qual destes operadores é usado para desalocar memória alocada dinamicamente via 'new' em C++?",
-          options: ['free()', 'dispose', 'delete', 'remove'],
-          correct_index: 2,
-        },
-      };
-
-      const fallback = fallbackQuizzes[language] || {
+      const fallback = FALLBACK_QUIZZES[language] || {
         question: `Com base na postagem sobre ${language}, qual seria o comportamento esperado?`,
         options: ['Comportamento A', 'Comportamento B', 'Comportamento C', 'Comportamento D'],
         correct_index: 0,

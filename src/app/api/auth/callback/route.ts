@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
+import { AVATAR_API_URL, DEFAULT_LANGUAGE_TRAILS } from '@/lib/config';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -41,8 +42,7 @@ export async function GET(request: Request) {
             finalUsername = `${username}_${data.user.id.substring(0, 4)}`;
           }
 
-          const avatarBaseUrl =
-            process.env.NEXT_PUBLIC_AVATAR_API_URL || 'https://api.dicebear.com/9.x/pixel-art/svg';
+          const avatarBaseUrl = AVATAR_API_URL;
 
           // Configurar campos específicos do provedor
           const isDiscord = provider === 'discord';
@@ -70,19 +70,8 @@ export async function GET(request: Request) {
           });
 
           // Inicializar trilhas de linguagem padrões
-          const defaultLanguages = [
-            'TS',
-            'JS',
-            'PYTHON',
-            'RUST',
-            'GO',
-            'CPP',
-            'JAVA',
-            'KOTLIN',
-            'SWIFT',
-          ];
           await prisma.languageTrail.createMany({
-            data: defaultLanguages.map((lang) => ({
+            data: DEFAULT_LANGUAGE_TRAILS.map((lang) => ({
               user_id: dbUser.id,
               language: lang as any,
               xp: 0,

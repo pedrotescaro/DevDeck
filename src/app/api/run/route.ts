@@ -2,21 +2,17 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { apiHandler } from '@/lib/api-handler';
 import { rateLimit } from '@/lib/ratelimit';
+import {
+  PISTON_LANGUAGES,
+  PISTON_API_URL,
+  PISTON_RUN_TIMEOUT_MS,
+  RATE_LIMIT_CODE_RUN,
+} from '@/lib/config';
 
 const runSchema = z.object({
   code: z.string().min(1).max(10000),
   language: z.string().min(1),
 });
-
-const PISTON_LANGUAGES: Record<string, { language: string; version: string }> = {
-  python: { language: 'python', version: '3.10.0' },
-  rust: { language: 'rust', version: '1.68.2' },
-  go: { language: 'go', version: '1.16.2' },
-  cpp: { language: 'c++', version: '10.2.0' },
-  java: { language: 'java', version: '15.0.2' },
-  kotlin: { language: 'kotlin', version: '1.8.2' },
-  swift: { language: 'swift', version: '5.3.3' },
-};
 
 function prepareCode(code: string, language: string): { content: string; fileName: string } {
   const trimmed = code.trim();
@@ -90,8 +86,7 @@ function indent(code: string): string {
 
 export const POST = apiHandler(async (req) => {
   await rateLimit('code-run:global', {
-    limit: 30,
-    window: '1 m',
+    ...RATE_LIMIT_CODE_RUN,
     endpoint: '/api/run',
   });
 
@@ -121,15 +116,14 @@ export const POST = apiHandler(async (req) => {
 
   const prepared = prepareCode(code, normalized);
 
-  const pistonApiUrl = process.env.PISTON_API_URL || 'https://emkc.org/api/v2/piston/execute';
-  const response = await fetch(pistonApiUrl, {
+  const response = await fetch(PISTON_API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       language: pistonLang.language,
       version: pistonLang.version,
       files: [{ name: prepared.fileName, content: prepared.content }],
-      run_timeout: 5000,
+      run_timeout: PISTON_RUN_TIMEOUT_MS,
     }),
   });
 

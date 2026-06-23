@@ -4,14 +4,14 @@ import { createClient } from '@/lib/supabase/server';
 import { registerSchema } from '@/lib/validators';
 import { rateLimit } from '@/lib/ratelimit';
 import { apiHandler } from '@/lib/api-handler';
+import { AVATAR_API_URL, DEFAULT_LANGUAGE_TRAILS, RATE_LIMIT_REGISTER } from '@/lib/config';
 
 export const POST = apiHandler(async (request) => {
   const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
 
   // Execute Upstash rate limit
   await rateLimit(`register:${ip}`, {
-    limit: 5,
-    window: '1 h',
+    ...RATE_LIMIT_REGISTER,
     endpoint: '/api/auth/register',
   });
 
@@ -66,8 +66,7 @@ export const POST = apiHandler(async (request) => {
     return NextResponse.json({ error: 'Erro ao criar conta de autenticação' }, { status: 500 });
   }
 
-  const avatarBaseUrl =
-    process.env.NEXT_PUBLIC_AVATAR_API_URL || 'https://api.dicebear.com/9.x/pixel-art/svg';
+  const avatarBaseUrl = AVATAR_API_URL;
 
   // 2. Create database user record via Prisma
   const dbUser = await prisma.user.create({
@@ -82,9 +81,8 @@ export const POST = apiHandler(async (request) => {
   });
 
   // 3. Initialize default LanguageTrails for the new user
-  const defaultLanguages = ['TS', 'JS', 'PYTHON', 'RUST', 'GO', 'CPP', 'JAVA', 'KOTLIN', 'SWIFT'];
   await prisma.languageTrail.createMany({
-    data: defaultLanguages.map((lang) => ({
+    data: DEFAULT_LANGUAGE_TRAILS.map((lang) => ({
       user_id: dbUser.id,
       language: lang as any,
       xp: 0,

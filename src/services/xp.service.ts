@@ -2,26 +2,40 @@ import { prisma } from '@/lib/prisma';
 import { Language } from '@prisma/client';
 import { logger } from '@/lib/logger';
 import { NotificationService } from './notification.service';
+import {
+  XP_LEVEL_THRESHOLDS,
+  XP_LEVEL_6_BASE,
+  XP_LEVEL_6_INCREMENT,
+  XP_LEVEL_INCREMENT_GROWTH,
+  BADGE_STREAK_7_DAYS,
+  BADGE_STREAK_30_DAYS,
+  BADGE_ACCEPTED_ANSWERS,
+  BADGE_QUIZ_MASTER_CORRECT,
+} from '@/lib/config';
 
 export function calculateLevel(xp: number): {
   level: number;
   nextLevelXp: number;
   prevLevelXp: number;
 } {
-  if (xp < 500) return { level: 1, nextLevelXp: 500, prevLevelXp: 0 };
-  if (xp < 800) return { level: 2, nextLevelXp: 800, prevLevelXp: 500 };
-  if (xp < 1100) return { level: 3, nextLevelXp: 1100, prevLevelXp: 800 };
-  if (xp < 1500) return { level: 4, nextLevelXp: 1500, prevLevelXp: 1100 };
-  if (xp < 2000) return { level: 5, nextLevelXp: 2000, prevLevelXp: 1500 };
+  for (const threshold of XP_LEVEL_THRESHOLDS) {
+    if (xp < threshold.nextLevelXp) {
+      return {
+        level: threshold.level,
+        nextLevelXp: threshold.nextLevelXp,
+        prevLevelXp: threshold.minXp,
+      };
+    }
+  }
 
   let level = 6;
-  let currentThreshold = 2000;
-  let nextIncrement = 600;
+  let currentThreshold = XP_LEVEL_6_BASE;
+  let nextIncrement = XP_LEVEL_6_INCREMENT;
 
   while (xp >= currentThreshold + nextIncrement) {
     currentThreshold += nextIncrement;
     level++;
-    nextIncrement += 100;
+    nextIncrement += XP_LEVEL_INCREMENT_GROWTH;
   }
 
   return {
@@ -273,10 +287,10 @@ async function checkBadgeEligibility(tx: any, userId: string, currentStreak: num
   const earnedSlugs = new Set<string>(userBadges.map((ub: any) => ub.badge.slug));
   const badgesToAward: string[] = [];
 
-  if (currentStreak >= 7 && !earnedSlugs.has('streak_7')) {
+  if (currentStreak >= BADGE_STREAK_7_DAYS && !earnedSlugs.has('streak_7')) {
     badgesToAward.push('streak_7');
   }
-  if (currentStreak >= 30 && !earnedSlugs.has('streak_30')) {
+  if (currentStreak >= BADGE_STREAK_30_DAYS && !earnedSlugs.has('streak_30')) {
     badgesToAward.push('streak_30');
   }
 
@@ -293,7 +307,7 @@ async function checkBadgeEligibility(tx: any, userId: string, currentStreak: num
     const acceptedCount = await tx.answer.count({
       where: { author_id: userId, is_accepted: true },
     });
-    if (acceptedCount >= 5) {
+    if (acceptedCount >= BADGE_ACCEPTED_ANSWERS) {
       badgesToAward.push('accepted_5');
     }
   }
@@ -302,7 +316,7 @@ async function checkBadgeEligibility(tx: any, userId: string, currentStreak: num
     const correctAttempts = await tx.quizAttempt.count({
       where: { user_id: userId, is_correct: true },
     });
-    if (correctAttempts >= 5) {
+    if (correctAttempts >= BADGE_QUIZ_MASTER_CORRECT) {
       badgesToAward.push('quiz_master');
     }
   }

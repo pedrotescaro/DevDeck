@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
+import { AI_MODEL_DEFAULTS, OLLAMA_BASE_URL, OPENAI_BASE_URL } from '@/lib/config';
 
 export const AIQuizResponseSchema = z.object({
   question: z.string().min(5).max(500),
@@ -68,7 +69,7 @@ async function callGemini(systemPrompt: string, userPrompt: string): Promise<any
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error('GEMINI_API_KEY não configurada');
 
-  const model = process.env.AI_MODEL || 'gemini-1.5-flash';
+  const model = process.env.AI_MODEL || AI_MODEL_DEFAULTS.gemini;
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   const response = await fetch(url, {
@@ -105,7 +106,7 @@ async function callGroq(systemPrompt: string, userPrompt: string): Promise<any> 
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) throw new Error('GROQ_API_KEY não configurada');
 
-  const model = process.env.AI_MODEL || 'llama-3.1-8b-instant';
+  const model = process.env.AI_MODEL || AI_MODEL_DEFAULTS.groq;
   const url = 'https://api.groq.com/openai/v1/chat/completions';
 
   const response = await fetch(url, {
@@ -139,8 +140,8 @@ async function callOpenAI(systemPrompt: string, userPrompt: string): Promise<any
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error('OPENAI_API_KEY não configurada');
 
-  const model = process.env.AI_MODEL || 'gpt-4o-mini';
-  const apiBase = process.env.OPENAI_API_BASE_URL || 'https://api.openai.com/v1';
+  const model = process.env.AI_MODEL || AI_MODEL_DEFAULTS.openai;
+  const apiBase = OPENAI_BASE_URL;
   const url = `${apiBase}/chat/completions`;
 
   const response = await fetch(url, {
@@ -171,8 +172,8 @@ async function callOpenAI(systemPrompt: string, userPrompt: string): Promise<any
 }
 
 async function callOllama(systemPrompt: string, userPrompt: string): Promise<any> {
-  const apiBase = process.env.OLLAMA_API_BASE_URL || 'http://localhost:11434';
-  const model = process.env.OLLAMA_MODEL || process.env.AI_MODEL || 'qwen2.5-coder';
+  const apiBase = OLLAMA_BASE_URL;
+  const model = process.env.OLLAMA_MODEL || process.env.AI_MODEL || AI_MODEL_DEFAULTS.ollama;
   const url = `${apiBase}/api/chat`;
 
   const response = await fetch(url, {
@@ -308,7 +309,7 @@ async function callGeminiChat(systemPrompt: string, messages: ChatMessage[]): Pr
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error('GEMINI_API_KEY não configurada');
 
-  const model = process.env.AI_MODEL || 'gemini-1.5-flash';
+  const model = process.env.AI_MODEL || AI_MODEL_DEFAULTS.gemini;
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   const contents = messages.map((msg) => {
@@ -351,7 +352,7 @@ async function callGroqChat(systemPrompt: string, messages: ChatMessage[]): Prom
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) throw new Error('GROQ_API_KEY não configurada');
 
-  const model = process.env.AI_MODEL || 'llama-3.1-8b-instant';
+  const model = process.env.AI_MODEL || AI_MODEL_DEFAULTS.groq;
   const url = 'https://api.groq.com/openai/v1/chat/completions';
 
   const groqMessages = [
@@ -386,8 +387,8 @@ async function callOpenAIChat(systemPrompt: string, messages: ChatMessage[]): Pr
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error('OPENAI_API_KEY não configurada');
 
-  const model = process.env.AI_MODEL || 'gpt-4o-mini';
-  const apiBase = process.env.OPENAI_API_BASE_URL || 'https://api.openai.com/v1';
+  const model = process.env.AI_MODEL || AI_MODEL_DEFAULTS.openai;
+  const apiBase = OPENAI_BASE_URL;
   const url = `${apiBase}/chat/completions`;
 
   // OpenAI supports multimodal via content arrays, but only for image_url parts.
@@ -435,8 +436,8 @@ async function callOpenAIChat(systemPrompt: string, messages: ChatMessage[]): Pr
 }
 
 async function callOllamaChat(systemPrompt: string, messages: ChatMessage[]): Promise<string> {
-  const apiBase = process.env.OLLAMA_API_BASE_URL || 'http://localhost:11434';
-  const model = process.env.OLLAMA_MODEL || process.env.AI_MODEL || 'qwen2.5-coder';
+  const apiBase = OLLAMA_BASE_URL;
+  const model = process.env.OLLAMA_MODEL || process.env.AI_MODEL || AI_MODEL_DEFAULTS.ollama;
   const url = `${apiBase}/api/chat`;
 
   const ollamaMessages = [

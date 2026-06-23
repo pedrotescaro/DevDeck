@@ -7,6 +7,7 @@ import { TRAILS_DATA, TrailLevel, TrailQuestion } from '@/lib/trailsData';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { motion, AnimatePresence } from 'framer-motion';
+import { XP_PER_LEVEL_DISPLAY } from '@/lib/config';
 import {
   BookOpen,
   Lock,
@@ -51,7 +52,7 @@ const getLanguageFullName = (code: string) => {
 };
 
 function getLevelFromXp(xp: number) {
-  return Math.max(1, Math.floor(xp / 1000) + 1);
+  return Math.max(1, Math.floor(xp / XP_PER_LEVEL_DISPLAY) + 1);
 }
 
 function getLearnSlidesForLevel(level: TrailLevel) {

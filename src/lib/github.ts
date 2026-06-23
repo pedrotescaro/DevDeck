@@ -1,3 +1,5 @@
+import { GITHUB_API_URL } from '@/lib/config';
+
 /**
  * Lightweight GitHub REST API client (no Octokit dependency).
  *
@@ -9,7 +11,7 @@
  * token, requests are anonymous (60 req/h, public repos only).
  */
 
-const GITHUB_API = 'https://api.github.com';
+const GITHUB_API = GITHUB_API_URL;
 
 function authHeaders(): Record<string, string> {
   const headers: Record<string, string> = {
