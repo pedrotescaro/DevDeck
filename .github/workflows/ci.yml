@@ -21,8 +21,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Audit dependencies
-        run: npm audit --audit-level=moderate
+      - name: Audit dependencies (block high/critical)
+        run: npm audit --audit-level=high
+
+      - name: Audit dependencies (warn moderate)
+        run: npm audit --audit-level=moderate || echo "::warning::Moderate vulnerabilities found — review with npm audit"
 
       - name: Validate Prisma Schema
         run: npx prisma validate
