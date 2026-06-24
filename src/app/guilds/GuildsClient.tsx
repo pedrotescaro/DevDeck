@@ -21,13 +21,14 @@ interface GuildData {
 }
 
 interface GuildsClientProps {
-  initialGuilds: GuildData[];
+  initialGuilds?: GuildData[];
+  initialMyGuilds?: GuildData[];
 }
 
-export function GuildsClient({ initialGuilds }: GuildsClientProps) {
+export function GuildsClient({ initialGuilds = [], initialMyGuilds = [] }: GuildsClientProps) {
   const router = useRouter();
   const [guilds, setGuilds] = useState<GuildData[]>(initialGuilds);
-  const [myGuilds, setMyGuilds] = useState<GuildData[]>([]);
+  const [myGuilds, setMyGuilds] = useState<GuildData[]>(initialMyGuilds);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [createName, setCreateName] = useState('');
   const [createDescription, setCreateDescription] = useState('');
@@ -45,14 +46,17 @@ export function GuildsClient({ initialGuilds }: GuildsClientProps) {
   }, []);
 
   useEffect(() => {
-    fetch('/api/guilds')
-      .then((r) => r.ok && r.json())
-      .then((data) => {
-        if (data.guilds) setGuilds(data.guilds);
-        if (data.myGuilds) setMyGuilds(data.myGuilds);
-      })
-      .catch(() => {});
-  }, []);
+    // Only re-fetch if no initial data was provided
+    if (initialGuilds.length === 0 && initialMyGuilds.length === 0) {
+      fetch('/api/guilds')
+        .then((r) => r.ok && r.json())
+        .then((data) => {
+          if (data.guilds) setGuilds(data.guilds);
+          if (data.myGuilds) setMyGuilds(data.myGuilds);
+        })
+        .catch(() => {});
+    }
+  }, [initialGuilds.length, initialMyGuilds.length]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,24 +87,10 @@ export function GuildsClient({ initialGuilds }: GuildsClientProps) {
         const err = await res.json();
         setCreateError(err.message || 'Erro ao criar guilda');
       }
-    } catch (err) {
+    } catch {
       setCreateError('Erro de conexão');
     } finally {
       setCreating(false);
-    }
-  };
-
-  const handleJoin = async (guildId: string) => {
-    try {
-      const res = await fetch(`/api/guilds/${guildId}/members`, { method: 'POST' });
-      if (res.ok) {
-        router.refresh();
-        setGuilds((prev) =>
-          prev.map((g) => (g.id === guildId ? { ...g, memberCount: g.memberCount + 1 } : g))
-        );
-      }
-    } catch (err) {
-      console.error(err);
     }
   };
 
@@ -110,21 +100,6 @@ export function GuildsClient({ initialGuilds }: GuildsClientProps) {
       g.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       g.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const formatLangName = (lang: string) => {
-    const map: Record<string, string> = {
-      TS: 'TypeScript',
-      JS: 'JavaScript',
-      PYTHON: 'Python',
-      RUST: 'Rust',
-      GO: 'Go',
-      CPP: 'C++',
-      JAVA: 'Java',
-      KOTLIN: 'Kotlin',
-      SWIFT: 'Swift',
-    };
-    return map[lang] || lang;
-  };
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased">

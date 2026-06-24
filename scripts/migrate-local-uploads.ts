@@ -58,12 +58,10 @@ async function run() {
     else if (ext === '.svg') contentType = 'image/svg+xml';
 
     // Fazer upload para o Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('uploads')
-      .upload(file, fileBuffer, {
-        contentType,
-        upsert: true,
-      });
+    const { error: uploadError } = await supabase.storage.from('uploads').upload(file, fileBuffer, {
+      contentType,
+      upsert: true,
+    });
 
     if (uploadError) {
       console.error(`Erro ao fazer upload de ${file}:`, uploadError.message);

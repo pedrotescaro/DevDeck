@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 
 export function Footer() {
   return (
@@ -9,14 +10,18 @@ export function Footer() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <img
+            <Image
               src="/logo.png"
               alt="DevDeck Logo"
+              width={20}
+              height={20}
               className="w-5 h-5 object-contain hidden dark:block"
             />
-            <img
+            <Image
               src="/logo-light.png"
               alt="DevDeck Logo"
+              width={20}
+              height={20}
               className="w-5 h-5 object-contain block dark:hidden"
             />
             <span className="text-dd-text font-bold text-sm">DevDeck</span>

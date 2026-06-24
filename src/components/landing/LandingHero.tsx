@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import BraceLoader from '@/components/BraceLoader';
@@ -46,8 +47,8 @@ export default function LandingHero({ initialUser }: LandingHeroProps) {
       {/* Background Slideshow Frames */}
       <div className="absolute inset-0 z-0">
         {BACKGROUND_IMAGES.map((src, i) => (
-          <div key={src} className={`lp-reel-frame ${i === activeIndex ? 'active' : ''}`}>
-            <img src={src} alt={`Fundo de programação ${i + 1}`} />
+          <div key={src} className={`lp-reel-frame relative ${i === activeIndex ? 'active' : ''}`}>
+            <Image src={src} alt={`Fundo de programação ${i + 1}`} fill sizes="100vw" />
           </div>
         ))}
       </div>

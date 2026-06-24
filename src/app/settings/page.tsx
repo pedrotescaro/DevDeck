@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { Sidebar } from '@/components/Sidebar';
 import { Footer } from '@/components/Footer';
 import {
-  Settings,
   User,
   GraduationCap,
   FileText,
@@ -184,8 +184,7 @@ export default function SettingsPage() {
 
   const handleSignOut = async () => {
     try {
-      const supabase = createClient();
-      await supabase.auth.signOut();
+      await fetch('/api/auth/logout', { method: 'POST' });
       router.push('/');
       router.refresh();
     } catch (err) {
@@ -512,9 +511,11 @@ export default function SettingsPage() {
                     <div className="space-y-3">
                       {bannerUrl ? (
                         <div className="relative rounded-xl overflow-hidden border border-dd-border h-24 bg-dd-surface/20">
-                          <img
+                          <Image
                             src={bannerUrl}
                             alt="Banner Preview"
+                            width={800}
+                            height={96}
                             className="w-full h-full object-cover"
                           />
                           <button

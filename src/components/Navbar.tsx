@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 import { StreakBadge } from './StreakBadge';
 
 interface NavbarUser {
@@ -21,7 +21,7 @@ function UserAvatar({ user, size = 32 }: { user: NavbarUser; size?: number }) {
 
   if (user.avatar_url) {
     return (
-      <img
+      <Image
         src={user.avatar_url}
         alt={user.username}
         width={size}
@@ -49,8 +49,7 @@ export function Navbar({ user }: NavbarProps) {
 
   const handleSignOut = async () => {
     try {
-      const supabase = createClient();
-      await supabase.auth.signOut();
+      await fetch('/api/auth/logout', { method: 'POST' });
       router.push('/');
       router.refresh();
     } catch (err) {
@@ -63,15 +62,19 @@ export function Navbar({ user }: NavbarProps) {
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* Left: Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <img
+          <Image
             src="/logo.png"
             alt="DevDeck Logo"
-            className="w-5 h-5 object-contain hidden dark:block"
+            width={20}
+            height={20}
+            className="object-contain hidden dark:block"
           />
-          <img
+          <Image
             src="/logo-light.png"
             alt="DevDeck Logo"
-            className="w-5 h-5 object-contain block dark:hidden"
+            width={20}
+            height={20}
+            className="object-contain block dark:hidden"
           />
           <span className="text-dd-text font-semibold text-lg tracking-tight">DevDeck</span>
         </Link>

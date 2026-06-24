@@ -10,10 +10,7 @@ import {
   Heart,
   MessageSquare,
   Bookmark,
-  User,
-  Code,
   Trophy,
-  HelpCircle,
 } from 'lucide-react';
 
 export function HeroMockup() {

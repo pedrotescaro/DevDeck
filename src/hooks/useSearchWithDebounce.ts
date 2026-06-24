@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 export function useSearchWithDebounce(initialQuery: string = '', delay: number = 300) {
   const [query, setQuery] = useState(initialQuery);

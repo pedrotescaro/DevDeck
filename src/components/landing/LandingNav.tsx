@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 
 const NAV_LINKS = [
@@ -30,7 +31,13 @@ export default function LandingNav({ initialUser }: LandingNavProps) {
       <div className="mx-auto max-w-7xl flex items-center justify-between px-6 py-3">
         {/* ── Logo ── */}
         <Link href="/" className="flex items-center gap-3 group">
-          <img src="/logo.png" alt="DevDeck Logo" className="w-8 h-8 object-contain" />
+          <Image
+            src="/logo.png"
+            alt="DevDeck Logo"
+            width={32}
+            height={32}
+            className="object-contain"
+          />
           <span
             className="lp-font-heading font-semibold text-lg tracking-wide"
             style={{ color: 'var(--lp-fg)' }}

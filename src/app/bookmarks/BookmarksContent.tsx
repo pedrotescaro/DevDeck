@@ -1,13 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { Sidebar } from '@/components/Sidebar';
 import { PostCard } from '@/components/PostCard';
 import { springGentle } from '@/lib/motion';
-import { ArrowLeft, Search, Bookmark, Sparkles } from 'lucide-react';
+import { ArrowLeft, Search, Bookmark } from 'lucide-react';
 
 interface BookmarksContentProps {
   user: {

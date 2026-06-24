@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
@@ -138,7 +139,13 @@ export default function RegisterPage() {
         <div className="flex flex-col items-center mb-8 text-center">
           {/* Logo & Title */}
           <Link href="/" className="flex items-center gap-2.5 mb-3.5 group">
-            <img src="/logo.png" alt="DevDeck Logo" className="w-7 h-7 object-contain" />
+            <Image
+              src="/logo.png"
+              alt="DevDeck Logo"
+              width={28}
+              height={28}
+              className="object-contain"
+            />
             <span className="lp-font-heading font-semibold text-lg tracking-wide text-[var(--lp-fg)]">
               DevDeck
             </span>

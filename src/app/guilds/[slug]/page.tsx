@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Sidebar } from '@/components/Sidebar';
 import { LanguageTag } from '@/components/LanguageTag';
 import { ArrowLeft, Users, UserPlus, LogOut, Calendar, Crown, Shield, Globe } from 'lucide-react';
@@ -270,9 +271,11 @@ export default function GuildDetailPage({ params }: GuildDetailProps) {
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         {member.user.avatar_url ? (
-                          <img
+                          <Image
                             src={member.user.avatar_url}
                             alt={member.user.username}
+                            width={36}
+                            height={36}
                             className="w-9 h-9 rounded-full object-cover border border-dd-border shrink-0"
                           />
                         ) : (

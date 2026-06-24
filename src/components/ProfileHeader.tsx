@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { LanguageTrailBar } from './LanguageTrailBar';
 import { Award, BookOpen, CheckCircle, GraduationCap } from 'lucide-react';
 import { FollowButton } from './motion/FollowButton';
@@ -61,9 +62,11 @@ export function ProfileHeader({
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
           {/* Avatar */}
           {user.avatar_url ? (
-            <img
+            <Image
               src={user.avatar_url}
               alt={user.username}
+              width={80}
+              height={80}
               className="w-20 h-20 rounded-full object-cover shrink-0 ring-2 ring-slate-800"
             />
           ) : (

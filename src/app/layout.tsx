@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { Inter, Space_Grotesk, JetBrains_Mono, Bebas_Neue } from 'next/font/google';
 import './globals.css';
 import './landing.css';
-import Script from 'next/script';
+import ConnectionBanner from '@/components/ConnectionBanner';
 
 const themeScript = `
   (function() {
@@ -72,6 +73,7 @@ export default function RootLayout({
       </head>
       <body className="bg-dd-bg text-dd-text min-h-screen font-sans" suppressHydrationWarning>
         {children}
+        <ConnectionBanner />
       </body>
     </html>
   );

@@ -1,4 +1,4 @@
-import { Language, NotificationType } from '@prisma/client';
+import { Language } from '@prisma/client';
 
 export interface CreatePostRequest {
   title: string;

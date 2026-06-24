@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/cn';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -52,9 +53,11 @@ export function ExploreGrid({ developers, filter }: ExploreGridProps) {
         >
           <div className="flex items-center gap-3 mb-3">
             {dev.avatar_url ? (
-              <img
+              <Image
                 src={dev.avatar_url}
                 alt={dev.username}
+                width={48}
+                height={48}
                 className="w-12 h-12 rounded-full object-cover"
               />
             ) : (

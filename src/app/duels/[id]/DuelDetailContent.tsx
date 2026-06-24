@@ -5,19 +5,8 @@ import Link from 'next/link';
 import { Sidebar } from '@/components/Sidebar';
 import { CodeEditor } from '@/components/CodeEditor';
 import { LanguageTag } from '@/components/LanguageTag';
-import { Footer } from '@/components/Footer';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
-import {
-  Swords,
-  Code,
-  Sparkles,
-  ArrowLeft,
-  Clock,
-  Vote,
-  CheckCircle,
-  HelpCircle,
-  Send,
-} from 'lucide-react';
+import { Swords, Code, Sparkles, ArrowLeft, Clock, Vote, HelpCircle, Send } from 'lucide-react';
 
 interface DuelDetailContentProps {
   user: {
@@ -30,7 +19,7 @@ interface DuelDetailContentProps {
 }
 
 export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps) {
-  const [duel, setDuel] = useState<any>(initialDuel);
+  const [duel] = useState<any>(initialDuel);
   const [code, setCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [voting, setVoting] = useState(false);

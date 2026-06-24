@@ -21,7 +21,7 @@ export const GET = apiHandler(async (req) => {
   }
 });
 
-export const POST = apiHandler(async (req) => {
+export const POST = apiHandler(async (_req) => {
   const user = await requireAuth();
 
   await NotificationService.markAllAsRead(user.id);

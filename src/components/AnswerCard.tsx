@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { MessageSquare, BarChart2, Share } from 'lucide-react';
 import { formatRelativeTime } from '@/lib/date';
 import { LikeButton } from '@/components/motion/LikeButton';
@@ -346,9 +347,11 @@ export function AnswerCard({
           >
             <div className="shrink-0">
               {currentUser?.avatar_url ? (
-                <img
+                <Image
                   src={currentUser.avatar_url}
                   alt={currentUser.username}
+                  width={32}
+                  height={32}
                   className="w-8 h-8 rounded-full object-cover border border-dd-border"
                 />
               ) : (

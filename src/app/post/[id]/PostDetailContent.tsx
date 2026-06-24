@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/Sidebar';
 import { LanguageTag } from '@/components/LanguageTag';
@@ -9,7 +10,6 @@ import { QuizWidget } from '@/components/QuizWidget';
 import { AnswerThread } from '@/components/AnswerThread';
 import type { AnswerNode } from '@/components/answer-types';
 import { MarkdownEditor, type NotionEditorRef } from '@/components/MarkdownEditor';
-import { Footer } from '@/components/Footer';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { Sparkles, MessageSquare, ArrowLeft, Flag, MapPin, X } from 'lucide-react';
 import { RepostMenu } from '@/components/motion/RepostMenu';
@@ -627,9 +627,11 @@ export function PostDetailContent({
             >
               <div className="flex items-center gap-3 flex-grow">
                 {user.avatar_url ? (
-                  <img
+                  <Image
                     src={user.avatar_url}
                     alt={user.username}
+                    width={36}
+                    height={36}
                     className="w-9 h-9 rounded-full object-cover border border-dd-border shrink-0"
                   />
                 ) : (
@@ -678,9 +680,11 @@ export function PostDetailContent({
               <form onSubmit={handlePostAnswer} className="flex gap-4">
                 <div className="shrink-0 pt-1">
                   {user.avatar_url ? (
-                    <img
+                    <Image
                       src={user.avatar_url}
                       alt={user.username}
+                      width={40}
+                      height={40}
                       className="w-10 h-10 rounded-full object-cover border border-dd-border"
                     />
                   ) : (
@@ -703,7 +707,13 @@ export function PostDetailContent({
 
                   {answerImage && (
                     <div className="relative rounded-xl overflow-hidden border border-dd-border max-h-40">
-                      <img src={answerImage} alt="Preview" className="w-full h-full object-cover" />
+                      <Image
+                        src={answerImage}
+                        alt="Preview"
+                        width={800}
+                        height={320}
+                        className="w-full h-full object-cover"
+                      />
                       <button
                         type="button"
                         onClick={() => setAnswerImage('')}

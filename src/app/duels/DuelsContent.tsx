@@ -2,10 +2,8 @@
 
 import { useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
-import { DuelCard } from '@/components/DuelCard';
-import { Footer } from '@/components/Footer';
 import { Language } from '@prisma/client';
-import { Swords, Plus, ChevronRight, Sparkles, HelpCircle, Code, ArrowLeft } from 'lucide-react';
+import { Swords, Plus, ChevronRight, Sparkles, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 interface DuelsContentProps {
@@ -182,7 +180,6 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
                   0
                 );
                 const challengerVotes = duel.solutions[0]?.vote_count ?? 0;
-                const opponentVotes = duel.solutions[1]?.vote_count ?? 0;
                 const challengerPercent =
                   totalVotes > 0 ? Math.round((challengerVotes / totalVotes) * 100) : 50;
                 const opponentPercent = totalVotes > 0 ? 100 - challengerPercent : 50;

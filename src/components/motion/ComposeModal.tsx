@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { modalContentVariants, fadeVariants, bottomSheetVariants } from '@/lib/motion';
@@ -26,14 +26,14 @@ export function ComposeModal({
   const reduced = useReducedMotion();
   const [discardWarning, setDiscardWarning] = useState(false);
 
-  function handleClose() {
+  const handleClose = useCallback(() => {
     if (hasDraft) {
       setDiscardWarning(true);
       return;
     }
     setDiscardWarning(false);
     onClose();
-  }
+  }, [hasDraft, onClose]);
 
   useEffect(() => {
     if (!open) return;
@@ -45,7 +45,7 @@ export function ComposeModal({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [open, hasDraft, onClose]);
+  }, [open, hasDraft, onClose, handleClose]);
 
   const handleDiscard = () => {
     setDiscardWarning(false);

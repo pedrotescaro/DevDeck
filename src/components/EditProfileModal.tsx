@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { X, Camera, Loader2 } from 'lucide-react';
 
 interface EditProfileModalProps {
@@ -164,7 +165,7 @@ export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditPr
               {/* Banner Section */}
               <div className="relative h-40 sm:h-48 bg-dd-surface/30">
                 {bannerUrl ? (
-                  <img src={bannerUrl} alt="Banner" className="w-full h-full object-cover" />
+                  <Image src={bannerUrl} alt="Banner" fill sizes="100%" className="object-cover" />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-r from-orange-500/20 via-amber-500/10 to-transparent" />
                 )}
@@ -206,9 +207,11 @@ export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditPr
               {/* Avatar (overlapping banner) */}
               <div className="px-4 -mt-12 relative z-10 mb-4">
                 {profileUser.avatar_url ? (
-                  <img
+                  <Image
                     src={profileUser.avatar_url}
                     alt={profileUser.username}
+                    width={96}
+                    height={96}
                     className="w-24 h-24 rounded-full border-4 border-dd-bg object-cover bg-dd-surface"
                   />
                 ) : (

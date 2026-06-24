@@ -43,3 +43,15 @@ export class UnauthorizedError extends AppError {
     super(code, message, 401, details);
   }
 }
+
+export class ConnectionError extends AppError {
+  constructor(code = 'CONNECTION_ERROR', message = 'Erro de conexão', details?: unknown) {
+    super(code, message, 503, details);
+  }
+}
+
+export class SessionExpiredError extends AppError {
+  constructor(code = 'SESSION_EXPIRED', message = 'Sessão expirada', details?: unknown) {
+    super(code, message, 401, details);
+  }
+}

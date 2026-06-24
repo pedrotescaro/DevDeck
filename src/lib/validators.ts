@@ -47,7 +47,7 @@ const imageUrlSchema = z
           return false;
         }
         return true;
-      } catch (err) {
+      } catch {
         // Degrade gracefully on timeout or network issues
         return true;
       }

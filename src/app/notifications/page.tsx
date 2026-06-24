@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { Sidebar } from '@/components/Sidebar';
 import { PostSkeletonList } from '@/components/motion/PostSkeleton';
@@ -74,7 +75,7 @@ export default function NotificationsPage() {
     fetchUserData();
   }, [router]);
 
-  const handleMarkAllAsRead = async () => {
+  const handleMarkAllAsRead = useCallback(async () => {
     if (notifications.every((n) => n.is_read)) return;
     try {
       const res = await fetch('/api/notifications', {
@@ -87,7 +88,7 @@ export default function NotificationsPage() {
     } catch (err) {
       console.error('Error marking notifications as read:', err);
     }
-  };
+  }, [notifications, router]);
 
   useEffect(() => {
     if (notifications.length > 0 && notifications.some((n) => !n.is_read)) {
@@ -96,7 +97,7 @@ export default function NotificationsPage() {
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [notifications]);
+  }, [notifications, handleMarkAllAsRead]);
 
   const formatTimeAgo = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -239,10 +240,12 @@ export default function NotificationsPage() {
                         <div className="flex items-center -space-x-2.5 overflow-hidden">
                           {item.upvoters.slice(0, 10).map((voter, idx) =>
                             voter.avatar_url ? (
-                              <img
+                              <Image
                                 key={idx}
                                 src={voter.avatar_url}
                                 alt={voter.username}
+                                width={32}
+                                height={32}
                                 className="w-8 h-8 rounded-full border-2 border-black object-cover shrink-0"
                               />
                             ) : (

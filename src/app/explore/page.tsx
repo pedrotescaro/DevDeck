@@ -3,19 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { Sidebar } from '@/components/Sidebar';
 import { PostCard } from '@/components/PostCard';
 import { FollowButton } from '@/components/motion/FollowButton';
 import { EmptyState } from '@/components/motion/EmptyState';
-import {
-  Search as SearchIcon,
-  Settings,
-  MoreHorizontal,
-  ChevronRight,
-  ArrowLeft,
-} from 'lucide-react';
+import { Search as SearchIcon, Settings, MoreHorizontal, ArrowLeft } from 'lucide-react';
 
 interface SuggestedUser {
   id: string;
@@ -483,9 +478,11 @@ export default function ExplorePage() {
                         className="flex items-center gap-3 min-w-0 group"
                       >
                         {sugUser.avatar_url ? (
-                          <img
+                          <Image
                             src={sugUser.avatar_url}
                             alt={sugUser.username}
+                            width={40}
+                            height={40}
                             className="w-10 h-10 rounded-full object-cover border border-dd-border group-hover:scale-105 transition-transform shrink-0"
                           />
                         ) : (
@@ -617,9 +614,11 @@ export default function ExplorePage() {
                       className="flex items-center gap-3 min-w-0 group"
                     >
                       {sugUser.avatar_url ? (
-                        <img
+                        <Image
                           src={sugUser.avatar_url}
                           alt={sugUser.username}
+                          width={40}
+                          height={40}
                           className="w-10 h-10 rounded-full object-cover border border-dd-border group-hover:scale-105 transition-transform shrink-0"
                         />
                       ) : (

@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { Sidebar } from '@/components/Sidebar';
 import { BadgeGrid } from '@/components/BadgeGrid';
 import { PostCard } from '@/components/PostCard';
@@ -140,41 +141,44 @@ export function ProfileContent({
     }
   };
 
-  const fetchUserPosts = async (
-    currentCursor: string | null,
-    isInitial: boolean,
-    targetTab: 'posts' | 'likes' | 'replies'
-  ) => {
-    setLoading(true);
-    try {
-      let url: string;
-      if (targetTab === 'replies') {
-        url = `/api/profile/${profileUser.username}/replies?limit=10${currentCursor ? `&cursor=${currentCursor}` : ''}`;
-      } else {
-        const paramName = targetTab === 'likes' ? 'likedBy' : 'author';
-        url = `/api/posts?${paramName}=${profileUser.username}&useCursor=true&limit=10${currentCursor ? `&cursor=${currentCursor}` : ''}`;
-      }
-      const res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
-        const items = data.items || [];
-        if (isInitial) {
-          setPosts({ tab: targetTab, items });
+  const fetchUserPosts = useCallback(
+    async (
+      currentCursor: string | null,
+      isInitial: boolean,
+      targetTab: 'posts' | 'likes' | 'replies'
+    ) => {
+      setLoading(true);
+      try {
+        let url: string;
+        if (targetTab === 'replies') {
+          url = `/api/profile/${profileUser.username}/replies?limit=10${currentCursor ? `&cursor=${currentCursor}` : ''}`;
         } else {
-          setPosts((prev) => ({
-            tab: targetTab,
-            items: [...prev.items, ...items],
-          }));
+          const paramName = targetTab === 'likes' ? 'likedBy' : 'author';
+          url = `/api/posts?${paramName}=${profileUser.username}&useCursor=true&limit=10${currentCursor ? `&cursor=${currentCursor}` : ''}`;
         }
-        setNextCursor(data.nextCursor || null);
-        setHasMore(!!data.nextCursor);
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          const items = data.items || [];
+          if (isInitial) {
+            setPosts({ tab: targetTab, items });
+          } else {
+            setPosts((prev) => ({
+              tab: targetTab,
+              items: [...prev.items, ...items],
+            }));
+          }
+          setNextCursor(data.nextCursor || null);
+          setHasMore(!!data.nextCursor);
+        }
+      } catch (err) {
+        console.error('Error fetching user posts:', err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error('Error fetching user posts:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [profileUser.username]
+  );
 
   // Fetch weekly activity data for this profile user
   useEffect(() => {
@@ -205,7 +209,7 @@ export function ProfileContent({
       setHasMore(true);
       fetchUserPosts(null, true, activeTab);
     }
-  }, [profileUser.username, activeTab]);
+  }, [profileUser.username, activeTab, fetchUserPosts]);
 
   const loadMorePosts = () => {
     if (loading || !hasMore) return;
@@ -274,10 +278,12 @@ export function ProfileContent({
           {/* Profile Banner (Twitter style gradient) */}
           {localProfileUser.banner_url ? (
             <div className="h-32 sm:h-44 relative border-b border-dd-border/40 overflow-hidden">
-              <img
+              <Image
                 src={localProfileUser.banner_url}
                 alt="Banner do perfil"
-                className="w-full h-full object-cover"
+                fill
+                sizes="100%"
+                className="object-cover"
               />
             </div>
           ) : (
@@ -288,9 +294,11 @@ export function ProfileContent({
           <div className="flex justify-between items-end px-4">
             <div className="-mt-12 sm:-mt-16 relative">
               {profileUser.avatar_url ? (
-                <img
+                <Image
                   src={profileUser.avatar_url}
                   alt={profileUser.username}
+                  width={128}
+                  height={128}
                   className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-dd-bg object-cover bg-dd-surface ring-2 ring-slate-800/10"
                 />
               ) : (

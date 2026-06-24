@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import {
@@ -10,6 +9,7 @@ import {
   type MouseEvent,
   type ReactNode,
 } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
@@ -175,10 +175,11 @@ function SafeImage({ src, alt }: { src?: string; alt?: string }) {
   }
 
   return (
-    <img
+    <Image
       src={src}
       alt={alt ?? ''}
-      loading="lazy"
+      width={800}
+      height={400}
       className="my-3 max-w-full rounded-lg border border-dd-border"
       onError={() => setHidden(true)}
     />

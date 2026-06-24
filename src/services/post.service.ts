@@ -3,7 +3,6 @@ import { Language } from '@prisma/client';
 import { CreatePostInput } from '@/lib/validators';
 import { encodeCursor, buildCursorWhere } from '@/lib/pagination';
 import { XpService } from './xp.service';
-import { NotificationService } from './notification.service';
 import { logger } from '@/lib/logger';
 import { QuizService } from './quiz.service';
 

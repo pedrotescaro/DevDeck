@@ -1,16 +1,7 @@
 'use client';
 
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
-import {
-  Bold,
-  Code,
-  Heading2,
-  Italic,
-  Link as LinkIcon,
-  List,
-  ListOrdered,
-  SquareCode,
-} from 'lucide-react';
+import { Bold, Code, Heading2, Italic, List, ListOrdered, SquareCode } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
 export interface SlashCommandItem {

@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 interface AuthorAvatarProps {
   username: string;
   avatar_url?: string | null;
@@ -22,9 +24,11 @@ export function AuthorAvatar({
 
   if (avatar_url) {
     return (
-      <img
+      <Image
         src={avatar_url}
         alt={username}
+        width={size === 'lg' ? 40 : size === 'md' ? 36 : 32}
+        height={size === 'lg' ? 40 : size === 'md' ? 36 : 32}
         className={`${sizeClass} rounded-full object-cover border border-dd-border shrink-0 ${className}`}
       />
     );

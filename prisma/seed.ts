@@ -357,7 +357,7 @@ async function main() {
     },
   });
 
-  const post2 = await prisma.post.create({
+  await prisma.post.create({
     data: {
       author_id: ana.id,
       title: 'Melhor forma de lidar com async generators em Python 3.12?',
@@ -399,7 +399,7 @@ impl Config {
     },
   });
 
-  const post4 = await prisma.post.create({
+  await prisma.post.create({
     data: {
       author_id: pedro.id,
       title: 'Server Components vs Client Components no Next.js 16',

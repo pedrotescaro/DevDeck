@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
 const ReactCodeMirror = dynamic(() => import('@uiw/react-codemirror'), {
@@ -27,16 +27,6 @@ export function CodeEditor({
   height = '300px',
   readOnly = false,
 }: CodeEditorProps) {
-  const extensions = useMemo(() => {
-    const exts: ReturnType<typeof import('@codemirror/lang-javascript').javascript>[] = [];
-
-    // We dynamically import language extensions to keep the bundle lean.
-    // Since we can't use top-level await in a client component, we lazily load them.
-    // CodeMirror will still work without language support, it just won't have syntax highlighting
-    // until the extension loads.
-    return exts;
-  }, []);
-
   return (
     <CodeEditorInner
       value={value}

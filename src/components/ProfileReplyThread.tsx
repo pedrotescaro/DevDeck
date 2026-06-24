@@ -16,7 +16,7 @@ interface ProfileReplyThreadProps {
   currentUser?: any;
 }
 
-export function ProfileReplyThread({ reply, currentUser }: ProfileReplyThreadProps) {
+export function ProfileReplyThread({ reply }: ProfileReplyThreadProps) {
   const router = useRouter();
 
   // Answer voting and interaction state
@@ -39,7 +39,6 @@ export function ProfileReplyThread({ reply, currentUser }: ProfileReplyThreadPro
   const parentCreatedAt = isNestedReply ? reply.parent.created_at : reply.post.created_at;
   const parentBody = isNestedReply ? reply.parent.body : reply.post.body;
   const parentTitle = !isNestedReply ? reply.post.title : undefined;
-  const parentId = isNestedReply ? reply.parent.id : reply.post.id;
   const postLanguage = !isNestedReply ? reply.post.language : undefined;
 
   const handleVote = async (type: 'up' | 'down') => {

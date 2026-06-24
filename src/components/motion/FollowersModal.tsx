@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import Image from 'next/image';
 import { X, Users } from 'lucide-react';
 import { modalContentVariants, fadeVariants } from '@/lib/motion';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -188,9 +189,11 @@ export function FollowersModal({
                           className="flex items-center gap-3 hover:opacity-85 transition-opacity min-w-0"
                         >
                           {itemUser.avatar_url ? (
-                            <img
+                            <Image
                               src={itemUser.avatar_url}
                               alt={itemUser.username}
+                              width={40}
+                              height={40}
                               className="w-10 h-10 rounded-full object-cover shrink-0"
                             />
                           ) : (

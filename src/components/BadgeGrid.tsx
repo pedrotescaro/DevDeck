@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 
 interface Badge {
   slug: string;
@@ -159,9 +160,11 @@ export function BadgeEmblem({
             earned ? 'shadow-lg shadow-orange-500/20' : 'opacity-35 grayscale'
           } transition-all duration-300 hover:scale-[1.04]`}
         >
-          <img
+          <Image
             src={imageSrc}
             alt={label}
+            width={128}
+            height={128}
             className={`${sizeClasses.outer} object-contain rounded-xl`}
           />
           {!earned && (

@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { LanguageTag } from './LanguageTag';
 import {
@@ -460,9 +461,11 @@ export function PostCard({
         {/* Image preview */}
         {post.image_url && (
           <div className="mt-3 mb-3 relative rounded-xl overflow-hidden border border-dd-border max-h-80 bg-dd-surface/20">
-            <img
+            <Image
               src={post.image_url}
               alt={`Post de @${post.author.username}`}
+              width={800}
+              height={320}
               className="w-full h-full object-cover max-h-80"
               onError={(e) => {
                 (e.target as HTMLElement).style.display = 'none';

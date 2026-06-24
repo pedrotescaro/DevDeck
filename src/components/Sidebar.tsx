@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 import {
   BookOpen,
   Swords,
@@ -12,18 +12,12 @@ import {
   Settings as SettingsIcon,
   Plus,
   LogOut,
-  ChevronDown,
-  Sparkles,
-  Send,
   X,
-  Sun,
-  Moon,
   Home,
   Search,
   Bell,
   MessageCircle,
   Bookmark,
-  BadgeCheck,
   MoreHorizontal,
   Flame,
   Users,
@@ -62,7 +56,7 @@ if (typeof window !== 'undefined') {
     if (cached) {
       inMemoryUser = JSON.parse(cached);
     }
-  } catch (e) {
+  } catch {
     // ignore
   }
 }
@@ -95,8 +89,11 @@ export function Sidebar({ user }: SidebarProps) {
           setActiveUser(parsed);
           inMemoryUser = parsed;
         }
-      } catch (e) {}
+      } catch {
+        // ignore
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only: reads sessionStorage to hydrate state
   }, []);
 
   useEffect(() => {
@@ -123,7 +120,7 @@ export function Sidebar({ user }: SidebarProps) {
             const parsed = JSON.parse(cached);
             setActiveUser(parsed);
             inMemoryUser = parsed;
-          } catch (e) {
+          } catch {
             // ignore
           }
         }
@@ -154,16 +151,7 @@ export function Sidebar({ user }: SidebarProps) {
       });
   }, [user]);
 
-  // Theme state & toggler
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [unreadCount, setUnreadCount] = useState(0);
-
-  useEffect(() => {
-    const isDark =
-      document.documentElement.classList.contains('dark') ||
-      localStorage.getItem('theme') === 'dark';
-    setTheme(isDark ? 'dark' : 'light');
-  }, []);
 
   useEffect(() => {
     if (!activeUser) return;
@@ -183,21 +171,9 @@ export function Sidebar({ user }: SidebarProps) {
     return () => clearInterval(interval);
   }, [activeUser, pathname]);
 
-  const toggleTheme = () => {
-    const nextTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(nextTheme);
-    if (nextTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  };
-
   // Post creation modal state
   const [postBody, setPostBody] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+  const [, setSubmitting] = useState(false);
   const [publishState, setPublishState] = useState<PublishState>('idle');
   const [postError, setPostError] = useState<string | null>(null);
   const [postImage, setPostImage] = useState('');
@@ -388,29 +364,6 @@ export function Sidebar({ user }: SidebarProps) {
 
   const initials = activeUser?.username.slice(0, 2).toUpperCase() || 'DV';
 
-  const DuckyIcon = ({ className }: { className?: string }) => (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      {/* Head */}
-      <circle cx="15.5" cy="7.5" r="3" />
-      {/* Eye */}
-      <circle cx="16" cy="7" r="0.5" fill="currentColor" />
-      {/* Beak */}
-      <path d="M18.5 7.5 C19.5 7.5 21 7 21.5 8 C20.5 9 19.5 8.5 18.5 8.5" fill="currentColor" />
-      {/* Body */}
-      <path d="M13 10.5 C10 10.5 8 9.5 6 11 C4.5 12 4 14 4 15.5 C4 18.5 7.5 20 11.5 20 C16 20 18.5 17.5 18.5 14.5 C18.5 12.5 17 11 15 10.5 L13 10.5 Z" />
-      {/* Wing */}
-      <path d="M8.5 14 C10.5 13.5 12.5 14 13.5 15.5 C12.5 17 9.5 17 8.5 14 Z" />
-    </svg>
-  );
-
   const navItems: Array<{
     label: string;
     href?: string;
@@ -468,15 +421,19 @@ export function Sidebar({ user }: SidebarProps) {
         <div className="space-y-5">
           {/* Logo */}
           <Link href="/feed" className="flex items-center gap-2.5 px-3 py-0 group w-fit">
-            <img
+            <Image
               src="/logo.png"
               alt="DevDeck Logo"
-              className="w-7 h-7 object-contain group-hover:scale-105 transition-transform duration-300 hidden dark:block"
+              width={28}
+              height={28}
+              className="object-contain group-hover:scale-105 transition-transform duration-300 hidden dark:block"
             />
-            <img
+            <Image
               src="/logo-light.png"
               alt="DevDeck Logo"
-              className="w-7 h-7 object-contain group-hover:scale-105 transition-transform duration-300 block dark:hidden"
+              width={28}
+              height={28}
+              className="object-contain group-hover:scale-105 transition-transform duration-300 block dark:hidden"
             />
             <span className="text-dd-text font-extrabold text-xl tracking-tight">DevDeck</span>
           </Link>
@@ -556,10 +513,12 @@ export function Sidebar({ user }: SidebarProps) {
                             className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors border-b border-dd-border/40"
                             onClick={() => setMoreMenuOpen(false)}
                           >
-                            <img
+                            <Image
                               src="/Logo_ia_ducky.png"
                               alt="Ducky"
-                              className="w-4.5 h-4.5 object-contain shrink-0"
+                              width={18}
+                              height={18}
+                              className="object-contain shrink-0"
                             />
                             Ducky
                           </Link>
@@ -638,9 +597,11 @@ export function Sidebar({ user }: SidebarProps) {
             >
               <div className="flex items-start gap-3.5 min-w-0 flex-grow">
                 {activeUser.avatar_url ? (
-                  <img
+                  <Image
                     src={activeUser.avatar_url}
                     alt={activeUser.username}
+                    width={40}
+                    height={40}
                     className="w-10 h-10 rounded-full object-cover border border-dd-border shrink-0 mt-0.5"
                   />
                 ) : (
@@ -721,15 +682,19 @@ export function Sidebar({ user }: SidebarProps) {
         {/* Top Header */}
         <header className="sticky top-0 z-40 w-full border-b border-dd-border bg-dd-bg/80 backdrop-blur-md px-4 py-3 flex items-center justify-between">
           <Link href="/feed" className="flex items-center gap-2 group">
-            <img
+            <Image
               src="/logo.png"
               alt="DevDeck Logo"
-              className="w-6 h-6 object-contain hidden dark:block"
+              width={24}
+              height={24}
+              className="object-contain hidden dark:block"
             />
-            <img
+            <Image
               src="/logo-light.png"
               alt="DevDeck Logo"
-              className="w-6 h-6 object-contain block dark:hidden"
+              width={24}
+              height={24}
+              className="object-contain block dark:hidden"
             />
             <span className="text-dd-text font-extrabold text-base tracking-tight">DevDeck</span>
           </Link>
@@ -742,9 +707,11 @@ export function Sidebar({ user }: SidebarProps) {
                   className="flex items-center focus:outline-none"
                 >
                   {activeUser.avatar_url ? (
-                    <img
+                    <Image
                       src={activeUser.avatar_url}
                       alt={activeUser.username}
+                      width={28}
+                      height={28}
                       className="w-7 h-7 rounded-full object-cover border border-dd-border"
                     />
                   ) : (
@@ -873,9 +840,11 @@ export function Sidebar({ user }: SidebarProps) {
           <div className="flex gap-3">
             {/* Avatar */}
             {activeUser?.avatar_url ? (
-              <img
+              <Image
                 src={activeUser.avatar_url}
                 alt={activeUser.username}
+                width={40}
+                height={40}
                 className="w-10 h-10 rounded-full object-cover border border-dd-border shrink-0"
               />
             ) : (
@@ -910,7 +879,13 @@ export function Sidebar({ user }: SidebarProps) {
 
               {postImage && (
                 <div className="relative rounded-xl overflow-hidden border border-dd-border max-h-40">
-                  <img src={postImage} alt="Preview" className="w-full h-full object-cover" />
+                  <Image
+                    src={postImage}
+                    alt="Preview"
+                    width={600}
+                    height={200}
+                    className="w-full h-full object-cover"
+                  />
                   <button
                     type="button"
                     onClick={() => setPostImage('')}

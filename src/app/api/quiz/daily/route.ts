@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { withCache } from '@/lib/cache';
 import { CACHE_TTL_DAILY_QUIZ } from '@/lib/config';
 
-export const GET = apiHandler(async (req) => {
+export const GET = apiHandler(async (_req) => {
   const user = await requireAuth();
 
   const today = new Date();

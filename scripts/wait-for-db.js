@@ -29,7 +29,7 @@ try {
       process.exit(0);
     });
 
-    socket.on('error', (err) => {
+    socket.on('error', () => {
       socket.destroy();
       if (attempts >= maxAttempts) {
         console.error('Database connection timeout. Exiting...');

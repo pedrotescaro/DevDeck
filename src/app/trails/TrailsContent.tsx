@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import Image from 'next/image';
 import { Sidebar } from '@/components/Sidebar';
 import { Footer } from '@/components/Footer';
 import { TRAILS_DATA, TrailLevel, TrailQuestion } from '@/lib/trailsData';
@@ -16,9 +17,6 @@ import {
   X,
   ChevronRight,
   Trophy,
-  Sparkles,
-  ArrowLeft,
-  ChevronDown,
   AlertTriangle,
   RotateCcw,
   Info,
@@ -330,7 +328,7 @@ export function TrailsContent({
           },
         ]);
       }
-    } catch (err) {
+    } catch {
       setDuckyLoading(false);
       setDuckyMessages((prev) => [
         ...prev,
@@ -484,6 +482,7 @@ export function TrailsContent({
     checkpointStage,
     checkpointReviewStep,
     activeCheckpointUnit,
+    getCheckpointSlides,
   ]);
 
   // Função para enviar mensagem para o Tutor de IA
@@ -590,7 +589,6 @@ export function TrailsContent({
     level: 1,
   };
 
-  const currentLevel = getLevelFromXp(userXp);
   const hasAnsweredQuestion = (questionId: string) =>
     Object.prototype.hasOwnProperty.call(attempts, questionId);
   const getSavedSelectedOption = (question: TrailQuestion) => {
@@ -731,12 +729,13 @@ export function TrailsContent({
     setCheckpointModalOpen(true);
   };
 
-  const getCheckpointSlides = () => {
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+  const getCheckpointSlides = useMemo(() => {
     if (!activeCheckpointUnit) return [];
     const unitLevels =
       TRAILS_DATA[activeLang]?.filter((l) => l.unitNumber === activeCheckpointUnit) || [];
     return getCheckpointReviewSlides(unitLevels);
-  };
+  }, [activeCheckpointUnit, activeLang]);
 
   const openLevelFromStart = (level: TrailLevel) => {
     setActiveLevel(level);
@@ -1230,7 +1229,6 @@ export function TrailsContent({
             {/* Seletor de Linguagens */}
             <div className="flex flex-wrap gap-2 justify-center md:justify-start">
               {['JS', 'TS', 'PYTHON', 'RUST', 'GO', 'JAVA'].map((lang) => {
-                const langCode = lang === 'PYTHON' ? 'PYTHON' : lang;
                 const isSelected = activeLang === (lang === 'PYTHON' ? 'PYTHON' : lang);
                 const label = getLanguageFullName(lang);
 
@@ -1595,7 +1593,13 @@ export function TrailsContent({
           {/* Widget 2: Ducky IA Chat Panel */}
           <div className="bg-dd-sidebar-bg border border-dd-border rounded-2xl p-4 flex flex-col h-[340px]">
             <div className="flex items-center gap-2 pb-2 border-b border-dd-border/50 shrink-0">
-              <img src="/Logo_ia_ducky.png" alt="Ducky" className="w-5 h-5 object-contain" />
+              <Image
+                src="/Logo_ia_ducky.png"
+                alt="Ducky"
+                width={20}
+                height={20}
+                className="object-contain"
+              />
               <h3 className="text-sm font-black text-dd-text">Ducky IA Tutor</h3>
             </div>
 
@@ -1611,15 +1615,19 @@ export function TrailsContent({
                     {/* Avatar */}
                     <div className="w-6.5 h-6.5 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-[#0c0c0e] border border-dd-border/40 select-none">
                       {isDucky ? (
-                        <img
+                        <Image
                           src="/Logo_ia_ducky.png"
                           alt="Ducky"
-                          className="w-5.5 h-5.5 object-contain"
+                          width={22}
+                          height={22}
+                          className="object-contain"
                         />
                       ) : user.avatar_url ? (
-                        <img
+                        <Image
                           src={user.avatar_url}
                           alt={user.username}
+                          width={26}
+                          height={26}
                           className="w-6.5 h-6.5 rounded-full object-cover"
                         />
                       ) : (
@@ -1650,10 +1658,12 @@ export function TrailsContent({
               {duckyLoading && (
                 <div className="flex gap-2.5 items-start w-full">
                   <div className="w-6.5 h-6.5 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-[#0c0c0e] border border-dd-border/40 select-none">
-                    <img
+                    <Image
                       src="/Logo_ia_ducky.png"
                       alt="Ducky"
-                      className="w-5.5 h-5.5 object-contain"
+                      width={22}
+                      height={22}
+                      className="object-contain"
                     />
                   </div>
                   <div className="flex gap-1 mt-2.5">
@@ -1720,9 +1730,11 @@ export function TrailsContent({
                       </span>
                       <div className="w-6 h-6 rounded-full bg-dd-border flex items-center justify-center text-[10px] font-black shrink-0 text-orange-500 uppercase overflow-hidden border border-dd-border/50">
                         {u.avatar_url ? (
-                          <img
+                          <Image
                             src={u.avatar_url}
                             alt={u.username}
+                            width={24}
+                            height={24}
                             className="w-full h-full object-cover"
                           />
                         ) : (
@@ -1804,10 +1816,12 @@ export function TrailsContent({
                         : 'bg-white/15 text-white hover:bg-white/25 animate-pulse'
                     }`}
                   >
-                    <img
+                    <Image
                       src="/Logo_ia_ducky.png"
                       alt="Ducky"
-                      className="w-3.5 h-3.5 object-contain"
+                      width={14}
+                      height={14}
+                      className="object-contain"
                     />
                     <span>Ducky {aiChatOpen ? 'Aberto' : 'IA'}</span>
                   </button>
@@ -2095,10 +2109,12 @@ export function TrailsContent({
                     {/* Header/Title of AI */}
                     <div className="shrink-0 p-4 border-b border-dd-border flex items-center justify-between bg-dd-surface/70">
                       <div className="flex items-center gap-2">
-                        <img
+                        <Image
                           src="/Logo_ia_ducky.png"
                           alt="Ducky"
-                          className="w-4 h-4 object-contain"
+                          width={16}
+                          height={16}
+                          className="object-contain"
                         />
                         <span className="text-xs font-bold text-dd-text">Ducky IA</span>
                       </div>
@@ -2126,10 +2142,12 @@ export function TrailsContent({
                             {msg.role === 'user' ? (
                               user.username[0].toUpperCase()
                             ) : (
-                              <img
+                              <Image
                                 src="/Logo_ia_ducky.png"
                                 alt="Ducky"
-                                className="w-5.5 h-5.5 object-contain"
+                                width={22}
+                                height={22}
+                                className="object-contain"
                               />
                             )}
                           </div>
@@ -2147,10 +2165,12 @@ export function TrailsContent({
                       {aiLoading && (
                         <div className="flex gap-2.5 max-w-[80%] mr-auto items-center">
                           <div className="w-7 h-7 rounded-full bg-[#0c0c0e] border border-dd-border/40 flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden">
-                            <img
+                            <Image
                               src="/Logo_ia_ducky.png"
                               alt="Ducky"
-                              className="w-5.5 h-5.5 object-contain"
+                              width={22}
+                              height={22}
+                              className="object-contain"
                             />
                           </div>
                           <div className="flex gap-1">
@@ -2337,10 +2357,12 @@ export function TrailsContent({
                         : 'bg-white/15 text-white hover:bg-white/25 animate-pulse'
                     }`}
                   >
-                    <img
+                    <Image
                       src="/Logo_ia_ducky.png"
                       alt="Ducky"
-                      className="w-3.5 h-3.5 object-contain"
+                      width={14}
+                      height={14}
+                      className="object-contain"
                     />
                     <span>Ducky {aiChatOpen ? 'Aberto' : 'IA'}</span>
                   </button>
@@ -2604,10 +2626,12 @@ export function TrailsContent({
                     {/* Header/Title of AI */}
                     <div className="shrink-0 p-4 border-b border-dd-border flex items-center justify-between bg-dd-surface/70">
                       <div className="flex items-center gap-2">
-                        <img
+                        <Image
                           src="/Logo_ia_ducky.png"
                           alt="Ducky"
-                          className="w-4 h-4 object-contain"
+                          width={16}
+                          height={16}
+                          className="object-contain"
                         />
                         <span className="text-xs font-bold text-dd-text">Ducky IA</span>
                       </div>
@@ -2635,10 +2659,12 @@ export function TrailsContent({
                             {msg.role === 'user' ? (
                               user.username[0].toUpperCase()
                             ) : (
-                              <img
+                              <Image
                                 src="/Logo_ia_ducky.png"
                                 alt="Ducky"
-                                className="w-5.5 h-5.5 object-contain"
+                                width={22}
+                                height={22}
+                                className="object-contain"
                               />
                             )}
                           </div>
@@ -2656,10 +2682,12 @@ export function TrailsContent({
                       {aiLoading && (
                         <div className="flex gap-2.5 max-w-[80%] mr-auto items-center">
                           <div className="w-7 h-7 rounded-full bg-[#0c0c0e] border border-dd-border/40 flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden">
-                            <img
+                            <Image
                               src="/Logo_ia_ducky.png"
                               alt="Ducky"
-                              className="w-5.5 h-5.5 object-contain"
+                              width={22}
+                              height={22}
+                              className="object-contain"
                             />
                           </div>
                           <div className="flex gap-1">

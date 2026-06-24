@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 import { Sidebar } from '@/components/Sidebar';
@@ -315,7 +316,7 @@ export function FeedContent({
       }
     }, 300);
     return () => clearTimeout(delayDebounce);
-  }, [searchQuery, feedFilter, followingSort]);
+  }, [searchQuery, feedFilter, followingSort, initialPosts, posts]);
 
   // Carregar posts quando o filtro (Para você / Seguindo) muda
   useEffect(() => {
@@ -344,7 +345,7 @@ export function FeedContent({
     if (feedFilter === 'following' || (feedFilter === 'for-you' && posts !== initialPosts)) {
       fetchFilteredPosts();
     }
-  }, [feedFilter, followingSort]);
+  }, [feedFilter, followingSort, initialPosts, posts]);
 
   const loadMorePosts = useCallback(async () => {
     if (loadingMore || !hasMore) return;
@@ -564,7 +565,7 @@ export function FeedContent({
     if (changed) {
       setVotes(newVotes);
     }
-  }, [posts]);
+  }, [posts, votes]);
 
   // Helper to format language name
   const formatLangName = (lang: string) => {
@@ -1190,9 +1191,11 @@ export function FeedContent({
                 <form onSubmit={handleCreatePost} className="flex gap-4">
                   <div className="shrink-0 pt-1">
                     {initialUser.avatar_url ? (
-                      <img
+                      <Image
                         src={initialUser.avatar_url}
                         alt={initialUser.username}
+                        width={40}
+                        height={40}
                         className="w-10 h-10 rounded-full object-cover border border-dd-border"
                       />
                     ) : (
@@ -1262,9 +1265,11 @@ export function FeedContent({
 
                     {postImage && (
                       <div className="relative rounded-xl overflow-hidden border border-dd-border max-h-60 bg-dd-bg">
-                        <img
+                        <Image
                           src={postImage}
                           alt="Preview"
+                          width={800}
+                          height={240}
                           className="w-full h-full object-cover max-h-60"
                         />
                         <button

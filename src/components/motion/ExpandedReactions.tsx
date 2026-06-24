@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowBigUp } from 'lucide-react';
 import { cn } from '@/lib/cn';
-import { AnimatedCounter } from './AnimatedCounter';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useLongPress } from '@/hooks/useLongPress';
 import { reactionPickerVariants, reactionItemVariants } from '@/lib/motion';

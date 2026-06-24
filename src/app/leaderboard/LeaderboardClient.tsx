@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Sidebar } from '@/components/Sidebar';
-import { Footer } from '@/components/Footer';
-
 interface LeaderboardRow {
   rank: number;
   username: string;
@@ -50,7 +48,7 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
     }
 
     fetchLeaderboard();
-  }, [language]);
+  }, [language, initialLeaderboard, leaderboard]);
 
   // Dividir o ranking em Top 3 e Restante
   const top3 = leaderboard.slice(0, 3);

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { EMOJI_CATEGORIES, insertAtCursor } from '@/lib/post-composer';
@@ -605,9 +606,11 @@ export default function MessagesPage() {
                     >
                       {/* Avatar */}
                       {chat.partner.avatar_url ? (
-                        <img
+                        <Image
                           src={chat.partner.avatar_url}
                           alt={chat.partner.username}
+                          width={44}
+                          height={44}
                           className="w-11 h-11 rounded-full object-cover border border-dd-border shrink-0"
                         />
                       ) : (
@@ -648,9 +651,11 @@ export default function MessagesPage() {
                 {/* Active Header */}
                 <div className="p-4 border-b border-dd-border/60 bg-dd-bg flex items-center gap-3">
                   {activeChat.partner.avatar_url ? (
-                    <img
+                    <Image
                       src={activeChat.partner.avatar_url}
                       alt={activeChat.partner.username}
+                      width={40}
+                      height={40}
                       className="w-10 h-10 rounded-full object-cover border border-dd-border"
                     />
                   ) : (
@@ -725,9 +730,11 @@ export default function MessagesPage() {
                                 }`}
                               >
                                 {msg.image_url && (
-                                  <img
+                                  <Image
                                     src={msg.image_url}
                                     alt="Anexo"
+                                    width={320}
+                                    height={192}
                                     className={`rounded-xl object-cover max-h-48 max-w-full ${msg.content ? 'mb-2' : ''}`}
                                   />
                                 )}
@@ -948,9 +955,11 @@ export default function MessagesPage() {
                   {messageImage && (
                     <div className="p-3 pb-0">
                       <div className="relative inline-block">
-                        <img
+                        <Image
                           src={messageImage}
                           alt="Anexo"
+                          width={80}
+                          height={80}
                           className="h-20 rounded-xl object-cover border border-dd-border shadow-sm"
                         />
                         <button
@@ -1125,9 +1134,11 @@ export default function MessagesPage() {
                     className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-dd-bg text-left transition-colors"
                   >
                     {item.avatar_url ? (
-                      <img
+                      <Image
                         src={item.avatar_url}
                         alt={item.username}
+                        width={36}
+                        height={36}
                         className="w-9 h-9 rounded-full object-cover border border-dd-border"
                       />
                     ) : (
@@ -1286,9 +1297,11 @@ export default function MessagesPage() {
                       className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-dd-bg text-left transition-colors"
                     >
                       {item.partner.avatar_url ? (
-                        <img
+                        <Image
                           src={item.partner.avatar_url}
                           alt={item.partner.username}
+                          width={36}
+                          height={36}
                           className="w-9 h-9 rounded-full object-cover border border-dd-border"
                         />
                       ) : (

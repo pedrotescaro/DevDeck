@@ -1,22 +1,19 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { Sidebar } from '@/components/Sidebar';
 import {
   Paperclip,
   History,
   Sparkles,
-  Maximize2,
-  ArrowLeft,
   Terminal,
   ShieldAlert,
-  Zap,
   Lock,
   Unlock,
   X,
   Image as ImageIcon,
 } from 'lucide-react';
-import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 
 // Custom SVG icon components since they are not exported by the installed lucide-react version
@@ -431,7 +428,6 @@ function detectLanguageFromExtension(ext: string): string {
 }
 
 export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
-  const reduced = useReducedMotion();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputVal, setInputVal] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
@@ -596,22 +592,6 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const [stars, setStars] = useState<
-    { x: number; y: number; size: number; opacity: number; delay: number; duration: number }[]
-  >([]);
-
-  useEffect(() => {
-    const generated = Array.from({ length: 65 }).map(() => ({
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 1.6 + 0.7,
-      opacity: Math.random() * 0.7 + 0.15,
-      delay: Math.random() * 4,
-      duration: Math.random() * 4 + 4,
-    }));
-    setStars(generated);
-  }, []);
 
   // Sync mode and deepThinkActive (Repositório mode disables deep think).
   useEffect(() => {
@@ -829,7 +809,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
           },
         ]);
       }
-    } catch (err) {
+    } catch {
       setThinking(false);
       const duckyMsgId = Math.random().toString();
       setMessages((prev) => [
@@ -905,7 +885,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
           currentIdx += 15;
         }, 10);
       }
-    } catch (err) {
+    } catch {
       setThinking(false);
       const duckyMsgId = Math.random().toString();
       setMessages((prev) => [
@@ -935,13 +915,6 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
     setTimeout(() => {
       inputRef.current?.focus();
     }, 50);
-  };
-
-  const clearHistory = () => {
-    if (confirm('Deseja apagar o histórico de conversa com o Ducky?')) {
-      setMessages([]);
-      setActiveRepo(null);
-    }
   };
 
   // DevDeck Ducky-style input card (Orange accents and custom button names)
@@ -1154,9 +1127,11 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
             className="group relative aspect-square bg-[#131316] border border-[#1f1f23] rounded-lg overflow-hidden cursor-pointer hover:border-orange-500/40 transition-all shadow-sm"
             title={`Carregar conversa: "${img.session.title}"`}
           >
-            <img
+            <Image
               src={`data:${img.mimeType};base64,${img.data}`}
               alt={img.name}
+              width={200}
+              height={200}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-end p-1.5 transition-opacity">
@@ -1389,10 +1364,12 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
             <div className="w-full max-w-2xl flex flex-col items-center gap-6 text-center -mt-16">
               {/* Ducky IA Branding */}
               <div className="flex items-center justify-center gap-3.5 select-none mb-1 animate-in fade-in zoom-in-95 duration-500">
-                <img
+                <Image
                   src="/Logo_ia_ducky.png"
                   alt="Ducky IA Logo"
-                  className="w-10 h-10 object-contain"
+                  width={40}
+                  height={40}
+                  className="object-contain"
                 />
                 <span className="text-2xl font-bold tracking-tight text-white font-sans">
                   {mode === 'Rápido'
@@ -1650,10 +1627,12 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                                 {a.kind === 'image' ? (
                                   <>
                                     {a.data ? (
-                                      <img
+                                      <Image
                                         src={`data:${a.mimeType || 'image/png'};base64,${a.data}`}
                                         alt={a.name}
-                                        className="w-5 h-5 object-cover rounded mr-1"
+                                        width={20}
+                                        height={20}
+                                        className="object-cover rounded mr-1"
                                       />
                                     ) : (
                                       <ImageIcon className="w-3 h-3 text-orange-500" />

@@ -10,7 +10,7 @@ export function useReactionBurst() {
   const reduced = useReducedMotion();
 
   const triggerBurst = useCallback(
-    (color: string = '#f97316') => {
+    (_color: string = '#f97316') => {
       if (reduced) return;
       setBursting(true);
       setTimeout(() => setBursting(false), 400);

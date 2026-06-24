@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState, useCallback } from 'react';
+import { ReactNode, useState } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/cn';
 
@@ -20,13 +20,12 @@ export function TabSwitcher({ tabs, defaultTab, className }: TabSwitcherProps) {
   const [activeTab, setActiveTab] = useState(defaultTab || tabs[0]?.id);
 
   const activeTabData = tabs.find((tab) => tab.id === activeTab);
-  const activeIndex = tabs.findIndex((tab) => tab.id === activeTab);
 
   return (
     <div className={cn('w-full', className)}>
       {/* Tab selector with sliding underline */}
       <div className="relative flex gap-6 border-b border-dd-border">
-        {tabs.map((tab, index) => (
+        {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}

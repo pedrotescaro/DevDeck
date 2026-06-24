@@ -22,7 +22,6 @@ type QuizState = 'unanswered' | 'correct' | 'incorrect';
 
 export function QuizWidget({
   quiz,
-  postId,
   attempted = false,
   userAnswer,
   onAttemptSuccess,

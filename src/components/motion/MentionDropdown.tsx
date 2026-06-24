@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
 import { mentionDropdownVariants } from '@/lib/motion';
 
@@ -68,9 +69,11 @@ export function MentionDropdown({ query, visible, onSelect, onClose }: MentionDr
               className="flex items-center gap-2.5 w-full px-3 py-2.5 hover:bg-dd-border/30 transition-colors cursor-pointer"
             >
               {user.avatar_url ? (
-                <img
+                <Image
                   src={user.avatar_url}
                   alt={user.username}
+                  width={24}
+                  height={24}
                   className="w-6 h-6 rounded-full object-cover"
                 />
               ) : (
