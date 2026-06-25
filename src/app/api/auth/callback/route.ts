@@ -88,7 +88,7 @@ export async function GET(request: Request) {
 
         // ── Issue JWT token for secondary auth layer ───────────
         try {
-          const token = signJwt({
+          const token = await signJwt({
             userId: data.user.id,
             username: finalUsername,
             email: email!,

@@ -12,7 +12,7 @@
  * 5. If JWT is invalid/expired, we fall back to Supabase session verification
  */
 
-import jwt, { type SignOptions } from 'jsonwebtoken';
+import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
 import { cookies } from 'next/headers';
 import { JWT_SECRET, JWT_COOKIE_NAME, JWT_COOKIE_OPTIONS } from '@/lib/config';
 import { logger } from '@/lib/logger';
@@ -28,30 +28,32 @@ export interface JwtPayload {
 /**
  * Sign a new JWT token for the given user.
  */
-export function signJwt(payload: { userId: string; username: string; email: string }): string {
-  const options: SignOptions = {
-    expiresIn: 60 * 60 * 24 * 7, // 7 days in seconds
-  };
-
-  return jwt.sign(
-    {
-      sub: payload.userId,
-      username: payload.username,
-      email: payload.email,
-    },
-    JWT_SECRET,
-    options
-  );
+export async function signJwt(payload: {
+  userId: string;
+  username: string;
+  email: string;
+}): Promise<string> {
+  return new SignJWT({
+    username: payload.username,
+    email: payload.email,
+  })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setSubject(payload.userId)
+    .setIssuedAt()
+    .setExpirationTime('7d')
+    .sign(getEncodedJwtSecret());
 }
 
 /**
  * Verify and decode a JWT token.
  * Returns the decoded payload if valid, null otherwise.
  */
-export function verifyJwt(token: string): JwtPayload | null {
+export async function verifyJwt(token: string): Promise<JwtPayload | null> {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
-    return decoded;
+    const { payload } = await jwtVerify(token, getEncodedJwtSecret(), {
+      algorithms: ['HS256'],
+    });
+    return normalizeJwtPayload(payload);
   } catch (err) {
     logger.debug('JWT verification failed', {
       error: err instanceof Error ? err.message : String(err),
@@ -94,5 +96,29 @@ export async function getJwtFromCookie(): Promise<string | null> {
 export async function getJwtUser(): Promise<JwtPayload | null> {
   const token = await getJwtFromCookie();
   if (!token) return null;
-  return verifyJwt(token);
+  return await verifyJwt(token);
+}
+
+function getEncodedJwtSecret() {
+  return new TextEncoder().encode(JWT_SECRET);
+}
+
+function normalizeJwtPayload(payload: JWTPayload): JwtPayload | null {
+  if (
+    typeof payload.sub !== 'string' ||
+    typeof payload.username !== 'string' ||
+    typeof payload.email !== 'string' ||
+    typeof payload.iat !== 'number' ||
+    typeof payload.exp !== 'number'
+  ) {
+    return null;
+  }
+
+  return {
+    sub: payload.sub,
+    username: payload.username,
+    email: payload.email,
+    iat: payload.iat,
+    exp: payload.exp,
+  };
 }

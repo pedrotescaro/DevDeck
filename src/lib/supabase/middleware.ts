@@ -40,7 +40,7 @@ export async function updateSession(request: NextRequest) {
 
   const jwtToken = request.cookies.get(JWT_COOKIE_NAME)?.value;
   if (jwtToken) {
-    const jwtPayload = verifyJwt(jwtToken);
+    const jwtPayload = await verifyJwt(jwtToken);
     if (jwtPayload?.sub) {
       // JWT is valid — treat as authenticated
       // We trust the JWT for middleware-level route protection.

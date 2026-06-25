@@ -1,4 +1,7 @@
+// @vitest-environment node
+
 import { describe, it, expect, vi } from 'vitest';
+import { SignJWT } from 'jose';
 
 vi.mock('@/lib/prisma', () => ({
   prisma: { user: { findUnique: vi.fn(), update: vi.fn() } },
@@ -29,42 +32,43 @@ describe('JWT', () => {
     email: 'test@example.com',
   };
 
-  it('should sign and verify a valid token', () => {
-    const token = signJwt(testPayload);
+  it('should sign and verify a valid token', async () => {
+    const token = await signJwt(testPayload);
     expect(typeof token).toBe('string');
     expect(token.split('.')).toHaveLength(3);
 
-    const decoded = verifyJwt(token);
+    const decoded = await verifyJwt(token);
     expect(decoded).not.toBeNull();
     expect(decoded!.sub).toBe(testPayload.userId);
     expect(decoded!.username).toBe(testPayload.username);
     expect(decoded!.email).toBe(testPayload.email);
   });
 
-  it('should return null for an invalid token', () => {
-    const result = verifyJwt('invalid.token.here');
+  it('should return null for an invalid token', async () => {
+    const result = await verifyJwt('invalid.token.here');
     expect(result).toBeNull();
   });
 
-  it('should return null for an empty string', () => {
-    const result = verifyJwt('');
+  it('should return null for an empty string', async () => {
+    const result = await verifyJwt('');
     expect(result).toBeNull();
   });
 
-  it('should return null for a token signed with wrong secret', () => {
-    const jwt = require('jsonwebtoken');
-    const wrongToken = jwt.sign(
-      { sub: 'user-1', username: 'test', email: 'test@test.com' },
-      'wrong-secret',
-      { expiresIn: '1h' }
-    );
-    const result = verifyJwt(wrongToken);
+  it('should return null for a token signed with wrong secret', async () => {
+    const wrongToken = await new SignJWT({ username: 'test', email: 'test@test.com' })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setSubject('user-1')
+      .setIssuedAt()
+      .setExpirationTime('1h')
+      .sign(new TextEncoder().encode('wrong-secret'));
+
+    const result = await verifyJwt(wrongToken);
     expect(result).toBeNull();
   });
 
-  it('should include iat and exp in the token', () => {
-    const token = signJwt(testPayload);
-    const decoded = verifyJwt(token);
+  it('should include iat and exp in the token', async () => {
+    const token = await signJwt(testPayload);
+    const decoded = await verifyJwt(token);
     expect(decoded!.iat).toBeDefined();
     expect(decoded!.exp).toBeDefined();
     expect(decoded!.exp).toBeGreaterThan(decoded!.iat);

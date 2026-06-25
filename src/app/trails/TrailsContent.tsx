@@ -383,6 +383,13 @@ export function TrailsContent({
   const [checkpointRunning, setCheckpointRunning] = useState(false);
   const [checkpointSuccess, setCheckpointSuccess] = useState(false);
 
+  const checkpointSlides = useMemo(() => {
+    if (!activeCheckpointUnit) return [];
+    const unitLevels =
+      TRAILS_DATA[activeLang]?.filter((l) => l.unitNumber === activeCheckpointUnit) || [];
+    return getCheckpointReviewSlides(unitLevels);
+  }, [activeCheckpointUnit, activeLang]);
+
   // Função para renderizar o conteúdo da mensagem com markdown simples
   const renderMessageContent = (content: string) => {
     const parts = content.split(/(\`\`\`[\s\S]*?\`\`\`|\`.*?\`|\*\*.*?\*\*)/g);
@@ -434,7 +441,7 @@ export function TrailsContent({
     if (checkpointModalOpen && activeCheckpointUnit) {
       const challenge = CHECKPOINTS_DATA[activeLang]?.[activeCheckpointUnit]?.challenge;
       if (checkpointStage === 'review') {
-        const slides = getCheckpointSlides();
+        const slides = checkpointSlides;
         const slide = slides[checkpointReviewStep];
         welcomeText = `Revisão do checkpoint ativo: **"${slide?.title}"**. Qual conceito você gostaria que eu explicasse melhor?`;
       } else if (checkpointStage === 'exercise') {
@@ -482,7 +489,7 @@ export function TrailsContent({
     checkpointStage,
     checkpointReviewStep,
     activeCheckpointUnit,
-    getCheckpointSlides,
+    checkpointSlides,
   ]);
 
   // Função para enviar mensagem para o Tutor de IA
@@ -504,7 +511,7 @@ export function TrailsContent({
       if (checkpointModalOpen && activeCheckpointUnit) {
         const challenge = CHECKPOINTS_DATA[activeLang]?.[activeCheckpointUnit]?.challenge;
         if (checkpointStage === 'review') {
-          const slides = getCheckpointSlides();
+          const slides = checkpointSlides;
           const slide = slides[checkpointReviewStep];
           stageToSend = 'checkpoint-review';
           currentContext = {
@@ -728,14 +735,6 @@ export function TrailsContent({
     setCheckpointSuccess(false);
     setCheckpointModalOpen(true);
   };
-
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
-  const getCheckpointSlides = useMemo(() => {
-    if (!activeCheckpointUnit) return [];
-    const unitLevels =
-      TRAILS_DATA[activeLang]?.filter((l) => l.unitNumber === activeCheckpointUnit) || [];
-    return getCheckpointReviewSlides(unitLevels);
-  }, [activeCheckpointUnit, activeLang]);
 
   const openLevelFromStart = (level: TrailLevel) => {
     setActiveLevel(level);
@@ -2410,7 +2409,7 @@ export function TrailsContent({
                   <div className="relative -mt-4 rounded-t-2xl bg-dd-surface p-6 flex-grow flex flex-col overflow-y-auto min-h-[420px]">
                     {checkpointStage === 'review' &&
                       (() => {
-                        const slides = getCheckpointSlides();
+                        const slides = checkpointSlides;
                         const slide = slides[checkpointReviewStep];
                         if (!slide) return null;
                         return (

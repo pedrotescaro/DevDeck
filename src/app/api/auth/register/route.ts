@@ -95,7 +95,7 @@ export const POST = apiHandler(async (request) => {
 
   // 4. Issue JWT token for secondary auth layer
   try {
-    const token = signJwt({
+    const token = await signJwt({
       userId: dbUser.id,
       username: dbUser.username,
       email: dbUser.email,
