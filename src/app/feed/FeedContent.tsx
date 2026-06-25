@@ -226,6 +226,7 @@ export function FeedContent({
   const [scheduledAt, setScheduledAt] = useState<string | null>(null);
   const [postLocation, setPostLocation] = useState('');
   const [isSensitive, setIsSensitive] = useState(false);
+  const didMountFilterEffectRef = useRef(false);
 
   // Report post state
   const [reportModalOpen, setReportModalOpen] = useState(false);
@@ -266,29 +267,6 @@ export function FeedContent({
     if (!searchQuery.trim()) {
       setLoadingSearch(false);
       setFeedError(null);
-      if (posts !== initialPosts || feedFilter !== 'for-you') {
-        const fetchFilteredPosts = async () => {
-          setLoadingSearch(true);
-          try {
-            const url =
-              feedFilter === 'following'
-                ? `/api/posts?filter=following&sort=${followingSort}&limit=${FEED_PAGE_SIZE}&useCursor=true`
-                : `/api/posts?limit=${FEED_PAGE_SIZE}&useCursor=true`;
-            const res = await fetch(url);
-            if (res.ok) {
-              const data = await res.json();
-              setPosts(data.items || []);
-              setNextCursor(data.nextCursor || null);
-              setHasMore(!!data.nextCursor);
-            }
-          } catch (err) {
-            console.error('Error fetching filtered posts:', err);
-          } finally {
-            setLoadingSearch(false);
-          }
-        };
-        fetchFilteredPosts();
-      }
       return;
     }
     if (searchQuery.trim().length < 2) {
@@ -316,7 +294,7 @@ export function FeedContent({
       }
     }, 300);
     return () => clearTimeout(delayDebounce);
-  }, [searchQuery, feedFilter, followingSort, initialPosts, posts]);
+  }, [searchQuery]);
 
   // Carregar posts quando o filtro (Para você / Seguindo) muda
   useEffect(() => {
@@ -341,11 +319,15 @@ export function FeedContent({
       }
     };
 
-    // Evita carregar duas vezes no mount inicial
-    if (feedFilter === 'following' || (feedFilter === 'for-you' && posts !== initialPosts)) {
+    if (!didMountFilterEffectRef.current) {
+      didMountFilterEffectRef.current = true;
+      return;
+    }
+
+    if (!searchQuery.trim()) {
       fetchFilteredPosts();
     }
-  }, [feedFilter, followingSort, initialPosts, posts]);
+  }, [feedFilter, followingSort, searchQuery]);
 
   const loadMorePosts = useCallback(async () => {
     if (loadingMore || !hasMore) return;
@@ -733,6 +715,7 @@ export function FeedContent({
       _pending: true,
       votes: [],
       quoted_post: quotePost,
+      _clientKey: tempId,
     };
 
     setPosts((prev) => [optimisticPost, ...prev]);
@@ -769,6 +752,7 @@ export function FeedContent({
                   votes: [],
                   quoted_post: quotePost,
                   _pending: false,
+                  _clientKey: tempId,
                 }
               : p
           )
@@ -1384,7 +1368,7 @@ export function FeedContent({
                         };
                         return (
                           <motion.div
-                            key={post.id}
+                            key={post._clientKey ?? post.id}
                             layout
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
