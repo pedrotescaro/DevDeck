@@ -75,14 +75,35 @@ export async function updateSession(request: NextRequest) {
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
-    return NextResponse.redirect(url);
+    const redirectResponse = NextResponse.redirect(url);
+
+    // 🔥 CORREÇÃO: Copia os cookies que o Supabase tentou atualizar
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie.name, cookie.value);
+    });
+
+    return redirectResponse;
   }
 
   // Redirect authenticated users trying to access auth pages to the feed
-  if (user && (pathname === '/login' || pathname === '/register')) {
+  // BUT allow access to /login when session_expired (DB may be unreachable,
+  // so the JWT is valid but the server can't load the user from the DB).
+  const reasonParam = request.nextUrl.searchParams.get('reason');
+  if (
+    user &&
+    (pathname === '/login' || pathname === '/register') &&
+    reasonParam !== 'session_expired'
+  ) {
     const url = request.nextUrl.clone();
     url.pathname = '/feed';
-    return NextResponse.redirect(url);
+    const redirectResponse = NextResponse.redirect(url);
+
+    // 🔥 CORREÇÃO: Faz o mesmo aqui por segurança
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie.name, cookie.value);
+    });
+
+    return redirectResponse;
   }
 
   return supabaseResponse;

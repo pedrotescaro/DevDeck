@@ -9,7 +9,10 @@ export default async function FeedPage() {
   const user = await getAuthUser();
 
   if (!user) {
-    redirect('/login');
+    // Use query param to tell middleware to allow access to /login
+    // even if a JWT cookie exists (avoids infinite redirect loop
+    // when the database is unreachable).
+    redirect('/login?reason=session_expired');
   }
 
   // 1. Buscar posts iniciais do feed com contagens de respostas e quizzes inclusos
@@ -97,7 +100,7 @@ export default async function FeedPage() {
           trails.reduce((max, t) => Math.max(max, t.streak), 0)
         ),
         trails: trails,
-        badges: user.badges.map((b) => b.badge),
+        badges: user.badges.map((b: any) => b.badge),
       }}
       initialPosts={serializedPosts}
       initialDuels={serializedDuels}
