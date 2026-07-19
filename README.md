@@ -80,9 +80,52 @@ Explore as especificações detalhadas do projeto e guias de infraestrutura:
 
 ---
 
-## 🛠️ Primeiros Passos (Instalação Rápida)
+## 🐳 Rodar com Docker (Recomendado)
 
-Para rodar o DevDeck na sua máquina local de forma simples e direta, siga os passos abaixo:
+A forma mais simples de rodar o DevDeck em **qualquer PC**. Você só precisa de [Docker](https://docs.docker.com/get-docker/) instalado.
+
+#### 1. Clone o repositório
+
+```bash
+git clone https://github.com/pedrotescaro/DevDeck.git
+cd DevDeck
+git checkout develop
+```
+
+#### 2. Configure o ambiente
+
+```bash
+cp .env.docker.example .env.docker
+```
+
+Edite o `.env.docker` e preencha com suas credenciais do Supabase (obrigatório para login/registro). Se quiser apenas ver as páginas públicas, pode pular este passo.
+
+#### 3. Suba os containers
+
+```bash
+# Modo desenvolvimento (com hot-reload)
+docker compose up
+
+# Modo produção (build otimizado)
+docker compose -f docker-compose.prod.yml up --build -d
+```
+
+Abra [http://localhost:3000](http://localhost:3000) 🎉
+
+> [!NOTE]
+> O banco PostgreSQL é criado automaticamente no Docker. No primeiro start, o container instala dependências e roda migrations — pode levar 1-2 minutos.
+
+> [!TIP]
+> Para popular o banco com dados de teste (badges, quizzes, usuários), rode:
+> ```bash
+> docker compose exec web sh -c "npx prisma db seed"
+> ```
+
+---
+
+## 🛠️ Primeiros Passos (Instalação Manual)
+
+Se preferir rodar **sem Docker**, instale Node.js 20+ e PostgreSQL 15+ na sua máquina:
 
 #### 1. Instalar as dependências do projeto
 

@@ -30,9 +30,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files — ignoramos tudo exceto o template versionado
+# env files — ignoramos tudo exceto os templates versionados
 .env*
 !.env.example
+!.env.docker.example
 env.local
 env.local.example
 env.example

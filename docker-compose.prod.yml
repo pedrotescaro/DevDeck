@@ -1,20 +1,16 @@
 # ──────────────────────────────────────────────────────
-# DevDeck — Docker Compose (Development)
+# DevDeck — Docker Compose (Production)
 #
 # Usage:
-#   1. cp .env.docker.example .env.docker
-#   2. Edit .env.docker with your values (Supabase keys, etc.)
-#   3. docker compose up
+#   docker compose -f docker-compose.prod.yml up --build -d
 #
-# Hot-reload is enabled: edit your source code and
-# changes will reflect automatically in the browser.
 # ──────────────────────────────────────────────────────
 
 services:
   db:
     image: postgres:15-alpine
     container_name: devdeck-db
-    restart: unless-stopped
+    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres_devdeck_2024}
@@ -25,39 +21,31 @@ services:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d devdeck"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 5
 
   web:
-    image: node:20-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+        NEXT_PUBLIC_AVATAR_API_URL: ${NEXT_PUBLIC_AVATAR_API_URL:-https://api.dicebear.com/9.x/pixel-art/svg}
     container_name: devdeck-web
-    working_dir: /app
-    restart: unless-stopped
+    restart: always
     ports:
       - "3000:3000"
     env_file:
       - .env.docker
     environment:
-      # Override DB URLs to point to the local Docker Postgres
       DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-postgres_devdeck_2024}@db:5432/devdeck?schema=public
       DIRECT_URL: postgresql://postgres:${DB_PASSWORD:-postgres_devdeck_2024}@db:5432/devdeck?schema=public
-    volumes:
-      # Bind-mount source code for hot-reload
-      - .:/app
-      # Anonymous volume to avoid overwriting container's node_modules
-      - /app/node_modules
     depends_on:
       db:
         condition: service_healthy
-    command: >
-      sh -c "
-        apk add --no-cache openssl libc6-compat &&
-        npm install &&
-        npx prisma generate &&
-        npx prisma migrate deploy &&
-        npm run dev
-      "
 
 volumes:
   postgres_data:
