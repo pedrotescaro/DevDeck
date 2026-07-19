@@ -57,8 +57,8 @@ export function BookmarkButton({ isSaved, onToggle, className, onViewAll }: Book
         className={cn(
           'dd-touch dd-focus-ring w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer shrink-0',
           saved
-            ? 'text-orange-500 hover:bg-orange-500/10'
-            : 'text-dd-muted hover:text-dd-text hover:bg-orange-500/10',
+            ? 'text-blue-500 hover:bg-blue-500/10'
+            : 'text-dd-muted hover:text-dd-text hover:bg-blue-500/10',
           className
         )}
         whileTap={reduced ? undefined : { scale: [1, 1.2, 1] }}

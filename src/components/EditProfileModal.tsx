@@ -167,7 +167,7 @@ export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditPr
                 {bannerUrl ? (
                   <Image src={bannerUrl} alt="Banner" fill sizes="100%" className="object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-r from-orange-500/20 via-amber-500/10 to-transparent" />
+                  <div className="w-full h-full bg-gradient-to-r from-blue-500/20 via-blue-400/10 to-transparent" />
                 )}
 
                 {/* Banner overlay with camera buttons */}
@@ -215,7 +215,7 @@ export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditPr
                     className="w-24 h-24 rounded-full border-4 border-dd-bg object-cover bg-dd-surface"
                   />
                 ) : (
-                  <div className="w-24 h-24 rounded-full border-4 border-dd-bg bg-orange-500/10 text-orange-400 flex items-center justify-center text-2xl font-black">
+                  <div className="w-24 h-24 rounded-full border-4 border-dd-bg bg-blue-500/10 text-blue-400 flex items-center justify-center text-2xl font-black">
                     {profileUser.username.slice(0, 2).toUpperCase()}
                   </div>
                 )}
@@ -233,7 +233,7 @@ export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditPr
                     onChange={(e) => setBio(e.target.value)}
                     rows={3}
                     maxLength={160}
-                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-md bg-transparent text-sm text-dd-text resize-none focus:border-orange-500 focus:outline-none transition-colors focus:ring-2 focus:ring-orange-500/20"
+                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-md bg-transparent text-sm text-dd-text resize-none focus:border-blue-500 focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500/20"
                     placeholder="Fale sobre você..."
                   />
                   <span className="absolute bottom-2 right-3 text-[10px] text-dd-muted font-mono">
@@ -250,7 +250,7 @@ export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditPr
                     type="text"
                     value={institution}
                     onChange={(e) => setInstitution(e.target.value)}
-                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-md bg-transparent text-sm text-dd-text focus:border-orange-500 focus:outline-none transition-colors focus:ring-2 focus:ring-orange-500/20"
+                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-md bg-transparent text-sm text-dd-text focus:border-blue-500 focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500/20"
                     placeholder="Ex: USP, Vercel, Freelancer"
                   />
                 </div>
@@ -266,7 +266,7 @@ export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditPr
                     onChange={(e) =>
                       setGithubUsername(e.target.value.replace(/[^a-zA-Z0-9-]/g, ''))
                     }
-                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-md bg-transparent text-sm text-dd-text focus:border-orange-500 focus:outline-none transition-colors focus:ring-2 focus:ring-orange-500/20"
+                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-md bg-transparent text-sm text-dd-text focus:border-blue-500 focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500/20"
                     placeholder="seu-usuario-github"
                   />
                 </div>
@@ -280,7 +280,7 @@ export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditPr
                     type="text"
                     value={discordUsername}
                     onChange={(e) => setDiscordUsername(e.target.value)}
-                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-md bg-transparent text-sm text-dd-text focus:border-orange-500 focus:outline-none transition-colors focus:ring-2 focus:ring-orange-500/20"
+                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-md bg-transparent text-sm text-dd-text focus:border-blue-500 focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500/20"
                     placeholder="seu-usuario-discord"
                   />
                 </div>
@@ -294,7 +294,7 @@ export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditPr
                     type="text"
                     value={pronouns}
                     onChange={(e) => setPronouns(e.target.value)}
-                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-md bg-transparent text-sm text-dd-text focus:border-orange-500 focus:outline-none transition-colors focus:ring-2 focus:ring-orange-500/20"
+                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-md bg-transparent text-sm text-dd-text focus:border-blue-500 focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500/20"
                     placeholder="ele/dele, ela/dela, elu/delu"
                   />
                 </div>
@@ -308,7 +308,7 @@ export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditPr
                     type="date"
                     value={birthday}
                     onChange={(e) => setBirthday(e.target.value)}
-                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-md bg-transparent text-sm text-dd-text focus:border-orange-500 focus:outline-none transition-colors focus:ring-2 focus:ring-orange-500/20"
+                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-md bg-transparent text-sm text-dd-text focus:border-blue-500 focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500/20"
                   />
                 </div>
               </div>

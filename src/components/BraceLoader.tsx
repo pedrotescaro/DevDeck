@@ -40,7 +40,7 @@ const BraceIcon: React.FC<{ color: string }> = ({ color }) => (
 );
 
 const BraceLoader: React.FC<BraceLoaderProps> = ({
-  color = '#FF5C00',
+  color = '#0083fe',
   background = '#1a1a1a',
   scale = 3,
 }) => {

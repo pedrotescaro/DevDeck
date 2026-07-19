@@ -374,7 +374,7 @@ export function PostDetailContent({
             // Highlight keywords
             const keywords =
               /\b(const|let|var|function|return|fn|impl|pub|use|import|from|def|class|async|await|struct|enum|if|else|for|while|match)\b/g;
-            html = html.replace(keywords, '<span class="text-orange-400 font-semibold">$1</span>');
+            html = html.replace(keywords, '<span class="text-blue-400 font-semibold">$1</span>');
 
             // Highlight types
             const types =
@@ -415,7 +415,7 @@ export function PostDetailContent({
   const isPostAuthor = post.author_id === user.id;
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased selection:bg-orange-500/35 selection:text-white">
+    <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased selection:bg-blue-500/35 selection:text-white">
       {/* XP Toast */}
       {toastXp && (
         <div className="fixed top-20 right-6 z-50 animate-slide-in-right rounded-xl border border-emerald-500/30 bg-dd-surface/90 backdrop-blur-xl p-4 shadow-2xl flex items-center gap-3">
@@ -524,11 +524,11 @@ export function PostDetailContent({
               }}
             >
               {/* 1. Comment Bubble */}
-              <div className="flex items-center gap-0.5 text-dd-muted select-none hover:text-orange-400 cursor-pointer group/comment">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-500/10 transition-colors animate-none">
-                  <MessageSquare className="w-3.5 h-3.5 text-dd-muted group-hover/comment:text-orange-400" />
+              <div className="flex items-center gap-0.5 text-dd-muted select-none hover:text-blue-400 cursor-pointer group/comment">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-500/10 transition-colors animate-none">
+                  <MessageSquare className="w-3.5 h-3.5 text-dd-muted group-hover/comment:text-blue-400" />
                 </div>
-                <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/comment:text-orange-400">
+                <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/comment:text-blue-400">
                   {post.answers?.length || 0}
                 </span>
               </div>
@@ -569,11 +569,11 @@ export function PostDetailContent({
               {/* Card mimicking the Feed layout */}
               <div
                 onClick={() => setShowQuiz(!showQuiz)}
-                className="p-3.5 rounded-xl border border-dd-border bg-dd-surface/30 backdrop-blur-sm flex items-center justify-between gap-4 hover:bg-dd-surface/50 hover:border-orange-500/20 transition-all duration-200 group/quiz cursor-pointer"
+                className="p-3.5 rounded-xl border border-dd-border bg-dd-surface/30 backdrop-blur-sm flex items-center justify-between gap-4 hover:bg-dd-surface/50 hover:border-blue-500/20 transition-all duration-200 group/quiz cursor-pointer"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center shrink-0 group-hover/quiz:scale-105 transition-transform duration-200">
-                    <Sparkles className="w-4.5 h-4.5 text-orange-400" />
+                  <div className="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0 group-hover/quiz:scale-105 transition-transform duration-200">
+                    <Sparkles className="w-4.5 h-4.5 text-blue-400" />
                   </div>
                   <div className="text-left min-w-0">
                     <h4 className="text-xs font-black text-dd-text truncate">
@@ -593,7 +593,7 @@ export function PostDetailContent({
                     'inline-flex items-center justify-center gap-1 px-4 py-1.5 rounded-full font-bold text-[10px] leading-tight transition-all duration-200 shrink-0 shadow-sm border cursor-pointer',
                     Boolean(post.quizzes[0].attempts && post.quizzes[0].attempts.length > 0)
                       ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20'
-                      : 'bg-orange-500 border-transparent hover:bg-orange-600 text-white'
+                      : 'bg-blue-500 border-transparent hover:bg-blue-600 text-white'
                   )}
                 >
                   <span>
@@ -635,7 +635,7 @@ export function PostDetailContent({
                     className="w-9 h-9 rounded-full object-cover border border-dd-border shrink-0"
                   />
                 ) : (
-                  <div className="w-9 h-9 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold border border-orange-500/10 shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold border border-blue-500/10 shrink-0">
                     {user.username.slice(0, 2).toUpperCase()}
                   </div>
                 )}
@@ -671,7 +671,7 @@ export function PostDetailContent({
                 <button
                   type="button"
                   onClick={() => alert('Rascunhos salvos localmente (Mock)! ')}
-                  className="text-xs font-bold text-orange-500 hover:text-orange-400 cursor-pointer"
+                  className="text-xs font-bold text-blue-500 hover:text-blue-400 cursor-pointer"
                 >
                   Rascunhos
                 </button>
@@ -688,7 +688,7 @@ export function PostDetailContent({
                       className="w-10 h-10 rounded-full object-cover border border-dd-border"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-sm font-bold border border-orange-500/10">
+                    <div className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm font-bold border border-blue-500/10">
                       {user.username.slice(0, 2).toUpperCase()}
                     </div>
                   )}
@@ -742,7 +742,7 @@ export function PostDetailContent({
                   {/* Bottom Row Divider */}
                   <div className="border-t border-dd-border/50 pt-3 flex items-center justify-between">
                     {/* Left tools (Icons) */}
-                    <div className="flex items-center gap-1.5 text-orange-500">
+                    <div className="flex items-center gap-1.5 text-blue-500">
                       {/* Image input trigger */}
                       <input
                         type="file"
@@ -753,7 +753,7 @@ export function PostDetailContent({
                       />
                       <label
                         htmlFor="answer-image-upload"
-                        className="p-2 hover:bg-orange-500/10 rounded-full transition-colors cursor-pointer"
+                        className="p-2 hover:bg-blue-500/10 rounded-full transition-colors cursor-pointer"
                         title="Adicionar imagem"
                       >
                         <svg
@@ -793,7 +793,7 @@ export function PostDetailContent({
                       <button
                         type="submit"
                         disabled={submitting || !answerBody.trim() || uploadingImage}
-                        className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-xs font-bold px-5 py-2 rounded-full transition-colors cursor-pointer shadow-md shadow-orange-500/10"
+                        className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white text-xs font-bold px-5 py-2 rounded-full transition-colors cursor-pointer shadow-md shadow-blue-500/10"
                       >
                         {submitting ? 'Postando...' : 'Postar'}
                       </button>

@@ -198,7 +198,7 @@ function renderStaticCode(code: string) {
           // Highlight keywords
           const keywords =
             /\b(const|let|var|function|return|fn|impl|pub|use|import|from|def|class|async|await|struct|enum|if|else|for|while|match)\b/g;
-          html = html.replace(keywords, '<span class="text-orange-400 font-semibold">$1</span>');
+          html = html.replace(keywords, '<span class="text-blue-400 font-semibold">$1</span>');
 
           // Highlight types
           const types =

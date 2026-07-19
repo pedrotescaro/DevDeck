@@ -32,7 +32,7 @@ export function PostTypePill({ value, onChange }: PostTypePillProps) {
           {value === opt.value && (
             <motion.div
               layoutId="postTypePill"
-              className="absolute inset-0 rounded-xl bg-dd-accent shadow-lg shadow-orange-500/15 -z-10"
+              className="absolute inset-0 rounded-xl bg-dd-accent shadow-lg shadow-blue-500/15 -z-10"
               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
             />
           )}

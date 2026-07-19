@@ -68,7 +68,7 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
   const displayPodium = podiumOrder.length > 0 ? podiumOrder : top3;
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased selection:bg-orange-500/35 selection:text-white">
+    <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased selection:bg-blue-500/35 selection:text-white">
       <Sidebar user={initialUser} />
 
       <div className="flex-grow flex flex-col md:flex-row min-w-0">
@@ -101,7 +101,7 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              className="text-xs rounded-full border border-dd-border bg-dd-surface px-3.5 py-1.5 text-dd-text focus:border-orange-500 focus:outline-none transition-all font-bold cursor-pointer"
+              className="text-xs rounded-full border border-dd-border bg-dd-surface px-3.5 py-1.5 text-dd-text focus:border-blue-500 focus:outline-none transition-all font-bold cursor-pointer"
             >
               <option value="GLOBAL">Geral / Global</option>
               <option value="TS">TypeScript</option>
@@ -118,7 +118,7 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
 
           {loading ? (
             <div className="flex flex-col items-center justify-center py-32">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-orange-500 border-t-transparent mb-4" />
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent mb-4" />
               <p className="text-dd-muted text-xs font-semibold">Carregando classificação...</p>
             </div>
           ) : (
@@ -138,8 +138,8 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
 
                     if (isFirst) {
                       cardStyle =
-                        'border-orange-500/30 bg-dd-sidebar-bg shadow-[0_0_20px_rgba(249,115,22,0.15)]';
-                      medalColor = 'text-orange-400';
+                        'border-blue-500/30 bg-dd-sidebar-bg shadow-[0_0_20px_rgba(0, 131, 254,0.15)]';
+                      medalColor = 'text-blue-400';
                       rankTitle = '👑 Mestre';
                       heightClass = 'h-52 z-10 scale-[1.03]';
                     } else if (isSecond) {
@@ -167,7 +167,7 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
                           <div
                             className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-xs select-none ${
                               isFirst
-                                ? 'bg-orange-500/20 text-orange-400 ring-2 ring-orange-500/40'
+                                ? 'bg-blue-500/20 text-blue-400 ring-2 ring-blue-500/40'
                                 : isSecond
                                   ? 'bg-dd-blue/20 text-dd-blue ring-2 ring-dd-blue/30'
                                   : 'bg-[#c5844a]/20 text-[#c5844a] ring-2 ring-[#c5844a]/30'
@@ -184,7 +184,7 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
 
                         <Link
                           href={`/profile/${row.username}`}
-                          className="text-dd-text font-black hover:text-orange-400 transition-colors text-xs truncate w-full text-center"
+                          className="text-dd-text font-black hover:text-blue-400 transition-colors text-xs truncate w-full text-center"
                         >
                           @{row.username}
                         </Link>
@@ -223,7 +223,7 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
                           href={`/profile/${row.username}`}
                           className="flex items-center gap-3 group"
                         >
-                          <div className="w-8 h-8 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/20 flex items-center justify-center font-bold text-xs group-hover:scale-105 transition-transform shrink-0">
+                          <div className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center font-bold text-xs group-hover:scale-105 transition-transform shrink-0">
                             {row.username.slice(0, 2).toUpperCase()}
                           </div>
                           <div>
@@ -236,7 +236,7 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
                           </div>
                         </Link>
                       </div>
-                      <span className="font-mono font-bold text-xs text-orange-500">
+                      <span className="font-mono font-bold text-xs text-blue-500">
                         {row.xp.toLocaleString()} XP
                       </span>
                     </div>
@@ -256,21 +256,21 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
             </h3>
             <div className="space-y-3 text-[10px] text-dd-muted leading-normal">
               <div className="flex gap-2">
-                <span className="text-orange-500 font-bold shrink-0">·</span>
+                <span className="text-blue-500 font-bold shrink-0">·</span>
                 <p>
                   <strong className="text-dd-text">Publicações:</strong> Compartilhe conhecimento e
                   responda dúvidas de outros devs.
                 </p>
               </div>
               <div className="flex gap-2">
-                <span className="text-orange-500 font-bold shrink-0">·</span>
+                <span className="text-blue-500 font-bold shrink-0">·</span>
                 <p>
                   <strong className="text-dd-text">Duelos (+20 XP):</strong> Desafie oponentes em
                   batalhas de algoritmo e ganhe votos.
                 </p>
               </div>
               <div className="flex gap-2">
-                <span className="text-orange-500 font-bold shrink-0">·</span>
+                <span className="text-blue-500 font-bold shrink-0">·</span>
                 <p>
                   <strong className="text-dd-text">Quizzes (+10 XP):</strong> Mantenha a ofensiva
                   diária resolvendo quizzes rápidos.
@@ -286,7 +286,7 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
                 Seu Ranking
               </h3>
               <div className="flex items-center gap-3 p-1">
-                <div className="w-9 h-9 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold text-xs ring-1 ring-orange-500/30 shrink-0">
+                <div className="w-9 h-9 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs ring-1 ring-blue-500/30 shrink-0">
                   {initialUser.username.slice(0, 2).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-grow">
@@ -295,7 +295,7 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
                   </p>
                   <p className="text-[10px] text-dd-muted mt-0.5">
                     Pontos totais:{' '}
-                    <strong className="text-orange-500 font-mono">
+                    <strong className="text-blue-500 font-mono">
                       {initialUser.total_xp.toLocaleString()} XP
                     </strong>
                   </p>

@@ -23,7 +23,7 @@ const LANGUAGE_COLORS: Record<string, string> = {
   JavaScript: '#f5a623',
   TypeScript: '#3178c6',
   Python: '#5ba3f5',
-  Rust: '#f97316',
+  Rust: '#0083fe',
   Go: '#22d48a',
   'C++': '#f59e0b',
   Java: '#ef4444',
@@ -61,7 +61,7 @@ export function ExploreGrid({ developers, filter }: ExploreGridProps) {
                 className="w-12 h-12 rounded-full object-cover"
               />
             ) : (
-              <div className="w-12 h-12 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-sm font-bold">
+              <div className="w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm font-bold">
                 {dev.username.slice(0, 2).toUpperCase()}
               </div>
             )}
@@ -75,8 +75,8 @@ export function ExploreGrid({ developers, filter }: ExploreGridProps) {
             <span
               className="text-[10px] font-bold px-2 py-0.5 rounded-full"
               style={{
-                backgroundColor: `${LANGUAGE_COLORS[dev.mainLanguage] || '#f97316'}20`,
-                color: LANGUAGE_COLORS[dev.mainLanguage] || '#f97316',
+                backgroundColor: `${LANGUAGE_COLORS[dev.mainLanguage] || '#0083fe'}20`,
+                color: LANGUAGE_COLORS[dev.mainLanguage] || '#0083fe',
               }}
             >
               {dev.mainLanguage}

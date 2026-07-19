@@ -57,13 +57,13 @@ export function LevelUpOverlay({ visible, level, title, onDone }: LevelUpOverlay
             initial="hidden"
             animate="visible"
           >
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-2xl shadow-orange-500/30 dd-badge-entrance">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-400 flex items-center justify-center shadow-2xl shadow-blue-500/30 dd-badge-entrance">
               <span className="text-3xl font-black text-white">{level}</span>
             </div>
             <div className="text-center space-y-1">
               <p className="text-lg font-black text-dd-text">Level {level} desbloqueado!</p>
               <p className="text-sm text-dd-muted font-medium">
-                Voce agora e um <span className="text-orange-400 font-bold">{displayTitle}</span>
+                Voce agora e um <span className="text-blue-400 font-bold">{displayTitle}</span>
               </p>
             </div>
           </motion.div>

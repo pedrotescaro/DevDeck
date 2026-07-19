@@ -149,7 +149,7 @@ export default function GuildDetailPage({ params }: GuildDetailProps) {
         <p className="text-sm text-dd-muted">{error || 'Guilda não encontrada'}</p>
         <Link
           href="/guilds"
-          className="text-xs font-bold text-orange-500 hover:text-orange-400 transition-colors"
+          className="text-xs font-bold text-blue-500 hover:text-blue-400 transition-colors"
         >
           ← Voltar para Guildas
         </Link>
@@ -179,8 +179,8 @@ export default function GuildDetailPage({ params }: GuildDetailProps) {
           </div>
 
           {/* Guild Banner/Info */}
-          <div className="h-32 bg-gradient-to-r from-orange-500/20 via-amber-500/10 to-transparent border-b border-dd-border/40 flex items-end px-5 pb-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-2xl font-black text-white shadow-lg shadow-orange-500/20">
+          <div className="h-32 bg-gradient-to-r from-blue-500/20 via-blue-400/10 to-transparent border-b border-dd-border/40 flex items-end px-5 pb-4">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-400 flex items-center justify-center text-2xl font-black text-white shadow-lg shadow-blue-500/20">
               {guild.name[0].toUpperCase()}
             </div>
           </div>
@@ -195,14 +195,14 @@ export default function GuildDetailPage({ params }: GuildDetailProps) {
                 </div>
                 <p className="text-xs text-dd-muted mt-1">
                   Criada em {formatDate(guild.created_at)} por{' '}
-                  <span className="text-orange-400 font-semibold">@{guild.owner.username}</span>
+                  <span className="text-blue-400 font-semibold">@{guild.owner.username}</span>
                 </p>
               </div>
               <div>
                 {!guild.isMember ? (
                   <button
                     onClick={handleJoin}
-                    className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-5 py-2.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5"
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs px-5 py-2.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5"
                   >
                     <UserPlus className="w-3.5 h-3.5" />
                     Entrar
@@ -228,14 +228,14 @@ export default function GuildDetailPage({ params }: GuildDetailProps) {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-dd-surface/40 border border-dd-border/60 rounded-xl p-4 text-center">
-                <Users className="w-4 h-4 text-orange-500 mx-auto mb-1" />
+                <Users className="w-4 h-4 text-blue-500 mx-auto mb-1" />
                 <div className="text-lg font-black text-dd-text">{guild.memberCount}</div>
                 <div className="text-[9px] font-bold uppercase tracking-wider text-dd-muted">
                   Membros
                 </div>
               </div>
               <div className="bg-dd-surface/40 border border-dd-border/60 rounded-xl p-4 text-center">
-                <Calendar className="w-4 h-4 text-orange-500 mx-auto mb-1" />
+                <Calendar className="w-4 h-4 text-blue-500 mx-auto mb-1" />
                 <div className="text-lg font-black text-dd-text">
                   {new Date(guild.created_at).toLocaleDateString('pt-BR', { month: 'short' })}
                 </div>
@@ -244,7 +244,7 @@ export default function GuildDetailPage({ params }: GuildDetailProps) {
                 </div>
               </div>
               <div className="bg-dd-surface/40 border border-dd-border/60 rounded-xl p-4 text-center">
-                <Globe className="w-4 h-4 text-orange-500 mx-auto mb-1" />
+                <Globe className="w-4 h-4 text-blue-500 mx-auto mb-1" />
                 <div className="text-lg font-black text-dd-text">
                   {guild.is_public ? 'Pública' : 'Privada'}
                 </div>
@@ -257,7 +257,7 @@ export default function GuildDetailPage({ params }: GuildDetailProps) {
             {/* Members */}
             <div className="pt-2">
               <h3 className="text-[10px] font-bold uppercase tracking-wider text-dd-muted mb-3 flex items-center gap-1.5">
-                <Users className="w-3 h-3 text-orange-500" />
+                <Users className="w-3 h-3 text-blue-500" />
                 Membros ({guild.memberCount})
               </h3>
               <div className="space-y-1">
@@ -279,13 +279,13 @@ export default function GuildDetailPage({ params }: GuildDetailProps) {
                             className="w-9 h-9 rounded-full object-cover border border-dd-border shrink-0"
                           />
                         ) : (
-                          <div className="w-9 h-9 rounded-full bg-orange-500/10 text-orange-400 flex items-center justify-center text-sm font-bold shrink-0">
+                          <div className="w-9 h-9 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center text-sm font-bold shrink-0">
                             {member.user.username[0].toUpperCase()}
                           </div>
                         )}
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <p className="text-sm font-bold text-dd-text truncate group-hover:text-orange-400 transition-colors">
+                            <p className="text-sm font-bold text-dd-text truncate group-hover:text-blue-400 transition-colors">
                               {member.user.username}
                             </p>
                             <RoleIcon

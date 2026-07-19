@@ -74,7 +74,7 @@ export function HeroMockup() {
 
         {/* Address Bar */}
         <div className="flex items-center gap-1.5 px-6 py-1 rounded-md bg-dd-bg border border-dd-border/50 text-[10px] text-dd-muted font-mono w-48 md:w-64 justify-center">
-          <span className="text-orange-500/80">https://</span>
+          <span className="text-blue-500/80">https://</span>
           devdeck.com/feed
         </div>
 
@@ -87,14 +87,14 @@ export function HeroMockup() {
         {/* Left Navigation */}
         <div className="hidden md:flex flex-col p-4 border-r border-dd-border bg-dd-surface/10 space-y-6">
           <div className="flex items-center gap-2 px-2">
-            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white font-bold text-xs">
+            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-500 to-blue-400 flex items-center justify-center text-white font-bold text-xs">
               DD
             </div>
             <span className="font-bold text-sm tracking-tight">DevDeck</span>
           </div>
 
           <div className="space-y-1">
-            <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-orange-500/10 text-orange-500 text-xs font-semibold">
+            <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-500/10 text-blue-500 text-xs font-semibold">
               <Terminal className="w-4 h-4" />
               Feed Principal
             </div>
@@ -111,7 +111,7 @@ export function HeroMockup() {
           {/* User profile preview */}
           <div className="mt-auto p-3 bg-dd-surface/30 border border-dd-border/60 rounded-xl space-y-2">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-bold">
+              <div className="w-7 h-7 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-[10px] font-bold">
                 GU
               </div>
               <div className="text-left">
@@ -121,7 +121,7 @@ export function HeroMockup() {
             </div>
             <div className="pt-1 border-t border-dd-border/50 flex items-center justify-between text-[9px]">
               <span className="text-dd-muted">Level 4</span>
-              <span className="text-orange-400 font-bold flex items-center gap-0.5">
+              <span className="text-blue-400 font-bold flex items-center gap-0.5">
                 <Flame className="w-3 h-3 fill-current" /> 12 dias
               </span>
             </div>
@@ -199,17 +199,17 @@ export function HeroMockup() {
             </div>
 
             {/* AI Generated Quiz Widget */}
-            <div className="border border-orange-500/20 bg-orange-500/[0.02] rounded-xl p-3.5 space-y-3 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-full blur-xl pointer-events-none" />
+            <div className="border border-blue-500/20 bg-blue-500/[0.02] rounded-xl p-3.5 space-y-3 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-xl pointer-events-none" />
 
-              <div className="flex items-center justify-between border-b border-orange-500/10 pb-2">
-                <div className="flex items-center gap-1.5 text-orange-400">
+              <div className="flex items-center justify-between border-b border-blue-500/10 pb-2">
+                <div className="flex items-center gap-1.5 text-blue-400">
                   <Sparkles className="w-3.5 h-3.5" />
                   <span className="text-[10px] font-bold uppercase tracking-wider">
                     Quiz Gerado por IA
                   </span>
                 </div>
-                <span className="text-[9px] text-orange-400/80 font-bold bg-orange-500/10 px-1.5 py-0.5 rounded">
+                <span className="text-[9px] text-blue-400/80 font-bold bg-blue-500/10 px-1.5 py-0.5 rounded">
                   +15 XP
                 </span>
               </div>
@@ -282,7 +282,7 @@ export function HeroMockup() {
               <span className="text-[10px] text-dd-muted uppercase tracking-wider font-semibold">
                 XP Diário
               </span>
-              <span className="text-[10px] text-orange-400 font-mono font-bold">
+              <span className="text-[10px] text-blue-400 font-mono font-bold">
                 {xpValue} / 1500 XP
               </span>
             </div>
@@ -290,7 +290,7 @@ export function HeroMockup() {
             {/* Progress track */}
             <div className="h-2 w-full bg-dd-surface rounded-full overflow-hidden relative">
               <div
-                className="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full transition-all duration-700 ease-out"
+                className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all duration-700 ease-out"
                 style={{ width: `${(xpValue / 1500) * 100}%` }}
               />
               <div
@@ -330,11 +330,11 @@ export function HeroMockup() {
               </div>
               <div className="h-1.5 w-full bg-dd-surface rounded-full overflow-hidden flex">
                 <div className="h-full bg-emerald-500" style={{ width: '68%' }} />
-                <div className="h-full bg-orange-500" style={{ width: '32%' }} />
+                <div className="h-full bg-blue-500" style={{ width: '32%' }} />
               </div>
               <div className="flex justify-between text-[9px] font-mono text-dd-muted">
                 <span>JavaScript</span>
-                <span className="text-orange-400 font-bold">32% (58 votos)</span>
+                <span className="text-blue-400 font-bold">32% (58 votos)</span>
               </div>
             </div>
 

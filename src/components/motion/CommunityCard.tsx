@@ -14,7 +14,7 @@ const LANGUAGE_THEME_COLORS: Record<string, string> = {
   JavaScript: '#f5a623',
   TypeScript: '#3178c6',
   Python: '#5ba3f5',
-  Rust: '#f97316',
+  Rust: '#0083fe',
   Go: '#22d48a',
   'C++': '#f59e0b',
   Java: '#ef4444',
@@ -35,7 +35,7 @@ const LANGUAGE_THEME_CLASSES: Record<string, string> = {
 };
 
 export function CommunityCard({ language, memberCount, isMember, onJoin }: CommunityCardProps) {
-  const themeColor = LANGUAGE_THEME_COLORS[language] || '#f97316';
+  const themeColor = LANGUAGE_THEME_COLORS[language] || '#0083fe';
   const themeClass = LANGUAGE_THEME_CLASSES[language] || '';
 
   return (

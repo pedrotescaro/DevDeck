@@ -11,9 +11,9 @@
   --lp-fg-dim: #D4D4D4;
   --lp-muted: #8A8A8A;
   --lp-muted-2: #262626;
-  --lp-accent: #F97316;
-  --lp-accent-bright: #FB923C;
-  --lp-accent-dim: #7C2D12;
+  --lp-accent: #0083FE;
+  --lp-accent-bright: #339EFE;
+  --lp-accent-dim: #003D7A;
   --lp-blue: #60A5FA;
   --lp-blue-dim: #1E3A8A;
   --lp-border: #1F1F1F;
@@ -23,7 +23,7 @@
   --lp-bronze: #B45309;
   --lp-string: #A3E635;
   --lp-type: #60A5FA;
-  --lp-kw: #F97316;
+  --lp-kw: #0083FE;
   --lp-com: #737373;
   --lp-fn: #FBBF24;
 }
@@ -55,7 +55,7 @@
 
 /* === Text Stroke === */
 .lp-text-stroke {
-  -webkit-text-stroke: 1.5px var(--lp-muted-2);
+  -webkit-text-stroke: 1.5px #FFFFFF;
   color: transparent;
 }
 
@@ -157,10 +157,10 @@
 /* === CTA Pulse === */
 @keyframes lp-pulse-cta {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(245, 118, 43, 0.65), 0 0 40px rgba(245, 118, 43, 0.3);
+    box-shadow: 0 0 0 0 rgba(0, 131, 254, 0.65), 0 0 40px rgba(0, 131, 254, 0.3);
   }
   50% {
-    box-shadow: 0 0 0 18px rgba(245, 118, 43, 0), 0 0 40px rgba(245, 118, 43, 0.3);
+    box-shadow: 0 0 0 18px rgba(0, 131, 254, 0), 0 0 40px rgba(0, 131, 254, 0.3);
   }
 }
 
@@ -237,19 +237,19 @@
   background: linear-gradient(155deg, #26221D 0%, #100E0C 100%);
   box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.7),
               0 0 0 1px rgba(255, 255, 255, 0.04) inset,
-              0 0 60px -10px rgba(245, 118, 43, 0.15);
+              0 0 60px -10px rgba(0, 131, 254, 0.15);
 }
 
 .lp-logo-stage:hover .lp-logo-card.c1 {
   transform: translateZ(-90px) translateY(54px) translateX(14px);
   opacity: 0.45;
-  border-color: rgba(245, 118, 43, 0.4);
+  border-color: rgba(0, 131, 254, 0.4);
 }
 
 .lp-logo-stage:hover .lp-logo-card.c2 {
   transform: translateZ(-50px) translateY(30px) translateX(8px);
   opacity: 0.75;
-  border-color: rgba(245, 118, 43, 0.7);
+  border-color: rgba(0, 131, 254, 0.7);
 }
 
 .lp-logo-stage:hover .lp-logo-card.c3 {
@@ -263,7 +263,7 @@
   border-color: var(--lp-accent);
   box-shadow: 0 45px 90px -20px rgba(0, 0, 0, 0.85),
               0 0 0 1px rgba(255, 255, 255, 0.08) inset,
-              0 0 80px -5px rgba(245, 118, 43, 0.35);
+              0 0 80px -5px rgba(0, 131, 254, 0.35);
 }
 
 .lp-braces {
@@ -277,8 +277,8 @@
   font-weight: 700;
   color: var(--lp-accent);
   letter-spacing: -4px;
-  text-shadow: 0 0 30px rgba(245, 118, 43, 0.55),
-               0 0 60px rgba(245, 118, 43, 0.3),
+  text-shadow: 0 0 30px rgba(0, 131, 254, 0.55),
+               0 0 60px rgba(0, 131, 254, 0.3),
                0 4px 0 rgba(0, 0, 0, 0.4);
 }
 
@@ -289,7 +289,7 @@
   transform: translateX(-50%) rotateX(82deg);
   width: 260px;
   height: 260px;
-  background: radial-gradient(ellipse at center, rgba(245, 118, 43, 0.35) 0%, rgba(245, 118, 43, 0.1) 30%, transparent 65%);
+  background: radial-gradient(ellipse at center, rgba(0, 131, 254, 0.35) 0%, rgba(0, 131, 254, 0.1) 30%, transparent 65%);
   filter: blur(25px);
 }
 
@@ -377,7 +377,7 @@
 /* === Trail Module === */
 .lp-trail-module {
   background: linear-gradient(135deg, var(--lp-accent-dim) 0%, var(--lp-bg-card) 100%);
-  border: 1px solid rgba(245, 118, 43, 0.3);
+  border: 1px solid rgba(0, 131, 254, 0.3);
   border-radius: 12px;
   padding: 20px;
   position: relative;
@@ -397,7 +397,7 @@
   right: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(245, 118, 43, 0.08) 0%, transparent 40%);
+  background: radial-gradient(circle, rgba(0, 131, 254, 0.08) 0%, transparent 40%);
   pointer-events: none;
 }
 
@@ -506,7 +506,7 @@ html.lp-landing-page::-webkit-scrollbar-thumb:hover {
   background: 
     linear-gradient(180deg, rgba(10, 10, 10, 0.45) 0%, rgba(10, 10, 10, 0.2) 28%, rgba(10, 10, 10, 0.4) 65%, rgba(10, 10, 10, 0.98) 100%),
     linear-gradient(90deg, rgba(10, 10, 10, 0.5) 0%, rgba(10, 10, 10, 0.15) 50%, rgba(10, 10, 10, 0.3) 100%),
-    radial-gradient(ellipse at 25% 60%, rgba(245, 118, 43, 0.08) 0%, transparent 55%);
+    radial-gradient(ellipse at 25% 60%, rgba(0, 131, 254, 0.08) 0%, transparent 55%);
   z-index: 2;
   pointer-events: none;
 }
@@ -570,10 +570,10 @@ html.lp-landing-page::-webkit-scrollbar-thumb:hover {
 /* === Duel Matchmaking Animation === */
 @keyframes lp-duel-pulse {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(245, 118, 43, 0.4);
+    box-shadow: 0 0 0 0 rgba(0, 131, 254, 0.4);
   }
   50% {
-    box-shadow: 0 0 20px 8px rgba(245, 118, 43, 0);
+    box-shadow: 0 0 20px 8px rgba(0, 131, 254, 0);
   }
 }
 

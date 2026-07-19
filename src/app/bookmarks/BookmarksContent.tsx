@@ -86,7 +86,7 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar Itens salvos"
-                className="w-full pl-11 pr-4 py-2.5 bg-dd-surface/40 hover:bg-dd-surface/60 focus:bg-dd-surface/80 border border-dd-border/60 focus:border-orange-500/50 rounded-full text-xs text-dd-text placeholder-dd-muted outline-0 transition-all shadow-inner"
+                className="w-full pl-11 pr-4 py-2.5 bg-dd-surface/40 hover:bg-dd-surface/60 focus:bg-dd-surface/80 border border-dd-border/60 focus:border-blue-500/50 rounded-full text-xs text-dd-text placeholder-dd-muted outline-0 transition-all shadow-inner"
               />
             </div>
           </div>
@@ -95,7 +95,7 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
           <div className="flex flex-col">
             {filteredPosts.length === 0 ? (
               <div className="text-center py-12 px-6 bg-dd-surface/20 border border-dd-border border-dashed rounded-2xl space-y-4 max-w-md mx-auto mt-8">
-                <div className="w-12 h-12 bg-orange-500/10 border border-orange-500/20 text-orange-500 rounded-full flex items-center justify-center mx-auto">
+                <div className="w-12 h-12 bg-blue-500/10 border border-blue-500/20 text-blue-500 rounded-full flex items-center justify-center mx-auto">
                   <Bookmark className="w-6 h-6" />
                 </div>
                 <div className="space-y-1">

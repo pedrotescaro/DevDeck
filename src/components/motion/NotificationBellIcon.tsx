@@ -33,7 +33,7 @@ export function NotificationBellIcon({
           {!reduced && (
             <span className="dd-dot-pulse absolute inline-flex h-full w-full rounded-full bg-dd-amber opacity-75" />
           )}
-          <span className="relative inline-flex min-w-[14px] h-[14px] -mt-0.5 -mr-0.5 bg-orange-500 text-white text-[8px] font-extrabold items-center justify-center rounded-full px-0.5 ring-2 ring-dd-bg">
+          <span className="relative inline-flex min-w-[14px] h-[14px] -mt-0.5 -mr-0.5 bg-blue-500 text-white text-[8px] font-extrabold items-center justify-center rounded-full px-0.5 ring-2 ring-dd-bg">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         </span>

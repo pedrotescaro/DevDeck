@@ -399,7 +399,7 @@ export function TrailsContent({
         return (
           <pre
             key={idx}
-            className="bg-black/30 text-orange-200 rounded-lg p-2.5 my-1.5 font-mono text-[9px] overflow-x-auto whitespace-pre leading-relaxed select-text"
+            className="bg-black/30 text-blue-200 rounded-lg p-2.5 my-1.5 font-mono text-[9px] overflow-x-auto whitespace-pre leading-relaxed select-text"
           >
             <code>{code}</code>
           </pre>
@@ -410,7 +410,7 @@ export function TrailsContent({
         return (
           <code
             key={idx}
-            className="bg-dd-border px-1 py-0.5 rounded text-[10px] font-mono text-orange-400"
+            className="bg-dd-border px-1 py-0.5 rounded text-[10px] font-mono text-blue-400"
           >
             {code}
           </code>
@@ -1237,7 +1237,7 @@ export function TrailsContent({
                     onClick={() => setActiveLang(lang === 'PYTHON' ? 'PYTHON' : lang)}
                     className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer border ${
                       isSelected
-                        ? 'bg-dd-accent border-orange-500 text-white shadow-md shadow-orange-500/10'
+                        ? 'bg-dd-accent border-blue-500 text-white shadow-md shadow-blue-500/10'
                         : 'bg-dd-surface border-dd-border text-dd-muted hover:text-dd-text hover:bg-dd-border/40'
                     }`}
                   >
@@ -1250,7 +1250,7 @@ export function TrailsContent({
             {/* Progress Indicator da Trilha Ativa */}
             <div className="bg-dd-surface border border-dd-border rounded-xl p-6 backdrop-blur-sm shadow-sm flex flex-col md:flex-row items-center justify-between gap-5">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 font-black text-xl">
+                <div className="w-14 h-14 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-black text-xl">
                   {activeLang.slice(0, 2)}
                 </div>
                 <div>
@@ -1271,7 +1271,7 @@ export function TrailsContent({
                 </div>
                 <div className="h-2.5 w-full bg-dd-border/40 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-orange-500 rounded-full transition-all duration-500"
+                    className="h-full bg-blue-500 rounded-full transition-all duration-500"
                     style={{ width: `${((activeTrail.xp % 500) / 500) * 100}%` }}
                   />
                 </div>
@@ -1280,8 +1280,8 @@ export function TrailsContent({
 
             {/* Header Card (Active Unit Banner) */}
             {activeUnitLevel && (
-              <div className="bg-gradient-to-r from-orange-500/10 via-orange-500/5 to-transparent border border-dd-border rounded-2xl p-7 shadow-md flex flex-col items-center text-center space-y-3">
-                <span className="px-3 py-1 bg-orange-500/15 border border-orange-500/30 text-orange-400 text-[10px] font-black uppercase tracking-wider rounded-full shadow-sm whitespace-nowrap">
+              <div className="bg-gradient-to-r from-blue-500/10 via-blue-500/5 to-transparent border border-dd-border rounded-2xl p-7 shadow-md flex flex-col items-center text-center space-y-3">
+                <span className="px-3 py-1 bg-blue-500/15 border border-blue-500/30 text-blue-400 text-[10px] font-black uppercase tracking-wider rounded-full shadow-sm whitespace-nowrap">
                   Unidade Atual
                 </span>
                 <div className="space-y-1.5">
@@ -1382,8 +1382,8 @@ export function TrailsContent({
                               className={`w-20 h-20 rounded-[22px] flex items-center justify-center transition-all transform cursor-pointer ${
                                 unlocked
                                   ? isCompleted
-                                    ? 'bg-orange-500 text-white border-x-2 border-t-2 border-b-[7px] border-orange-600 hover:bg-orange-400 active:border-b-0 active:translate-y-[7px]'
-                                    : 'bg-dd-surface text-orange-500 border-x-2 border-t-2 border-b-[7px] border-orange-500 hover:bg-dd-border/30 active:border-b-0 active:translate-y-[7px]'
+                                    ? 'bg-blue-500 text-white border-x-2 border-t-2 border-b-[7px] border-blue-600 hover:bg-blue-400 active:border-b-0 active:translate-y-[7px]'
+                                    : 'bg-dd-surface text-blue-500 border-x-2 border-t-2 border-b-[7px] border-blue-500 hover:bg-dd-border/30 active:border-b-0 active:translate-y-[7px]'
                                   : 'bg-dd-surface/40 text-dd-muted/30 border-x-2 border-t-2 border-b-[7px] border-dd-border/40 cursor-not-allowed'
                               }`}
                             >
@@ -1427,7 +1427,7 @@ export function TrailsContent({
                         {/* Linha pontilhada conectando à bandeira */}
                         <div className="w-full flex items-center justify-center my-6 max-w-sm px-4">
                           <div className="flex-grow border-t-2 border-dashed border-dd-border/50"></div>
-                          <span className="px-4 py-1.5 bg-dd-accent/15 border border-orange-500/30 text-orange-400 text-[9px] font-black uppercase tracking-wider rounded-full mx-3 text-center shadow-sm whitespace-nowrap">
+                          <span className="px-4 py-1.5 bg-dd-accent/15 border border-blue-500/30 text-blue-400 text-[9px] font-black uppercase tracking-wider rounded-full mx-3 text-center shadow-sm whitespace-nowrap">
                             Revisão Final & Checkpoint {unitNumber}
                           </span>
                           <div className="flex-grow border-t-2 border-dashed border-dd-border/50"></div>
@@ -1465,8 +1465,8 @@ export function TrailsContent({
                             className={`w-20 h-20 rounded-[22px] flex items-center justify-center transition-all transform cursor-pointer relative ${
                               checkpointUnlocked
                                 ? isCheckpointCompleted
-                                  ? 'bg-dd-accent text-white border-x-2 border-t-2 border-b-[7px] border-orange-600 hover:bg-orange-500 active:border-b-0 active:translate-y-[7px]'
-                                  : 'bg-dd-surface text-orange-500 border-x-2 border-t-2 border-b-[7px] border-orange-500 hover:bg-dd-border/30 active:border-b-0 active:translate-y-[7px]'
+                                  ? 'bg-dd-accent text-white border-x-2 border-t-2 border-b-[7px] border-blue-600 hover:bg-blue-500 active:border-b-0 active:translate-y-[7px]'
+                                  : 'bg-dd-surface text-blue-500 border-x-2 border-t-2 border-b-[7px] border-blue-500 hover:bg-dd-border/30 active:border-b-0 active:translate-y-[7px]'
                                 : 'bg-dd-surface/40 text-dd-muted/30 border-x-2 border-t-2 border-b-[7px] border-dd-border/30 cursor-not-allowed'
                             }`}
                           >
@@ -1509,9 +1509,9 @@ export function TrailsContent({
                   transition={{ type: 'spring', stiffness: 350, damping: 25 }}
                   className="sticky bottom-6 left-0 right-0 z-30 flex justify-center px-4 pointer-events-none"
                 >
-                  <div className="pointer-events-auto bg-dd-surface/90 backdrop-blur-md border border-orange-500/30 rounded-2xl px-6 py-5 shadow-xl max-w-lg w-full flex items-center justify-between gap-5">
+                  <div className="pointer-events-auto bg-dd-surface/90 backdrop-blur-md border border-blue-500/30 rounded-2xl px-6 py-5 shadow-xl max-w-lg w-full flex items-center justify-between gap-5">
                     <div className="min-w-0">
-                      <p className="text-[10px] font-extrabold uppercase text-orange-400 tracking-wider">
+                      <p className="text-[10px] font-extrabold uppercase text-blue-400 tracking-wider">
                         Próxima Atividade Recomendada
                       </p>
                       <h4 className="text-sm font-black text-dd-text truncate mt-0.5">
@@ -1526,7 +1526,7 @@ export function TrailsContent({
 
                     <button
                       onClick={() => handleCheckpointClick(recommendedCheckpoint.unitNumber)}
-                      className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-orange-500/20 whitespace-nowrap cursor-pointer active:scale-95"
+                      className="px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-blue-500/20 whitespace-nowrap cursor-pointer active:scale-95"
                     >
                       Começar
                     </button>
@@ -1542,9 +1542,9 @@ export function TrailsContent({
                   transition={{ type: 'spring', stiffness: 350, damping: 25 }}
                   className="sticky bottom-6 left-0 right-0 z-30 flex justify-center px-4 pointer-events-none"
                 >
-                  <div className="pointer-events-auto bg-dd-surface/90 backdrop-blur-md border border-orange-500/30 rounded-2xl px-6 py-5 shadow-xl max-w-lg w-full flex items-center justify-between gap-5">
+                  <div className="pointer-events-auto bg-dd-surface/90 backdrop-blur-md border border-blue-500/30 rounded-2xl px-6 py-5 shadow-xl max-w-lg w-full flex items-center justify-between gap-5">
                     <div className="min-w-0">
-                      <p className="text-[10px] font-extrabold uppercase text-orange-400 tracking-wider">
+                      <p className="text-[10px] font-extrabold uppercase text-blue-400 tracking-wider">
                         Próxima Atividade Recomendada
                       </p>
                       <h4 className="text-sm font-black text-dd-text truncate mt-0.5">
@@ -1557,7 +1557,7 @@ export function TrailsContent({
 
                     <button
                       onClick={() => handleLevelClick(recommendedLevel, true)}
-                      className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-orange-500/20 whitespace-nowrap cursor-pointer active:scale-95"
+                      className="px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-blue-500/20 whitespace-nowrap cursor-pointer active:scale-95"
                     >
                       Começar
                     </button>
@@ -1573,7 +1573,7 @@ export function TrailsContent({
         <aside className="hidden lg:flex w-80 shrink-0 flex-col gap-4 p-4 sticky top-0 h-screen overflow-y-auto">
           {/* Widget 1: Duelos de Código */}
           <div className="bg-dd-sidebar-bg border border-dd-border rounded-2xl p-4 space-y-3">
-            <div className="flex items-center gap-2 text-orange-500">
+            <div className="flex items-center gap-2 text-blue-500">
               <Swords className="w-5 h-5" />
               <h3 className="text-sm font-black text-dd-text">Duelos de Código</h3>
             </div>
@@ -1583,7 +1583,7 @@ export function TrailsContent({
             </p>
             <Link
               href="/duels"
-              className="flex items-center justify-center w-full py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-orange-500/20 active:scale-95"
+              className="flex items-center justify-center w-full py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-blue-500/20 active:scale-95"
             >
               Buscar Duelo
             </Link>
@@ -1666,9 +1666,9 @@ export function TrailsContent({
                     />
                   </div>
                   <div className="flex gap-1 mt-2.5">
-                    <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-100" />
-                    <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-200" />
-                    <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-300" />
+                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce delay-100" />
+                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce delay-200" />
+                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce delay-300" />
                   </div>
                 </div>
               )}
@@ -1685,12 +1685,12 @@ export function TrailsContent({
                 onChange={(e) => setDuckyInput(e.target.value)}
                 placeholder="Perguntar ao patinho..."
                 disabled={duckyLoading}
-                className="flex-grow rounded-lg border border-dd-border bg-dd-bg px-2.5 py-1.5 text-[10.5px] text-dd-text placeholder-dd-muted focus:border-orange-500 focus:outline-none disabled:opacity-50"
+                className="flex-grow rounded-lg border border-dd-border bg-dd-bg px-2.5 py-1.5 text-[10.5px] text-dd-text placeholder-dd-muted focus:border-blue-500 focus:outline-none disabled:opacity-50"
               />
               <button
                 type="submit"
                 disabled={duckyLoading || !duckyInput.trim()}
-                className="p-1.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center shrink-0 animate-in fade-in duration-100"
+                className="p-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center shrink-0 animate-in fade-in duration-100"
               >
                 <Send className="w-3.5 h-3.5" />
               </button>
@@ -1699,7 +1699,7 @@ export function TrailsContent({
 
           {/* Widget 3: Classificação Geral (Leaderboard Top 3) */}
           <div className="bg-dd-sidebar-bg border border-dd-border rounded-2xl p-4 space-y-3.5">
-            <div className="flex items-center gap-2 text-orange-500">
+            <div className="flex items-center gap-2 text-blue-500">
               <Trophy className="w-5 h-5" />
               <h3 className="text-sm font-black text-dd-text">Classificação Geral</h3>
             </div>
@@ -1727,7 +1727,7 @@ export function TrailsContent({
                       >
                         {u.rank}º
                       </span>
-                      <div className="w-6 h-6 rounded-full bg-dd-border flex items-center justify-center text-[10px] font-black shrink-0 text-orange-500 uppercase overflow-hidden border border-dd-border/50">
+                      <div className="w-6 h-6 rounded-full bg-dd-border flex items-center justify-center text-[10px] font-black shrink-0 text-blue-500 uppercase overflow-hidden border border-dd-border/50">
                         {u.avatar_url ? (
                           <Image
                             src={u.avatar_url}
@@ -1742,7 +1742,7 @@ export function TrailsContent({
                       </div>
                       <span className="font-bold text-dd-text truncate">@{u.username}</span>
                     </div>
-                    <span className="font-mono font-black text-orange-400 shrink-0 text-[11px]">
+                    <span className="font-mono font-black text-blue-400 shrink-0 text-[11px]">
                       {u.xp} XP
                     </span>
                   </div>
@@ -1752,7 +1752,7 @@ export function TrailsContent({
 
             <Link
               href="/leaderboard"
-              className="block text-center text-[10.5px] font-bold text-orange-400 hover:text-orange-300 transition-colors pt-1 border-t border-dd-border/50"
+              className="block text-center text-[10.5px] font-bold text-blue-400 hover:text-blue-300 transition-colors pt-1 border-t border-dd-border/50"
             >
               Ver classificação completa →
             </Link>
@@ -1782,7 +1782,7 @@ export function TrailsContent({
               onClick={(e) => e.stopPropagation()}
             >
               {/* Colored Modal Header */}
-              <div className="shrink-0 bg-gradient-to-r from-orange-500 to-amber-600 text-white p-5 pb-8 relative flex flex-col gap-4">
+              <div className="shrink-0 bg-gradient-to-r from-blue-500 to-blue-600 text-white p-5 pb-8 relative flex flex-col gap-4">
                 <div className="flex items-center justify-between w-full">
                   <button
                     onClick={handleCloseQuizRequest}
@@ -1811,7 +1811,7 @@ export function TrailsContent({
                     onClick={() => setAiChatOpen(!aiChatOpen)}
                     className={`h-7 px-2.5 rounded-full flex items-center gap-1.5 text-[10px] font-bold transition-all cursor-pointer border-none shadow-sm ${
                       aiChatOpen
-                        ? 'bg-white text-orange-600 hover:bg-white/95 font-black'
+                        ? 'bg-white text-blue-600 hover:bg-white/95 font-black'
                         : 'bg-white/15 text-white hover:bg-white/25 animate-pulse'
                     }`}
                   >
@@ -1880,7 +1880,7 @@ export function TrailsContent({
                         return (
                           <div className="space-y-4 py-2">
                             <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500 font-bold text-sm">
+                              <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 font-bold text-sm">
                                 <Lightbulb className="w-4 h-4" />
                               </div>
                               <h3 className="text-sm font-extrabold text-dd-text">{slide.title}</h3>
@@ -1891,16 +1891,16 @@ export function TrailsContent({
                             </p>
 
                             {slide.code && (
-                              <div className="relative bg-black/40 rounded-xl p-4 border border-dd-border font-mono text-[10px] text-orange-200 overflow-x-auto whitespace-pre leading-relaxed font-semibold">
+                              <div className="relative bg-black/40 rounded-xl p-4 border border-dd-border font-mono text-[10px] text-blue-200 overflow-x-auto whitespace-pre leading-relaxed font-semibold">
                                 {slide.code}
                               </div>
                             )}
 
                             {slide.tip && (
-                              <div className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-3 flex items-start gap-2.5">
-                                <Lightbulb className="w-3.5 h-3.5 text-orange-500 mt-0.5 shrink-0" />
+                              <div className="bg-blue-500/5 border border-blue-500/10 rounded-xl p-3 flex items-start gap-2.5">
+                                <Lightbulb className="w-3.5 h-3.5 text-blue-500 mt-0.5 shrink-0" />
                                 <div className="space-y-0.5">
-                                  <h4 className="text-[10px] font-bold text-orange-500 uppercase tracking-wide">
+                                  <h4 className="text-[10px] font-bold text-blue-500 uppercase tracking-wide">
                                     Dica Pro
                                   </h4>
                                   <p className="text-[10px] text-dd-muted leading-relaxed">
@@ -1920,7 +1920,7 @@ export function TrailsContent({
                           <div className="space-y-6 py-2">
                             {currentStage === 'challenge' && (
                               <div className="flex items-center gap-2">
-                                <span className="px-2 py-0.5 rounded bg-orange-500/10 text-[9px] font-black text-orange-500 uppercase tracking-wider">
+                                <span className="px-2 py-0.5 rounded bg-blue-500/10 text-[9px] font-black text-blue-500 uppercase tracking-wider">
                                   Desafio Final
                                 </span>
                               </div>
@@ -1949,7 +1949,7 @@ export function TrailsContent({
                                       'border-dd-border opacity-50 bg-dd-surface text-dd-muted';
                                   }
                                 } else if (isSelected) {
-                                  btnClasses = 'border-orange-500 bg-orange-500/5 text-orange-400';
+                                  btnClasses = 'border-blue-500 bg-blue-500/5 text-blue-400';
                                 }
 
                                 return (
@@ -1982,7 +1982,7 @@ export function TrailsContent({
 
                     {currentStage === 'summary' && (
                       <div className="text-center py-6 space-y-6">
-                        <div className="w-16 h-16 bg-orange-500/10 border border-orange-500/20 rounded-full flex items-center justify-center text-orange-400 mx-auto animate-bounce">
+                        <div className="w-16 h-16 bg-blue-500/10 border border-blue-500/20 rounded-full flex items-center justify-center text-blue-400 mx-auto animate-bounce">
                           <Trophy className="w-8 h-8" />
                         </div>
 
@@ -2005,7 +2005,7 @@ export function TrailsContent({
                           </div>
                           <div className="bg-dd-surface border border-dd-border p-4 rounded-xl text-center">
                             <p className="text-[9px] font-bold text-dd-muted uppercase">XP Ganho</p>
-                            <p className="text-lg font-black text-orange-400 mt-1 font-mono">
+                            <p className="text-lg font-black text-blue-400 mt-1 font-mono">
                               +{xpEarned} XP
                             </p>
                           </div>
@@ -2031,7 +2031,7 @@ export function TrailsContent({
                             return (
                               <button
                                 onClick={handleNextStageOrStep}
-                                className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                                className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
                               >
                                 Próximo
                                 <ChevronRight className="w-4 h-4" />
@@ -2046,7 +2046,7 @@ export function TrailsContent({
                               <button
                                 onClick={handleCheckAnswer}
                                 disabled={selectedOption === null || submittingAttempt}
-                                className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 disabled:bg-dd-surface disabled:border disabled:border-dd-border disabled:text-dd-muted text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                                className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 disabled:bg-dd-surface disabled:border disabled:border-dd-border disabled:text-dd-muted text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
                               >
                                 {submittingAttempt ? 'Verificando...' : 'Confirmar'}
                                 <ChevronRight className="w-4 h-4" />
@@ -2060,7 +2060,7 @@ export function TrailsContent({
                             return (
                               <button
                                 onClick={handleNextStageOrStep}
-                                className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                                className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
                               >
                                 {currentStage === 'challenge' ? 'Ver Resultado' : 'Avançar'}
                                 <ChevronRight className="w-4 h-4" />
@@ -2072,7 +2072,7 @@ export function TrailsContent({
                             return (
                               <button
                                 onClick={handleNextStageOrStep}
-                                className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 animate-pulse"
+                                className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 animate-pulse"
                               >
                                 Avançar
                                 <ChevronRight className="w-4 h-4" />
@@ -2083,7 +2083,7 @@ export function TrailsContent({
                           return (
                             <button
                               onClick={handleNextStageOrStep}
-                              className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 animate-pulse"
+                              className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 animate-pulse"
                             >
                               Ver Resultado
                               <ChevronRight className="w-4 h-4" />
@@ -2117,7 +2117,7 @@ export function TrailsContent({
                         />
                         <span className="text-xs font-bold text-dd-text">Ducky IA</span>
                       </div>
-                      <span className="px-1.5 py-0.5 rounded bg-orange-500/10 text-[8px] font-bold text-orange-500 uppercase tracking-wide">
+                      <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-[8px] font-bold text-blue-500 uppercase tracking-wide">
                         Online
                       </span>
                     </div>
@@ -2134,7 +2134,7 @@ export function TrailsContent({
                           <div
                             className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden ${
                               msg.role === 'user'
-                                ? 'bg-orange-500 text-white'
+                                ? 'bg-blue-500 text-white'
                                 : 'bg-[#0c0c0e] border border-dd-border/40'
                             }`}
                           >
@@ -2153,7 +2153,7 @@ export function TrailsContent({
                           <div
                             className={`p-3 rounded-2xl text-[11px] leading-relaxed select-text break-words ${
                               msg.role === 'user'
-                                ? 'bg-orange-500 text-white rounded-tr-none font-semibold'
+                                ? 'bg-blue-500 text-white rounded-tr-none font-semibold'
                                 : 'bg-dd-border/40 text-dd-text rounded-tl-none border border-dd-border/30 font-medium'
                             }`}
                           >
@@ -2173,9 +2173,9 @@ export function TrailsContent({
                             />
                           </div>
                           <div className="flex gap-1">
-                            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-100" />
-                            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-200" />
-                            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-300" />
+                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce delay-100" />
+                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce delay-200" />
+                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce delay-300" />
                           </div>
                         </div>
                       )}
@@ -2191,9 +2191,9 @@ export function TrailsContent({
                               handleSendAiMessage('Explicar este conceito de forma mais detalhada')
                             }
                             disabled={aiLoading}
-                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-blue-500/50 transition-all cursor-pointer"
                           >
-                            <Lightbulb className="w-3 h-3 text-orange-500/80" /> Explicar Conceito
+                            <Lightbulb className="w-3 h-3 text-blue-500/80" /> Explicar Conceito
                           </button>
                           <button
                             onClick={() =>
@@ -2202,9 +2202,9 @@ export function TrailsContent({
                               )
                             }
                             disabled={aiLoading}
-                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-blue-500/50 transition-all cursor-pointer"
                           >
-                            <Code2 className="w-3 h-3 text-orange-500/80" /> Exemplo de Código
+                            <Code2 className="w-3 h-3 text-blue-500/80" /> Exemplo de Código
                           </button>
                         </>
                       )}
@@ -2217,18 +2217,18 @@ export function TrailsContent({
                               )
                             }
                             disabled={aiLoading}
-                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-blue-500/50 transition-all cursor-pointer"
                           >
-                            <Search className="w-3 h-3 text-orange-500/80" /> Dica Sutil
+                            <Search className="w-3 h-3 text-blue-500/80" /> Dica Sutil
                           </button>
                           <button
                             onClick={() =>
                               handleSendAiMessage('Explique a teoria por trás desta pergunta')
                             }
                             disabled={aiLoading}
-                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-blue-500/50 transition-all cursor-pointer"
                           >
-                            <BookText className="w-3 h-3 text-orange-500/80" /> Explicar Teoria
+                            <BookText className="w-3 h-3 text-blue-500/80" /> Explicar Teoria
                           </button>
                         </>
                       )}
@@ -2248,12 +2248,12 @@ export function TrailsContent({
                         onChange={(e) => setAiInput(e.target.value)}
                         placeholder="Perguntar ao tutor..."
                         disabled={aiLoading}
-                        className="flex-grow rounded-xl border border-dd-border bg-dd-surface px-3 py-2 text-xs text-dd-text placeholder-dd-muted focus:border-orange-500 focus:outline-none disabled:opacity-50"
+                        className="flex-grow rounded-xl border border-dd-border bg-dd-surface px-3 py-2 text-xs text-dd-text placeholder-dd-muted focus:border-blue-500 focus:outline-none disabled:opacity-50"
                       />
                       <button
                         type="submit"
                         disabled={aiLoading || !aiInput.trim()}
-                        className="px-3 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition-all disabled:opacity-50 cursor-pointer"
+                        className="px-3 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs transition-all disabled:opacity-50 cursor-pointer"
                       >
                         Enviar
                       </button>
@@ -2307,7 +2307,7 @@ export function TrailsContent({
               onClick={(e) => e.stopPropagation()}
             >
               {/* Colored Modal Header */}
-              <div className="shrink-0 bg-gradient-to-r from-dd-accent to-orange-600 text-white p-5 pb-8 relative flex flex-col gap-4">
+              <div className="shrink-0 bg-gradient-to-r from-dd-accent to-blue-600 text-white p-5 pb-8 relative flex flex-col gap-4">
                 <div className="flex items-center justify-between w-full">
                   <button
                     onClick={() => {
@@ -2352,7 +2352,7 @@ export function TrailsContent({
                     onClick={() => setAiChatOpen(!aiChatOpen)}
                     className={`h-7 px-2.5 rounded-full flex items-center gap-1.5 text-[10px] font-bold transition-all cursor-pointer border-none shadow-sm ${
                       aiChatOpen
-                        ? 'bg-white text-orange-600 hover:bg-white/95 font-black'
+                        ? 'bg-white text-blue-600 hover:bg-white/95 font-black'
                         : 'bg-white/15 text-white hover:bg-white/25 animate-pulse'
                     }`}
                   >
@@ -2415,11 +2415,11 @@ export function TrailsContent({
                         return (
                           <div className="space-y-4 py-2">
                             <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500 font-bold text-sm">
+                              <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 font-bold text-sm">
                                 <Library className="w-4 h-4" />
                               </div>
                               <div>
-                                <p className="text-[10px] font-bold text-orange-500 uppercase tracking-wide">
+                                <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wide">
                                   Revisando: {slide.levelTitle}
                                 </p>
                                 <h3 className="text-sm font-extrabold text-dd-text">
@@ -2433,16 +2433,16 @@ export function TrailsContent({
                             </p>
 
                             {slide.code && (
-                              <div className="relative bg-black/40 rounded-xl p-4 border border-dd-border font-mono text-[10px] text-orange-200 overflow-x-auto whitespace-pre leading-relaxed font-semibold">
+                              <div className="relative bg-black/40 rounded-xl p-4 border border-dd-border font-mono text-[10px] text-blue-200 overflow-x-auto whitespace-pre leading-relaxed font-semibold">
                                 {slide.code}
                               </div>
                             )}
 
                             {slide.tip && (
-                              <div className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-3 flex items-start gap-2.5">
-                                <Lightbulb className="w-3.5 h-3.5 text-orange-500 mt-0.5 shrink-0" />
+                              <div className="bg-blue-500/5 border border-blue-500/10 rounded-xl p-3 flex items-start gap-2.5">
+                                <Lightbulb className="w-3.5 h-3.5 text-blue-500 mt-0.5 shrink-0" />
                                 <div className="space-y-0.5">
-                                  <h4 className="text-[10px] font-bold text-orange-500 uppercase tracking-wide">
+                                  <h4 className="text-[10px] font-bold text-blue-500 uppercase tracking-wide">
                                     Dica Pro
                                   </h4>
                                   <p className="text-[10px] text-dd-muted leading-relaxed">
@@ -2462,7 +2462,7 @@ export function TrailsContent({
                         return (
                           <div className="space-y-5 py-2 flex flex-col flex-grow min-h-0">
                             <div>
-                              <span className="px-2 py-0.5 rounded bg-orange-500/10 text-[9px] font-black text-orange-500 uppercase tracking-wider">
+                              <span className="px-2 py-0.5 rounded bg-blue-500/10 text-[9px] font-black text-blue-500 uppercase tracking-wider">
                                 Desafio de Código da Unidade {activeCheckpointUnit}
                               </span>
                               <h3 className="text-base font-black text-dd-text mt-1">
@@ -2523,7 +2523,7 @@ export function TrailsContent({
 
                     {checkpointStage === 'summary' && (
                       <div className="text-center py-8 space-y-6">
-                        <div className="w-20 h-20 bg-orange-500/10 border border-orange-500/20 rounded-full flex items-center justify-center text-orange-400 mx-auto animate-bounce shadow-lg shadow-orange-500/10">
+                        <div className="w-20 h-20 bg-blue-500/10 border border-blue-500/20 rounded-full flex items-center justify-center text-blue-400 mx-auto animate-bounce shadow-lg shadow-blue-500/10">
                           <Trophy className="w-10 h-10" />
                         </div>
 
@@ -2539,9 +2539,7 @@ export function TrailsContent({
 
                         <div className="bg-dd-surface border border-dd-border p-4 rounded-xl text-center max-w-xs mx-auto">
                           <p className="text-[10px] font-black text-dd-muted uppercase">XP Ganho</p>
-                          <p className="text-2xl font-black text-orange-400 mt-1 font-mono">
-                            +50 XP
-                          </p>
+                          <p className="text-2xl font-black text-blue-400 mt-1 font-mono">+50 XP</p>
                         </div>
                       </div>
                     )}
@@ -2577,7 +2575,7 @@ export function TrailsContent({
                                 setCheckpointStage('exercise');
                               }
                             }}
-                            className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                            className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
                           >
                             {checkpointReviewStep === 2 ? 'Ir para o Exercício' : 'Próximo'}
                             <ChevronRight className="w-4 h-4" />
@@ -2587,7 +2585,7 @@ export function TrailsContent({
                             <button
                               onClick={handleRunCheckpointCode}
                               disabled={checkpointRunning || checkpointSuccess}
-                              className="px-5 py-2.5 bg-dd-surface border border-orange-500/50 hover:bg-dd-border/30 text-orange-400 rounded-full text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+                              className="px-5 py-2.5 bg-dd-surface border border-blue-500/50 hover:bg-dd-border/30 text-blue-400 rounded-full text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                               {checkpointRunning ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -2600,7 +2598,7 @@ export function TrailsContent({
                             <button
                               onClick={handleCompleteCheckpoint}
                               disabled={!checkpointSuccess || submittingAttempt}
-                              className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed enabled:animate-pulse"
+                              className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed enabled:animate-pulse"
                             >
                               {submittingAttempt ? 'Gravando...' : 'Concluir Checkpoint'}
                               <ChevronRight className="w-4 h-4" />
@@ -2634,7 +2632,7 @@ export function TrailsContent({
                         />
                         <span className="text-xs font-bold text-dd-text">Ducky IA</span>
                       </div>
-                      <span className="px-1.5 py-0.5 rounded bg-orange-500/10 text-[8px] font-bold text-orange-500 uppercase tracking-wide">
+                      <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-[8px] font-bold text-blue-500 uppercase tracking-wide">
                         Online
                       </span>
                     </div>
@@ -2651,7 +2649,7 @@ export function TrailsContent({
                           <div
                             className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden ${
                               msg.role === 'user'
-                                ? 'bg-orange-500 text-white'
+                                ? 'bg-blue-500 text-white'
                                 : 'bg-[#0c0c0e] border border-dd-border/40'
                             }`}
                           >
@@ -2670,7 +2668,7 @@ export function TrailsContent({
                           <div
                             className={`p-3 rounded-2xl text-[11px] leading-relaxed select-text break-words ${
                               msg.role === 'user'
-                                ? 'bg-orange-500 text-white rounded-tr-none font-semibold'
+                                ? 'bg-blue-500 text-white rounded-tr-none font-semibold'
                                 : 'bg-dd-border/40 text-dd-text rounded-tl-none border border-dd-border/30 font-medium'
                             }`}
                           >
@@ -2690,9 +2688,9 @@ export function TrailsContent({
                             />
                           </div>
                           <div className="flex gap-1">
-                            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-100" />
-                            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-200" />
-                            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce delay-300" />
+                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce delay-100" />
+                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce delay-200" />
+                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce delay-300" />
                           </div>
                         </div>
                       )}
@@ -2710,9 +2708,9 @@ export function TrailsContent({
                               )
                             }
                             disabled={aiLoading}
-                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-blue-500/50 transition-all cursor-pointer"
                           >
-                            <Lightbulb className="w-3 h-3 text-orange-500/80" /> Explicar Revisão
+                            <Lightbulb className="w-3 h-3 text-blue-500/80" /> Explicar Revisão
                           </button>
                           <button
                             onClick={() =>
@@ -2721,9 +2719,9 @@ export function TrailsContent({
                               )
                             }
                             disabled={aiLoading}
-                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-blue-500/50 transition-all cursor-pointer"
                           >
-                            <Code2 className="w-3 h-3 text-orange-500/80" /> Exemplo de Código
+                            <Code2 className="w-3 h-3 text-blue-500/80" /> Exemplo de Código
                           </button>
                         </>
                       )}
@@ -2736,9 +2734,9 @@ export function TrailsContent({
                               )
                             }
                             disabled={aiLoading}
-                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-blue-500/50 transition-all cursor-pointer"
                           >
-                            <Search className="w-3 h-3 text-orange-500/80" /> Dica de Lógica
+                            <Search className="w-3 h-3 text-blue-500/80" /> Dica de Lógica
                           </button>
                           <button
                             onClick={() =>
@@ -2747,9 +2745,9 @@ export function TrailsContent({
                               )
                             }
                             disabled={aiLoading}
-                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-orange-500/50 transition-all cursor-pointer"
+                            className="px-2.5 py-1 flex items-center gap-1.5 rounded-full border border-dd-border bg-dd-surface text-[10px] text-dd-muted hover:text-dd-text hover:border-blue-500/50 transition-all cursor-pointer"
                           >
-                            <Bug className="w-3 h-3 text-orange-500/80" /> Ajudar com o Bug
+                            <Bug className="w-3 h-3 text-blue-500/80" /> Ajudar com o Bug
                           </button>
                         </>
                       )}
@@ -2769,12 +2767,12 @@ export function TrailsContent({
                         onChange={(e) => setAiInput(e.target.value)}
                         placeholder="Perguntar ao tutor..."
                         disabled={aiLoading}
-                        className="flex-grow rounded-xl border border-dd-border bg-dd-surface px-3 py-2 text-xs text-dd-text placeholder-dd-muted focus:border-orange-500 focus:outline-none disabled:opacity-50"
+                        className="flex-grow rounded-xl border border-dd-border bg-dd-surface px-3 py-2 text-xs text-dd-text placeholder-dd-muted focus:border-blue-500 focus:outline-none disabled:opacity-50"
                       />
                       <button
                         type="submit"
                         disabled={aiLoading || !aiInput.trim()}
-                        className="px-3 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition-all disabled:opacity-50 cursor-pointer"
+                        className="px-3 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs transition-all disabled:opacity-50 cursor-pointer"
                       >
                         Enviar
                       </button>
@@ -2809,7 +2807,7 @@ export function TrailsContent({
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
               className="relative w-full max-w-sm bg-dd-surface border border-dd-border p-8 rounded-2xl shadow-2xl z-10 text-center space-y-6"
             >
-              <div className="w-20 h-20 bg-orange-500/10 border border-orange-500/20 text-orange-400 rounded-full flex items-center justify-center text-4xl mx-auto shadow-lg shadow-orange-500/10">
+              <div className="w-20 h-20 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full flex items-center justify-center text-4xl mx-auto shadow-lg shadow-blue-500/10">
                 ⭐
               </div>
 
@@ -2828,14 +2826,14 @@ export function TrailsContent({
                 <span className="text-[10px] font-bold text-dd-muted uppercase block">
                   Título Conquistado
                 </span>
-                <span className="text-sm font-black text-orange-400 uppercase tracking-wide mt-1 block">
+                <span className="text-sm font-black text-blue-400 uppercase tracking-wide mt-1 block">
                   {unlockedTitle}
                 </span>
               </div>
 
               <button
                 onClick={() => setLevelUpVisible(false)}
-                className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-500/15 transition-all cursor-pointer active:scale-95"
+                className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/15 transition-all cursor-pointer active:scale-95"
               >
                 Continuar Jornada
               </button>
@@ -2914,7 +2912,7 @@ export function TrailsContent({
                     confirmDialog.variant === 'danger'
                       ? 'bg-red-500 hover:bg-red-600 text-white shadow-md shadow-red-500/15'
                       : confirmDialog.variant === 'warning'
-                        ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-md shadow-orange-500/15'
+                        ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-md shadow-blue-500/15'
                         : 'bg-dd-accent hover:bg-dd-accent/90 text-white shadow-md'
                   }`}
                 >

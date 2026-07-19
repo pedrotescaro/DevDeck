@@ -373,7 +373,7 @@ export default function ExplorePage() {
                 placeholder="Buscar"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-full bg-dd-search-bg border border-dd-search-border focus:border-orange-500/50 focus:bg-dd-bg py-2.5 pl-12 pr-4 text-xs font-semibold text-dd-text placeholder-dd-muted/70 focus:outline-none transition-colors"
+                className="w-full rounded-full bg-dd-search-bg border border-dd-search-border focus:border-blue-500/50 focus:bg-dd-bg py-2.5 pl-12 pr-4 text-xs font-semibold text-dd-text placeholder-dd-muted/70 focus:outline-none transition-colors"
               />
             </form>
 
@@ -407,7 +407,7 @@ export default function ExplorePage() {
                       {tab === 'posts' ? 'Publicações' : 'Pessoas'}
                     </span>
                     {searchTab === tab && (
-                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500" />
+                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />
                     )}
                   </button>
                 ))}
@@ -415,7 +415,7 @@ export default function ExplorePage() {
 
               {searching ? (
                 <div className="flex flex-col items-center justify-center py-20 gap-3">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
                   <p className="text-xs text-dd-muted">Buscando...</p>
                 </div>
               ) : searchTab === 'posts' ? (
@@ -425,7 +425,7 @@ export default function ExplorePage() {
                     <div className="text-center">
                       <button
                         onClick={handleClearSearch}
-                        className="text-xs text-orange-400 font-bold hover:underline"
+                        className="text-xs text-blue-400 font-bold hover:underline"
                       >
                         Voltar para assuntos do momento
                       </button>
@@ -460,7 +460,7 @@ export default function ExplorePage() {
                   <div className="text-center">
                     <button
                       onClick={handleClearSearch}
-                      className="text-xs text-orange-400 font-bold hover:underline"
+                      className="text-xs text-blue-400 font-bold hover:underline"
                     >
                       Voltar para assuntos do momento
                     </button>
@@ -486,7 +486,7 @@ export default function ExplorePage() {
                             className="w-10 h-10 rounded-full object-cover border border-dd-border group-hover:scale-105 transition-transform shrink-0"
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold border border-orange-500/10 group-hover:scale-105 transition-transform shrink-0">
+                          <div className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold border border-blue-500/10 group-hover:scale-105 transition-transform shrink-0">
                             {sugUser.username.slice(0, 2).toUpperCase()}
                           </div>
                         )}
@@ -547,7 +547,7 @@ export default function ExplorePage() {
                       {activeTab === tab && (
                         <motion.div
                           layoutId="exploreTabIndicator"
-                          className="absolute bottom-0 left-3 right-3 h-0.5 bg-orange-500 rounded-full"
+                          className="absolute bottom-0 left-3 right-3 h-0.5 bg-blue-500 rounded-full"
                           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                         />
                       )}
@@ -571,11 +571,11 @@ export default function ExplorePage() {
                   >
                     <div className="space-y-1 w-full pr-4">
                       <div className="flex items-center gap-1.5 text-[11px] text-dd-muted font-bold">
-                        <span className="font-mono text-orange-500 font-extrabold">
+                        <span className="font-mono text-blue-500 font-extrabold">
                           # {trend.rank}
                         </span>
                         <span>·</span>
-                        <span className="font-semibold text-orange-400">{trend.languageLabel}</span>
+                        <span className="font-semibold text-blue-400">{trend.languageLabel}</span>
                       </div>
                       <p className="text-sm font-black text-dd-text leading-snug mt-0.5">
                         {trend.title}
@@ -622,7 +622,7 @@ export default function ExplorePage() {
                           className="w-10 h-10 rounded-full object-cover border border-dd-border group-hover:scale-105 transition-transform shrink-0"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold border border-orange-500/10 group-hover:scale-105 transition-transform shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold border border-blue-500/10 group-hover:scale-105 transition-transform shrink-0">
                           {sugUser.username.slice(0, 2).toUpperCase()}
                         </div>
                       )}
@@ -648,7 +648,7 @@ export default function ExplorePage() {
               )}
             </div>
 
-            <button className="text-xs font-bold text-orange-400 hover:text-orange-300 transition-colors block pt-2">
+            <button className="text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors block pt-2">
               Mostrar mais
             </button>
           </div>

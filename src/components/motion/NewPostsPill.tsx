@@ -21,8 +21,8 @@ export function NewPostsPill({ count, onClick, visible }: NewPostsPillProps) {
           animate="visible"
           exit="exit"
           className="fixed top-[4.5rem] left-1/2 -translate-x-1/2 z-40
-                     bg-orange-500 text-white text-xs font-bold
-                     px-4 py-2 rounded-full shadow-lg shadow-orange-500/25
+                     bg-blue-500 text-white text-xs font-bold
+                     px-4 py-2 rounded-full shadow-lg shadow-blue-500/25
                      hover:scale-[1.03] active:scale-95 dd-focus-ring cursor-pointer"
         >
           Ver {count} {count === 1 ? 'novo post' : 'novos posts'}

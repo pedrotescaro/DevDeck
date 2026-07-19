@@ -922,7 +922,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
     const repoMode = mode === 'Repositório';
     const repoFollowUp = repoMode && activeRepo;
     return (
-      <div className="w-full bg-[#131316]/90 border border-[#232329] rounded-2xl p-4 flex flex-col justify-between min-h-[140px] shadow-2xl focus-within:border-orange-500/40 focus-within:shadow-[0_0_25px_rgba(249,115,22,0.12)] transition-all duration-300 max-w-2xl mx-auto backdrop-blur-md">
+      <div className="w-full bg-[#131316]/90 border border-[#232329] rounded-2xl p-4 flex flex-col justify-between min-h-[140px] shadow-2xl focus-within:border-blue-500/40 focus-within:shadow-[0_0_25px_rgba(0, 131, 254,0.12)] transition-all duration-300 max-w-2xl mx-auto backdrop-blur-md">
         {/* Attachment chips preview */}
         {attachedFiles.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-2">
@@ -932,9 +932,9 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                 className="flex items-center gap-1.5 pl-2 pr-1 py-1 bg-[#1c1c1f] border border-[#2c2c35] rounded-lg text-[11px] text-dd-text max-w-[200px]"
               >
                 {f.kind === 'image' ? (
-                  <ImageIcon className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+                  <ImageIcon className="w-3.5 h-3.5 text-blue-500 shrink-0" />
                 ) : (
-                  <FileCode className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+                  <FileCode className="w-3.5 h-3.5 text-blue-500 shrink-0" />
                 )}
                 <span className="truncate">{f.name}</span>
                 <button
@@ -985,7 +985,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
               disabled={repoMode}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-semibold border transition-all cursor-pointer select-none disabled:opacity-40 disabled:cursor-not-allowed ${
                 deepThinkActive
-                  ? 'bg-[#2a1b15] border-[#7c3a0d] text-[#f97316]'
+                  ? 'bg-[#0a1929] border-[#7c3a0d] text-[#0083fe]'
                   : 'bg-[#1a1a1f] border-[#232329] text-[#8b8b93] hover:bg-[#232329] hover:text-dd-text'
               }`}
             >
@@ -999,7 +999,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
               onClick={() => setSearchActive(!searchActive)}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-semibold border transition-all cursor-pointer select-none ${
                 searchActive
-                  ? 'bg-[#2a1b15] border-[#7c3a0d] text-[#f97316]'
+                  ? 'bg-[#0a1929] border-[#7c3a0d] text-[#0083fe]'
                   : 'bg-[#1a1a1f] border-[#232329] text-[#8b8b93] hover:bg-[#232329] hover:text-dd-text'
               }`}
             >
@@ -1038,7 +1038,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
               type="button"
               onClick={() => handleSend(inputVal)}
               disabled={!inputVal.trim() || thinking || (repoMode && !repoFollowUp)}
-              className="p-2 bg-[#f97316] hover:bg-orange-600 disabled:opacity-40 disabled:hover:bg-[#f97316] disabled:cursor-not-allowed text-white rounded-full transition-all cursor-pointer flex items-center justify-center shrink-0 w-8.5 h-8.5 shadow-md"
+              className="p-2 bg-[#0083fe] hover:bg-blue-600 disabled:opacity-40 disabled:hover:bg-[#0083fe] disabled:cursor-not-allowed text-white rounded-full transition-all cursor-pointer flex items-center justify-center shrink-0 w-8.5 h-8.5 shadow-md"
               title="Enviar"
             >
               <svg
@@ -1062,7 +1062,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
     return (
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm bg-[#131316]/90 border border-[#232329] rounded-2xl p-3.5 flex items-center justify-between gap-4 shadow-2xl z-20 backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-500 select-none">
         <div className="flex items-center gap-3 text-left">
-          <div className="w-8 h-8 rounded-lg bg-[#2a1b15] border border-[#7c3a0d]/30 flex items-center justify-center text-[#f97316] text-xs">
+          <div className="w-8 h-8 rounded-lg bg-[#0a1929] border border-[#7c3a0d]/30 flex items-center justify-center text-[#0083fe] text-xs">
             ✨
           </div>
           <div className="font-sans">
@@ -1074,7 +1074,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
         </div>
         <button
           onClick={() => alert('Recurso premium em breve!')}
-          className="px-4.5 py-2 bg-[#f97316] hover:bg-orange-600 text-white text-[10px] font-bold rounded-full transition-all cursor-pointer shrink-0 shadow-md"
+          className="px-4.5 py-2 bg-[#0083fe] hover:bg-blue-600 text-white text-[10px] font-bold rounded-full transition-all cursor-pointer shrink-0 shadow-md"
         >
           Explorar
         </button>
@@ -1124,7 +1124,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
           <div
             key={idx}
             onClick={() => handleSelectSession(img.session)}
-            className="group relative aspect-square bg-[#131316] border border-[#1f1f23] rounded-lg overflow-hidden cursor-pointer hover:border-orange-500/40 transition-all shadow-sm"
+            className="group relative aspect-square bg-[#131316] border border-[#1f1f23] rounded-lg overflow-hidden cursor-pointer hover:border-blue-500/40 transition-all shadow-sm"
             title={`Carregar conversa: "${img.session.title}"`}
           >
             <Image
@@ -1232,7 +1232,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                   onClick={() => handleSelectSession(s)}
                   className={`group flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-all border ${
                     activeChatId === s.id
-                      ? 'bg-orange-500/10 border-orange-500/20 text-white font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]'
+                      ? 'bg-blue-500/10 border-blue-500/20 text-white font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]'
                       : 'bg-transparent border-transparent hover:bg-[#131316]/60 text-[#b3b3b9] hover:text-white'
                   }`}
                 >
@@ -1240,11 +1240,11 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                   <div className="flex items-center gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shrink-0">
                     <button
                       onClick={(e) => toggleBookmarkSession(s.id, e)}
-                      className="p-1 hover:bg-[#1c1c1f] rounded text-[#8b8b93] hover:text-orange-500 transition-colors cursor-pointer"
+                      className="p-1 hover:bg-[#1c1c1f] rounded text-[#8b8b93] hover:text-blue-500 transition-colors cursor-pointer"
                       title={s.isSaved ? 'Remover dos salvos' : 'Salvar conversa'}
                     >
                       {s.isSaved ? (
-                        <BookmarkFilled className="w-3.5 h-3.5 text-orange-500" />
+                        <BookmarkFilled className="w-3.5 h-3.5 text-blue-500" />
                       ) : (
                         <BookmarkOutline className="w-3.5 h-3.5" />
                       )}
@@ -1312,7 +1312,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0c0c0e] border border-[#1f1f23] hover:border-[#38383e] rounded-lg text-[10px] font-bold text-dd-muted hover:text-dd-text transition-all"
                 title={activeRepo.url}
               >
-                <Github className="w-3.5 h-3.5 text-orange-500" />
+                <Github className="w-3.5 h-3.5 text-blue-500" />
                 <span className="max-w-[180px] truncate">
                   {activeRepo.owner}/{activeRepo.name}
                 </span>
@@ -1326,7 +1326,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
             {/* Novo Chat Button */}
             <button
               onClick={handleNewChat}
-              className="flex items-center gap-1 px-3 py-1.5 text-[#f97316] font-bold text-xs hover:underline cursor-pointer bg-transparent border-0 transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 text-[#0083fe] font-bold text-xs hover:underline cursor-pointer bg-transparent border-0 transition-colors"
               title="Iniciar nova conversa"
             >
               <Plus className="w-3.5 h-3.5" />
@@ -1386,12 +1386,12 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                   onClick={() => setMode('Rápido')}
                   className={`flex items-center gap-1.5 px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     mode === 'Rápido'
-                      ? 'bg-[#2a1b15] text-[#f97316] shadow-sm border border-orange-500/10'
+                      ? 'bg-[#0a1929] text-[#0083fe] shadow-sm border border-blue-500/10'
                       : 'text-[#8b8b93] hover:text-dd-text'
                   }`}
                 >
                   <Flame
-                    className={`w-3.5 h-3.5 ${mode === 'Rápido' ? 'text-[#f97316]' : 'text-[#8b8b93]'}`}
+                    className={`w-3.5 h-3.5 ${mode === 'Rápido' ? 'text-[#0083fe]' : 'text-[#8b8b93]'}`}
                   />
                   <span>Rápido</span>
                 </button>
@@ -1400,12 +1400,12 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                   onClick={() => setMode('Deep Debug')}
                   className={`flex items-center gap-1.5 px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     mode === 'Deep Debug'
-                      ? 'bg-[#2a1b15] text-[#f97316] shadow-sm border border-orange-500/10'
+                      ? 'bg-[#0a1929] text-[#0083fe] shadow-sm border border-blue-500/10'
                       : 'text-[#8b8b93] hover:text-dd-text'
                   }`}
                 >
                   <Terminal
-                    className={`w-3.5 h-3.5 ${mode === 'Deep Debug' ? 'text-[#f97316]' : 'text-[#8b8b93]'}`}
+                    className={`w-3.5 h-3.5 ${mode === 'Deep Debug' ? 'text-[#0083fe]' : 'text-[#8b8b93]'}`}
                   />
                   <span>Deep Debug</span>
                 </button>
@@ -1414,12 +1414,12 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                   onClick={() => setMode('Repositório')}
                   className={`flex items-center gap-1.5 px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     mode === 'Repositório'
-                      ? 'bg-[#2a1b15] text-[#f97316] shadow-sm border border-orange-500/10'
+                      ? 'bg-[#0a1929] text-[#0083fe] shadow-sm border border-blue-500/10'
                       : 'text-[#8b8b93] hover:text-dd-text'
                   }`}
                 >
                   <GitBranch
-                    className={`w-3.5 h-3.5 ${mode === 'Repositório' ? 'text-[#f97316]' : 'text-[#8b8b93]'}`}
+                    className={`w-3.5 h-3.5 ${mode === 'Repositório' ? 'text-[#0083fe]' : 'text-[#8b8b93]'}`}
                   />
                   <span>Repositório</span>
                 </button>
@@ -1428,7 +1428,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
               {/* Repository URL input (only in repo mode) */}
               {mode === 'Repositório' ? (
                 <div className="w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className="flex items-center gap-2 bg-[#131316]/90 border border-[#232329] focus-within:border-orange-500/40 rounded-2xl p-2 shadow-2xl backdrop-blur-md transition-all">
+                  <div className="flex items-center gap-2 bg-[#131316]/90 border border-[#232329] focus-within:border-blue-500/40 rounded-2xl p-2 shadow-2xl backdrop-blur-md transition-all">
                     <div className="pl-2">
                       <Github className="w-5 h-5 text-[#8b8b93]" />
                     </div>
@@ -1446,7 +1446,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                     <button
                       onClick={handleRepoAnalyze}
                       disabled={!repoUrl.trim() || thinking}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-[#f97316] hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl transition-all cursor-pointer shrink-0"
+                      className="flex items-center gap-1.5 px-4 py-2 bg-[#0083fe] hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl transition-all cursor-pointer shrink-0"
                     >
                       {thinking ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -1476,7 +1476,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                   >
                     <svg
                       viewBox="0 0 24 24"
-                      className="w-3.5 h-3.5 fill-none stroke-current text-orange-500"
+                      className="w-3.5 h-3.5 fill-none stroke-current text-blue-500"
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -1558,7 +1558,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                             rel="noopener noreferrer"
                             className="mb-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#0c0c0e] border border-[#1f1f23] hover:border-[#38383e] rounded-md text-[10px] font-bold text-dd-muted hover:text-dd-text transition-all"
                           >
-                            <Github className="w-3 h-3 text-orange-500" />
+                            <Github className="w-3 h-3 text-blue-500" />
                             <span>
                               {msg.repo.owner}/{msg.repo.name}
                             </span>
@@ -1568,7 +1568,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                         <div className="max-w-[85%] text-sm text-dd-text leading-relaxed font-sans">
                           <MarkdownRenderer content={msg.text} />
                           {msg.isStreaming && (
-                            <span className="inline-block w-1.5 h-3 bg-orange-500 ml-1 animate-pulse" />
+                            <span className="inline-block w-1.5 h-3 bg-blue-500 ml-1 animate-pulse" />
                           )}
                         </div>
 
@@ -1635,11 +1635,11 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                                         className="object-cover rounded mr-1"
                                       />
                                     ) : (
-                                      <ImageIcon className="w-3 h-3 text-orange-500" />
+                                      <ImageIcon className="w-3 h-3 text-blue-500" />
                                     )}
                                   </>
                                 ) : (
-                                  <FileCode className="w-3 h-3 text-orange-500" />
+                                  <FileCode className="w-3 h-3 text-blue-500" />
                                 )}
                                 <span className="max-w-[120px] truncate">{a.name}</span>
                               </div>
@@ -1679,9 +1679,9 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                     <div className="flex flex-col items-start w-full py-4 border-b border-[#1f1f23]/10 animate-in fade-in duration-200">
                       <div className="flex items-center gap-2.5 text-xs text-[#71767b] py-1 font-sans">
                         <div className="flex gap-1.5">
-                          <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                          <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                          <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce" />
+                          <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                          <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                          <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" />
                         </div>
                         <span>
                           {mode === 'Deep Debug'
@@ -1706,7 +1706,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
                 {/* Premium Promotion Hint */}
                 <div className="mt-2.5 text-[9px] text-[#71767b] max-w-xl text-center flex items-center justify-center gap-1.5 select-none">
-                  <Sparkles className="w-3 h-3 text-orange-500" />
+                  <Sparkles className="w-3 h-3 text-blue-500" />
                   <span>
                     Ducky AI Premium — Tire dúvidas ilimitadas e ative análise de repositórios do
                     GitHub.
@@ -1763,7 +1763,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
               >
                 {labels[tab]}
                 {isActive && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-[2.5px] bg-[#f97316] rounded-full" />
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-[2.5px] bg-[#0083fe] rounded-full" />
                 )}
               </button>
             );
@@ -1772,7 +1772,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
         {/* Search Input Bar */}
         <div className="p-4 border-b border-[#1c1c1f]/40 shrink-0">
-          <div className="relative flex items-center bg-[#131316] border border-[#1f1f23] rounded-full px-3.5 py-2 focus-within:border-orange-500/40 transition-colors">
+          <div className="relative flex items-center bg-[#131316] border border-[#1f1f23] rounded-full px-3.5 py-2 focus-within:border-blue-500/40 transition-colors">
             <Search className="w-4 h-4 text-[#53535f] mr-2.5 shrink-0" />
             <input
               type="text"

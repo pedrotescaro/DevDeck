@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import BraceLoader from '@/components/BraceLoader';
 
 const container = {
   hidden: {},
@@ -229,10 +228,8 @@ fn credit_xp(user: &User, action: Action) -> Result<XP, Error> {
           </div>
         </motion.div>
 
-        {/* Right Column — 3D Loader */}
-        <div className="lg:col-span-5 relative h-[560px] flex items-center justify-center">
-          <BraceLoader scale={3} color="#FF5C00" background="transparent" />
-        </div>
+        {/* Right Column — Empty spacing column */}
+        <div className="hidden lg:block lg:col-span-5 min-h-[400px]" />
       </div>
 
       {/* Reel progress & chapter - absolute bottom-right */}

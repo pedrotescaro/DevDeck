@@ -52,7 +52,7 @@ export function FollowButton({ isFollowing, onToggle, size = 'md', className }: 
           ? hovered
             ? 'bg-red-500/10 border-red-500/30 text-red-400'
             : 'bg-dd-surface border border-dd-border text-dd-text'
-          : 'bg-dd-accent text-white hover:bg-orange-600',
+          : 'bg-dd-accent text-white hover:bg-blue-600',
         loading && 'opacity-70 cursor-wait',
         className
       )}

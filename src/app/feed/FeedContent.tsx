@@ -571,12 +571,12 @@ export function FeedContent({
       TS: 'bg-blue-500',
       JS: 'bg-amber-500',
       PYTHON: 'bg-emerald-500',
-      RUST: 'bg-orange-500',
+      RUST: 'bg-blue-500',
       GO: 'bg-cyan-500',
       CPP: 'bg-blue-600',
       JAVA: 'bg-red-500',
       KOTLIN: 'bg-purple-500',
-      SWIFT: 'bg-orange-600',
+      SWIFT: 'bg-blue-600',
     };
     return map[lang] || 'bg-slate-500';
   };
@@ -594,7 +594,7 @@ export function FeedContent({
             // Highlight keywords
             const keywords =
               /\b(const|let|var|function|return|fn|impl|pub|use|import|from|def|class|async|await|struct|enum|if|else|for|while|match)\b/g;
-            html = html.replace(keywords, '<span class="text-orange-400 font-semibold">$1</span>');
+            html = html.replace(keywords, '<span class="text-blue-400 font-semibold">$1</span>');
 
             // Highlight types
             const types =
@@ -1033,7 +1033,7 @@ export function FeedContent({
   );
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased selection:bg-orange-500/35 selection:text-white">
+    <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased selection:bg-blue-500/35 selection:text-white">
       <LevelUpOverlay
         visible={levelUpVisible}
         level={currentLevel}
@@ -1057,7 +1057,7 @@ export function FeedContent({
         </div>
       )}
       {firstPostToastVisible && (
-        <div className="fixed left-1/2 top-24 z-50 -translate-x-1/2 rounded-full bg-dd-accent px-4 py-2 text-xs font-black text-white shadow-xl shadow-orange-500/25 dd-soft-bounce">
+        <div className="fixed left-1/2 top-24 z-50 -translate-x-1/2 rounded-full bg-dd-accent px-4 py-2 text-xs font-black text-white shadow-xl shadow-blue-500/25 dd-soft-bounce">
           +50 XP - Primeira postagem! Bem-vindo ao DevDeck.
         </div>
       )}
@@ -1083,7 +1083,7 @@ export function FeedContent({
               {feedFilter === 'for-you' && (
                 <motion.div
                   layoutId="feedTabIndicator"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-full"
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 />
               )}
@@ -1106,7 +1106,7 @@ export function FeedContent({
                 {feedFilter === 'following' && (
                   <motion.div
                     layoutId="feedTabIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-full"
                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                   />
                 )}
@@ -1140,7 +1140,7 @@ export function FeedContent({
                       }}
                       className={`w-full text-left px-4 py-2.5 text-xs transition-colors cursor-pointer ${
                         followingSort === 'recent'
-                          ? 'text-orange-400 font-bold bg-orange-500/5'
+                          ? 'text-blue-400 font-bold bg-blue-500/5'
                           : 'text-dd-text hover:bg-dd-surface/80'
                       }`}
                     >
@@ -1153,7 +1153,7 @@ export function FeedContent({
                       }}
                       className={`w-full text-left px-4 py-2.5 text-xs transition-colors cursor-pointer ${
                         followingSort === 'popular'
-                          ? 'text-orange-400 font-bold bg-orange-500/5'
+                          ? 'text-blue-400 font-bold bg-blue-500/5'
                           : 'text-dd-text hover:bg-dd-surface/80'
                       }`}
                     >
@@ -1170,7 +1170,7 @@ export function FeedContent({
             <>
               <motion.div
                 layout
-                className="relative z-20 border-b border-dd-border/60 bg-transparent p-4 sm:p-5 transition-[border-color,box-shadow] duration-200 focus-within:border-orange-500/40"
+                className="relative z-20 border-b border-dd-border/60 bg-transparent p-4 sm:p-5 transition-[border-color,box-shadow] duration-200 focus-within:border-blue-500/40"
               >
                 <form onSubmit={handleCreatePost} className="flex gap-4">
                   <div className="shrink-0 pt-1">
@@ -1183,7 +1183,7 @@ export function FeedContent({
                         className="w-10 h-10 rounded-full object-cover border border-dd-border"
                       />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-sm font-bold border border-orange-500/10">
+                      <div className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm font-bold border border-blue-500/10">
                         {initialUser.username.slice(0, 2).toUpperCase()}
                       </div>
                     )}
@@ -1282,7 +1282,7 @@ export function FeedContent({
                     />
 
                     <div className="flex flex-wrap items-center justify-between gap-3 border-t border-dd-border/50 pt-3">
-                      <div className="flex items-center gap-1.5 text-orange-500">
+                      <div className="flex items-center gap-1.5 text-blue-500">
                         <div>
                           <input
                             type="file"
@@ -1293,7 +1293,7 @@ export function FeedContent({
                           />
                           <label
                             htmlFor="inline-file-upload"
-                            className="dd-touch inline-flex items-center justify-center rounded-full p-2 transition-colors hover:bg-orange-500/10 cursor-pointer"
+                            className="dd-touch inline-flex items-center justify-center rounded-full p-2 transition-colors hover:bg-blue-500/10 cursor-pointer"
                             title="Adicionar imagem"
                           >
                             <svg
@@ -1416,7 +1416,7 @@ export function FeedContent({
             >
               <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm">
                 <h2 className="font-bold text-lg text-dd-text flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-orange-500" />
+                  <Sparkles className="w-5 h-5 text-blue-500" />
                   🧩 DevDeck Quizzes
                 </h2>
                 <p className="text-dd-muted text-xs mt-1">
@@ -1426,10 +1426,10 @@ export function FeedContent({
 
               {/* Quiz Diário do Dia */}
               {dailyQuiz && (
-                <div className="dd-glow-ring rounded-xl border border-orange-500/35 bg-dd-surface p-5 backdrop-blur-sm space-y-4">
+                <div className="dd-glow-ring rounded-xl border border-blue-500/35 bg-dd-surface p-5 backdrop-blur-sm space-y-4">
                   <div className="flex justify-between items-center border-b border-dd-border pb-3">
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 text-[10px] font-bold bg-orange-500/10 text-orange-400 border border-orange-500/25 rounded-md uppercase tracking-wider">
+                      <span className="px-2 py-0.5 text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/25 rounded-md uppercase tracking-wider">
                         Oficial
                       </span>
                       <span className="text-xs font-bold text-dd-text">
@@ -1437,7 +1437,7 @@ export function FeedContent({
                       </span>
                     </div>
                     <span className="text-[10px] text-dd-muted flex items-center gap-1 font-semibold">
-                      <Calendar className="w-3.5 h-3.5 text-orange-500" /> Rotativo Diário
+                      <Calendar className="w-3.5 h-3.5 text-blue-500" /> Rotativo Diário
                     </span>
                   </div>
                   <QuizWidget
@@ -1542,7 +1542,7 @@ export function FeedContent({
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm shadow-sm">
                 <div>
                   <h2 className="font-bold text-lg text-dd-text flex items-center gap-2">
-                    <Swords className="w-5 h-5 text-orange-500" />
+                    <Swords className="w-5 h-5 text-blue-500" />
                     ⚔️ Arena de Duelos
                   </h2>
                   <p className="text-dd-muted text-xs mt-1">
@@ -1552,7 +1552,7 @@ export function FeedContent({
                 </div>
                 <button
                   onClick={() => setShowDuelForm(!showDuelForm)}
-                  className="bg-orange-500 text-white font-bold py-2.5 px-5 rounded-lg text-xs transition-colors hover:bg-orange-600 whitespace-nowrap cursor-pointer shadow-[0_0_15px_rgba(249,115,22,0.15)] flex items-center gap-1.5 self-start sm:self-auto"
+                  className="bg-blue-500 text-white font-bold py-2.5 px-5 rounded-lg text-xs transition-colors hover:bg-blue-600 whitespace-nowrap cursor-pointer shadow-[0_0_15px_rgba(0, 131, 254,0.15)] flex items-center gap-1.5 self-start sm:self-auto"
                 >
                   <Plus className="w-4 h-4" />
                   {showDuelForm ? 'Fechar Formulário' : 'Criar Novo Duelo'}
@@ -1571,14 +1571,14 @@ export function FeedContent({
                           onChange={(e) => setDuelTitle(e.target.value)}
                           required
                           placeholder="Título do problema (Ex: Inverter String sem Built-ins)..."
-                          className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-dd-text placeholder-slate-600 focus:border-orange-500/60 focus:outline-none"
+                          className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-dd-text placeholder-slate-600 focus:border-blue-500/60 focus:outline-none"
                         />
                       </div>
                       <div>
                         <select
                           value={duelLanguage}
                           onChange={(e) => setDuelLanguage(e.target.value as Language)}
-                          className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg/80 px-3 py-2.5 text-dd-text focus:border-orange-500/60 focus:outline-none cursor-pointer"
+                          className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg/80 px-3 py-2.5 text-dd-text focus:border-blue-500/60 focus:outline-none cursor-pointer"
                         >
                           <option value="TS">TypeScript</option>
                           <option value="JS">JavaScript</option>
@@ -1596,14 +1596,14 @@ export function FeedContent({
                         required
                         rows={4}
                         placeholder="Descreva o problema de algoritmo, formatos de entradas/saídas e exemplos..."
-                        className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-dd-text placeholder-slate-600 focus:border-orange-500/60 focus:outline-none resize-none"
+                        className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-dd-text placeholder-slate-600 focus:border-blue-500/60 focus:outline-none resize-none"
                       />
                     </div>
                     <div className="flex justify-end">
                       <button
                         type="submit"
                         disabled={creatingDuel}
-                        className="bg-orange-500 text-white text-xs font-bold px-6 py-2 rounded-lg transition-all hover:bg-orange-600 disabled:opacity-50 cursor-pointer"
+                        className="bg-blue-500 text-white text-xs font-bold px-6 py-2 rounded-lg transition-all hover:bg-blue-600 disabled:opacity-50 cursor-pointer"
                       >
                         {creatingDuel ? 'Enviando...' : 'Publicar Duelo'}
                       </button>
@@ -1630,7 +1630,7 @@ export function FeedContent({
               <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                 <div>
                   <h2 className="font-bold text-lg text-dd-text flex items-center gap-2">
-                    <Trophy className="w-5 h-5 text-orange-500" />
+                    <Trophy className="w-5 h-5 text-blue-500" />
                     🏆 Quadro de Líderes
                   </h2>
                   <p className="text-dd-muted text-xs mt-1">
@@ -1641,7 +1641,7 @@ export function FeedContent({
                   <select
                     value={leaderboardLanguage}
                     onChange={(e) => setLeaderboardLanguage(e.target.value)}
-                    className="text-xs rounded-lg border border-dd-border bg-dd-bg/80 px-3 py-2 text-dd-text focus:border-orange-500/60 focus:outline-none cursor-pointer font-medium"
+                    className="text-xs rounded-lg border border-dd-border bg-dd-bg/80 px-3 py-2 text-dd-text focus:border-blue-500/60 focus:outline-none cursor-pointer font-medium"
                   >
                     <option value="GLOBAL">Leaderboard Global</option>
                     <option value="TS">TypeScript</option>
@@ -1680,11 +1680,11 @@ export function FeedContent({
                           key={row.username}
                           className={`border-b border-dd-border hover:bg-dd-surface transition-colors ${
                             row.rank === 1
-                              ? 'bg-amber-500/5 border-l-2 border-l-amber-400'
+                              ? 'bg-blue-500/5 border-l-2 border-l-blue-400'
                               : row.rank === 2
                                 ? 'bg-slate-300/5 border-l-2 border-l-slate-400'
                                 : row.rank === 3
-                                  ? 'bg-orange-700/5 border-l-2 border-l-orange-700'
+                                  ? 'bg-blue-700/5 border-l-2 border-l-blue-700'
                                   : ''
                           }`}
                         >
@@ -1700,7 +1700,7 @@ export function FeedContent({
                           <td className="py-4 px-6 font-bold text-dd-text">
                             <Link
                               href={`/profile/${row.username}`}
-                              className="flex items-center gap-3 hover:text-orange-400 transition-colors w-fit"
+                              className="flex items-center gap-3 hover:text-blue-400 transition-colors w-fit"
                             >
                               <div className="w-7 h-7 rounded-full bg-dd-surface text-dd-text flex items-center justify-center font-bold text-xs select-none">
                                 {row.username.slice(0, 2).toUpperCase()}
@@ -1708,7 +1708,7 @@ export function FeedContent({
                               {row.username}
                             </Link>
                           </td>
-                          <td className="py-4 px-6 text-center text-orange-400 font-mono font-bold">
+                          <td className="py-4 px-6 text-center text-blue-400 font-mono font-bold">
                             Nível {row.level}
                           </td>
                           <td className="py-4 px-6 text-right font-mono font-bold text-dd-text">
@@ -1738,7 +1738,7 @@ export function FeedContent({
               placeholder="Buscar"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-11 pr-4 py-2.5 bg-dd-search-bg hover:bg-dd-search-bg/80 focus:bg-dd-bg border border-dd-search-border focus:border-orange-500/50 text-sm rounded-full text-dd-text placeholder-dd-muted focus:outline-none focus:ring-1 focus:ring-orange-500/30 transition-all duration-200"
+              className="w-full pl-11 pr-4 py-2.5 bg-dd-search-bg hover:bg-dd-search-bg/80 focus:bg-dd-bg border border-dd-search-border focus:border-blue-500/50 text-sm rounded-full text-dd-text placeholder-dd-muted focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all duration-200"
             />
           </div>
           {searchQuery.trim() && (
@@ -1756,8 +1756,8 @@ export function FeedContent({
                 ENGAJAMENTO
               </span>
               <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
               </span>
             </div>
 
@@ -1772,8 +1772,8 @@ export function FeedContent({
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                   <div className="flex flex-col items-center">
-                    <Flame className="w-14 h-14 text-orange-500 fill-orange-500" />
-                    <span className="mt-2.5 text-xs font-bold text-orange-500">
+                    <Flame className="w-14 h-14 text-blue-500 fill-blue-500" />
+                    <span className="mt-2.5 text-xs font-bold text-blue-500">
                       {currentStreak} {currentStreak === 1 ? 'dia' : 'dias'} de ofensiva
                     </span>
                   </div>
@@ -1794,12 +1794,12 @@ export function FeedContent({
                     <span>5d</span>
                   </div>
                   <div
-                    className={`h-[1px] flex-grow mx-1 ${currentStreak >= 10 ? 'bg-orange-500' : 'bg-dd-border/40'}`}
+                    className={`h-[1px] flex-grow mx-1 ${currentStreak >= 10 ? 'bg-blue-500' : 'bg-dd-border/40'}`}
                   />
 
                   <div className="flex flex-col items-center gap-1 shrink-0">
                     <Flame
-                      className={`w-4 h-4 text-orange-500 fill-orange-500 ${currentStreak >= 10 ? 'opacity-100 filter drop-shadow-[0_0_3px_rgba(249,115,22,0.5)]' : 'opacity-40'}`}
+                      className={`w-4 h-4 text-blue-500 fill-blue-500 ${currentStreak >= 10 ? 'opacity-100 filter drop-shadow-[0_0_3px_rgba(0, 131, 254,0.5)]' : 'opacity-40'}`}
                     />
                     <span>10d</span>
                   </div>
@@ -1846,8 +1846,8 @@ export function FeedContent({
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                   <div className="flex flex-col items-center">
-                    <Calendar className="w-14 h-14 text-orange-500" />
-                    <span className="mt-2.5 text-xs font-bold text-orange-500">
+                    <Calendar className="w-14 h-14 text-blue-500" />
+                    <span className="mt-2.5 text-xs font-bold text-blue-500">
                       Atividade Semanal
                     </span>
                   </div>
@@ -1874,7 +1874,7 @@ export function FeedContent({
                           title={tooltipText}
                           className={`w-6 h-6 rounded-md flex items-center justify-center transition-colors ${
                             isActive
-                              ? 'bg-orange-500 text-black shadow-[0_0_8px_rgba(249,115,22,0.3)]'
+                              ? 'bg-blue-500 text-black shadow-[0_0_8px_rgba(0, 131, 254,0.3)]'
                               : 'bg-dd-surface border border-dd-border text-dd-muted'
                           }`}
                         >
@@ -1916,7 +1916,7 @@ export function FeedContent({
               <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider block">
                 Conquistas
               </span>
-              <Award className="w-4 h-4 text-orange-500" />
+              <Award className="w-4 h-4 text-blue-500" />
             </div>
 
             <div className="grid grid-cols-3 gap-2 text-center">
@@ -1957,7 +1957,7 @@ export function FeedContent({
               <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider block">
                 Minhas Trilhas
               </span>
-              <Sparkles className="w-3.5 h-3.5 text-orange-500/80" />
+              <Sparkles className="w-3.5 h-3.5 text-blue-500/80" />
             </div>
 
             {initialUser.trails.length === 0 ? (
@@ -1977,7 +1977,7 @@ export function FeedContent({
                   return (
                     <div key={trail.id} className="space-y-1.5 group">
                       <div className="flex justify-between items-center text-xs">
-                        <span className="font-semibold text-dd-text group-hover:text-orange-400 transition-colors">
+                        <span className="font-semibold text-dd-text group-hover:text-blue-400 transition-colors">
                           {formatLangName(trail.language)}
                         </span>
                         <span className="text-[10px] bg-dd-surface border border-dd-border text-dd-text font-bold px-1.5 py-0.5 rounded font-mono">
@@ -2007,7 +2007,7 @@ export function FeedContent({
               <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider block">
                 Tópicos em Alta
               </span>
-              <TrendingUp className="w-4 h-4 text-orange-500" />
+              <TrendingUp className="w-4 h-4 text-blue-500" />
             </div>
 
             {trendingPosts.length === 0 ? (
@@ -2022,21 +2022,21 @@ export function FeedContent({
                       setSearchQuery(post.body.replace(/```[\s\S]*?```/g, '').substring(0, 40));
                       setActiveTab('feed');
                     }}
-                    className="group relative block w-full pl-4 border-l-2 border-orange-500/20 text-left transition-colors hover:border-orange-500"
+                    className="group relative block w-full pl-4 border-l-2 border-blue-500/20 text-left transition-colors hover:border-blue-500"
                   >
                     <span className="block">
                       <div className="flex items-center gap-1.5 text-[9px] text-dd-muted">
-                        <span className="font-mono text-orange-500 font-bold"># {idx + 1}</span>
+                        <span className="font-mono text-blue-500 font-bold"># {idx + 1}</span>
                         <span>·</span>
                         {post.language ? (
-                          <span className="font-semibold text-orange-400">
+                          <span className="font-semibold text-blue-400">
                             {formatLangName(post.language)}
                           </span>
                         ) : (
                           <span>Geral</span>
                         )}
                       </div>
-                      <h5 className="text-xs font-bold text-dd-text group-hover:text-orange-400 transition-colors line-clamp-1 leading-snug mt-0.5">
+                      <h5 className="text-xs font-bold text-dd-text group-hover:text-blue-400 transition-colors line-clamp-1 leading-snug mt-0.5">
                         {post.body
                           .replace(/```[\s\S]*?```/g, '')
                           .replace(/[#*_`~]/g, '')
@@ -2071,7 +2071,7 @@ export function FeedContent({
                     className="rounded-lg border border-dd-border/60 bg-dd-bg/40 p-3 space-y-2 hover:border-dd-border transition-colors"
                   >
                     <div className="flex justify-between items-center text-[10px]">
-                      <span className="text-orange-400 font-bold tracking-tight">
+                      <span className="text-blue-400 font-bold tracking-tight">
                         DUELO DE CÓDIGO
                       </span>
                       {duel.language && <LanguageTag language={duel.language} size="sm" />}
@@ -2085,7 +2085,7 @@ export function FeedContent({
                       </span>
                       <Link
                         href={`/duels/${duel.id}`}
-                        className="text-orange-500 hover:text-orange-400 flex items-center font-bold"
+                        className="text-blue-500 hover:text-blue-400 flex items-center font-bold"
                       >
                         Votar
                         <ChevronRight className="w-3 h-3 ml-0.5" />

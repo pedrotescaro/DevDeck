@@ -47,12 +47,12 @@ export function DuelCard({ duel }: DuelCardProps) {
   const statusColor: Record<Duel['status'], string> = {
     PENDING: 'text-dd-amber',
     ACTIVE: 'text-dd-blue',
-    VOTING: 'text-orange-400',
+    VOTING: 'text-blue-400',
     FINISHED: 'text-dd-green',
   };
 
   return (
-    <article className="bg-dd-card border border-orange-500/30 rounded-xl p-5">
+    <article className="bg-dd-card border border-blue-500/30 rounded-xl p-5">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
@@ -74,7 +74,7 @@ export function DuelCard({ duel }: DuelCardProps) {
       <div className="space-y-3">
         {/* Challenger */}
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-semibold shrink-0">
+          <div className="w-7 h-7 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-[10px] font-semibold shrink-0">
             {duel.challenger.username.slice(0, 2).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">

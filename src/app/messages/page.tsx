@@ -567,7 +567,7 @@ export default function MessagesPage() {
                   placeholder="Buscar conversas"
                   value={chatSearchQuery}
                   onChange={(e) => setChatSearchQuery(e.target.value)}
-                  className="w-full rounded-full bg-dd-surface/80 border border-transparent focus:border-orange-500/50 focus:bg-dd-bg py-2 pl-11 pr-4 text-xs font-semibold text-dd-text placeholder-dd-muted/70 focus:outline-none transition-colors"
+                  className="w-full rounded-full bg-dd-surface/80 border border-transparent focus:border-blue-500/50 focus:bg-dd-bg py-2 pl-11 pr-4 text-xs font-semibold text-dd-text placeholder-dd-muted/70 focus:outline-none transition-colors"
                 />
               </div>
             </div>
@@ -576,7 +576,7 @@ export default function MessagesPage() {
             <div className="flex-grow overflow-y-auto divide-y divide-dd-border/40">
               {loadingChats ? (
                 <div className="flex flex-col items-center py-10 gap-2">
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
                   <p className="text-[10px] text-dd-muted">Buscando chats...</p>
                 </div>
               ) : filteredChats.length === 0 ? (
@@ -584,7 +584,7 @@ export default function MessagesPage() {
                   <p className="text-xs text-dd-muted font-bold">Nenhum bate-papo iniciado</p>
                   <button
                     onClick={handleOpenNewChatModal}
-                    className="text-xs text-orange-400 font-extrabold hover:underline"
+                    className="text-xs text-blue-400 font-extrabold hover:underline"
                   >
                     Iniciar nova conversa
                   </button>
@@ -600,7 +600,7 @@ export default function MessagesPage() {
                       onClick={() => setActiveChat(chat)}
                       className={`w-full p-4 flex gap-3 text-left transition-colors duration-150 relative ${
                         isActive
-                          ? 'bg-dd-surface/40 border-r-2 border-orange-500'
+                          ? 'bg-dd-surface/40 border-r-2 border-blue-500'
                           : 'hover:bg-dd-surface/20'
                       }`}
                     >
@@ -614,7 +614,7 @@ export default function MessagesPage() {
                           className="w-11 h-11 rounded-full object-cover border border-dd-border shrink-0"
                         />
                       ) : (
-                        <div className="w-11 h-11 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold border border-orange-500/10 shrink-0">
+                        <div className="w-11 h-11 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold border border-blue-500/10 shrink-0">
                           {initials}
                         </div>
                       )}
@@ -631,7 +631,7 @@ export default function MessagesPage() {
                         </div>
                         <p className="text-xs text-dd-muted truncate leading-relaxed">
                           {chat.lastSenderId === user?.id && (
-                            <span className="text-orange-400/80 mr-0.5">Você:</span>
+                            <span className="text-blue-400/80 mr-0.5">Você:</span>
                           )}
                           {chat.lastMessage || 'Nenhuma mensagem enviada.'}
                         </p>
@@ -659,7 +659,7 @@ export default function MessagesPage() {
                       className="w-10 h-10 rounded-full object-cover border border-dd-border"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold border border-orange-500/10">
+                    <div className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold border border-blue-500/10">
                       {activeChat.partner.username.slice(0, 2).toUpperCase()}
                     </div>
                   )}
@@ -677,7 +677,7 @@ export default function MessagesPage() {
                 <div className="flex-grow overflow-y-auto p-4 space-y-3 bg-dd-surface/10">
                   {loadingMessages ? (
                     <div className="flex flex-col items-center justify-center h-full gap-2 text-dd-muted">
-                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
                       <p className="text-[10px]">Buscando mensagens...</p>
                     </div>
                   ) : (
@@ -725,7 +725,7 @@ export default function MessagesPage() {
                               <div
                                 className={`rounded-2xl px-4 py-2 text-xs leading-relaxed font-semibold shadow-sm max-w-full ${
                                   isCurrentUser
-                                    ? 'bg-orange-500 text-white rounded-br-none'
+                                    ? 'bg-blue-500 text-white rounded-br-none'
                                     : 'bg-dd-surface text-dd-text rounded-bl-none border border-dd-border/60'
                                 }`}
                               >
@@ -739,8 +739,8 @@ export default function MessagesPage() {
                                   />
                                 )}
                                 {replyText && (
-                                  <div className="bg-black/10 dark:bg-white/10 rounded-lg p-2 mb-1.5 border-l-2 border-orange-500/80 text-[10px] opacity-80 max-w-full truncate">
-                                    <span className="font-extrabold text-orange-400 block mb-0.5">
+                                  <div className="bg-black/10 dark:bg-white/10 rounded-lg p-2 mb-1.5 border-l-2 border-blue-500/80 text-[10px] opacity-80 max-w-full truncate">
+                                    <span className="font-extrabold text-blue-400 block mb-0.5">
                                       Em resposta a @{replyUser}
                                     </span>
                                     <span className="line-clamp-2">{replyText}</span>
@@ -864,7 +864,7 @@ export default function MessagesPage() {
                                         }}
                                         className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-dd-text hover:bg-dd-surface-hover/80 transition-colors text-left font-semibold cursor-pointer border-b border-dd-border/30 pb-2.5 mb-1"
                                       >
-                                        <Sparkles className="w-3.5 h-3.5 text-orange-400" />
+                                        <Sparkles className="w-3.5 h-3.5 text-blue-400" />
                                         <span>Perguntar ao Ducky</span>
                                       </button>
                                       <button
@@ -924,7 +924,7 @@ export default function MessagesPage() {
                   {replyingToMessage && (
                     <div className="flex items-center justify-between px-4 py-2.5 bg-dd-surface/60 border-b border-dd-border/40 text-xs font-semibold text-dd-muted">
                       <div className="flex items-center gap-1.5 truncate">
-                        <Reply className="w-3.5 h-3.5 text-orange-400" />
+                        <Reply className="w-3.5 h-3.5 text-blue-400" />
                         <span>
                           Respondendo a{' '}
                           <strong className="text-dd-text">
@@ -988,7 +988,7 @@ export default function MessagesPage() {
                           htmlFor="dm-image-upload"
                           className={`p-2 rounded-full transition-colors shrink-0 cursor-pointer flex items-center justify-center ${
                             uploadingImage
-                              ? 'text-orange-500 animate-pulse bg-orange-500/10'
+                              ? 'text-blue-500 animate-pulse bg-blue-500/10'
                               : 'text-dd-muted hover:text-dd-text'
                           }`}
                         >
@@ -1001,7 +1001,7 @@ export default function MessagesPage() {
                           onClick={() => setEmojiPanelOpen(!emojiPanelOpen)}
                           className={`p-2 rounded-full transition-colors shrink-0 ${
                             emojiPanelOpen
-                              ? 'bg-orange-500/15 text-orange-400'
+                              ? 'bg-blue-500/15 text-blue-400'
                               : 'text-dd-muted hover:text-dd-text'
                           }`}
                         >
@@ -1022,7 +1022,7 @@ export default function MessagesPage() {
                               <div className="space-y-3 max-h-52 overflow-y-auto">
                                 {EMOJI_CATEGORIES.map((category) => (
                                   <div key={category.name}>
-                                    <p className="text-[10px] font-bold text-orange-400 mb-1.5">
+                                    <p className="text-[10px] font-bold text-blue-400 mb-1.5">
                                       {category.name}
                                     </p>
                                     <div className="grid grid-cols-6 gap-1">
@@ -1031,7 +1031,7 @@ export default function MessagesPage() {
                                           key={`${category.name}-${emoji}`}
                                           type="button"
                                           onClick={() => insertEmoji(emoji)}
-                                          className="text-lg rounded-lg p-1.5 hover:bg-orange-500/10 transition-colors cursor-pointer"
+                                          className="text-lg rounded-lg p-1.5 hover:bg-blue-500/10 transition-colors cursor-pointer"
                                         >
                                           {emoji}
                                         </button>
@@ -1051,13 +1051,13 @@ export default function MessagesPage() {
                         placeholder="Enviar uma mensagem..."
                         value={newMessageText}
                         onChange={(e) => setNewMessageText(e.target.value)}
-                        className="flex-1 rounded-full bg-dd-surface/80 border border-transparent focus:border-orange-500/50 focus:bg-dd-bg py-2.5 px-4 text-xs font-semibold text-dd-text placeholder-dd-muted/65 focus:outline-none transition-colors"
+                        className="flex-1 rounded-full bg-dd-surface/80 border border-transparent focus:border-blue-500/50 focus:bg-dd-bg py-2.5 px-4 text-xs font-semibold text-dd-text placeholder-dd-muted/65 focus:outline-none transition-colors"
                       />
 
                       <button
                         type="submit"
                         disabled={(!newMessageText.trim() && !messageImage) || uploadingImage}
-                        className="p-2.5 bg-orange-500 text-white rounded-full transition-all shrink-0 hover:bg-orange-600 disabled:opacity-50 disabled:bg-dd-surface disabled:text-dd-muted active:scale-95 cursor-pointer"
+                        className="p-2.5 bg-blue-500 text-white rounded-full transition-all shrink-0 hover:bg-blue-600 disabled:opacity-50 disabled:bg-dd-surface disabled:text-dd-muted active:scale-95 cursor-pointer"
                       >
                         <Send className="w-4 h-4" />
                       </button>
@@ -1110,7 +1110,7 @@ export default function MessagesPage() {
                   placeholder="Pesquisar pessoas"
                   value={usersSearchQuery}
                   onChange={(e) => handleSearchUsers(e.target.value)}
-                  className="w-full rounded-full bg-dd-bg border border-dd-border py-2 pl-11 pr-4 text-xs font-semibold text-dd-text focus:border-orange-500/50 focus:outline-none"
+                  className="w-full rounded-full bg-dd-bg border border-dd-border py-2 pl-11 pr-4 text-xs font-semibold text-dd-text focus:border-blue-500/50 focus:outline-none"
                 />
               </div>
             </div>
@@ -1119,7 +1119,7 @@ export default function MessagesPage() {
             <div className="flex-1 overflow-y-auto divide-y divide-dd-border/30 p-2">
               {loadingUsers ? (
                 <div className="flex items-center justify-center py-10 gap-2 text-dd-muted">
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
                   <p className="text-xs">Buscando desenvolvedores...</p>
                 </div>
               ) : allUsers.length === 0 ? (
@@ -1142,7 +1142,7 @@ export default function MessagesPage() {
                         className="w-9 h-9 rounded-full object-cover border border-dd-border"
                       />
                     ) : (
-                      <div className="w-9 h-9 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold border border-orange-500/10">
+                      <div className="w-9 h-9 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold border border-blue-500/10">
                         {item.username.slice(0, 2).toUpperCase()}
                       </div>
                     )}
@@ -1186,7 +1186,7 @@ export default function MessagesPage() {
               <textarea
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
-                className="w-full bg-dd-bg border border-dd-border/80 focus:border-orange-500 rounded-xl p-3 text-xs font-semibold text-dd-text outline-none resize-none min-h-[100px]"
+                className="w-full bg-dd-bg border border-dd-border/80 focus:border-blue-500 rounded-xl p-3 text-xs font-semibold text-dd-text outline-none resize-none min-h-[100px]"
                 placeholder="Edite sua mensagem..."
                 autoFocus
               />
@@ -1202,7 +1202,7 @@ export default function MessagesPage() {
                   type="button"
                   onClick={() => handleEditMessage(editingMessage.id, editContent)}
                   disabled={!editContent.trim()}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-50 transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-blue-500 hover:bg-blue-600 text-white disabled:opacity-50 transition-colors cursor-pointer"
                 >
                   Salvar
                 </button>
@@ -1305,7 +1305,7 @@ export default function MessagesPage() {
                           className="w-9 h-9 rounded-full object-cover border border-dd-border"
                         />
                       ) : (
-                        <div className="w-9 h-9 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold border border-orange-500/10">
+                        <div className="w-9 h-9 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold border border-blue-500/10">
                           {item.partner.username.slice(0, 2).toUpperCase()}
                         </div>
                       )}
@@ -1366,7 +1366,7 @@ export default function MessagesPage() {
 
             <button
               onClick={() => setInfoMessage(null)}
-              className="mt-5 w-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold py-2 px-4 rounded-xl transition-colors cursor-pointer"
+              className="mt-5 w-full bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-2 px-4 rounded-xl transition-colors cursor-pointer"
             >
               Fechar
             </button>
@@ -1383,14 +1383,14 @@ export default function MessagesPage() {
           />
 
           <div className="relative w-full max-w-md bg-dd-surface border border-dd-border rounded-2xl p-5 shadow-2xl z-10 font-sans">
-            <div className="flex items-center gap-2 mb-4 text-orange-400">
+            <div className="flex items-center gap-2 mb-4 text-blue-400">
               <Sparkles className="w-5 h-5 animate-pulse" />
               <h3 className="text-sm font-black text-dd-text">Análise do Ducky AI</h3>
             </div>
 
             <div className="bg-dd-bg/40 border border-dd-border/80 rounded-xl p-3.5 text-xs leading-relaxed space-y-3.5">
               <div>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-orange-400 block mb-1">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-blue-400 block mb-1">
                   Mensagem analisada
                 </span>
                 <p className="text-dd-text font-semibold italic">
@@ -1419,10 +1419,10 @@ export default function MessagesPage() {
               </div>
 
               <div>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-orange-400 block mb-1">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-blue-400 block mb-1">
                   Sugestão de Resposta
                 </span>
-                <p className="text-dd-text font-extrabold bg-orange-500/10 text-orange-400 p-2.5 rounded-lg border border-orange-500/25">
+                <p className="text-dd-text font-extrabold bg-blue-500/10 text-blue-400 p-2.5 rounded-lg border border-blue-500/25">
                   &quot;Opa! Com certeza, bora marcar sim! Qual o melhor dia e horário para
                   você?&quot;
                 </p>
@@ -1431,7 +1431,7 @@ export default function MessagesPage() {
 
             <button
               onClick={() => setGrokMessage(null)}
-              className="mt-5 w-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold py-2 px-4 rounded-xl transition-colors cursor-pointer"
+              className="mt-5 w-full bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-2 px-4 rounded-xl transition-colors cursor-pointer"
             >
               Entendido
             </button>
@@ -1450,7 +1450,7 @@ export default function MessagesPage() {
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             className="fixed bottom-6 right-6 z-[200] bg-dd-surface border border-dd-border text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5"
           >
-            <span className="w-2 h-2 bg-orange-500 rounded-full animate-ping" />
+            <span className="w-2 h-2 bg-blue-500 rounded-full animate-ping" />
             <span className="text-dd-text">{toastMessage}</span>
           </motion.div>
         )}

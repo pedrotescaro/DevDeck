@@ -111,7 +111,7 @@ export function GuildsClient({ initialGuilds = [], initialMyGuilds = [] }: Guild
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-lg font-extrabold text-dd-text flex items-center gap-2">
-                  <Users className="w-5 h-5 text-orange-500" />
+                  <Users className="w-5 h-5 text-blue-500" />
                   Guildas
                 </h1>
                 <p className="text-xs text-dd-muted mt-0.5">
@@ -120,7 +120,7 @@ export function GuildsClient({ initialGuilds = [], initialMyGuilds = [] }: Guild
               </div>
               <button
                 onClick={() => setShowCreateForm(!showCreateForm)}
-                className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg text-xs transition-all cursor-pointer flex items-center gap-1.5"
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg text-xs transition-all cursor-pointer flex items-center gap-1.5"
               >
                 {showCreateForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
                 {showCreateForm ? 'Cancelar' : 'Criar Guilda'}
@@ -135,14 +135,14 @@ export function GuildsClient({ initialGuilds = [], initialMyGuilds = [] }: Guild
                 placeholder="Buscar guildas..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-dd-search-bg border border-dd-search-border rounded-full text-xs text-dd-text placeholder-dd-muted focus:outline-none focus:border-orange-500/50 transition-colors"
+                className="w-full pl-9 pr-4 py-2 bg-dd-search-bg border border-dd-search-border rounded-full text-xs text-dd-text placeholder-dd-muted focus:outline-none focus:border-blue-500/50 transition-colors"
               />
             </div>
           </div>
 
           {/* Create Form */}
           {showCreateForm && (
-            <div className="mx-5 mt-5 p-5 rounded-xl border border-orange-500/30 bg-dd-surface/80 backdrop-blur-sm">
+            <div className="mx-5 mt-5 p-5 rounded-xl border border-blue-500/30 bg-dd-surface/80 backdrop-blur-sm">
               <h3 className="text-sm font-bold text-dd-text mb-4">Nova Guilda</h3>
               <form onSubmit={handleCreate} className="space-y-3">
                 <div>
@@ -154,7 +154,7 @@ export function GuildsClient({ initialGuilds = [], initialMyGuilds = [] }: Guild
                     value={createName}
                     onChange={(e) => setCreateName(e.target.value)}
                     placeholder="Ex: Rustaceans BR"
-                    className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg px-3 py-2.5 text-dd-text placeholder-slate-600 focus:border-orange-500/60 focus:outline-none"
+                    className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg px-3 py-2.5 text-dd-text placeholder-slate-600 focus:border-blue-500/60 focus:outline-none"
                     required
                     minLength={3}
                   />
@@ -168,7 +168,7 @@ export function GuildsClient({ initialGuilds = [], initialMyGuilds = [] }: Guild
                     onChange={(e) => setCreateDescription(e.target.value)}
                     placeholder="Qual o foco da sua guilda?"
                     rows={2}
-                    className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg px-3 py-2.5 text-dd-text placeholder-slate-600 focus:border-orange-500/60 focus:outline-none resize-none"
+                    className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg px-3 py-2.5 text-dd-text placeholder-slate-600 focus:border-blue-500/60 focus:outline-none resize-none"
                   />
                 </div>
                 <div>
@@ -178,7 +178,7 @@ export function GuildsClient({ initialGuilds = [], initialMyGuilds = [] }: Guild
                   <select
                     value={createLanguage}
                     onChange={(e) => setCreateLanguage(e.target.value)}
-                    className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg px-3 py-2.5 text-dd-text focus:border-orange-500/60 focus:outline-none cursor-pointer"
+                    className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg px-3 py-2.5 text-dd-text focus:border-blue-500/60 focus:outline-none cursor-pointer"
                   >
                     <option value="">Todas as linguagens</option>
                     <option value="TS">TypeScript</option>
@@ -199,7 +199,7 @@ export function GuildsClient({ initialGuilds = [], initialMyGuilds = [] }: Guild
                   <button
                     type="submit"
                     disabled={creating}
-                    className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-5 py-2 rounded-lg transition-all disabled:opacity-50 cursor-pointer"
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs px-5 py-2 rounded-lg transition-all disabled:opacity-50 cursor-pointer"
                   >
                     {creating ? 'Criando...' : 'Criar Guilda'}
                   </button>
@@ -212,7 +212,7 @@ export function GuildsClient({ initialGuilds = [], initialMyGuilds = [] }: Guild
           {myGuilds.length > 0 && (
             <div className="px-5 pt-5">
               <h2 className="text-[10px] font-bold uppercase tracking-wider text-dd-muted mb-3 flex items-center gap-1.5">
-                <Sparkles className="w-3 h-3 text-orange-500" />
+                <Sparkles className="w-3 h-3 text-blue-500" />
                 Minhas Guildas
               </h2>
               <div className="space-y-2">
@@ -220,10 +220,10 @@ export function GuildsClient({ initialGuilds = [], initialMyGuilds = [] }: Guild
                   <Link
                     key={g.id}
                     href={`/guilds/${g.slug}`}
-                    className="flex items-center justify-between p-3.5 rounded-xl border border-orange-500/20 bg-orange-500/5 hover:bg-orange-500/10 transition-colors group"
+                    className="flex items-center justify-between p-3.5 rounded-xl border border-blue-500/20 bg-blue-500/5 hover:bg-blue-500/10 transition-colors group"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-9 h-9 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center font-bold text-sm shrink-0">
+                      <div className="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold text-sm shrink-0">
                         {g.name[0].toUpperCase()}
                       </div>
                       <div className="min-w-0">
@@ -231,7 +231,7 @@ export function GuildsClient({ initialGuilds = [], initialMyGuilds = [] }: Guild
                         <p className="text-[10px] text-dd-muted">{g.memberCount} membros</p>
                       </div>
                     </div>
-                    <Users className="w-4 h-4 text-dd-muted group-hover:text-orange-400 transition-colors shrink-0" />
+                    <Users className="w-4 h-4 text-dd-muted group-hover:text-blue-400 transition-colors shrink-0" />
                   </Link>
                 ))}
               </div>
@@ -258,10 +258,10 @@ export function GuildsClient({ initialGuilds = [], initialMyGuilds = [] }: Guild
                   <Link
                     key={g.id}
                     href={`/guilds/${g.slug}`}
-                    className="flex items-center justify-between p-4 rounded-xl border border-dd-border bg-dd-surface/30 hover:bg-dd-surface/60 hover:border-orange-500/20 transition-all group"
+                    className="flex items-center justify-between p-4 rounded-xl border border-dd-border bg-dd-surface/30 hover:bg-dd-surface/60 hover:border-blue-500/20 transition-all group"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500/20 to-amber-500/10 text-orange-400 flex items-center justify-center font-bold text-lg shrink-0 group-hover:scale-105 transition-transform">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-400/10 text-blue-400 flex items-center justify-center font-bold text-lg shrink-0 group-hover:scale-105 transition-transform">
                         {g.name[0].toUpperCase()}
                       </div>
                       <div className="min-w-0">

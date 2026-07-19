@@ -37,7 +37,7 @@ export function ReactionButton({ count, isActive, onToggle, title }: ReactionBut
         title={title}
         className={cn(
           'dd-touch dd-focus-ring relative p-1.5 rounded-md transition-colors cursor-pointer',
-          isActive ? 'text-orange-500' : 'text-dd-muted hover:text-dd-text hover:scale-[1.03]'
+          isActive ? 'text-blue-500' : 'text-dd-muted hover:text-dd-text hover:scale-[1.03]'
         )}
         whileTap={reduced ? undefined : { scale: [1, 1.35, 1.1, 1] }}
         transition={{ duration: 0.3, times: [0, 0.35, 0.7, 1] }}
@@ -47,7 +47,7 @@ export function ReactionButton({ count, isActive, onToggle, title }: ReactionBut
           PARTICLE_ANGLES.map((deg, i) => (
             <span
               key={i}
-              className="absolute top-1/2 left-1/2 w-1.5 h-1.5 -ml-[3px] -mt-[3px] rounded-full bg-orange-500 pointer-events-none"
+              className="absolute top-1/2 left-1/2 w-1.5 h-1.5 -ml-[3px] -mt-[3px] rounded-full bg-blue-500 pointer-events-none"
               style={{
                 ['--tx' as string]: `${Math.cos((deg * Math.PI) / 180) * 16}px`,
                 ['--ty' as string]: `${Math.sin((deg * Math.PI) / 180) * 16}px`,

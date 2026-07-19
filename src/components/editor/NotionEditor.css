@@ -47,7 +47,7 @@
 }
 
 .notion-editor-content a {
-  color: var(--color-dd-accent, #f97316);
+  color: var(--color-dd-accent, #0083fe);
   text-decoration: underline;
 }
 

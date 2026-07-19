@@ -94,13 +94,13 @@ export function PostComposerExtras({
         {(location || scheduledAt || isSensitive) && (
           <div className="flex flex-wrap gap-2">
             {location && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-orange-500/10 px-2.5 py-1 text-[10px] font-bold text-orange-400">
+              <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2.5 py-1 text-[10px] font-bold text-blue-400">
                 <MapPin className="w-3 h-3" />
                 {location}
                 <button
                   type="button"
                   onClick={() => setLocation('')}
-                  className="hover:text-orange-300 cursor-pointer"
+                  className="hover:text-blue-300 cursor-pointer"
                   aria-label="Remover localização"
                 >
                   <X className="w-3 h-3" />
@@ -108,7 +108,7 @@ export function PostComposerExtras({
               </span>
             )}
             {scheduledAt && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-orange-500/10 px-2.5 py-1 text-[10px] font-bold text-orange-400">
+              <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2.5 py-1 text-[10px] font-bold text-blue-400">
                 <Calendar className="w-3 h-3" />
                 {new Date(scheduledAt).toLocaleString('pt-BR', {
                   dateStyle: 'short',
@@ -117,7 +117,7 @@ export function PostComposerExtras({
                 <button
                   type="button"
                   onClick={() => setScheduledAt(null)}
-                  className="hover:text-orange-300 cursor-pointer"
+                  className="hover:text-blue-300 cursor-pointer"
                   aria-label="Remover agendamento"
                 >
                   <X className="w-3 h-3" />
@@ -145,7 +145,7 @@ export function PostComposerExtras({
           <button
             type="button"
             onClick={() => togglePanel('reply')}
-            className="flex items-center gap-1.5 text-orange-500 hover:text-orange-400 font-extrabold text-[11px] cursor-pointer w-fit py-1 px-2 hover:bg-orange-500/5 rounded-full transition-colors"
+            className="flex items-center gap-1.5 text-blue-500 hover:text-blue-400 font-extrabold text-[11px] cursor-pointer w-fit py-1 px-2 hover:bg-blue-500/5 rounded-full transition-colors"
           >
             <Globe className="w-3.5 h-3.5 shrink-0" />
             <span>{replyLabel}</span>
@@ -163,8 +163,8 @@ export function PostComposerExtras({
                   }}
                   className={`flex w-full items-start gap-2.5 rounded-lg px-3 py-2.5 text-left transition-colors cursor-pointer ${
                     replyAudience === option.value
-                      ? 'bg-orange-500/10 text-orange-400'
-                      : 'text-dd-text hover:bg-orange-500/5 hover:text-orange-400'
+                      ? 'bg-blue-500/10 text-blue-400'
+                      : 'text-dd-text hover:bg-blue-500/5 hover:text-blue-400'
                   }`}
                 >
                   {option.value === 'everyone' && <Globe className="w-4 h-4 mt-0.5 shrink-0" />}
@@ -193,8 +193,8 @@ export function PostComposerExtras({
           onClick={() => togglePanel('emoji')}
           className={`p-2 rounded-full transition-colors cursor-pointer ${
             openPanel === 'emoji'
-              ? 'bg-orange-500/15 text-orange-400'
-              : 'text-orange-500 hover:bg-orange-500/10'
+              ? 'bg-blue-500/15 text-blue-400'
+              : 'text-blue-500 hover:bg-blue-500/10'
           }`}
           title="Emojis"
         >
@@ -209,14 +209,14 @@ export function PostComposerExtras({
             <div className="space-y-3 max-h-52 overflow-y-auto">
               {EMOJI_CATEGORIES.map((category) => (
                 <div key={category.name}>
-                  <p className="text-[10px] font-bold text-orange-400 mb-1.5">{category.name}</p>
+                  <p className="text-[10px] font-bold text-blue-400 mb-1.5">{category.name}</p>
                   <div className="grid grid-cols-6 gap-1">
                     {category.emojis.map((emoji) => (
                       <button
                         key={`${category.name}-${emoji}`}
                         type="button"
                         onClick={() => insertEmoji(emoji)}
-                        className="text-lg rounded-lg p-1.5 hover:bg-orange-500/10 transition-colors cursor-pointer"
+                        className="text-lg rounded-lg p-1.5 hover:bg-blue-500/10 transition-colors cursor-pointer"
                       >
                         {emoji}
                       </button>
@@ -235,8 +235,8 @@ export function PostComposerExtras({
           onClick={() => togglePanel('schedule')}
           className={`p-2 rounded-full transition-colors cursor-pointer ${
             openPanel === 'schedule' || scheduledAt
-              ? 'bg-orange-500/15 text-orange-400'
-              : 'text-orange-500 hover:bg-orange-500/10'
+              ? 'bg-blue-500/15 text-blue-400'
+              : 'text-blue-500 hover:bg-blue-500/10'
           }`}
           title="Agendar publicação"
         >
@@ -250,7 +250,7 @@ export function PostComposerExtras({
               type="datetime-local"
               value={scheduledAt ?? ''}
               onChange={(e) => setScheduledAt(e.target.value || null)}
-              className="w-full rounded-lg border border-dd-border bg-dd-bg px-2.5 py-2 text-xs text-dd-text focus:border-orange-500/65 focus:outline-none"
+              className="w-full rounded-lg border border-dd-border bg-dd-bg px-2.5 py-2 text-xs text-dd-text focus:border-blue-500/65 focus:outline-none"
             />
             <div className="flex gap-2">
               <button
@@ -266,7 +266,7 @@ export function PostComposerExtras({
               <button
                 type="button"
                 onClick={() => setOpenPanel(null)}
-                className="flex-1 rounded-lg bg-orange-500 px-2 py-1.5 text-[10px] font-bold text-white hover:bg-orange-600 cursor-pointer"
+                className="flex-1 rounded-lg bg-blue-500 px-2 py-1.5 text-[10px] font-bold text-white hover:bg-blue-600 cursor-pointer"
               >
                 Confirmar
               </button>
@@ -281,8 +281,8 @@ export function PostComposerExtras({
           onClick={() => togglePanel('location')}
           className={`p-2 rounded-full transition-colors cursor-pointer ${
             openPanel === 'location' || location
-              ? 'bg-orange-500/15 text-orange-400'
-              : 'text-orange-500 hover:bg-orange-500/10'
+              ? 'bg-blue-500/15 text-blue-400'
+              : 'text-blue-500 hover:bg-blue-500/10'
           }`}
           title="Adicionar localização"
         >
@@ -297,7 +297,7 @@ export function PostComposerExtras({
               value={locationDraft}
               onChange={(e) => setLocationDraft(e.target.value)}
               placeholder="Onde você está?"
-              className="w-full rounded-lg border border-dd-border bg-dd-bg px-2.5 py-2 text-xs text-dd-text placeholder-dd-muted focus:border-orange-500/65 focus:outline-none"
+              className="w-full rounded-lg border border-dd-border bg-dd-bg px-2.5 py-2 text-xs text-dd-text placeholder-dd-muted focus:border-blue-500/65 focus:outline-none"
             />
             <div className="flex flex-wrap gap-1.5">
               {QUICK_LOCATIONS.map((item) => (
@@ -305,7 +305,7 @@ export function PostComposerExtras({
                   key={item}
                   type="button"
                   onClick={() => setLocationDraft(item)}
-                  className="rounded-full border border-dd-border px-2 py-1 text-[10px] font-bold text-dd-muted hover:text-orange-400 hover:border-orange-500/30 cursor-pointer"
+                  className="rounded-full border border-dd-border px-2 py-1 text-[10px] font-bold text-dd-muted hover:text-blue-400 hover:border-blue-500/30 cursor-pointer"
                 >
                   {item}
                 </button>
@@ -317,7 +317,7 @@ export function PostComposerExtras({
                 setLocation(locationDraft.trim());
                 setOpenPanel(null);
               }}
-              className="w-full rounded-lg bg-orange-500 px-2 py-1.5 text-[10px] font-bold text-white hover:bg-orange-600 cursor-pointer"
+              className="w-full rounded-lg bg-blue-500 px-2 py-1.5 text-[10px] font-bold text-white hover:bg-blue-600 cursor-pointer"
             >
               Adicionar localização
             </button>
@@ -329,7 +329,7 @@ export function PostComposerExtras({
         type="button"
         onClick={() => setIsSensitive(!isSensitive)}
         className={`p-2 rounded-full transition-colors cursor-pointer ${
-          isSensitive ? 'bg-red-500/15 text-red-400' : 'text-orange-500 hover:bg-orange-500/10'
+          isSensitive ? 'bg-red-500/15 text-red-400' : 'text-blue-500 hover:bg-blue-500/10'
         }`}
         title="Marcar como conteúdo sensível"
       >

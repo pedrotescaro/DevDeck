@@ -77,7 +77,7 @@ export function MentionDropdown({ query, visible, onSelect, onClose }: MentionDr
                   className="w-6 h-6 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-6 h-6 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[8px] font-bold">
+                <div className="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-[8px] font-bold">
                   {user.username.slice(0, 2).toUpperCase()}
                 </div>
               )}

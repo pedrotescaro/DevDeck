@@ -36,12 +36,12 @@ export function XPToast({ amount, language, visible, onClose }: XPToastProps) {
         animation: 'slide-in-right 0.3s ease-out',
       }}
     >
-      <div className="bg-dd-card border border-orange-500/40 rounded-xl px-4 py-3 flex items-center gap-3">
+      <div className="bg-dd-card border border-blue-500/40 rounded-xl px-4 py-3 flex items-center gap-3">
         {/* Orange accent bar */}
-        <div className="w-1 h-8 bg-orange-500 rounded-full" />
+        <div className="w-1 h-8 bg-blue-500 rounded-full" />
 
         <div className="flex items-center gap-3">
-          <span className="text-orange-400 font-bold text-lg">+{amount} XP</span>
+          <span className="text-blue-400 font-bold text-lg">+{amount} XP</span>
           <LanguageTag language={language} size="sm" />
         </div>
 

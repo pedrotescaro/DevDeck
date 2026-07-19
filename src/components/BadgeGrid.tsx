@@ -66,13 +66,13 @@ export const badgeDesigns: Record<string, BadgeDesign> = {
     ribbonText: 'MASTER',
   },
   rustacean_approved: {
-    bgGradient: 'bg-gradient-to-br from-orange-500/20 via-orange-700/10 to-zinc-950/40',
-    borderColor: 'border-orange-500/80 dark:border-orange-500 border-b-orange-800',
-    textColor: 'text-orange-600 dark:text-orange-400',
-    glowColor: 'shadow-orange-500/30',
+    bgGradient: 'bg-gradient-to-br from-blue-500/20 via-blue-700/10 to-zinc-950/40',
+    borderColor: 'border-blue-500/80 dark:border-blue-500 border-b-blue-800',
+    textColor: 'text-blue-600 dark:text-blue-400',
+    glowColor: 'shadow-blue-500/30',
     shapeClass:
       'rounded-lg border-[3px] [clip-path:polygon(25%_0%,_75%_0%,_100%_50%,_75%_100%,_25%_100%,_0%_50%)]',
-    innerBg: 'bg-gradient-to-br from-orange-500/10 to-transparent',
+    innerBg: 'bg-gradient-to-br from-blue-500/10 to-transparent',
     ribbonText: 'ELITE',
   },
   stack_overflow_ban: {
@@ -157,7 +157,7 @@ export function BadgeEmblem({
       <div className="flex flex-col items-center justify-center select-none">
         <div
           className={`relative flex items-center justify-center ${sizeClasses.outer} ${
-            earned ? 'shadow-lg shadow-orange-500/20' : 'opacity-35 grayscale'
+            earned ? 'shadow-lg shadow-blue-500/20' : 'opacity-35 grayscale'
           } transition-all duration-300 hover:scale-[1.04]`}
         >
           <Image

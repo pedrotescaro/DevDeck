@@ -149,7 +149,7 @@ export default function NotificationsPage() {
         );
       case 'DUEL':
         return (
-          <div className={cn(base, 'text-orange-500 bg-orange-500/10')}>
+          <div className={cn(base, 'text-blue-500 bg-blue-500/10')}>
             <Swords className="w-4 h-4" />
           </div>
         );
@@ -197,7 +197,7 @@ export default function NotificationsPage() {
                   {activeTab === tab && (
                     <motion.span
                       layoutId="notifTabIndicator"
-                      className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-1 rounded-full bg-orange-500"
+                      className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-1 rounded-full bg-blue-500"
                       transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                     />
                   )}
@@ -251,7 +251,7 @@ export default function NotificationsPage() {
                             ) : (
                               <div
                                 key={idx}
-                                className="w-8 h-8 rounded-full border-2 border-black bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-bold shrink-0"
+                                className="w-8 h-8 rounded-full border-2 border-black bg-blue-500/20 text-blue-400 flex items-center justify-center text-[10px] font-bold shrink-0"
                               >
                                 {voter.username.slice(0, 2).toUpperCase()}
                               </div>
@@ -312,7 +312,7 @@ export default function NotificationsPage() {
                         <div className="pt-1.5">
                           <Link
                             href={item.link}
-                            className="text-[10px] font-black text-orange-400 hover:text-orange-300 transition-colors inline-flex items-center gap-0.5"
+                            className="text-[10px] font-black text-blue-400 hover:text-blue-300 transition-colors inline-flex items-center gap-0.5"
                           >
                             Ir para atividade →
                           </Link>

@@ -170,7 +170,7 @@ export function ProfileReplyThread({ reply }: ProfileReplyThreadProps) {
               </span>
             </div>
             {postLanguage && (
-              <span className="px-1.5 py-0.5 text-[9px] font-bold text-orange-500 bg-orange-500/10 border border-orange-500/20 rounded">
+              <span className="px-1.5 py-0.5 text-[9px] font-bold text-blue-500 bg-blue-500/10 border border-blue-500/20 rounded">
                 {postLanguage}
               </span>
             )}
@@ -219,8 +219,7 @@ export function ProfileReplyThread({ reply }: ProfileReplyThreadProps) {
           </div>
 
           <div className="text-[11px] text-dd-muted mt-0.5">
-            Repondo a{' '}
-            <span className="text-orange-500/90 font-medium">@{parentAuthor.username}</span>
+            Repondo a <span className="text-blue-500/90 font-medium">@{parentAuthor.username}</span>
           </div>
 
           <div className="text-sm text-dd-text mt-2">
@@ -241,9 +240,9 @@ export function ProfileReplyThread({ reply }: ProfileReplyThreadProps) {
               {/* Comment Button (just redirects to post thread) */}
               <button
                 type="button"
-                className="flex items-center gap-0.5 text-dd-muted hover:text-orange-400 active:scale-[0.95] transition-transform p-1 bg-transparent border-none"
+                className="flex items-center gap-0.5 text-dd-muted hover:text-blue-400 active:scale-[0.95] transition-transform p-1 bg-transparent border-none"
               >
-                <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-500/10 transition-colors">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-500/10 transition-colors">
                   <MessageSquare className="w-3.5 h-3.5" />
                 </div>
               </button>
@@ -273,10 +272,10 @@ export function ProfileReplyThread({ reply }: ProfileReplyThreadProps) {
 
               {/* Views Mock */}
               <div className="flex items-center gap-0.5 text-dd-muted select-none group/views">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-500/10 hover:text-orange-400 transition-colors">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-500/10 hover:text-blue-400 transition-colors">
                   <BarChart2 className="w-4 h-4" />
                 </div>
-                <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/views:text-orange-400">
+                <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/views:text-blue-400">
                   {Math.abs(voteCount) * 4 + 12}
                 </span>
               </div>
@@ -293,9 +292,9 @@ export function ProfileReplyThread({ reply }: ProfileReplyThreadProps) {
               <button
                 type="button"
                 onClick={handleShare}
-                className="flex items-center gap-0.5 text-dd-muted hover:text-orange-400 transition-colors p-1 bg-transparent border-none"
+                className="flex items-center gap-0.5 text-dd-muted hover:text-blue-400 transition-colors p-1 bg-transparent border-none"
               >
-                <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-500/10 transition-colors">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-500/10 transition-colors">
                   <Share className="w-3.5 h-3.5" />
                 </div>
               </button>

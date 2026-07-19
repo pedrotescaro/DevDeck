@@ -93,9 +93,9 @@ export function QuizWidget({
 
     if (state === 'unanswered') {
       if (selectedIndex === index && submitting) {
-        return `${base} border-orange-500/50 bg-orange-500/10 text-dd-text`;
+        return `${base} border-blue-500/50 bg-blue-500/10 text-dd-text`;
       }
-      return `${base} border-dd-border bg-dd-surface hover:border-orange-500/30 hover:bg-orange-500/5 text-dd-text cursor-pointer`;
+      return `${base} border-dd-border bg-dd-surface hover:border-blue-500/30 hover:bg-blue-500/5 text-dd-text cursor-pointer`;
     }
 
     // After answering
@@ -110,7 +110,7 @@ export function QuizWidget({
 
   return (
     <div
-      className={`bg-dd-card border border-orange-500/30 rounded-xl p-5 ${
+      className={`bg-dd-card border border-blue-500/30 rounded-xl p-5 ${
         state === 'unanswered' ? 'dd-glow-ring' : ''
       } ${
         state === 'correct' ? 'dd-correct-flash' : ''
@@ -118,7 +118,7 @@ export function QuizWidget({
     >
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
-        <span className="text-orange-400">
+        <span className="text-blue-400">
           <svg
             width="18"
             height="18"

@@ -38,7 +38,7 @@ export function AnswerThread({
   return (
     <div className="flex flex-col bg-transparent">
       <div className="flex items-center gap-2 p-4 sm:p-5 border-b border-dd-border/50">
-        <MessageSquare className="w-4.5 h-4.5 text-orange-500/85" />
+        <MessageSquare className="w-4.5 h-4.5 text-blue-500/85" />
         <h2 className="text-sm font-extrabold text-dd-text">Respostas ({totalAnswers})</h2>
       </div>
 

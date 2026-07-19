@@ -102,7 +102,7 @@ export function ScreenshotCarousel() {
 
           {/* Address Bar */}
           <div className="flex items-center gap-1.5 px-6 py-1 rounded-md bg-dd-bg border border-dd-border/50 text-[10px] text-dd-muted font-mono w-48 md:w-80 justify-center">
-            <span className="text-orange-500/80">https://</span>
+            <span className="text-blue-500/80">https://</span>
             {current.url}
           </div>
 
@@ -112,7 +112,7 @@ export function ScreenshotCarousel() {
               onClick={() => setDisplayTheme('light')}
               className={`p-1 rounded transition-colors ${
                 displayTheme === 'light'
-                  ? 'bg-orange-500 text-white'
+                  ? 'bg-blue-500 text-white'
                   : 'text-dd-muted hover:text-dd-text'
               }`}
               title="Modo Claro"
@@ -123,7 +123,7 @@ export function ScreenshotCarousel() {
               onClick={() => setDisplayTheme('dark')}
               className={`p-1 rounded transition-colors ${
                 displayTheme === 'dark'
-                  ? 'bg-orange-500 text-white'
+                  ? 'bg-blue-500 text-white'
                   : 'text-dd-muted hover:text-dd-text'
               }`}
               title="Modo Escuro"
@@ -177,7 +177,7 @@ export function ScreenshotCarousel() {
             key={idx}
             onClick={() => setCurrentIndex(idx)}
             className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-              currentIndex === idx ? 'bg-orange-500 w-3.5' : 'bg-dd-border hover:bg-dd-muted'
+              currentIndex === idx ? 'bg-blue-500 w-3.5' : 'bg-dd-border hover:bg-dd-muted'
             }`}
             title={`Slide ${idx + 1}`}
           />

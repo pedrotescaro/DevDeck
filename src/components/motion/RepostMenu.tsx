@@ -67,7 +67,7 @@ export function RepostMenu({
                 setOpen(false);
                 onRepost();
               }}
-              className="flex items-center gap-2.5 w-full px-4 py-3 text-xs font-bold text-dd-text hover:bg-orange-500/10 hover:text-orange-400 transition-colors cursor-pointer"
+              className="flex items-center gap-2.5 w-full px-4 py-3 text-xs font-bold text-dd-text hover:bg-blue-500/10 hover:text-blue-400 transition-colors cursor-pointer"
             >
               <Repeat2 className="w-4 h-4" />
               Repostar
@@ -78,7 +78,7 @@ export function RepostMenu({
                 setOpen(false);
                 onQuote();
               }}
-              className="flex items-center gap-2.5 w-full px-4 py-3 text-xs font-bold text-dd-text hover:bg-orange-500/10 hover:text-orange-400 transition-colors cursor-pointer"
+              className="flex items-center gap-2.5 w-full px-4 py-3 text-xs font-bold text-dd-text hover:bg-blue-500/10 hover:text-blue-400 transition-colors cursor-pointer"
             >
               <Pencil className="w-4 h-4" />
               Comentar

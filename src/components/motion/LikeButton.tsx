@@ -61,8 +61,8 @@ export function LikeButton({ count, isActive, onToggle, title }: LikeButtonProps
         className={cn(
           'dd-touch dd-focus-ring relative w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer shrink-0',
           isActive
-            ? 'text-orange-500 hover:bg-orange-500/10'
-            : 'text-dd-muted hover:text-dd-text hover:bg-orange-500/10'
+            ? 'text-blue-500 hover:bg-blue-500/10'
+            : 'text-dd-muted hover:text-dd-text hover:bg-blue-500/10'
         )}
         whileTap={reduced ? undefined : { scale: [1, 1.35, 1.1, 1] }}
         transition={{ duration: 0.3, times: [0, 0.35, 0.7, 1] }}
@@ -70,14 +70,14 @@ export function LikeButton({ count, isActive, onToggle, title }: LikeButtonProps
         <Heart
           className={cn(
             'w-4 h-4 transition-colors',
-            isActive ? 'fill-orange-500 text-orange-500' : 'text-dd-muted'
+            isActive ? 'fill-blue-500 text-blue-500' : 'text-dd-muted'
           )}
         />
         {bursting &&
           PARTICLE_ANGLES.map((deg, i) => (
             <span
               key={i}
-              className="absolute top-1/2 left-1/2 w-1.5 h-1.5 -ml-[3px] -mt-[3px] rounded-full bg-orange-500 pointer-events-none"
+              className="absolute top-1/2 left-1/2 w-1.5 h-1.5 -ml-[3px] -mt-[3px] rounded-full bg-blue-500 pointer-events-none"
               style={{
                 ['--tx' as string]: `${Math.cos((deg * Math.PI) / 180) * 16}px`,
                 ['--ty' as string]: `${Math.sin((deg * Math.PI) / 180) * 16}px`,

@@ -461,7 +461,7 @@ export function Sidebar({ user }: SidebarProps) {
                     />
                   )}
                   {item.badge === 'dot' && (
-                    <span className="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-orange-500 ring-2 ring-dd-bg animate-pulse" />
+                    <span className="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-blue-500 ring-2 ring-dd-bg animate-pulse" />
                   )}
                 </div>
               );
@@ -581,7 +581,7 @@ export function Sidebar({ user }: SidebarProps) {
           {activeUser && (
             <button
               onClick={() => setModalOpen(true)}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-extrabold py-2.5 px-4 rounded-full text-sm transition-all duration-200 active:scale-[0.98] shadow-lg shadow-orange-500/10 hover:shadow-orange-500/20 cursor-pointer flex items-center justify-center gap-2"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-extrabold py-2.5 px-4 rounded-full text-sm transition-all duration-200 active:scale-[0.98] shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 cursor-pointer flex items-center justify-center gap-2"
             >
               <span>Postar</span>
             </button>
@@ -605,7 +605,7 @@ export function Sidebar({ user }: SidebarProps) {
                     className="w-10 h-10 rounded-full object-cover border border-dd-border shrink-0 mt-0.5"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-sm font-bold border border-orange-500/10 shrink-0 mt-0.5">
+                  <div className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm font-bold border border-blue-500/10 shrink-0 mt-0.5">
                     {initials}
                   </div>
                 )}
@@ -614,7 +614,7 @@ export function Sidebar({ user }: SidebarProps) {
                     <p className="text-sm font-bold text-dd-text truncate leading-tight">
                       {activeUser.username}
                     </p>
-                    <span className="px-1.5 py-0.5 rounded bg-orange-500/10 border border-orange-500/30 text-[9.5px] font-extrabold text-orange-500 leading-none shadow-sm shrink-0">
+                    <span className="px-1.5 py-0.5 rounded bg-blue-500/10 border border-blue-500/30 text-[9.5px] font-extrabold text-blue-500 leading-none shadow-sm shrink-0">
                       Lvl {Math.max(1, Math.floor((activeUser.total_xp ?? 0) / 1000) + 1)}
                     </span>
                   </div>
@@ -622,8 +622,8 @@ export function Sidebar({ user }: SidebarProps) {
                     @{activeUser.username.toLowerCase()}
                   </p>
                   <div className="flex items-center gap-2 mt-3 select-none">
-                    <Flame className="w-6 h-6 text-orange-500 fill-orange-500 shrink-0" />
-                    <span className="text-[11px] font-extrabold text-orange-500 leading-none">
+                    <Flame className="w-6 h-6 text-blue-500 fill-blue-500 shrink-0" />
+                    <span className="text-[11px] font-extrabold text-blue-500 leading-none">
                       {activeUser.streak_days ?? activeUser.streak ?? 0}{' '}
                       {(activeUser.streak_days ?? activeUser.streak ?? 0) === 1 ? 'dia' : 'dias'} de
                       ofensiva
@@ -715,7 +715,7 @@ export function Sidebar({ user }: SidebarProps) {
                       className="w-7 h-7 rounded-full object-cover border border-dd-border"
                     />
                   ) : (
-                    <div className="w-7 h-7 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-bold border border-orange-500/10">
+                    <div className="w-7 h-7 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-[10px] font-bold border border-blue-500/10">
                       {initials}
                     </div>
                   )}
@@ -781,7 +781,7 @@ export function Sidebar({ user }: SidebarProps) {
                     <>
                       <Icon className={`w-5.5 h-5.5 ${item.active ? 'fill-current' : ''}`} />
                       {item.badge === 'dot' && (
-                        <span className="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-orange-500 ring-2 ring-dd-bg" />
+                        <span className="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-blue-500 ring-2 ring-dd-bg" />
                       )}
                     </>
                   )}
@@ -811,7 +811,7 @@ export function Sidebar({ user }: SidebarProps) {
           {activeUser && (
             <button
               onClick={() => setModalOpen(true)}
-              className="absolute -top-14 right-4 bg-orange-500 text-white rounded-full p-3.5 shadow-lg shadow-orange-500/25 active:scale-95 transition-all w-12 h-12 flex items-center justify-center cursor-pointer"
+              className="absolute -top-14 right-4 bg-blue-500 text-white rounded-full p-3.5 shadow-lg shadow-blue-500/25 active:scale-95 transition-all w-12 h-12 flex items-center justify-center cursor-pointer"
               aria-label="Postar"
             >
               <Plus className="w-5.5 h-5.5" />
@@ -830,7 +830,7 @@ export function Sidebar({ user }: SidebarProps) {
           <button
             type="button"
             onClick={() => showToast('Rascunhos salvos localmente!')}
-            className="text-xs font-black text-orange-500 hover:text-orange-400 transition-colors cursor-pointer"
+            className="text-xs font-black text-blue-500 hover:text-blue-400 transition-colors cursor-pointer"
           >
             Rascunhos
           </button>
@@ -848,7 +848,7 @@ export function Sidebar({ user }: SidebarProps) {
                 className="w-10 h-10 rounded-full object-cover border border-dd-border shrink-0"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold border border-orange-500/10 shrink-0">
+              <div className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold border border-blue-500/10 shrink-0">
                 {initials}
               </div>
             )}
@@ -916,7 +916,7 @@ export function Sidebar({ user }: SidebarProps) {
           {/* Divider */}
           <div className="border-t border-dd-border/50 pt-3 flex items-center justify-between">
             {/* Left tools (Icons) */}
-            <div className="flex items-center gap-1.5 text-orange-500">
+            <div className="flex items-center gap-1.5 text-blue-500">
               {/* Image input trigger */}
               <input
                 type="file"
@@ -927,7 +927,7 @@ export function Sidebar({ user }: SidebarProps) {
               />
               <label
                 htmlFor="sidebar-tweet-image-upload"
-                className="p-2 hover:bg-orange-500/10 rounded-full transition-colors cursor-pointer"
+                className="p-2 hover:bg-blue-500/10 rounded-full transition-colors cursor-pointer"
                 title="Adicionar imagem"
               >
                 <svg
@@ -991,7 +991,7 @@ export function Sidebar({ user }: SidebarProps) {
               <X className="w-4.5 h-4.5 animate-pulse" />
             </button>
 
-            <div className="mx-auto w-16 h-16 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center text-3xl shadow-[0_0_20px_rgba(249,115,22,0.15)] animate-pulse">
+            <div className="mx-auto w-16 h-16 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center text-3xl shadow-[0_0_20px_rgba(0, 131, 254,0.15)] animate-pulse">
               👑
             </div>
 
@@ -999,7 +999,7 @@ export function Sidebar({ user }: SidebarProps) {
               <h3 id="premium-modal-title" className="text-xl font-extrabold text-dd-text">
                 Upgrade para o Premium
               </h3>
-              <p className="text-xs text-orange-500 font-bold uppercase tracking-wider bg-orange-500/10 py-1 px-3 rounded-full w-fit mx-auto animate-bounce">
+              <p className="text-xs text-blue-500 font-bold uppercase tracking-wider bg-blue-500/10 py-1 px-3 rounded-full w-fit mx-auto animate-bounce">
                 40% de Desconto Ativo
               </p>
               <p className="text-xs text-dd-muted leading-relaxed px-4">
@@ -1009,19 +1009,19 @@ export function Sidebar({ user }: SidebarProps) {
 
             <div className="border-t border-b border-dd-border py-4 text-left space-y-3.5 text-xs font-semibold text-dd-text">
               <div className="flex items-center gap-3">
-                <span className="text-orange-500 text-lg">✓</span>
+                <span className="text-blue-500 text-lg">✓</span>
                 <span>Selo verificado premium no perfil</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-orange-500 text-lg">✓</span>
+                <span className="text-blue-500 text-lg">✓</span>
                 <span>Acesso exclusivo ao Ducky AI para tirar dúvidas</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-orange-500 text-lg">✓</span>
+                <span className="text-blue-500 text-lg">✓</span>
                 <span>Ganho de XP em dobro (+100% XP em respostas)</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-orange-500 text-lg">✓</span>
+                <span className="text-blue-500 text-lg">✓</span>
                 <span>Participação em Duelos e Quizzes exclusivos</span>
               </div>
             </div>
@@ -1031,7 +1031,7 @@ export function Sidebar({ user }: SidebarProps) {
                 showToast('Assinatura premium processada com sucesso! Parabéns!');
                 setPremiumModalOpen(false);
               }}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-extrabold py-3 px-4 rounded-xl text-sm transition-all duration-200 active:scale-[0.98] shadow-lg shadow-orange-500/10 cursor-pointer"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-extrabold py-3 px-4 rounded-xl text-sm transition-all duration-200 active:scale-[0.98] shadow-lg shadow-blue-500/10 cursor-pointer"
             >
               Atualizar Agora
             </button>
@@ -1044,7 +1044,7 @@ export function Sidebar({ user }: SidebarProps) {
       {/* ========================================== */}
       {toast && toast.visible && (
         <div className="fixed bottom-6 right-6 z-50 animate-slide-in-right rounded-xl border border-dd-border bg-dd-surface/90 backdrop-blur-xl p-4 shadow-2xl flex items-center gap-3 max-w-sm">
-          <div className="w-8 h-8 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center font-bold text-sm ring-1 ring-orange-500/20">
+          <div className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center font-bold text-sm ring-1 ring-blue-500/20">
             i
           </div>
           <div>

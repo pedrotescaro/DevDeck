@@ -139,7 +139,7 @@ export function FollowersModal({
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-dd-border">
               <h2 className="text-dd-text text-sm font-extrabold uppercase tracking-wider flex items-center gap-2">
-                <Users className="w-4 h-4 text-orange-500" />
+                <Users className="w-4 h-4 text-blue-500" />
                 {title}
               </h2>
               <button
@@ -197,7 +197,7 @@ export function FollowersModal({
                               className="w-10 h-10 rounded-full object-cover shrink-0"
                             />
                           ) : (
-                            <div className="w-10 h-10 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/20 flex items-center justify-center text-sm font-bold shrink-0">
+                            <div className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center text-sm font-bold shrink-0">
                               {initials}
                             </div>
                           )}
@@ -205,7 +205,7 @@ export function FollowersModal({
                             <p className="text-xs font-bold text-dd-text truncate hover:underline">
                               @{itemUser.username}
                             </p>
-                            <p className="text-[10px] text-orange-400 font-mono">
+                            <p className="text-[10px] text-blue-400 font-mono">
                               {itemUser.total_xp.toLocaleString('pt-BR')} XP
                             </p>
                           </div>

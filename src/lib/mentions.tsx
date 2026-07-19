@@ -14,7 +14,7 @@ export function parseMentions(text: string) {
         <Link
           key={index}
           href={`/profile/${username}`}
-          className="text-orange-500 hover:underline font-semibold"
+          className="text-blue-500 hover:underline font-semibold"
           onClick={(e) => e.stopPropagation()}
         >
           {part}

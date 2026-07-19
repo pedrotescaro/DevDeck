@@ -11,7 +11,7 @@ import { reactionPickerVariants, reactionItemVariants } from '@/lib/motion';
 const PARTICLE_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
 
 const REACTIONS = [
-  { emoji: '\u{1F525}', label: 'Fogo', color: '#f97316' },
+  { emoji: '\u{1F525}', label: 'Fogo', color: '#0083fe' },
   { emoji: '\u2764\uFE0F', label: 'Curtir', color: '#ef4444' },
   { emoji: '\u{1F602}', label: 'Haha', color: '#f5a623' },
   { emoji: '\u{1F44F}', label: 'Aplausos', color: '#22d48a' },
@@ -35,7 +35,7 @@ export function ExpandedReactionButton({
 }: ExpandedReactionButtonProps) {
   const [bursting, setBursting] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [particleColor, setParticleColor] = useState('#f97316');
+  const [particleColor, setParticleColor] = useState('#0083fe');
   const reduced = useReducedMotion();
 
   const handleQuickReact = () => {
@@ -43,7 +43,7 @@ export function ExpandedReactionButton({
     const willActivate = !isActive;
     if (willActivate && !reduced) {
       setBursting(true);
-      setParticleColor('#f97316');
+      setParticleColor('#0083fe');
       setTimeout(() => setBursting(false), 400);
     }
     onReact(null);
@@ -76,8 +76,8 @@ export function ExpandedReactionButton({
         className={cn(
           'dd-touch dd-focus-ring dd-gpu relative p-1.5 rounded-md transition-colors cursor-pointer select-none',
           isActive
-            ? 'text-orange-500 hover:bg-orange-500/10'
-            : 'text-dd-muted hover:text-dd-text hover:bg-orange-500/10'
+            ? 'text-blue-500 hover:bg-blue-500/10'
+            : 'text-dd-muted hover:text-dd-text hover:bg-blue-500/10'
         )}
         whileTap={reduced ? undefined : { scale: [1, 1.35, 1.1, 1] }}
         transition={{ duration: 0.3, times: [0, 0.35, 0.7, 1] }}
@@ -120,7 +120,7 @@ export function ExpandedReactionButton({
                   type="button"
                   variants={reactionItemVariants}
                   onClick={() => handlePickerReact(reaction)}
-                  className="dd-touch w-8 h-8 flex items-center justify-center rounded-full hover:bg-orange-500/10 transition-colors cursor-pointer"
+                  className="dd-touch w-8 h-8 flex items-center justify-center rounded-full hover:bg-blue-500/10 transition-colors cursor-pointer"
                   whileHover={{ scale: 1.3 }}
                   title={reaction.label}
                 >

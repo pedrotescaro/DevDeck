@@ -303,7 +303,7 @@ export function PostCard({
             // Highlight keywords
             const keywords =
               /\b(const|let|var|function|return|fn|impl|pub|use|import|from|def|class|async|await|struct|enum|if|else|for|while|match)\b/g;
-            html = html.replace(keywords, '<span class="text-orange-400 font-semibold">$1</span>');
+            html = html.replace(keywords, '<span class="text-blue-400 font-semibold">$1</span>');
 
             // Highlight types
             const types =
@@ -348,7 +348,7 @@ export function PostCard({
           'transition-colors relative',
           flat
             ? 'bg-transparent border-b border-dd-border/50 rounded-none p-4 sm:p-5 hover:bg-dd-surface/20'
-            : 'bg-dd-card border border-dd-border rounded-xl p-5 hover:border-orange-500/30'
+            : 'bg-dd-card border border-dd-border rounded-xl p-5 hover:border-blue-500/30'
         )}
       >
         {/* Header */}
@@ -489,11 +489,11 @@ export function PostCard({
               e.preventDefault();
               router.push(`/post/${post.id}`);
             }}
-            className="mt-3 mb-3 p-3.5 rounded-xl border border-dd-border bg-dd-surface/30 backdrop-blur-sm flex items-center justify-between gap-4 hover:bg-dd-surface/50 hover:border-orange-500/20 transition-all duration-200 group/quiz cursor-pointer"
+            className="mt-3 mb-3 p-3.5 rounded-xl border border-dd-border bg-dd-surface/30 backdrop-blur-sm flex items-center justify-between gap-4 hover:bg-dd-surface/50 hover:border-blue-500/20 transition-all duration-200 group/quiz cursor-pointer"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-9 h-9 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center shrink-0 group-hover/quiz:scale-105 transition-transform duration-200">
-                <Sparkles className="w-4.5 h-4.5 text-orange-400" />
+              <div className="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0 group-hover/quiz:scale-105 transition-transform duration-200">
+                <Sparkles className="w-4.5 h-4.5 text-blue-400" />
               </div>
               <div className="text-left min-w-0">
                 <h4 className="text-xs font-black text-dd-text truncate">Quiz de Aprendizado</h4>
@@ -512,7 +512,7 @@ export function PostCard({
                 'inline-flex items-center justify-center gap-1 px-4 py-1.5 rounded-full font-bold text-[10px] leading-tight transition-all duration-200 shrink-0 shadow-sm border',
                 Boolean(post.quizzes[0].attempts && post.quizzes[0].attempts.length > 0)
                   ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20'
-                  : 'bg-orange-500 border-transparent hover:bg-orange-600 text-white'
+                  : 'bg-blue-500 border-transparent hover:bg-blue-600 text-white'
               )}
             >
               <span>
@@ -535,12 +535,12 @@ export function PostCard({
           {/* 1. Comment bubble */}
           <Link
             href={`/post/${post.id}`}
-            className="flex items-center gap-0.5 text-dd-muted hover:text-orange-400 transition-colors group/comment"
+            className="flex items-center gap-0.5 text-dd-muted hover:text-blue-400 transition-colors group/comment"
           >
-            <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-500/10 transition-colors">
-              <MessageSquare className="w-3.5 h-3.5 text-dd-muted group-hover/comment:text-orange-400" />
+            <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-500/10 transition-colors">
+              <MessageSquare className="w-3.5 h-3.5 text-dd-muted group-hover/comment:text-blue-400" />
             </div>
-            <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/comment:text-orange-400">
+            <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/comment:text-blue-400">
               {post._count?.answers ?? 0}
             </span>
           </Link>
@@ -563,10 +563,10 @@ export function PostCard({
 
           {/* 4. Views BarChart */}
           <div className="flex items-center gap-0.5 text-dd-muted select-none group/views">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-500/10 hover:text-orange-400 transition-colors">
-              <BarChart2 className="w-4 h-4 text-dd-muted group-hover/views:text-orange-400" />
+            <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-500/10 hover:text-blue-400 transition-colors">
+              <BarChart2 className="w-4 h-4 text-dd-muted group-hover/views:text-blue-400" />
             </div>
-            <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/views:text-orange-400">
+            <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/views:text-blue-400">
               {post.view_count >= 1000
                 ? `${(post.view_count / 1000).toFixed(0)}mil`
                 : post.view_count}
@@ -755,7 +755,7 @@ export function PostCard({
               type="submit"
               onClick={(e) => e.stopPropagation()}
               disabled={saving || !editBody.trim() || editBody.length >= POST_CHAR_LIMIT}
-              className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-xs font-bold py-2 px-5 rounded-lg transition-colors cursor-pointer"
+              className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white text-xs font-bold py-2 px-5 rounded-lg transition-colors cursor-pointer"
             >
               {saving ? 'Salvando...' : 'Salvar'}
             </button>

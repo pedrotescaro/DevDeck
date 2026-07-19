@@ -119,7 +119,7 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
 
             const keywords =
               /\b(const|let|var|function|return|fn|impl|pub|use|import|from|def|class|async|await|struct|enum|if|else|for|while|match)\b/g;
-            html = html.replace(keywords, '<span class="text-orange-400 font-semibold">$1</span>');
+            html = html.replace(keywords, '<span class="text-blue-400 font-semibold">$1</span>');
 
             const types =
               /\b(string|number|boolean|any|void|User|Post|Language|int|float|str|char)\b/g;
@@ -200,7 +200,7 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
             {/* Duel Room Header */}
             <div className="bg-dd-sidebar-bg border border-dd-border rounded-xl p-5 space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-[10px] font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+                <span className="text-[10px] font-bold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
                   <Swords className="w-3 h-3" />
                   Duelo de Código
                 </span>
@@ -232,7 +232,7 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
             {duel.status === 'ACTIVE' && isParticipant && (
               <div className="bg-dd-sidebar-bg border border-dd-border rounded-xl p-5 space-y-4">
                 <div className="flex items-center gap-2 border-b border-dd-border/60 pb-3">
-                  <Code className="w-4 h-4 text-orange-500/85" />
+                  <Code className="w-4 h-4 text-blue-500/85" />
                   <h2 className="text-xs font-extrabold text-dd-text">Escreva seu Algoritmo</h2>
                 </div>
 
@@ -252,7 +252,7 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
                   <button
                     onClick={handleSubmitSolution}
                     disabled={submitting || code.trim() === ''}
-                    className="bg-orange-500 text-white text-xs font-bold px-5 py-2 rounded-full transition-colors hover:bg-orange-600 disabled:opacity-50 cursor-pointer shadow-md shadow-orange-500/10 flex items-center gap-1.5"
+                    className="bg-blue-500 text-white text-xs font-bold px-5 py-2 rounded-full transition-colors hover:bg-blue-600 disabled:opacity-50 cursor-pointer shadow-md shadow-blue-500/10 flex items-center gap-1.5"
                   >
                     <Send className="w-3.5 h-3.5" />
                     {submitting ? 'Enviando...' : 'Submeter Solução (+25 XP)'}
@@ -265,7 +265,7 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
             {duel.status === 'ACTIVE' && (
               <div className="bg-dd-sidebar-bg border border-dd-border rounded-xl p-5 space-y-5">
                 <div className="flex items-center gap-2 border-b border-dd-border/60 pb-3">
-                  <Vote className="w-4 h-4 text-orange-500/85" />
+                  <Vote className="w-4 h-4 text-blue-500/85" />
                   <h2 className="text-xs font-extrabold text-dd-text">
                     Arena de Votos da Comunidade
                   </h2>
@@ -292,7 +292,7 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
                           <button
                             onClick={() => handleVote(challengerSolution.id)}
                             disabled={voting}
-                            className="w-full bg-orange-500 text-white text-xs font-bold py-2 rounded-full hover:bg-orange-600 transition-colors cursor-pointer shadow-sm"
+                            className="w-full bg-blue-500 text-white text-xs font-bold py-2 rounded-full hover:bg-blue-600 transition-colors cursor-pointer shadow-sm"
                           >
                             Votar nesta solução
                           </button>
@@ -329,7 +329,7 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
                           <button
                             onClick={() => handleVote(opponentSolution.id)}
                             disabled={voting}
-                            className="w-full bg-orange-500 text-white text-xs font-bold py-2 rounded-full hover:bg-orange-600 transition-colors cursor-pointer shadow-sm"
+                            className="w-full bg-blue-500 text-white text-xs font-bold py-2 rounded-full hover:bg-blue-600 transition-colors cursor-pointer shadow-sm"
                           >
                             Votar nesta solução
                           </button>
@@ -349,7 +349,7 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
                 {totalVotes > 0 && (
                   <div className="border-t border-dd-border/60 pt-4 space-y-3">
                     <h3 className="font-bold text-[10px] text-center text-dd-muted uppercase tracking-wider flex items-center justify-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-orange-500" />
+                      <Sparkles className="w-3.5 h-3.5 text-blue-500" />
                       Resultado Parcial ({totalVotes} votos)
                     </h3>
 
@@ -365,7 +365,7 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
 
                     <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden flex">
                       <div
-                        className="h-full bg-orange-500 transition-all duration-350"
+                        className="h-full bg-blue-500 transition-all duration-350"
                         style={{ width: `${challengerPercent}%` }}
                       />
                       <div
@@ -394,7 +394,7 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-dd-muted">Status:</span>
-                <span className="font-semibold text-orange-500">{duel.status}</span>
+                <span className="font-semibold text-blue-500">{duel.status}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-dd-muted">Votos Totais:</span>

@@ -34,7 +34,7 @@ function UserAvatar({ user, size = 32 }: { user: NavbarUser; size?: number }) {
 
   return (
     <div
-      className="rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-semibold"
+      className="rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-semibold"
       style={{ width: size, height: size }}
     >
       {initials}
@@ -167,7 +167,7 @@ export function Navbar({ user }: NavbarProps) {
               </Link>
               <Link
                 href="/register"
-                className="bg-orange-500 text-white text-sm px-4 py-1.5 rounded-lg font-medium hover:bg-orange-600 transition-colors"
+                className="bg-blue-500 text-white text-sm px-4 py-1.5 rounded-lg font-medium hover:bg-blue-600 transition-colors"
               >
                 Registrar
               </Link>
@@ -277,7 +277,7 @@ export function Navbar({ user }: NavbarProps) {
               </Link>
               <Link
                 href="/register"
-                className="bg-orange-500 text-white text-sm px-4 py-1.5 rounded-lg font-medium hover:bg-orange-600 transition-colors"
+                className="bg-blue-500 text-white text-sm px-4 py-1.5 rounded-lg font-medium hover:bg-blue-600 transition-colors"
                 onClick={() => setMobileOpen(false)}
               >
                 Registrar

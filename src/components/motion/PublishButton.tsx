@@ -32,8 +32,8 @@ export function PublishButton({ disabled, state, xpReward = 15, className }: Pub
         disabled={disabled || state === 'submitting'}
         className={cn(
           'dd-focus-ring dd-gpu relative bg-dd-accent text-white text-xs font-bold px-5 py-2 rounded-full',
-          'shadow-md shadow-orange-500/10 transition-[opacity,background-color] duration-200 cursor-pointer',
-          'hover:bg-orange-600',
+          'shadow-md shadow-blue-500/10 transition-[opacity,background-color] duration-200 cursor-pointer',
+          'hover:bg-blue-600',
           isEmpty && 'opacity-40 scale-95 pointer-events-none',
           state === 'success' && 'bg-dd-green hover:bg-dd-green',
           state === 'submitting' && 'opacity-80 cursor-wait',

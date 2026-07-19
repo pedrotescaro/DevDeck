@@ -287,7 +287,7 @@ export function ProfileContent({
               />
             </div>
           ) : (
-            <div className="h-32 sm:h-44 bg-gradient-to-r from-orange-500/20 via-amber-500/10 to-transparent relative border-b border-dd-border/40" />
+            <div className="h-32 sm:h-44 bg-gradient-to-r from-blue-500/20 via-blue-400/10 to-transparent relative border-b border-dd-border/40" />
           )}
 
           {/* Avatar and Edit Profile/Follow Button flex alignment */}
@@ -302,7 +302,7 @@ export function ProfileContent({
                   className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-dd-bg object-cover bg-dd-surface ring-2 ring-slate-800/10"
                 />
               ) : (
-                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-dd-bg bg-orange-500/10 text-orange-400 flex items-center justify-center text-3xl font-black shadow-[0_0_15px_rgba(249,115,22,0.05)]">
+                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-dd-bg bg-blue-500/10 text-blue-400 flex items-center justify-center text-3xl font-black shadow-[0_0_15px_rgba(0, 131, 254,0.05)]">
                   {profileUser.username.slice(0, 2).toUpperCase()}
                 </div>
               )}
@@ -328,7 +328,7 @@ export function ProfileContent({
                 <h2 className="text-dd-text text-lg sm:text-xl font-extrabold tracking-tight">
                   {profileUser.username}
                 </h2>
-                <span className="text-xs text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2.5 py-0.5 rounded-full font-bold">
+                <span className="text-xs text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 rounded-full font-bold">
                   {profileUser.total_xp.toLocaleString('pt-BR')} XP Total
                 </span>
               </div>
@@ -381,24 +381,24 @@ export function ProfileContent({
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-bold text-dd-muted uppercase tracking-wider">
               {localProfileUser.institution && (
                 <div className="flex items-center gap-1.5">
-                  <GraduationCap className="w-4 h-4 text-orange-500/80" />
+                  <GraduationCap className="w-4 h-4 text-blue-500/80" />
                   <span>{localProfileUser.institution}</span>
                 </div>
               )}
               {localProfileUser.pronouns && (
                 <div className="flex items-center gap-1.5">
-                  <Tag className="w-4 h-4 text-orange-500/80" />
+                  <Tag className="w-4 h-4 text-blue-500/80" />
                   <span>{localProfileUser.pronouns}</span>
                 </div>
               )}
               {localProfileUser.birthday && (
                 <div className="flex items-center gap-1.5">
-                  <Cake className="w-4 h-4 text-orange-500/80" />
+                  <Cake className="w-4 h-4 text-blue-500/80" />
                   <span>Nascido(a) em {formatBirthday(localProfileUser.birthday)}</span>
                 </div>
               )}
               <div className="flex items-center gap-1.5">
-                <Calendar className="w-4 h-4 text-orange-500/80" />
+                <Calendar className="w-4 h-4 text-blue-500/80" />
                 <span>{formatJoinedDate(profileUser.created_at)}</span>
               </div>
             </div>
@@ -441,7 +441,7 @@ export function ProfileContent({
                   {isSelected && (
                     <motion.div
                       layoutId="profileTabIndicator"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-full"
                       transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                     />
                   )}
@@ -509,7 +509,7 @@ export function ProfileContent({
                   <div className="flex justify-center py-6 border-b border-dd-border/40">
                     <button
                       onClick={loadMorePosts}
-                      className="px-5 py-2.5 bg-dd-surface hover:bg-dd-border border border-dd-border text-dd-text rounded-full text-xs font-bold transition-all cursor-pointer hover:border-orange-500/20 active:scale-95"
+                      className="px-5 py-2.5 bg-dd-surface hover:bg-dd-border border border-dd-border text-dd-text rounded-full text-xs font-bold transition-all cursor-pointer hover:border-blue-500/20 active:scale-95"
                     >
                       Carregar Mais
                     </button>
@@ -526,7 +526,7 @@ export function ProfileContent({
                       {stats.answers_count}
                     </div>
                     <div className="text-dd-muted text-[10px] uppercase font-bold tracking-wider mt-1.5 flex items-center justify-center gap-1.5">
-                      <BookOpen className="w-3.5 h-3.5 text-orange-500" />
+                      <BookOpen className="w-3.5 h-3.5 text-blue-500" />
                       <span>Respostas</span>
                     </div>
                   </div>
@@ -535,7 +535,7 @@ export function ProfileContent({
                       {stats.accuracy}%
                     </div>
                     <div className="text-dd-muted text-[10px] uppercase font-bold tracking-wider mt-1.5 flex items-center justify-center gap-1.5">
-                      <Award className="w-3.5 h-3.5 text-orange-500" />
+                      <Award className="w-3.5 h-3.5 text-blue-500" />
                       <span>Precisão</span>
                     </div>
                   </div>
@@ -544,7 +544,7 @@ export function ProfileContent({
                       {stats.accepted_count}
                     </div>
                     <div className="text-dd-muted text-[10px] uppercase font-bold tracking-wider mt-1.5 flex items-center justify-center gap-1.5">
-                      <Check className="w-3.5 h-3.5 text-orange-500" />
+                      <Check className="w-3.5 h-3.5 text-blue-500" />
                       <span>Aceitas</span>
                     </div>
                   </div>
@@ -554,7 +554,7 @@ export function ProfileContent({
                 <div className="bg-dd-surface/40 border border-dd-border/60 rounded-2xl p-5 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-dd-muted flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-orange-500" />
+                      <Calendar className="w-3.5 h-3.5 text-blue-500" />
                       Atividade Semanal (Quizzes)
                     </span>
                   </div>
@@ -572,7 +572,7 @@ export function ProfileContent({
                             title={tooltipText}
                             className={`w-7 h-7 rounded-md flex items-center justify-center transition-colors text-xs font-bold ${
                               isActive
-                                ? 'bg-orange-500 text-black shadow-[0_0_8px_rgba(249,115,22,0.3)]'
+                                ? 'bg-blue-500 text-black shadow-[0_0_8px_rgba(0, 131, 254,0.3)]'
                                 : 'bg-dd-surface border border-dd-border text-dd-muted'
                             }`}
                           >
@@ -613,14 +613,14 @@ export function ProfileContent({
                 <div className="flex items-center justify-between border-b border-dd-border/60 pb-3">
                   <div>
                     <h3 className="text-xs font-bold text-dd-text uppercase tracking-wider flex items-center gap-2">
-                      <Award className="w-4 h-4 text-orange-500" />
+                      <Award className="w-4 h-4 text-blue-500" />
                       Coleção de Conquistas
                     </h3>
                     <p className="text-dd-muted text-[11px] mt-0.5">
                       Tarefas concluídas na comunidade e emblemas desbloqueados.
                     </p>
                   </div>
-                  <Sparkles className="w-4 h-4 text-orange-500/60" />
+                  <Sparkles className="w-4 h-4 text-blue-500/60" />
                 </div>
                 <BadgeGrid badges={mappedBadges} />
               </div>

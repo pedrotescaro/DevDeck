@@ -260,11 +260,11 @@ export function AnswerCard({
                   setReplyText(`@${answer.author.username} `);
                 }
               }}
-              className="flex items-center gap-0.5 text-dd-muted select-none hover:text-orange-400 cursor-pointer group/comment border-none bg-transparent active:scale-[0.95] transition-transform"
+              className="flex items-center gap-0.5 text-dd-muted select-none hover:text-blue-400 cursor-pointer group/comment border-none bg-transparent active:scale-[0.95] transition-transform"
               title="Responder a este comentário"
             >
-              <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-500/10 transition-colors animate-none">
-                <MessageSquare className="w-3.5 h-3.5 text-dd-muted group-hover/comment:text-orange-400" />
+              <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-500/10 transition-colors animate-none">
+                <MessageSquare className="w-3.5 h-3.5 text-dd-muted group-hover/comment:text-blue-400" />
               </div>
             </button>
 
@@ -289,10 +289,10 @@ export function AnswerCard({
 
             {/* 4. Views BarChart */}
             <div className="flex items-center gap-0.5 text-dd-muted select-none group/views">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-500/10 hover:text-orange-400 transition-colors animate-none">
-                <BarChart2 className="w-4 h-4 text-dd-muted group-hover/views:text-orange-400" />
+              <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-500/10 hover:text-blue-400 transition-colors animate-none">
+                <BarChart2 className="w-4 h-4 text-dd-muted group-hover/views:text-blue-400" />
               </div>
-              <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/views:text-orange-400">
+              <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/views:text-blue-400">
                 {Math.abs(voteCount) * 4 + 12}
               </span>
             </div>
@@ -307,7 +307,7 @@ export function AnswerCard({
             <button
               type="button"
               onClick={handleShare}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-dd-muted hover:text-orange-500 hover:bg-orange-500/10 transition-colors cursor-pointer shrink-0"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-dd-muted hover:text-blue-500 hover:bg-blue-500/10 transition-colors cursor-pointer shrink-0"
               title="Compartilhar"
             >
               <Share className="w-3.5 h-3.5" />
@@ -355,7 +355,7 @@ export function AnswerCard({
                   className="w-8 h-8 rounded-full object-cover border border-dd-border"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold border border-orange-500/10">
+                <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold border border-blue-500/10">
                   {currentUser?.username?.slice(0, 2).toUpperCase() || 'ME'}
                 </div>
               )}
@@ -386,7 +386,7 @@ export function AnswerCard({
                     !replyText.trim() ||
                     replyText.trim() === `@${answer.author.username}`
                   }
-                  className="px-3 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-xs font-bold text-white transition-all duration-200 active:scale-[0.97] cursor-pointer disabled:opacity-50"
+                  className="px-3 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-xs font-bold text-white transition-all duration-200 active:scale-[0.97] cursor-pointer disabled:opacity-50"
                 >
                   {replySubmitting ? 'Enviando...' : 'Responder'}
                 </button>

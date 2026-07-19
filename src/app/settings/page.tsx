@@ -249,7 +249,7 @@ export default function SettingsPage() {
     return (
       <div className="flex min-h-screen bg-dd-bg items-center justify-center text-dd-text antialiased">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
           <p className="text-xs text-dd-muted">Carregando configurações...</p>
         </div>
       </div>
@@ -273,7 +273,7 @@ export default function SettingsPage() {
 
           {/* Search Box */}
           <div className="p-3 border-b border-dd-border/50">
-            <div className="relative flex items-center bg-dd-surface/40 border border-dd-border rounded-full px-3 py-1.5 focus-within:border-orange-500/80 focus-within:bg-dd-bg transition-all">
+            <div className="relative flex items-center bg-dd-surface/40 border border-dd-border rounded-full px-3 py-1.5 focus-within:border-blue-500/80 focus-within:bg-dd-bg transition-all">
               <Search className="w-4 h-4 text-dd-muted mr-2 flex-shrink-0" />
               <input
                 type="text"
@@ -320,7 +320,7 @@ export default function SettingsPage() {
                   >
                     <div className="flex items-center gap-3">
                       <TabIcon
-                        className={`w-4.5 h-4.5 ${isSelected ? 'text-orange-500' : 'text-dd-muted'}`}
+                        className={`w-4.5 h-4.5 ${isSelected ? 'text-blue-500' : 'text-dd-muted'}`}
                       />
                       <div className="space-y-0.5">
                         <span className="text-xs font-bold tracking-wide block">{tab.title}</span>
@@ -332,7 +332,7 @@ export default function SettingsPage() {
                     <ChevronRight className="w-4 h-4 text-dd-muted/60" />
 
                     {isSelected && (
-                      <div className="absolute right-0 top-0 bottom-0 w-[3px] bg-orange-500" />
+                      <div className="absolute right-0 top-0 bottom-0 w-[3px] bg-blue-500" />
                     )}
                   </button>
                 );
@@ -419,7 +419,7 @@ export default function SettingsPage() {
                       type="text"
                       value={institution}
                       onChange={(e) => setInstitution(e.target.value)}
-                      className="w-full rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-xs text-dd-text focus:border-orange-500/60 focus:outline-none transition-colors"
+                      className="w-full rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-xs text-dd-text focus:border-blue-500/60 focus:outline-none transition-colors"
                       placeholder="Ex: USP, Vercel, Freelancer"
                     />
                   </div>
@@ -441,7 +441,7 @@ export default function SettingsPage() {
                       onChange={(e) =>
                         setGithubUsername(e.target.value.replace(/[^a-zA-Z0-9-]/g, ''))
                       }
-                      className="w-full rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-xs text-dd-text focus:border-orange-500/60 focus:outline-none transition-colors"
+                      className="w-full rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-xs text-dd-text focus:border-blue-500/60 focus:outline-none transition-colors"
                       placeholder="Ex: seu-usuario-github"
                     />
                   </div>
@@ -464,7 +464,7 @@ export default function SettingsPage() {
                       type="text"
                       value={discordUsername}
                       onChange={(e) => setDiscordUsername(e.target.value)}
-                      className="w-full rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-xs text-dd-text focus:border-orange-500/60 focus:outline-none transition-colors"
+                      className="w-full rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-xs text-dd-text focus:border-blue-500/60 focus:outline-none transition-colors"
                       placeholder="Ex: seu-usuario-discord"
                     />
                   </div>
@@ -482,7 +482,7 @@ export default function SettingsPage() {
                       type="text"
                       value={pronouns}
                       onChange={(e) => setPronouns(e.target.value)}
-                      className="w-full rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-xs text-dd-text focus:border-orange-500/60 focus:outline-none transition-colors"
+                      className="w-full rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-xs text-dd-text focus:border-blue-500/60 focus:outline-none transition-colors"
                       placeholder="Ex: ele/dele, ela/dela, elu/delu"
                     />
                   </div>
@@ -500,7 +500,7 @@ export default function SettingsPage() {
                       type="date"
                       value={birthday}
                       onChange={(e) => setBirthday(e.target.value)}
-                      className="w-full rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-xs text-dd-text focus:border-orange-500/60 focus:outline-none transition-colors"
+                      className="w-full rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-xs text-dd-text focus:border-blue-500/60 focus:outline-none transition-colors"
                     />
                   </div>
 
@@ -564,7 +564,7 @@ export default function SettingsPage() {
                       rows={4}
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
-                      className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-dd-text placeholder-slate-600 focus:border-orange-500/60 focus:outline-none resize-none transition-colors"
+                      className="w-full text-xs rounded-lg border border-dd-border bg-dd-bg/80 px-4 py-2.5 text-dd-text placeholder-slate-600 focus:border-blue-500/60 focus:outline-none resize-none transition-colors"
                       placeholder="Fale um pouco sobre você, tecnologias favoritas..."
                     />
                   </div>
@@ -573,7 +573,7 @@ export default function SettingsPage() {
                     <button
                       type="submit"
                       disabled={updating}
-                      className="bg-orange-500 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-colors hover:bg-orange-600 disabled:opacity-50 cursor-pointer shadow-md shadow-orange-500/10"
+                      className="bg-blue-500 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-colors hover:bg-blue-600 disabled:opacity-50 cursor-pointer shadow-md shadow-blue-500/10"
                     >
                       {updating ? 'Salvando...' : 'Salvar Alterações'}
                     </button>
@@ -600,15 +600,15 @@ export default function SettingsPage() {
                     onClick={() => changeTheme('dark')}
                     className={`flex flex-col items-center gap-3 p-4 rounded-xl border transition-all duration-200 text-left cursor-pointer ${
                       theme === 'dark'
-                        ? 'border-orange-500 bg-orange-500/[0.03] text-dd-text shadow-[0_0_15px_rgba(249,115,22,0.05)]'
+                        ? 'border-blue-500 bg-blue-500/[0.03] text-dd-text shadow-[0_0_15px_rgba(0, 131, 254,0.05)]'
                         : 'border-dd-border bg-dd-bg/40 text-dd-muted hover:border-dd-border/80 hover:text-dd-text'
                     }`}
                   >
                     <div className="flex items-center justify-between w-full">
                       <Moon
-                        className={`w-5 h-5 ${theme === 'dark' ? 'text-orange-400' : 'text-dd-muted'}`}
+                        className={`w-5 h-5 ${theme === 'dark' ? 'text-blue-400' : 'text-dd-muted'}`}
                       />
-                      {theme === 'dark' && <span className="w-2 h-2 rounded-full bg-orange-500" />}
+                      {theme === 'dark' && <span className="w-2 h-2 rounded-full bg-blue-500" />}
                     </div>
                     <div className="w-full">
                       <p className="text-xs font-bold">Modo Escuro</p>
@@ -624,7 +624,7 @@ export default function SettingsPage() {
                     onClick={() => changeTheme('light')}
                     className={`flex flex-col items-center gap-3 p-4 rounded-xl border transition-all duration-200 text-left cursor-pointer ${
                       theme === 'light'
-                        ? 'border-orange-500 bg-orange-500/[0.03] text-dd-text shadow-[0_0_15px_rgba(249,115,22,0.05)]'
+                        ? 'border-blue-500 bg-blue-500/[0.03] text-dd-text shadow-[0_0_15px_rgba(0, 131, 254,0.05)]'
                         : 'border-dd-border bg-dd-bg/40 text-dd-muted hover:border-dd-border/80 hover:text-dd-text'
                     }`}
                   >
@@ -632,7 +632,7 @@ export default function SettingsPage() {
                       <Sun
                         className={`w-5 h-5 ${theme === 'light' ? 'text-amber-500' : 'text-dd-muted'}`}
                       />
-                      {theme === 'light' && <span className="w-2 h-2 rounded-full bg-orange-500" />}
+                      {theme === 'light' && <span className="w-2 h-2 rounded-full bg-blue-500" />}
                     </div>
                     <div className="w-full">
                       <p className="text-xs font-bold">Modo Claro</p>
@@ -666,7 +666,7 @@ export default function SettingsPage() {
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="2.5"
-                        className="text-orange-500 animate-pulse animate-duration-1000"
+                        className="text-blue-500 animate-pulse animate-duration-1000"
                       >
                         <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
                         <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
@@ -693,7 +693,7 @@ export default function SettingsPage() {
                     onClick={toggleSound}
                     className={`px-4 py-2 rounded-lg border text-[11px] font-extrabold uppercase tracking-wider transition-all duration-200 active:scale-[0.97] cursor-pointer ${
                       soundEnabled
-                        ? 'bg-orange-500 border-orange-600 text-white shadow-md shadow-orange-500/10 hover:bg-orange-600'
+                        ? 'bg-blue-500 border-blue-600 text-white shadow-md shadow-blue-500/10 hover:bg-blue-600'
                         : 'bg-dd-surface border-dd-border text-dd-muted hover:text-dd-text hover:bg-dd-border/30'
                     }`}
                   >
