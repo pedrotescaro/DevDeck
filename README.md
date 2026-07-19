@@ -43,9 +43,9 @@ Explore as especificações detalhadas do projeto e guias de infraestrutura:
 <table width="100%">
   <tr>
     <td width="50%" valign="top">
-      <h4>🎨 Design Twitter/X OLED Black</h4>
+      <h4>🎨 Design Twitter/X OLED Black & Electric Blue</h4>
       <ul>
-        <li>Interface super fluida com barra lateral completa (Página Inicial, Explorar, Notificações, Mensagens, Ducky, Itens Salvos e Perfil).</li>
+        <li>Interface super fluida com a nova identidade visual <b>Electric Blue (#0083fe)</b> e barra lateral completa (Página Inicial, Explorar, Notificações, Mensagens, Ducky, Itens Salvos e Perfil).</li>
         <li>Tema escuro nativo (OLED) para sessões de codificação noturnas saudáveis, configurável nas opções de Aparência.</li>
         <li>Visual mobile minimalista com bottom navigation bar.</li>
       </ul>
