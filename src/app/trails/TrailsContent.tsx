@@ -53,6 +53,29 @@ function getLevelFromXp(xp: number) {
   return Math.max(1, Math.floor(xp / XP_PER_LEVEL_DISPLAY) + 1);
 }
 
+const TRAIL_MAP_WIDTH = 400;
+const TRAIL_MAP_ROW_HEIGHT = 190;
+const TRAIL_MAP_NODE_CENTER_Y = 95;
+
+function buildTrailPath(nodeCount: number) {
+  if (nodeCount < 2) return '';
+
+  const centerX = TRAIL_MAP_WIDTH / 2;
+  let path = `M ${centerX} ${TRAIL_MAP_NODE_CENTER_Y}`;
+
+  for (let index = 0; index < nodeCount - 1; index += 1) {
+    const startY = TRAIL_MAP_NODE_CENTER_Y + index * TRAIL_MAP_ROW_HEIGHT;
+    const endY = startY + TRAIL_MAP_ROW_HEIGHT;
+    const middleY = startY + TRAIL_MAP_ROW_HEIGHT / 2;
+    const bendX = index % 2 === 0 ? 306 : 94;
+
+    path += ` C ${centerX} ${startY + 48}, ${bendX} ${startY + 42}, ${bendX} ${middleY}`;
+    path += ` C ${bendX} ${endY - 42}, ${centerX} ${endY - 48}, ${centerX} ${endY}`;
+  }
+
+  return path;
+}
+
 function getLearnSlidesForLevel(level: TrailLevel) {
   return level.questions.map((q, idx) => {
     let title = `Conceito ${idx + 1}: ${level.title}`;
@@ -1199,13 +1222,6 @@ export function TrailsContent({
     return 'Estagiário de Código';
   };
 
-  const getOffsetStyle = (index: number) => {
-    // Padrão sinuoso: zigue-zague vertical
-    const values = [0, 50, 95, 50, 0, -50, -95, -50];
-    const val = values[index % values.length];
-    return { transform: `translateX(${val}px)` };
-  };
-
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased">
       <Sidebar user={user} />
@@ -1296,207 +1312,247 @@ export function TrailsContent({
               </div>
             )}
 
-            {/* Winding Trail Path */}
-            <div className="relative flex flex-col items-center py-14 bg-dd-surface/5 border border-dd-border/50 border-dashed rounded-2xl overflow-hidden min-h-[550px]">
-              <div className="space-y-5 w-full max-w-sm flex flex-col items-center">
-                {(() => {
-                  const levels = TRAILS_DATA[activeLang] || [];
-                  const elements: React.ReactNode[] = [];
-                  let pathNodeIndex = 0;
+            {/* Mapa vertical da trilha */}
+            <div className="relative flex min-h-[550px] flex-col items-center overflow-hidden rounded-2xl border border-dashed border-dd-border/50 bg-dd-surface/5 px-2 py-5 sm:px-4">
+              {(() => {
+                const levels = TRAILS_DATA[activeLang] || [];
+                const unitsMap = new Map<number, TrailLevel[]>();
+                const trailNodes: Array<
+                  | { type: 'level'; level: TrailLevel; unitStart: boolean }
+                  | { type: 'checkpoint'; unitNumber: number; unitLevels: TrailLevel[] }
+                > = [];
 
-                  // Group levels by unitNumber
-                  const unitsMap = new Map<number, TrailLevel[]>();
-                  levels.forEach((level) => {
-                    if (!unitsMap.has(level.unitNumber)) {
-                      unitsMap.set(level.unitNumber, []);
-                    }
-                    unitsMap.get(level.unitNumber)!.push(level);
+                levels.forEach((level) => {
+                  const unitLevels = unitsMap.get(level.unitNumber) || [];
+                  unitLevels.push(level);
+                  unitsMap.set(level.unitNumber, unitLevels);
+                });
+
+                unitsMap.forEach((unitLevels, unitNumber) => {
+                  unitLevels.forEach((level, levelIndex) => {
+                    trailNodes.push({ type: 'level', level, unitStart: levelIndex === 0 });
                   });
+                  trailNodes.push({ type: 'checkpoint', unitNumber, unitLevels });
+                });
 
-                  // Iterate over each unit
-                  unitsMap.forEach((unitLevels, unitNumber) => {
-                    // Render unit header separator
-                    const firstLevelOfUnit = unitLevels[0];
-                    elements.push(
-                      <div
-                        key={`unit-sep-${unitNumber}`}
-                        className="w-full flex items-center justify-center my-10 max-w-sm px-4"
-                      >
-                        <div className="flex-grow border-t border-dd-border/60"></div>
-                        <span className="px-4.5 py-2 bg-dd-surface border border-dd-border text-dd-text text-[10px] font-extrabold uppercase tracking-wider rounded-full mx-3 text-center shadow-sm whitespace-nowrap">
-                          Unidade {unitNumber}:{' '}
-                          {firstLevelOfUnit?.unitTitle || `Unidade ${unitNumber}`}
-                        </span>
-                        <div className="flex-grow border-t border-dd-border/60"></div>
-                      </div>
-                    );
+                const mapHeight = trailNodes.length * TRAIL_MAP_ROW_HEIGHT;
+                const path = buildTrailPath(trailNodes.length);
 
-                    // Render all levels of this unit
-                    unitLevels.forEach((level) => {
-                      const globalIdx = levels.findIndex(
-                        (l) => l.levelNumber === level.levelNumber
-                      );
-                      const unlocked = isLevelUnlocked(globalIdx);
-                      const completedCount = level.questions.filter(
-                        (q) => attempts[q.id] === true
-                      ).length;
-                      const isCompleted = completedCount === level.questions.length;
-                      const offsetIdx = pathNodeIndex++;
+                return (
+                  <div
+                    className="relative w-full max-w-[440px]"
+                    style={{ height: `${mapHeight}px` }}
+                  >
+                    <svg
+                      aria-hidden="true"
+                      className="pointer-events-none absolute left-1/2 top-0 z-0 h-full w-[calc(100%-24px)] max-w-[400px] -translate-x-1/2 overflow-visible"
+                      viewBox={`0 0 ${TRAIL_MAP_WIDTH} ${mapHeight}`}
+                      preserveAspectRatio="none"
+                    >
+                      <path
+                        d={path}
+                        fill="none"
+                        stroke="var(--color-dd-muted)"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeDasharray="8 10"
+                        opacity="0.62"
+                      />
+                    </svg>
 
-                      elements.push(
-                        <div
-                          key={`level-${level.levelNumber}`}
-                          className="w-full flex flex-col items-center"
-                        >
+                    {trailNodes.slice(0, -1).map((_, index) => {
+                      const bendsRight = index % 2 === 0;
+                      const decorationTop =
+                        TRAIL_MAP_NODE_CENTER_Y +
+                        index * TRAIL_MAP_ROW_HEIGHT +
+                        TRAIL_MAP_ROW_HEIGHT / 2;
+
+                      return (
+                        <div key={`path-detail-${index}`} aria-hidden="true">
                           <div
-                            className="relative z-10 flex flex-col items-center my-7 transition-transform"
-                            style={getOffsetStyle(offsetIdx)}
+                            className={`absolute z-[2] flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border border-dd-border bg-dd-bg shadow-lg ${
+                              bendsRight ? 'left-[76.5%]' : 'left-[23.5%]'
+                            }`}
+                            style={{ top: `${decorationTop}px` }}
                           >
-                            {/* Estrelas orgânicas/curvadas */}
-                            <div className="flex gap-1.5 justify-center mb-2.5 items-end h-6.5">
+                            <span className="text-[8px] font-black leading-none text-blue-400">
+                              XP
+                            </span>
+                            <span className="mt-0.5 text-[7px] font-extrabold leading-none text-yellow-500">
+                              +{index % 2 === 0 ? 150 : 200}
+                            </span>
+                          </div>
+                          <Trophy
+                            className={`absolute z-[1] h-7 w-7 -translate-x-1/2 -translate-y-1/2 text-dd-border ${
+                              bendsRight ? 'left-[23%]' : 'left-[77%]'
+                            }`}
+                            style={{ top: `${decorationTop + 12}px` }}
+                            strokeWidth={1.5}
+                          />
+                        </div>
+                      );
+                    })}
+
+                    {trailNodes.map((node, nodeIndex) => {
+                      if (node.type === 'level') {
+                        const { level } = node;
+                        const globalIdx = levels.findIndex(
+                          (item) => item.levelNumber === level.levelNumber
+                        );
+                        const unlocked = isLevelUnlocked(globalIdx);
+                        const completedCount = level.questions.filter(
+                          (question) => attempts[question.id] === true
+                        ).length;
+                        const isCompleted = completedCount === level.questions.length;
+
+                        return (
+                          <div
+                            key={`level-${level.levelNumber}`}
+                            className="relative z-10 flex flex-col items-center justify-center"
+                            style={{ height: `${TRAIL_MAP_ROW_HEIGHT}px` }}
+                          >
+                            {node.unitStart && (
+                              <span
+                                className={`absolute top-1 rounded-full border border-dd-border bg-dd-bg/95 px-3 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-dd-muted shadow-sm ${
+                                  nodeIndex % 2 === 0 ? 'left-2 sm:left-5' : 'right-2 sm:right-5'
+                                }`}
+                                title={level.unitTitle}
+                              >
+                                Unidade {level.unitNumber}
+                              </span>
+                            )}
+
+                            <div className="mb-2.5 flex h-6.5 items-end justify-center gap-1.5">
                               {Array.from({ length: level.questions.length }).map((_, starIdx) => {
                                 const isStarEarned =
                                   attempts[level.questions[starIdx]?.id] === true;
                                 const isMiddle = starIdx === 1;
                                 const starClass = isMiddle
-                                  ? 'w-5.5 h-5.5 -translate-y-0.5 scale-110'
-                                  : 'w-5 h-5 translate-y-0.5 ' +
-                                    (starIdx === 0 ? 'rotate-[-12deg]' : 'rotate-[12deg]');
+                                  ? 'h-5.5 w-5.5 -translate-y-0.5 scale-110'
+                                  : `h-5 w-5 translate-y-0.5 ${
+                                      starIdx === 0 ? 'rotate-[-12deg]' : 'rotate-[12deg]'
+                                    }`;
 
                                 return (
                                   <Star
                                     key={starIdx}
                                     className={`transition-all ${starClass} ${
                                       isStarEarned
-                                        ? 'text-yellow-500 fill-yellow-500'
-                                        : 'text-dd-border/70'
+                                        ? 'fill-yellow-500 text-yellow-500'
+                                        : 'fill-dd-bg text-dd-border'
                                     }`}
                                   />
                                 );
                               })}
                             </div>
 
-                            {/* Botão 3D da fase (Rounded-Square) */}
                             <button
+                              type="button"
                               onClick={() => handleLevelClick(level, unlocked)}
-                              className={`w-20 h-20 rounded-[22px] flex items-center justify-center transition-all transform cursor-pointer ${
+                              aria-label={`Fase ${level.levelNumber}: ${level.title}`}
+                              className={`flex h-[72px] w-[72px] transform items-center justify-center rounded-[20px] border-x-2 border-t-2 border-b-[6px] transition-all ${
                                 unlocked
-                                  ? isCompleted
-                                    ? 'bg-blue-500 text-white border-x-2 border-t-2 border-b-[7px] border-blue-600 hover:bg-blue-400 active:border-b-0 active:translate-y-[7px]'
-                                    : 'bg-dd-surface text-blue-500 border-x-2 border-t-2 border-b-[7px] border-blue-500 hover:bg-dd-border/30 active:border-b-0 active:translate-y-[7px]'
-                                  : 'bg-dd-surface/40 text-dd-muted/30 border-x-2 border-t-2 border-b-[7px] border-dd-border/40 cursor-not-allowed'
+                                  ? `cursor-pointer border-blue-600 bg-blue-500 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-400 active:translate-y-[6px] active:border-b-0 ${
+                                      isCompleted
+                                        ? 'ring-2 ring-blue-400/20 ring-offset-2 ring-offset-dd-bg'
+                                        : ''
+                                    }`
+                                  : 'cursor-not-allowed border-dd-border/50 bg-dd-surface/80 text-dd-muted/35'
                               }`}
                             >
                               {unlocked ? (
-                                <BookOpen className="w-8 h-8" />
+                                <BookOpen className="h-8 w-8" />
                               ) : (
-                                <Lock className="w-7 h-7" />
+                                <Lock className="h-7 w-7" />
                               )}
                             </button>
 
-                            {/* Título da fase */}
-                            <div className="mt-3 text-center max-w-[170px]">
-                              <p className="text-xs font-black uppercase text-dd-text leading-tight">
+                            <div className="mt-2.5 max-w-[190px] text-center">
+                              <p className="text-xs font-black uppercase leading-tight text-dd-text">
                                 Fase {level.levelNumber}
                               </p>
-                              <p className="text-[10.5px] text-dd-muted font-bold leading-tight mt-1 truncate">
+                              <p className="mt-1 truncate text-[10.5px] font-bold leading-tight text-dd-muted">
                                 {level.title}
                               </p>
                             </div>
                           </div>
-                        </div>
-                      );
-                    });
+                        );
+                      }
 
-                    // Render unit Checkpoint at the end of the unit levels
-                    const checkpointId = `${activeLang.toLowerCase()}-u${unitNumber}-checkpoint`;
-                    const isCheckpointCompleted = attempts[checkpointId] === true;
+                      const checkpointId = `${activeLang.toLowerCase()}-u${node.unitNumber}-checkpoint`;
+                      const isCheckpointCompleted = attempts[checkpointId] === true;
+                      const lastLevel = node.unitLevels[node.unitLevels.length - 1];
+                      const checkpointUnlocked =
+                        lastLevel && lastLevel.questions.every((question) => attempts[question.id]);
 
-                    const lastLevelOfUnit = unitLevels[unitLevels.length - 1];
-                    const lastLevelCompleted =
-                      lastLevelOfUnit &&
-                      lastLevelOfUnit.questions.every((q) => attempts[q.id] === true);
-                    const checkpointUnlocked = lastLevelCompleted;
-                    const checkpointOffsetIdx = pathNodeIndex++;
-
-                    elements.push(
-                      <div
-                        key={`checkpoint-${unitNumber}`}
-                        className="w-full flex flex-col items-center"
-                      >
-                        {/* Linha pontilhada conectando à bandeira */}
-                        <div className="w-full flex items-center justify-center my-6 max-w-sm px-4">
-                          <div className="flex-grow border-t-2 border-dashed border-dd-border/50"></div>
-                          <span className="px-4 py-1.5 bg-dd-accent/15 border border-blue-500/30 text-blue-400 text-[9px] font-black uppercase tracking-wider rounded-full mx-3 text-center shadow-sm whitespace-nowrap">
-                            Revisão Final & Checkpoint {unitNumber}
-                          </span>
-                          <div className="flex-grow border-t-2 border-dashed border-dd-border/50"></div>
-                        </div>
-
+                      return (
                         <div
-                          className="relative z-10 flex flex-col items-center my-6 transition-transform"
-                          style={getOffsetStyle(checkpointOffsetIdx)}
+                          key={`checkpoint-${node.unitNumber}`}
+                          className="relative z-10 flex flex-col items-center justify-center"
+                          style={{ height: `${TRAIL_MAP_ROW_HEIGHT}px` }}
                         >
-                          {/* Três estrelas douradas se concluído, cinzas caso contrário */}
-                          <div className="flex gap-1.5 justify-center mb-2.5 items-end h-6.5">
+                          <div className="mb-2.5 flex h-6.5 items-end justify-center gap-1.5">
                             {Array.from({ length: 3 }).map((_, starIdx) => {
                               const isMiddle = starIdx === 1;
-                              const starClass = isMiddle
-                                ? 'w-5.5 h-5.5 -translate-y-0.5 scale-110'
-                                : 'w-5.5 h-5.5 translate-y-0.5 ' +
-                                  (starIdx === 0 ? 'rotate-[-12deg]' : 'rotate-[12deg]');
-
                               return (
                                 <Star
                                   key={starIdx}
-                                  className={`transition-all ${starClass} ${
+                                  className={`transition-all ${
+                                    isMiddle
+                                      ? 'h-5.5 w-5.5 -translate-y-0.5 scale-110'
+                                      : `h-5 w-5 translate-y-0.5 ${
+                                          starIdx === 0 ? 'rotate-[-12deg]' : 'rotate-[12deg]'
+                                        }`
+                                  } ${
                                     isCheckpointCompleted
-                                      ? 'text-yellow-500 fill-yellow-500'
-                                      : 'text-dd-border/70'
+                                      ? 'fill-yellow-500 text-yellow-500'
+                                      : 'fill-dd-bg text-dd-border'
                                   }`}
                                 />
                               );
                             })}
                           </div>
 
-                          {/* Botão 3D da bandeira (Checkpoint) */}
                           <button
-                            onClick={() => handleCheckpointClick(unitNumber)}
-                            className={`w-20 h-20 rounded-[22px] flex items-center justify-center transition-all transform cursor-pointer relative ${
+                            type="button"
+                            onClick={() => handleCheckpointClick(node.unitNumber)}
+                            aria-label={`Checkpoint da unidade ${node.unitNumber}`}
+                            className={`relative flex h-[72px] w-[72px] transform items-center justify-center rounded-[20px] border-x-2 border-t-2 border-b-[6px] transition-all ${
                               checkpointUnlocked
-                                ? isCheckpointCompleted
-                                  ? 'bg-dd-accent text-white border-x-2 border-t-2 border-b-[7px] border-blue-600 hover:bg-blue-500 active:border-b-0 active:translate-y-[7px]'
-                                  : 'bg-dd-surface text-blue-500 border-x-2 border-t-2 border-b-[7px] border-blue-500 hover:bg-dd-border/30 active:border-b-0 active:translate-y-[7px]'
-                                : 'bg-dd-surface/40 text-dd-muted/30 border-x-2 border-t-2 border-b-[7px] border-dd-border/30 cursor-not-allowed'
+                                ? `cursor-pointer border-blue-600 bg-blue-500 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-400 active:translate-y-[6px] active:border-b-0 ${
+                                    isCheckpointCompleted
+                                      ? 'ring-2 ring-blue-400/20 ring-offset-2 ring-offset-dd-bg'
+                                      : ''
+                                  }`
+                                : 'cursor-not-allowed border-dd-border/50 bg-dd-surface/80 text-dd-muted/35'
                             }`}
                           >
                             <Flag
-                              className={`w-8 h-8 ${checkpointUnlocked && !isCheckpointCompleted ? 'animate-pulse' : ''}`}
+                              className={`h-8 w-8 ${
+                                checkpointUnlocked && !isCheckpointCompleted ? 'animate-pulse' : ''
+                              }`}
                             />
                             {!checkpointUnlocked && (
-                              <div className="absolute -top-1 -right-1 bg-dd-surface border border-dd-border p-1 rounded-full text-dd-muted shadow-sm">
-                                <Lock className="w-3.5 h-3.5 text-dd-muted" />
-                              </div>
+                              <span className="absolute -right-1 -top-1 rounded-full border border-dd-border bg-dd-bg p-1 shadow-sm">
+                                <Lock className="h-3.5 w-3.5 text-dd-muted" />
+                              </span>
                             )}
                           </button>
 
-                          {/* Título do Checkpoint */}
-                          <div className="mt-3 text-center max-w-[170px]">
-                            <p className="text-xs font-black uppercase text-dd-text leading-tight">
+                          <div className="mt-2.5 max-w-[190px] text-center">
+                            <p className="text-xs font-black uppercase leading-tight text-dd-text">
                               Checkpoint
                             </p>
-                            <p className="text-[10.5px] text-dd-muted font-bold leading-tight mt-1 truncate">
-                              Unidade {unitNumber}
+                            <p className="mt-1 truncate text-[10.5px] font-bold leading-tight text-dd-muted">
+                              Unidade {node.unitNumber}
                             </p>
                           </div>
                         </div>
-                      </div>
-                    );
-                  });
-
-                  return elements;
-                })()}
-              </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Floating Recommended Level Bar */}

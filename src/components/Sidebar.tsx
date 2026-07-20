@@ -32,6 +32,7 @@ import { CharCounter } from '@/components/motion/CharCounter';
 import { MentionDropdown } from '@/components/motion/MentionDropdown';
 import { appendPostExtras, ReplyAudience, resetPostComposerExtras } from '@/lib/post-composer';
 import { POST_CHAR_LIMIT } from '@/lib/motion';
+import { ThemeLogo } from '@/components/ThemeLogo';
 
 interface SidebarUser {
   id: string;
@@ -421,8 +422,7 @@ export function Sidebar({ user }: SidebarProps) {
         <div className="space-y-5">
           {/* Logo */}
           <Link href="/feed" className="flex items-center gap-2.5 px-3 py-0 group w-fit">
-            <Image
-              src="/logo.svg"
+            <ThemeLogo
               alt="DevDeck Logo"
               width={28}
               height={28}
@@ -675,13 +675,7 @@ export function Sidebar({ user }: SidebarProps) {
         {/* Top Header */}
         <header className="sticky top-0 z-40 w-full border-b border-dd-border bg-dd-bg/80 backdrop-blur-md px-4 py-3 flex items-center justify-between">
           <Link href="/feed" className="flex items-center gap-2 group">
-            <Image
-              src="/logo.svg"
-              alt="DevDeck Logo"
-              width={24}
-              height={24}
-              className="object-contain"
-            />
+            <ThemeLogo alt="DevDeck Logo" width={24} height={24} className="object-contain" />
             <span className="text-dd-text font-extrabold text-base tracking-tight">DevDeck</span>
           </Link>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
+import { ThemeLogo } from '@/components/ThemeLogo';
 
 export function Footer() {
   return (
@@ -10,8 +10,7 @@ export function Footer() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <Image
-              src="/logo.svg"
+            <ThemeLogo
               alt="DevDeck Logo"
               width={20}
               height={20}

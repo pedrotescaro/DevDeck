@@ -5,6 +5,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { StreakBadge } from './StreakBadge';
+import { ThemeLogo } from './ThemeLogo';
 
 interface NavbarUser {
   username: string;
@@ -62,13 +63,7 @@ export function Navbar({ user }: NavbarProps) {
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* Left: Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <Image
-            src="/logo.svg"
-            alt="DevDeck Logo"
-            width={20}
-            height={20}
-            className="object-contain"
-          />
+          <ThemeLogo alt="DevDeck Logo" width={20} height={20} className="object-contain" />
           <span className="text-dd-text font-semibold text-lg tracking-tight">DevDeck</span>
         </Link>
 
