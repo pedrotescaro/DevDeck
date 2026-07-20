@@ -63,18 +63,11 @@ export function Navbar({ user }: NavbarProps) {
         {/* Left: Logo */}
         <Link href="/" className="flex items-center gap-2 group">
           <Image
-            src="/logo.png"
+            src="/logo.svg"
             alt="DevDeck Logo"
             width={20}
             height={20}
-            className="object-contain hidden dark:block"
-          />
-          <Image
-            src="/logo-light.png"
-            alt="DevDeck Logo"
-            width={20}
-            height={20}
-            className="object-contain block dark:hidden"
+            className="object-contain"
           />
           <span className="text-dd-text font-semibold text-lg tracking-tight">DevDeck</span>
         </Link>

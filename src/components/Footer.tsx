@@ -11,18 +11,11 @@ export function Footer() {
           {/* Logo */}
           <div className="flex items-center gap-2">
             <Image
-              src="/logo.png"
+              src="/logo.svg"
               alt="DevDeck Logo"
               width={20}
               height={20}
-              className="w-5 h-5 object-contain hidden dark:block"
-            />
-            <Image
-              src="/logo-light.png"
-              alt="DevDeck Logo"
-              width={20}
-              height={20}
-              className="w-5 h-5 object-contain block dark:hidden"
+              className="w-5 h-5 object-contain"
             />
             <span className="text-dd-text font-bold text-sm">DevDeck</span>
           </div>

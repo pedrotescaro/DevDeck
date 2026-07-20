@@ -140,7 +140,7 @@ export default function RegisterPage() {
           {/* Logo & Title */}
           <Link href="/" className="flex items-center gap-2.5 mb-3.5 group">
             <Image
-              src="/logo.png"
+              src="/logo.svg"
               alt="DevDeck Logo"
               width={28}
               height={28}

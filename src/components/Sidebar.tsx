@@ -422,18 +422,11 @@ export function Sidebar({ user }: SidebarProps) {
           {/* Logo */}
           <Link href="/feed" className="flex items-center gap-2.5 px-3 py-0 group w-fit">
             <Image
-              src="/logo.png"
+              src="/logo.svg"
               alt="DevDeck Logo"
               width={28}
               height={28}
-              className="object-contain group-hover:scale-105 transition-transform duration-300 hidden dark:block"
-            />
-            <Image
-              src="/logo-light.png"
-              alt="DevDeck Logo"
-              width={28}
-              height={28}
-              className="object-contain group-hover:scale-105 transition-transform duration-300 block dark:hidden"
+              className="object-contain group-hover:scale-105 transition-transform duration-300"
             />
             <span className="text-dd-text font-extrabold text-xl tracking-tight">DevDeck</span>
           </Link>
@@ -683,18 +676,11 @@ export function Sidebar({ user }: SidebarProps) {
         <header className="sticky top-0 z-40 w-full border-b border-dd-border bg-dd-bg/80 backdrop-blur-md px-4 py-3 flex items-center justify-between">
           <Link href="/feed" className="flex items-center gap-2 group">
             <Image
-              src="/logo.png"
+              src="/logo.svg"
               alt="DevDeck Logo"
               width={24}
               height={24}
-              className="object-contain hidden dark:block"
-            />
-            <Image
-              src="/logo-light.png"
-              alt="DevDeck Logo"
-              width={24}
-              height={24}
-              className="object-contain block dark:hidden"
+              className="object-contain"
             />
             <span className="text-dd-text font-extrabold text-base tracking-tight">DevDeck</span>
           </Link>

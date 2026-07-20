@@ -32,7 +32,7 @@ export default function LandingNav({ initialUser }: LandingNavProps) {
         {/* ── Logo ── */}
         <Link href="/" className="flex items-center gap-3 group">
           <Image
-            src="/logo.png"
+            src="/logo.svg"
             alt="DevDeck Logo"
             width={32}
             height={32}

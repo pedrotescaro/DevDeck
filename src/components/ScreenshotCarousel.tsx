@@ -147,7 +147,7 @@ export function ScreenshotCarousel() {
               transition={{ duration: 0.5, ease: 'easeInOut' }}
               className="w-full h-full object-cover absolute inset-0"
               onError={(e) => {
-                e.currentTarget.src = '/logo.png';
+                e.currentTarget.src = '/logo.svg';
               }}
             />
           </AnimatePresence>
