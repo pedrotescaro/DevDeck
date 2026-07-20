@@ -58,18 +58,29 @@ export class GitHubError extends Error {
 }
 
 async function ghFetch(path: string): Promise<any> {
-  const res = await fetch(`${GITHUB_API}${path}`, { headers: authHeaders() });
+  let res = await fetch(`${GITHUB_API}${path}`, { headers: authHeaders() });
+
+  // Se o GITHUB_TOKEN no ambiente estiver inválido/expirado (401), tenta sem autenticação (para repos públicos)
+  if (res.status === 401 && process.env.GITHUB_TOKEN) {
+    const headersWithoutAuth = { ...authHeaders() };
+    delete headersWithoutAuth.Authorization;
+    res = await fetch(`${GITHUB_API}${path}`, { headers: headersWithoutAuth });
+  }
+
+  if (res.status === 401) {
+    throw new GitHubError(
+      401,
+      'Não foi possível autenticar na API do GitHub (HTTP 401). Verifique se o seu token de acesso (GITHUB_TOKEN) está válido.'
+    );
+  }
   if (res.status === 404) {
     throw new GitHubError(404, 'Repositório não encontrado ou é privado.');
   }
   if (res.status === 403) {
-    throw new GitHubError(
-      403,
-      'Limite de requisições ao GitHub atingido ou acesso negado (repositório privado).'
-    );
+    throw new GitHubError(403, 'Limite de requisições à API do GitHub atingido ou acesso negado.');
   }
   if (!res.ok) {
-    throw new GitHubError(res.status, `GitHub API erro (${res.status}).`);
+    throw new GitHubError(res.status, `Erro na API do GitHub (${res.status}).`);
   }
   return res.json();
 }
@@ -140,10 +151,18 @@ export async function fetchManifest(
 ): Promise<{ filename: string; content: string } | null> {
   for (const filename of MANIFEST_FILES) {
     try {
-      const res = await fetch(
+      let res = await fetch(
         `${GITHUB_API}/repos/${owner}/${repo}/contents/${filename}?ref=${branch}`,
         { headers: authHeaders() }
       );
+      if (res.status === 401 && process.env.GITHUB_TOKEN) {
+        const headersWithoutAuth = { ...authHeaders() };
+        delete headersWithoutAuth.Authorization;
+        res = await fetch(
+          `${GITHUB_API}/repos/${owner}/${repo}/contents/${filename}?ref=${branch}`,
+          { headers: headersWithoutAuth }
+        );
+      }
       if (!res.ok) continue;
       const data = await res.json();
       if (data.content) {

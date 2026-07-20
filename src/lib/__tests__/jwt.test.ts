@@ -21,7 +21,7 @@ import {
   XP_LEVEL_6_INCREMENT,
   XP_PER_LEVEL_DISPLAY,
   DEFAULT_LANGUAGE_TRAILS,
-  PISTON_LANGUAGES,
+  WANDBOX_LANGUAGES,
   FALLBACK_QUIZZES,
 } from '../config';
 
@@ -133,12 +133,11 @@ describe('Config constants', () => {
     expect(DEFAULT_LANGUAGE_TRAILS).toContain('RUST');
   });
 
-  it('should have PISTON_LANGUAGES for all supported languages', () => {
+  it('should have WANDBOX_LANGUAGES for all supported languages', () => {
     const supportedLangs = ['python', 'rust', 'go', 'cpp', 'java', 'kotlin', 'swift'];
     supportedLangs.forEach((lang) => {
-      expect(PISTON_LANGUAGES[lang]).toBeDefined();
-      expect(PISTON_LANGUAGES[lang].language).toBeTruthy();
-      expect(PISTON_LANGUAGES[lang].version).toBeTruthy();
+      expect(WANDBOX_LANGUAGES[lang]).toBeDefined();
+      expect(WANDBOX_LANGUAGES[lang].compiler).toBeTruthy();
     });
   });
 

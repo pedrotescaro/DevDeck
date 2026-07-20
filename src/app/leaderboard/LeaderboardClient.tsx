@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Sidebar } from '@/components/Sidebar';
 interface LeaderboardRow {
   rank: number;
@@ -164,17 +165,33 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
                         </span>
 
                         <div className="relative mb-2 shrink-0">
-                          <div
-                            className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-xs select-none ${
-                              isFirst
-                                ? 'bg-blue-500/20 text-blue-400 ring-2 ring-blue-500/40'
-                                : isSecond
-                                  ? 'bg-dd-blue/20 text-dd-blue ring-2 ring-dd-blue/30'
-                                  : 'bg-[#c5844a]/20 text-[#c5844a] ring-2 ring-[#c5844a]/30'
-                            }`}
-                          >
-                            {row.username.slice(0, 2).toUpperCase()}
-                          </div>
+                          {row.avatar_url ? (
+                            <Image
+                              src={row.avatar_url}
+                              alt={row.username}
+                              width={44}
+                              height={44}
+                              className={`w-11 h-11 rounded-full object-cover select-none ${
+                                isFirst
+                                  ? 'ring-2 ring-blue-500/40'
+                                  : isSecond
+                                    ? 'ring-2 ring-dd-blue/30'
+                                    : 'ring-2 ring-[#c5844a]/30'
+                              }`}
+                            />
+                          ) : (
+                            <div
+                              className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-xs select-none ${
+                                isFirst
+                                  ? 'bg-blue-500/20 text-blue-400 ring-2 ring-blue-500/40'
+                                  : isSecond
+                                    ? 'bg-dd-blue/20 text-dd-blue ring-2 ring-dd-blue/30'
+                                    : 'bg-[#c5844a]/20 text-[#c5844a] ring-2 ring-[#c5844a]/30'
+                              }`}
+                            >
+                              {row.username.slice(0, 2).toUpperCase()}
+                            </div>
+                          )}
                           <span
                             className={`absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full border border-dd-border bg-dd-bg flex items-center justify-center font-black text-[9px] ${medalColor}`}
                           >
@@ -223,9 +240,19 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
                           href={`/profile/${row.username}`}
                           className="flex items-center gap-3 group"
                         >
-                          <div className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center font-bold text-xs group-hover:scale-105 transition-transform shrink-0">
-                            {row.username.slice(0, 2).toUpperCase()}
-                          </div>
+                          {row.avatar_url ? (
+                            <Image
+                              src={row.avatar_url}
+                              alt={row.username}
+                              width={32}
+                              height={32}
+                              className="w-8 h-8 rounded-full object-cover group-hover:scale-105 transition-transform shrink-0 border border-blue-500/20"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center font-bold text-xs group-hover:scale-105 transition-transform shrink-0">
+                              {row.username.slice(0, 2).toUpperCase()}
+                            </div>
+                          )}
                           <div>
                             <p className="text-xs font-black text-dd-text group-hover:underline">
                               @{row.username}
@@ -286,9 +313,19 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
                 Seu Ranking
               </h3>
               <div className="flex items-center gap-3 p-1">
-                <div className="w-9 h-9 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs ring-1 ring-blue-500/30 shrink-0">
-                  {initialUser.username.slice(0, 2).toUpperCase()}
-                </div>
+                {initialUser.avatar_url ? (
+                  <Image
+                    src={initialUser.avatar_url}
+                    alt={initialUser.username}
+                    width={36}
+                    height={36}
+                    className="w-9 h-9 rounded-full object-cover ring-1 ring-blue-500/30 shrink-0"
+                  />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs ring-1 ring-blue-500/30 shrink-0">
+                    {initialUser.username.slice(0, 2).toUpperCase()}
+                  </div>
+                )}
                 <div className="min-w-0 flex-grow">
                   <p className="text-xs font-black text-dd-text truncate">
                     @{initialUser.username}

@@ -294,6 +294,133 @@ const Trash2 = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+const Zap = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+  </svg>
+);
+
+const Target = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <circle cx="12" cy="12" r="10" />
+    <circle cx="12" cy="12" r="6" />
+    <circle cx="12" cy="12" r="2" />
+  </svg>
+);
+
+const Folder = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2z" />
+  </svg>
+);
+
+const Globe = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+    <path d="M2 12h20" />
+  </svg>
+);
+
+const FlaskConical = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55A1 1 0 0 0 5.607 22h12.786a1 1 0 0 0 .886-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2" />
+    <line x1="8.5" y1="2" x2="15.5" y2="2" />
+    <path d="M7 16h10" />
+  </svg>
+);
+
+const Wrench = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+  </svg>
+);
+
+const Bug = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="m8 2 1.88 1.88" />
+    <path d="M14.12 3.88 16 2" />
+    <path d="M9 7.13v-1a3.003 3.003 0 0 1 6 0v1" />
+    <path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6" />
+    <path d="M12 20v-9" />
+    <path d="M6.53 9C4.6 9.8 3 11.4 3 14" />
+    <path d="M6 18c-1.5 0-2.5-.5-3-1" />
+    <path d="M17.47 9c1.93.8 3.53 2.4 3.53 5" />
+    <path d="M18 18c1.5 0 2.5-.5 3-1" />
+  </svg>
+);
+
+const Gear = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+  </svg>
+);
+
 interface DuckyContentProps {
   user: {
     id: string;
@@ -558,7 +685,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
     setActiveRepo(null);
     setInputVal('');
     setAttachedFiles([]);
-    setDeepThinkActive(mode === 'Deep Debug');
+    setDeepThinkActive(false);
   };
 
   const toggleBookmarkSession = (id: string, e: React.MouseEvent) => {
@@ -593,15 +720,8 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Sync mode and deepThinkActive (Repositório mode disables deep think).
-  useEffect(() => {
-    setDeepThinkActive(mode === 'Deep Debug');
-  }, [mode]);
-
   const handleDeepThinkToggle = () => {
-    const nextVal = !deepThinkActive;
-    setDeepThinkActive(nextVal);
-    setMode(nextVal ? 'Deep Debug' : 'Rápido');
+    setDeepThinkActive((prev) => !prev);
   };
 
   // Smooth scroll to bottom of chat
@@ -698,6 +818,9 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
     // Append Search or DeepThink hints to query internally if active to improve prompt context
     let finalQuery = textToSend;
+    if (deepThinkActive) {
+      finalQuery = `[Think Deeper ativo] ${finalQuery}`;
+    }
     if (searchActive) {
       finalQuery = `[Pesquisa ativa] ${finalQuery}`;
     }
@@ -920,7 +1043,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
     const repoMode = mode === 'Repositório';
     const repoFollowUp = repoMode && activeRepo;
     return (
-      <div className="w-full bg-gradient-to-br from-[#121722]/95 via-[#0d111b]/95 to-[#0a0d14]/95 border border-blue-500/20 rounded-[24px] p-4 flex flex-col justify-between min-h-[148px] shadow-[0_24px_80px_-32px_rgba(0,131,254,0.7)] focus-within:border-blue-400/50 focus-within:shadow-[0_24px_90px_-28px_rgba(0,131,254,0.9)] transition-all duration-300 max-w-2xl mx-auto backdrop-blur-xl">
+      <div className="w-full bg-[#0d111a] border border-[#1e2638] rounded-[20px] p-4 flex flex-col justify-between min-h-[148px] shadow-lg focus-within:border-blue-500/50 transition-all duration-300 max-w-2xl mx-auto backdrop-blur-xl">
         {/* Attachment chips preview */}
         {attachedFiles.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-2">
@@ -974,42 +1097,35 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
         {/* Bottom row */}
         <div className="flex items-center justify-between border-t border-[#1f1f23]/40 pt-3 mt-2 select-none">
-          {/* Left side: Orange Toggles */}
+          {/* Left side: Toggles */}
           <div className="flex items-center gap-2">
-            {/* Deep Debug Toggle */}
+            {/* Think Deeper Toggle */}
             <button
               type="button"
               onClick={handleDeepThinkToggle}
               disabled={repoMode}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-semibold border transition-all cursor-pointer select-none disabled:opacity-40 disabled:cursor-not-allowed ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-medium border transition-all cursor-pointer select-none disabled:opacity-40 disabled:cursor-not-allowed ${
                 deepThinkActive
-                  ? 'bg-[#0a1929] border-[#7c3a0d] text-[#0083fe]'
-                  : 'bg-[#1a1a1f] border-[#232329] text-[#8b8b93] hover:bg-[#232329] hover:text-dd-text'
+                  ? 'bg-[#0a1929] border-blue-500/60 text-[#0083fe]'
+                  : 'bg-[#141824]/80 border-[#232a3b] text-[#8b8b93] hover:bg-[#1a2133] hover:text-dd-text'
               }`}
             >
-              <Terminal className="w-3.5 h-3.5" />
-              <span>Deep Debug</span>
+              <Gear className="w-3.5 h-3.5" />
+              <span>Think Deeper</span>
             </button>
 
-            {/* Buscar Dados Toggle */}
+            {/* Search Toggle */}
             <button
               type="button"
               onClick={() => setSearchActive(!searchActive)}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-semibold border transition-all cursor-pointer select-none ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-medium border transition-all cursor-pointer select-none ${
                 searchActive
-                  ? 'bg-[#0a1929] border-[#7c3a0d] text-[#0083fe]'
-                  : 'bg-[#1a1a1f] border-[#232329] text-[#8b8b93] hover:bg-[#232329] hover:text-dd-text'
+                  ? 'bg-[#0a1929] border-blue-500/60 text-[#0083fe]'
+                  : 'bg-[#141824]/80 border-[#232a3b] text-[#8b8b93] hover:bg-[#1a2133] hover:text-dd-text'
               }`}
             >
-              <svg
-                viewBox="0 0 24 24"
-                className="w-3.5 h-3.5 fill-none stroke-current"
-                strokeWidth="2"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10zM2 12h20" />
-              </svg>
-              <span>Buscar Dados</span>
+              <Globe className="w-3.5 h-3.5" />
+              <span>Search</span>
             </button>
           </div>
 
@@ -1272,11 +1388,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
       <div
         className={`relative flex min-h-0 min-w-0 flex-grow flex-col overflow-hidden bg-[#05070b] ${!isFullscreen ? 'border-l border-[#1f1f23]/40' : ''}`}
       >
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -left-28 top-16 h-80 w-80 rounded-full bg-blue-600/15 blur-[110px]" />
-          <div className="absolute -right-20 bottom-10 h-96 w-96 rounded-full bg-cyan-400/8 blur-[130px]" />
-          <div className="absolute inset-0 opacity-[0.025] [background-image:linear-gradient(rgba(255,255,255,.6)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.6)_1px,transparent_1px)] [background-size:36px_36px]" />
-        </div>
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden" />
 
         {/* Top Header */}
         <header className="relative z-20 flex items-center justify-between border-b border-white/5 bg-[#070a10]/75 px-4 py-3 backdrop-blur-xl sm:px-6 select-none">
@@ -1309,24 +1421,18 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
               </button>
             )}
             <div className="flex items-center gap-2.5">
-              <div className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-blue-400/20 bg-gradient-to-br from-blue-500/20 to-cyan-400/5 shadow-[0_0_24px_rgba(0,131,254,0.18)]">
-                <Image
-                  src="/async-logo.svg"
-                  alt="ASYNC"
-                  width={28}
-                  height={28}
-                  className="h-7 w-7 object-contain"
-                />
-                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#070a10] bg-emerald-400" />
-              </div>
+              <Image
+                src="/async-logo.svg"
+                alt="ASYNC"
+                width={24}
+                height={24}
+                className="h-6 w-6 object-contain"
+              />
               <div className="hidden sm:block">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-black tracking-[0.16em] text-white">ASYNC</span>
-                  <span className="rounded-full border border-blue-400/20 bg-blue-500/10 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-wider text-blue-300">
-                    IA
-                  </span>
                 </div>
-                <p className="text-[9px] font-medium text-[#717987]">Copiloto de código • online</p>
+                <p className="text-[10px] font-medium text-[#717987]">Copiloto de código</p>
               </div>
             </div>
             {activeRepo && (
@@ -1387,82 +1493,54 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
           /* ASYNC welcome state */
           <div className="relative z-10 mx-auto flex w-full max-w-4xl flex-grow flex-col items-center justify-center overflow-y-auto px-4 py-8">
             <div className="-mt-10 flex w-full max-w-2xl flex-col items-center gap-6 text-center">
-              <div className="flex flex-col items-center gap-4 select-none animate-in fade-in zoom-in-95 duration-500">
-                <div className="relative">
-                  <div className="absolute inset-0 scale-150 rounded-full bg-blue-500/20 blur-2xl" />
-                  <div className="relative flex h-24 w-24 items-center justify-center rounded-[28px] border border-blue-400/25 bg-gradient-to-br from-blue-500/20 via-[#101827] to-cyan-400/10 shadow-[0_24px_70px_-18px_rgba(0,131,254,0.85)]">
-                    <Image
-                      src="/async-logo.svg"
-                      alt="ASYNC IA"
-                      width={72}
-                      height={72}
-                      className="h-[72px] w-[72px] object-contain drop-shadow-[0_10px_24px_rgba(0,131,254,0.3)]"
-                    />
-                  </div>
-                  <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-emerald-400/20 bg-[#08130f] px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.18em] text-emerald-300 shadow-lg">
-                    online agora
-                  </span>
-                </div>
-
-                <div className="mt-2 space-y-2">
-                  <span className="inline-flex rounded-full border border-blue-400/20 bg-blue-500/10 px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-blue-300">
-                    DevDeck Intelligence
-                  </span>
-                  <h1 className="font-sans text-3xl font-black tracking-tight text-white sm:text-4xl">
-                    {mode === 'Rápido'
-                      ? 'Como a ASYNC pode ajudar?'
-                      : mode === 'Deep Debug'
-                        ? 'Depuração profunda com ASYNC'
-                        : 'Analise seu repositório com ASYNC'}
-                  </h1>
-                  <p className="mx-auto max-w-lg text-xs font-medium leading-relaxed text-[#828a99] sm:text-sm">
-                    Seu copiloto de programação para investigar bugs, explicar conceitos, refatorar
-                    código e entender projetos inteiros.
-                  </p>
-                </div>
+              <div className="flex items-center justify-center gap-3.5 select-none animate-in fade-in zoom-in-95 duration-500">
+                <Image
+                  src="/async-logo.svg"
+                  alt="ASYNC"
+                  width={56}
+                  height={56}
+                  className="h-14 w-14 object-contain"
+                />
+                <h1 className="font-sans text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                  Comece a conversar agora
+                </h1>
               </div>
 
               {/* Mode switch tabs capsule (Rápido, Deep Debug, Repositório) */}
-              <div className="flex rounded-full border border-white/8 bg-[#0c111b]/90 p-1.5 shadow-xl backdrop-blur-xl select-none animate-in fade-in duration-300">
+              <div className="flex rounded-full border border-white/10 bg-[#0c111c]/90 p-1.5 shadow-xl backdrop-blur-xl select-none animate-in fade-in duration-300">
                 <button
                   onClick={() => setMode('Rápido')}
-                  className={`flex items-center gap-1.5 px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                  className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     mode === 'Rápido'
-                      ? 'bg-[#0a1929] text-[#0083fe] shadow-sm border border-blue-500/10'
-                      : 'text-[#8b8b93] hover:text-dd-text'
+                      ? 'bg-[#0a1929] border border-blue-500/80 text-[#0083fe] shadow-sm'
+                      : 'text-[#8b8b93] hover:text-dd-text border border-transparent'
                   }`}
                 >
-                  <Flame
-                    className={`w-3.5 h-3.5 ${mode === 'Rápido' ? 'text-[#0083fe]' : 'text-[#8b8b93]'}`}
-                  />
+                  <Zap className="w-3.5 h-3.5" />
                   <span>Rápido</span>
                 </button>
 
                 <button
                   onClick={() => setMode('Deep Debug')}
-                  className={`flex items-center gap-1.5 px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                  className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     mode === 'Deep Debug'
-                      ? 'bg-[#0a1929] text-[#0083fe] shadow-sm border border-blue-500/10'
-                      : 'text-[#8b8b93] hover:text-dd-text'
+                      ? 'bg-[#0a1929] border border-blue-500/80 text-[#0083fe] shadow-sm'
+                      : 'text-[#8b8b93] hover:text-dd-text border border-transparent'
                   }`}
                 >
-                  <Terminal
-                    className={`w-3.5 h-3.5 ${mode === 'Deep Debug' ? 'text-[#0083fe]' : 'text-[#8b8b93]'}`}
-                  />
+                  <Target className="w-3.5 h-3.5" />
                   <span>Deep Debug</span>
                 </button>
 
                 <button
                   onClick={() => setMode('Repositório')}
-                  className={`flex items-center gap-1.5 px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                  className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     mode === 'Repositório'
-                      ? 'bg-[#0a1929] text-[#0083fe] shadow-sm border border-blue-500/10'
-                      : 'text-[#8b8b93] hover:text-dd-text'
+                      ? 'bg-[#0a1929] border border-blue-500/80 text-[#0083fe] shadow-sm'
+                      : 'text-[#8b8b93] hover:text-dd-text border border-transparent'
                   }`}
                 >
-                  <GitBranch
-                    className={`w-3.5 h-3.5 ${mode === 'Repositório' ? 'text-[#0083fe]' : 'text-[#8b8b93]'}`}
-                  />
+                  <Folder className="w-3.5 h-3.5" />
                   <span>Repositório</span>
                 </button>
               </div>
@@ -1509,64 +1587,40 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                 <div className="w-full">{renderInputCard()}</div>
               )}
 
-              {/* Minimal Suggestion pills with icons */}
+              {/* Suggestion pills matching reference image */}
               {mode !== 'Repositório' && (
                 <div className="flex flex-wrap items-center justify-center gap-2.5 w-full select-none animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <button
                     onClick={() => handleSuggestionClick('Explicar Bug')}
-                    className="flex items-center gap-2 px-4 py-2 border border-[#232329] bg-[#131316]/90 hover:bg-[#1c1c22] hover:border-[#383842] text-[11px] font-semibold text-[#8b8b93] hover:text-white rounded-full transition-all duration-200 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+                    className="flex items-center gap-2 px-4 py-2 border border-[#1d2433] bg-[#0d121c]/90 hover:bg-[#141b2a] hover:border-[#2d374d] text-xs font-medium text-[#8b8b93] hover:text-white rounded-full transition-all duration-200 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      className="w-3.5 h-3.5 fill-none stroke-current text-blue-500"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M12 2v2M6 8a6 6 0 0 1 12 0c0 3 2.5 4 2.5 4H3.5S6 11 6 8Z" />
-                      <path d="M18 12h-3M6 12H9M15 16H9" />
-                      <path d="m19 6-1.5 1.5M5 6l1.5 1.5M12 18v3" />
-                    </svg>
+                    <Gear className="w-3.5 h-3.5 text-blue-400" />
                     <span>Explicar Bug</span>
                   </button>
                   <button
                     onClick={() => handleSuggestionClick('Refatorar Código')}
-                    className="flex items-center gap-2 px-4 py-2 border border-[#232329] bg-[#131316]/90 hover:bg-[#1c1c22] hover:border-[#383842] text-[11px] font-semibold text-[#8b8b93] hover:text-white rounded-full transition-all duration-200 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+                    className="flex items-center gap-2 px-4 py-2 border border-[#1d2433] bg-[#0d121c]/90 hover:bg-[#141b2a] hover:border-[#2d374d] text-xs font-medium text-[#8b8b93] hover:text-white rounded-full transition-all duration-200 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      className="w-3.5 h-3.5 fill-none stroke-current text-purple-400"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
-                    </svg>
+                    <Wrench className="w-3.5 h-3.5 text-blue-400" />
                     <span>Refatorar Código</span>
                   </button>
                   <button
-                    onClick={() => handleSuggestionClick('Escrever Teste')}
-                    className="flex items-center gap-2 px-4 py-2 border border-[#232329] bg-[#131316]/90 hover:bg-[#1c1c22] hover:border-[#383842] text-[11px] font-semibold text-[#8b8b93] hover:text-white rounded-full transition-all duration-200 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+                    onClick={() => setMode('Repositório')}
+                    className="flex items-center gap-2 px-4 py-2 border border-[#1d2433] bg-[#0d121c]/90 hover:bg-[#141b2a] hover:border-[#2d374d] text-xs font-medium text-[#8b8b93] hover:text-white rounded-full transition-all duration-200 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      className="w-3.5 h-3.5 fill-none stroke-current text-green-400"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                      <polyline points="14 2 14 8 20 8" />
-                      <path d="m9 15 2 2 4-4" />
-                    </svg>
-                    <span>Escrever Teste</span>
+                    <Folder className="w-3.5 h-3.5 text-blue-400" />
+                    <span>Repositório</span>
+                  </button>
+                  <button
+                    onClick={() => handleSuggestionClick('Escrever Testes')}
+                    className="flex items-center gap-2 px-4 py-2 border border-[#1d2433] bg-[#0d121c]/90 hover:bg-[#141b2a] hover:border-[#2d374d] text-xs font-medium text-[#8b8b93] hover:text-white rounded-full transition-all duration-200 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <FlaskConical className="w-3.5 h-3.5 text-blue-400" />
+                    <span>Escrever Testes</span>
                   </button>
                 </div>
               )}
             </div>
-
-            {/* Floating Banner */}
-            {renderBottomBanner()}
           </div>
         ) : (
           /* CONVERSATION FLOW (Bubble-free clean thread) */

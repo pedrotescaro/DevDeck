@@ -240,10 +240,12 @@ function CodeBlock({
   children,
   className,
   compact,
+  onRunStart,
 }: {
   children: ReactNode;
   className?: string;
   compact: boolean;
+  onRunStart?: () => void;
 }) {
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -274,6 +276,8 @@ function CodeBlock({
 
   const handleRun = async (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
+    setExpanded(true);
+    onRunStart?.();
     setRunning(true);
     setOutput(null);
     setError(null);
@@ -411,7 +415,11 @@ export function MarkdownRenderer({ content, compact = false }: MarkdownRendererP
 
       if (isValidElement<{ className?: string; children?: ReactNode }>(child)) {
         return (
-          <CodeBlock className={child.props.className} compact={compact}>
+          <CodeBlock
+            className={child.props.className}
+            compact={compact}
+            onRunStart={() => setExpanded(true)}
+          >
             {child.props.children}
           </CodeBlock>
         );

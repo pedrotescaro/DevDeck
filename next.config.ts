@@ -35,7 +35,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' blob: data: https://images.unsplash.com https://api.dicebear.com https://avatars.githubusercontent.com",
       "font-src 'self' data: https://fonts.gstatic.com",
-      "connect-src 'self' ws: wss: https://*.supabase.co https://api.github.com https://emkc.org https://generativelanguage.googleapis.com https://api.groq.com https://api.openai.com http://localhost:11434",
+      "connect-src 'self' ws: wss: https://*.supabase.co https://api.github.com https://wandbox.org https://generativelanguage.googleapis.com https://api.groq.com https://api.openai.com http://localhost:11434",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -49,6 +49,9 @@ const ALLOWED_ORIGINS = [process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:30
 const nextConfig: NextConfig = {
   output: 'standalone',
   images: {
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'api.dicebear.com' },

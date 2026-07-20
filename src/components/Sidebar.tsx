@@ -395,7 +395,7 @@ export function Sidebar({ user }: SidebarProps) {
       active: pathname.startsWith('/trails'),
     },
     {
-      label: 'ASYNC IA',
+      label: 'ASYNC',
       href: '/async',
       icon: Sparkles,
       active: pathname.startsWith('/async') || pathname.startsWith('/ducky'),
@@ -455,7 +455,7 @@ export function Sidebar({ user }: SidebarProps) {
                 <div className="relative flex items-center justify-center w-5 h-5">
                   {item.label === 'Notificações' ? (
                     <NotificationBellIcon unreadCount={unreadCount} active={item.active} />
-                  ) : item.label === 'ASYNC IA' ? (
+                  ) : item.label === 'ASYNC' || item.label === 'ASYNC IA' ? (
                     <Image
                       src="/async-logo.svg"
                       alt=""
@@ -516,20 +516,7 @@ export function Sidebar({ user }: SidebarProps) {
                             <MessageCircle className="w-4.5 h-4.5 text-dd-muted" />
                             Bate-papo
                           </Link>
-                          <Link
-                            href="/async"
-                            className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors border-b border-dd-border/40"
-                            onClick={() => setMoreMenuOpen(false)}
-                          >
-                            <Image
-                              src="/async-logo.svg"
-                              alt="ASYNC"
-                              width={18}
-                              height={18}
-                              className="object-contain shrink-0"
-                            />
-                            ASYNC IA
-                          </Link>
+
                           <Link
                             href="/guilds"
                             className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors border-b border-dd-border/40"
@@ -591,6 +578,16 @@ export function Sidebar({ user }: SidebarProps) {
               onClick={() => setModalOpen(true)}
               className="w-full bg-blue-500 hover:bg-blue-600 text-white font-extrabold py-2.5 px-4 rounded-full text-sm transition-all duration-200 active:scale-[0.98] shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 cursor-pointer flex items-center justify-center gap-2"
             >
+              <svg
+                viewBox="0 0 24 24"
+                className="w-4.5 h-4.5 fill-none stroke-current"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.375 2.625a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4Z" />
+              </svg>
               <span>Postar</span>
             </button>
           )}
@@ -634,7 +631,7 @@ export function Sidebar({ user }: SidebarProps) {
                     <span className="text-[11px] font-extrabold text-blue-500 leading-none">
                       {activeUser.streak_days ?? activeUser.streak ?? 0}{' '}
                       {(activeUser.streak_days ?? activeUser.streak ?? 0) === 1 ? 'dia' : 'dias'} de
-                      ofensiva
+                      domínio
                     </span>
                   </div>
                 </div>

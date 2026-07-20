@@ -11,8 +11,8 @@
 export const AVATAR_API_URL =
   process.env.NEXT_PUBLIC_AVATAR_API_URL || 'https://api.dicebear.com/9.x/pixel-art/svg';
 
-export const PISTON_API_URL =
-  process.env.PISTON_API_URL || 'https://emkc.org/api/v2/piston/execute';
+export const WANDBOX_API_URL =
+  process.env.WANDBOX_API_URL || 'https://wandbox.org/api/compile.json';
 
 export const GITHUB_API_URL = process.env.GITHUB_API_URL || 'https://api.github.com';
 
@@ -77,24 +77,23 @@ export const DEFAULT_LANGUAGE_TRAILS = [
   'SWIFT',
 ] as const;
 
-/* ── Piston Code Runner ──────────────────────────────────────── */
+/* ── Wandbox Code Runner ──────────────────────────────────────── */
 
-export interface PistonLanguageConfig {
-  language: string;
-  version: string;
+export interface WandboxLanguageConfig {
+  compiler: string;
 }
 
-export const PISTON_LANGUAGES: Record<string, PistonLanguageConfig> = {
-  python: { language: 'python', version: '3.10.0' },
-  rust: { language: 'rust', version: '1.68.2' },
-  go: { language: 'go', version: '1.16.2' },
-  cpp: { language: 'c++', version: '10.2.0' },
-  java: { language: 'java', version: '15.0.2' },
-  kotlin: { language: 'kotlin', version: '1.8.2' },
-  swift: { language: 'swift', version: '5.3.3' },
+export const WANDBOX_LANGUAGES: Record<string, WandboxLanguageConfig> = {
+  python: { compiler: 'cpython-3.12.7' },
+  rust: { compiler: 'rust-1.82.0' },
+  go: { compiler: 'go-1.23.2' },
+  cpp: { compiler: 'gcc-13.2.0' },
+  java: { compiler: 'openjdk-jdk-22+36' },
+  kotlin: { compiler: 'openjdk-jdk-22+36' }, // Kotlin não tem compilador nativo no Wandbox, usa fallback
+  swift: { compiler: 'swift-6.0.1' },
 };
 
-export const PISTON_RUN_TIMEOUT_MS = 5000;
+export const WANDBOX_RUN_TIMEOUT_MS = 10000;
 
 /* ── Rate Limiting Defaults ──────────────────────────────────── */
 
