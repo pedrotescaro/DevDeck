@@ -278,14 +278,14 @@ export function TrailsContent({
   const [aiInput, setAiInput] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
 
-  // Estados para o Ducky IA na barra lateral
-  interface DuckyMessage {
+  // Estados para o ASYNC IA na barra lateral
+  interface AsyncMessage {
     role: 'user' | 'model';
     content: string;
   }
-  const [duckyMessages, setDuckyMessages] = useState<DuckyMessage[]>([]);
-  const [duckyInput, setDuckyInput] = useState('');
-  const [duckyLoading, setDuckyLoading] = useState(false);
+  const [duckyMessages, setAsyncMessages] = useState<AsyncMessage[]>([]);
+  const [duckyInput, setAsyncInput] = useState('');
+  const [duckyLoading, setAsyncLoading] = useState(false);
 
   const aiChatEndRef = useRef<HTMLDivElement>(null);
   const sidebarChatEndRef = useRef<HTMLDivElement>(null);
@@ -307,24 +307,24 @@ export function TrailsContent({
   }, [duckyMessages, duckyLoading]);
 
   useEffect(() => {
-    setDuckyMessages([
+    setAsyncMessages([
       {
         role: 'model',
-        content: `Quack! 🦆 Eu sou o Ducky, seu patinho de borracha! Como posso ajudar com a trilha de **${getLanguageFullName(activeLang)}** hoje? Pode me enviar um código com bug ou tirar dúvidas!`,
+        content: `Olá! Eu sou a **ASYNC**, sua copiloto de programação. Como posso ajudar com a trilha de **${getLanguageFullName(activeLang)}** hoje? Envie um código com bug ou tire suas dúvidas.`,
       },
     ]);
   }, [activeLang]);
 
-  // Enviar mensagem para o Ducky IA
-  const handleSendDuckyMessage = async (e?: React.FormEvent) => {
+  // Enviar mensagem para o ASYNC IA
+  const handleSendAsyncMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!duckyInput.trim() || duckyLoading) return;
 
-    const userMsg: DuckyMessage = { role: 'user', content: duckyInput };
+    const userMsg: AsyncMessage = { role: 'user', content: duckyInput };
     const updatedMessages = [...duckyMessages, userMsg];
-    setDuckyMessages(updatedMessages);
-    setDuckyInput('');
-    setDuckyLoading(true);
+    setAsyncMessages(updatedMessages);
+    setAsyncInput('');
+    setAsyncLoading(true);
 
     try {
       const response = await fetch('/api/ai/ducky/chat', {
@@ -337,27 +337,26 @@ export function TrailsContent({
       });
 
       const data = await response.json();
-      setDuckyLoading(false);
+      setAsyncLoading(false);
 
       if (response.ok && data.text) {
-        setDuckyMessages((prev) => [...prev, { role: 'model', content: data.text }]);
+        setAsyncMessages((prev) => [...prev, { role: 'model', content: data.text }]);
       } else {
-        setDuckyMessages((prev) => [
+        setAsyncMessages((prev) => [
           ...prev,
           {
             role: 'model',
-            content:
-              'Quack... Desculpe, tive um problema ao processar sua dúvida. Pode tentar novamente?',
+            content: 'Tive um problema ao processar sua dúvida. Pode tentar novamente?',
           },
         ]);
       }
     } catch {
-      setDuckyLoading(false);
-      setDuckyMessages((prev) => [
+      setAsyncLoading(false);
+      setAsyncMessages((prev) => [
         ...prev,
         {
           role: 'model',
-          content: 'Quack... Não consegui me conectar com os servidores de IA.',
+          content: 'Não consegui me conectar com os servidores de IA.',
         },
       ]);
     }
@@ -497,7 +496,7 @@ export function TrailsContent({
       return [
         {
           role: 'assistant',
-          content: `Quack! 🦆 Eu sou o **Ducky**, seu tutor de IA para **${getLanguageFullName(activeLang)}**. ${welcomeText}`,
+          content: `Olá! Eu sou a **ASYNC**, sua tutora de IA para **${getLanguageFullName(activeLang)}**. ${welcomeText}`,
         },
       ];
     });
@@ -1625,7 +1624,7 @@ export function TrailsContent({
           <Footer />
         </main>
 
-        {/* Right Sidebar: Duelos, Ducky Chat, Leaderboard */}
+        {/* Right Sidebar: Duelos, ASYNC Chat, Leaderboard */}
         <aside className="hidden lg:flex w-80 shrink-0 flex-col gap-4 p-4 sticky top-0 h-screen overflow-y-auto">
           {/* Widget 1: Duelos de Código */}
           <div className="bg-dd-sidebar-bg border border-dd-border rounded-2xl p-4 space-y-3">
@@ -1645,23 +1644,40 @@ export function TrailsContent({
             </Link>
           </div>
 
-          {/* Widget 2: Ducky IA Chat Panel */}
-          <div className="bg-dd-sidebar-bg border border-dd-border rounded-2xl p-4 flex flex-col h-[340px]">
-            <div className="flex items-center gap-2 pb-2 border-b border-dd-border/50 shrink-0">
-              <Image
-                src="/Logo_ia_ducky.png"
-                alt="Ducky"
-                width={20}
-                height={20}
-                className="object-contain"
-              />
-              <h3 className="text-sm font-black text-dd-text">Ducky IA Tutor</h3>
+          {/* Widget 2: ASYNC IA Chat Panel */}
+          <div className="relative flex h-[360px] flex-col overflow-hidden rounded-2xl border border-blue-500/20 bg-gradient-to-b from-blue-500/[0.08] via-dd-sidebar-bg to-dd-sidebar-bg p-4 shadow-[0_18px_50px_-32px_rgba(0,131,254,0.75)]">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-blue-500/15 blur-3xl"
+            />
+            <div className="relative z-10 flex items-center gap-3 border-b border-blue-500/10 pb-3 shrink-0">
+              <div className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-blue-400/20 bg-blue-500/10 shadow-[0_0_20px_rgba(0,131,254,0.12)]">
+                <Image
+                  src="/async-logo.svg"
+                  alt="ASYNC"
+                  width={32}
+                  height={32}
+                  className="h-8 w-8 object-contain"
+                />
+                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-dd-sidebar-bg bg-emerald-400" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-black tracking-wide text-dd-text">ASYNC</h3>
+                  <span className="rounded-full border border-blue-500/20 bg-blue-500/10 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-wider text-blue-400">
+                    IA
+                  </span>
+                </div>
+                <p className="text-[9px] font-semibold text-dd-muted">
+                  Tutora da sua trilha • online
+                </p>
+              </div>
             </div>
 
             {/* Messages Scroll Area */}
-            <div className="flex-grow overflow-y-auto py-3 space-y-4 scrollbar-ducky select-text min-h-0">
+            <div className="relative z-10 flex-grow overflow-y-auto py-3 space-y-3 scrollbar-ducky select-text min-h-0">
               {duckyMessages.map((msg, idx) => {
-                const isDucky = msg.role !== 'user';
+                const isAsync = msg.role !== 'user';
                 return (
                   <div
                     key={idx}
@@ -1669,10 +1685,10 @@ export function TrailsContent({
                   >
                     {/* Avatar */}
                     <div className="w-6.5 h-6.5 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-[#0c0c0e] border border-dd-border/40 select-none">
-                      {isDucky ? (
+                      {isAsync ? (
                         <Image
-                          src="/Logo_ia_ducky.png"
-                          alt="Ducky"
+                          src="/async-logo.svg"
+                          alt="ASYNC"
                           width={22}
                           height={22}
                           className="object-contain"
@@ -1696,14 +1712,20 @@ export function TrailsContent({
                     <div className="flex-grow min-w-0">
                       <div className="flex items-center gap-1.5 mb-0.5 select-none">
                         <span className="text-[10px] font-bold text-dd-text">
-                          {isDucky ? 'Ducky AI' : user.username}
+                          {isAsync ? 'ASYNC IA' : user.username}
                         </span>
                         <span className="text-[8px] text-dd-muted font-medium">
-                          {isDucky ? '@ducky' : `@${user.username.toLowerCase()}`}
+                          {isAsync ? '@async_ia' : `@${user.username.toLowerCase()}`}
                         </span>
                       </div>
 
-                      <div className="text-[10px] text-dd-text leading-relaxed font-sans pr-2">
+                      <div
+                        className={`rounded-2xl px-3 py-2 text-[10px] leading-relaxed font-sans ${
+                          isAsync
+                            ? 'rounded-tl-md border border-blue-500/10 bg-blue-500/[0.07] text-dd-text'
+                            : 'rounded-tr-md bg-blue-500 text-white'
+                        }`}
+                      >
                         {renderMessageContent(msg.content)}
                       </div>
                     </div>
@@ -1714,8 +1736,8 @@ export function TrailsContent({
                 <div className="flex gap-2.5 items-start w-full">
                   <div className="w-6.5 h-6.5 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-[#0c0c0e] border border-dd-border/40 select-none">
                     <Image
-                      src="/Logo_ia_ducky.png"
-                      alt="Ducky"
+                      src="/async-logo.svg"
+                      alt="ASYNC"
                       width={22}
                       height={22}
                       className="object-contain"
@@ -1732,21 +1754,21 @@ export function TrailsContent({
 
             {/* Input form */}
             <form
-              onSubmit={handleSendDuckyMessage}
-              className="pt-2 border-t border-dd-border/50 flex gap-1.5 shrink-0"
+              onSubmit={handleSendAsyncMessage}
+              className="relative z-10 flex gap-1.5 border-t border-blue-500/10 pt-3 shrink-0"
             >
               <input
                 type="text"
                 value={duckyInput}
-                onChange={(e) => setDuckyInput(e.target.value)}
-                placeholder="Perguntar ao patinho..."
+                onChange={(e) => setAsyncInput(e.target.value)}
+                placeholder="Pergunte à ASYNC..."
                 disabled={duckyLoading}
-                className="flex-grow rounded-lg border border-dd-border bg-dd-bg px-2.5 py-1.5 text-[10.5px] text-dd-text placeholder-dd-muted focus:border-blue-500 focus:outline-none disabled:opacity-50"
+                className="flex-grow rounded-xl border border-blue-500/15 bg-dd-bg/80 px-3 py-2 text-[10.5px] text-dd-text shadow-inner placeholder-dd-muted focus:border-blue-500/50 focus:outline-none disabled:opacity-50"
               />
               <button
                 type="submit"
                 disabled={duckyLoading || !duckyInput.trim()}
-                className="p-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center shrink-0 animate-in fade-in duration-100"
+                className="flex h-8.5 w-8.5 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-blue-500 p-1.5 text-white shadow-lg shadow-blue-500/20 transition-all hover:-translate-y-0.5 hover:bg-blue-600 disabled:opacity-50 animate-in fade-in duration-100"
               >
                 <Send className="w-3.5 h-3.5" />
               </button>
@@ -1872,13 +1894,13 @@ export function TrailsContent({
                     }`}
                   >
                     <Image
-                      src="/Logo_ia_ducky.png"
-                      alt="Ducky"
+                      src="/async-logo.svg"
+                      alt="ASYNC"
                       width={14}
                       height={14}
                       className="object-contain"
                     />
-                    <span>Ducky {aiChatOpen ? 'Aberto' : 'IA'}</span>
+                    <span>ASYNC {aiChatOpen ? 'Aberto' : 'IA'}</span>
                   </button>
                 </div>
 
@@ -2165,13 +2187,13 @@ export function TrailsContent({
                     <div className="shrink-0 p-4 border-b border-dd-border flex items-center justify-between bg-dd-surface/70">
                       <div className="flex items-center gap-2">
                         <Image
-                          src="/Logo_ia_ducky.png"
-                          alt="Ducky"
+                          src="/async-logo.svg"
+                          alt="ASYNC"
                           width={16}
                           height={16}
                           className="object-contain"
                         />
-                        <span className="text-xs font-bold text-dd-text">Ducky IA</span>
+                        <span className="text-xs font-bold text-dd-text">ASYNC IA</span>
                       </div>
                       <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-[8px] font-bold text-blue-500 uppercase tracking-wide">
                         Online
@@ -2198,8 +2220,8 @@ export function TrailsContent({
                               user.username[0].toUpperCase()
                             ) : (
                               <Image
-                                src="/Logo_ia_ducky.png"
-                                alt="Ducky"
+                                src="/async-logo.svg"
+                                alt="ASYNC"
                                 width={22}
                                 height={22}
                                 className="object-contain"
@@ -2221,8 +2243,8 @@ export function TrailsContent({
                         <div className="flex gap-2.5 max-w-[80%] mr-auto items-center">
                           <div className="w-7 h-7 rounded-full bg-[#0c0c0e] border border-dd-border/40 flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden">
                             <Image
-                              src="/Logo_ia_ducky.png"
-                              alt="Ducky"
+                              src="/async-logo.svg"
+                              alt="ASYNC"
                               width={22}
                               height={22}
                               className="object-contain"
@@ -2413,13 +2435,13 @@ export function TrailsContent({
                     }`}
                   >
                     <Image
-                      src="/Logo_ia_ducky.png"
-                      alt="Ducky"
+                      src="/async-logo.svg"
+                      alt="ASYNC"
                       width={14}
                       height={14}
                       className="object-contain"
                     />
-                    <span>Ducky {aiChatOpen ? 'Aberto' : 'IA'}</span>
+                    <span>ASYNC {aiChatOpen ? 'Aberto' : 'IA'}</span>
                   </button>
                 </div>
 
@@ -2680,13 +2702,13 @@ export function TrailsContent({
                     <div className="shrink-0 p-4 border-b border-dd-border flex items-center justify-between bg-dd-surface/70">
                       <div className="flex items-center gap-2">
                         <Image
-                          src="/Logo_ia_ducky.png"
-                          alt="Ducky"
+                          src="/async-logo.svg"
+                          alt="ASYNC"
                           width={16}
                           height={16}
                           className="object-contain"
                         />
-                        <span className="text-xs font-bold text-dd-text">Ducky IA</span>
+                        <span className="text-xs font-bold text-dd-text">ASYNC IA</span>
                       </div>
                       <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-[8px] font-bold text-blue-500 uppercase tracking-wide">
                         Online
@@ -2713,8 +2735,8 @@ export function TrailsContent({
                               user.username[0].toUpperCase()
                             ) : (
                               <Image
-                                src="/Logo_ia_ducky.png"
-                                alt="Ducky"
+                                src="/async-logo.svg"
+                                alt="ASYNC"
                                 width={22}
                                 height={22}
                                 className="object-contain"
@@ -2736,8 +2758,8 @@ export function TrailsContent({
                         <div className="flex gap-2.5 max-w-[80%] mr-auto items-center">
                           <div className="w-7 h-7 rounded-full bg-[#0c0c0e] border border-dd-border/40 flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden">
                             <Image
-                              src="/Logo_ia_ducky.png"
-                              alt="Ducky"
+                              src="/async-logo.svg"
+                              alt="ASYNC"
                               width={22}
                               height={22}
                               className="object-contain"

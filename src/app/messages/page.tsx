@@ -23,7 +23,6 @@ import {
   Pencil,
   Copy,
   Info,
-  Sparkles,
   Trash2,
   Heart,
 } from 'lucide-react';
@@ -864,8 +863,14 @@ export default function MessagesPage() {
                                         }}
                                         className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-dd-text hover:bg-dd-surface-hover/80 transition-colors text-left font-semibold cursor-pointer border-b border-dd-border/30 pb-2.5 mb-1"
                                       >
-                                        <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-                                        <span>Perguntar ao Ducky</span>
+                                        <Image
+                                          src="/async-logo.svg"
+                                          alt=""
+                                          width={16}
+                                          height={16}
+                                          className="h-4 w-4 object-contain"
+                                        />
+                                        <span>Perguntar à ASYNC</span>
                                       </button>
                                       <button
                                         type="button"
@@ -1374,7 +1379,7 @@ export default function MessagesPage() {
         </div>
       )}
 
-      {/* Ducky AI Modal */}
+      {/* ASYNC AI Modal */}
       {grokMessage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
@@ -1383,9 +1388,22 @@ export default function MessagesPage() {
           />
 
           <div className="relative w-full max-w-md bg-dd-surface border border-dd-border rounded-2xl p-5 shadow-2xl z-10 font-sans">
-            <div className="flex items-center gap-2 mb-4 text-blue-400">
-              <Sparkles className="w-5 h-5 animate-pulse" />
-              <h3 className="text-sm font-black text-dd-text">Análise do Ducky AI</h3>
+            <div className="mb-4 flex items-center gap-3 rounded-xl border border-blue-500/15 bg-blue-500/[0.06] p-3 text-blue-400">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10">
+                <Image
+                  src="/async-logo.svg"
+                  alt="ASYNC"
+                  width={28}
+                  height={28}
+                  className="h-7 w-7 object-contain"
+                />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-dd-text">Análise da ASYNC IA</h3>
+                <p className="text-[9px] font-semibold text-dd-muted">
+                  Leitura inteligente da conversa
+                </p>
+              </div>
             </div>
 
             <div className="bg-dd-bg/40 border border-dd-border/80 rounded-xl p-3.5 text-xs leading-relaxed space-y-3.5">

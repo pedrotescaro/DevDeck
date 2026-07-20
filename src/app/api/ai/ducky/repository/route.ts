@@ -62,7 +62,7 @@ export const POST = apiHandler(async (req) => {
   if (!parsed) {
     return NextResponse.json(
       {
-        text: 'Quack... Essa URL não parece ser de um repositório do GitHub. Tente algo como `github.com/usuario/repositorio`.',
+        text: 'Essa URL não parece ser de um repositório do GitHub. Tente algo como `github.com/usuario/repositorio`.',
       },
       { status: 400 }
     );
@@ -74,10 +74,7 @@ export const POST = apiHandler(async (req) => {
     input = await gatherRepoAnalysisInput(parsed.owner, parsed.repo);
   } catch (err) {
     if (err instanceof GitHubError) {
-      return NextResponse.json(
-        { text: `Quack... ${err.message}` },
-        { status: err.status === 404 ? 404 : 502 }
-      );
+      return NextResponse.json({ text: err.message }, { status: err.status === 404 ? 404 : 502 });
     }
     throw err;
   }
@@ -85,16 +82,16 @@ export const POST = apiHandler(async (req) => {
   const repoBlock = buildRepoContextBlock(input);
   const { repo } = input;
 
-  // 2. System prompt do Ducky atuando como analista de repositórios.
-  const systemPrompt = `Você é o Ducky (quack! 🦆), o patinho de borracha de programação oficial do DevDeck, agora atuando como analista de repositórios do GitHub.
+  // 2. System prompt do ASYNC atuando como analista de repositórios.
+  const systemPrompt = `Você é a ASYNC, a copiloto de programação oficial do DevDeck, agora atuando como analista de repositórios do GitHub.
 Analise o repositório fornecido pelo usuário e produza insights técnicos claros e acionáveis.
 
 Diretrizes:
-1. Use um tom alegre, inteligente e técnico em português do Brasil, com pequenas menções a patos.
+1. Use um tom claro, confiante, inteligente e técnico em português do Brasil.
 2. Formate sempre em Markdown limpo, com syntax highlighting em blocos de código.
 3. Baseie-se SOMENTE no contexto fornecido (README, estrutura de arquivos, manifesto de dependências). Não invente arquivos ou funcionalidades que não estejam evidentes.
 ${language ? `4. Quando relevante, adapte comentários à trilha ativa do usuário: **${language}**.` : ''}
-5. Nunca saia do personagem. Você é o Ducky, não um modelo da OpenAI, Google ou Groq.`;
+5. Nunca saia do personagem. Você é a ASYNC, não um modelo de linguagem genérico.`;
 
   // 3. Montar histórico + pergunta.
   const isFollowUp = history.some((h) => h.content && h.content.trim().length > 0);
@@ -110,7 +107,7 @@ ${language ? `4. Quando relevante, adapte comentários à trilha ativa do usuár
     });
     messages.push({
       role: 'assistant',
-      content: 'Quack! 🦆 Recebi o contexto do repositório e estou pronto. Pode perguntar!',
+      content: 'Contexto do repositório recebido e indexado. Pode perguntar!',
     });
     for (const h of history) {
       if (!h.content || !h.content.trim()) continue;
@@ -142,7 +139,7 @@ Seja conciso e específico. Se faltar informação (ex: sem README), diga o que 
 
   if (!responseText) {
     return NextResponse.json({
-      text: 'Quack... Não consegui processar a análise do repositório agora. Pode tentar de novo?',
+      text: 'Não consegui processar a análise do repositório agora. Pode tentar novamente?',
       repo: {
         name: repo.name,
         owner: repo.owner,

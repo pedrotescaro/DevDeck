@@ -51,13 +51,13 @@ const SCREENSHOTS = [
       'Seu perfil exibe seu progresso por linguagem, suas conquistas (badges), ofensivas de dias ativos e histórico de duelos. Suas linhas de código viram seu portfólio.',
   },
   {
-    id: 'ducky',
-    label: 'Ducky Debugger',
+    id: 'async',
+    label: 'ASYNC Debugger',
     icon: MessageSquare,
-    src: '/screenshots/ducky_dark.png',
+    src: '/screenshots/async_dark.png',
     title: 'Seu parceiro de código inteligente',
     description:
-      'Consulte o patinho de borracha da IA para analisar stack traces, tirar dúvidas ou obter dicas sobre desafios sem sair da arena de desenvolvimento.',
+      'Use a ASYNC para analisar stack traces, tirar dúvidas ou obter dicas sobre desafios sem sair da arena de desenvolvimento.',
   },
 ];
 

@@ -803,9 +803,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
           {
             id: duckyMsgId,
             sender: 'ducky',
-            text:
-              data.text ||
-              'Quack... Tive um problema ao processar seu código. Pode tentar de novo?',
+            text: data.text || 'Tive um problema ao processar seu código. Pode tentar novamente?',
           },
         ]);
       }
@@ -817,7 +815,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
         {
           id: duckyMsgId,
           sender: 'ducky',
-          text: 'Quack... Tive um problema ao me conectar com os servidores de IA.',
+          text: 'Tive um problema ao me conectar com os servidores de IA.',
         },
       ]);
     }
@@ -893,7 +891,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
         {
           id: duckyMsgId,
           sender: 'ducky',
-          text: 'Quack... Não consegui analisar o repositório. Verifique a URL e tente de novo.',
+          text: 'Não consegui analisar o repositório. Verifique a URL e tente novamente.',
         },
       ]);
     }
@@ -917,12 +915,12 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
     }, 50);
   };
 
-  // DevDeck Ducky-style input card (Orange accents and custom button names)
+  // ASYNC input card
   const renderInputCard = () => {
     const repoMode = mode === 'Repositório';
     const repoFollowUp = repoMode && activeRepo;
     return (
-      <div className="w-full bg-[#131316]/90 border border-[#232329] rounded-2xl p-4 flex flex-col justify-between min-h-[140px] shadow-2xl focus-within:border-blue-500/40 focus-within:shadow-[0_0_25px_rgba(0, 131, 254,0.12)] transition-all duration-300 max-w-2xl mx-auto backdrop-blur-md">
+      <div className="w-full bg-gradient-to-br from-[#121722]/95 via-[#0d111b]/95 to-[#0a0d14]/95 border border-blue-500/20 rounded-[24px] p-4 flex flex-col justify-between min-h-[148px] shadow-[0_24px_80px_-32px_rgba(0,131,254,0.7)] focus-within:border-blue-400/50 focus-within:shadow-[0_24px_90px_-28px_rgba(0,131,254,0.9)] transition-all duration-300 max-w-2xl mx-auto backdrop-blur-xl">
         {/* Attachment chips preview */}
         {attachedFiles.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-2">
@@ -968,7 +966,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
               ? `Pergunte sobre ${activeRepo?.name}...`
               : repoMode
                 ? 'Cole a URL de um repositório no campo acima para analisar.'
-                : 'Perguntar ao Ducky...'
+                : 'Pergunte à ASYNC sobre seu código...'
           }
           rows={2}
           className="w-full bg-transparent border-0 outline-0 ring-0 text-sm text-dd-text placeholder-[#53535f] resize-none py-1.5 max-h-36 overflow-y-auto font-sans leading-relaxed focus:ring-0 focus:outline-none disabled:opacity-50"
@@ -1066,9 +1064,9 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
             ✨
           </div>
           <div className="font-sans">
-            <p className="text-[11px] font-bold text-white leading-tight">Personalizar o Ducky</p>
+            <p className="text-[11px] font-bold text-white leading-tight">Potencialize a ASYNC</p>
             <p className="text-[9px] text-[#8b8b93] font-medium leading-tight mt-0.5">
-              Tenha acesso a mais recursos no Ducky AI Premium
+              Mais contexto, análises profundas e repositórios completos
             </p>
           </div>
         </div>
@@ -1267,15 +1265,21 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-[#060606] text-dd-text antialiased overflow-hidden">
+    <div className="relative flex h-screen flex-col overflow-hidden bg-[#05070b] text-dd-text antialiased md:flex-row">
       {/* Sidebar rendered conditionally based on expanded mode */}
       {!isFullscreen && <Sidebar user={user} />}
 
       <div
-        className={`flex-grow flex flex-col min-h-0 min-w-0 bg-[#060606] relative overflow-hidden ${!isFullscreen ? 'border-l border-[#1f1f23]/40' : ''}`}
+        className={`relative flex min-h-0 min-w-0 flex-grow flex-col overflow-hidden bg-[#05070b] ${!isFullscreen ? 'border-l border-[#1f1f23]/40' : ''}`}
       >
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -left-28 top-16 h-80 w-80 rounded-full bg-blue-600/15 blur-[110px]" />
+          <div className="absolute -right-20 bottom-10 h-96 w-96 rounded-full bg-cyan-400/8 blur-[130px]" />
+          <div className="absolute inset-0 opacity-[0.025] [background-image:linear-gradient(rgba(255,255,255,.6)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.6)_1px,transparent_1px)] [background-size:36px_36px]" />
+        </div>
+
         {/* Top Header */}
-        <header className="flex items-center justify-between px-6 py-4 bg-[#060606]/40 backdrop-blur-md sticky top-0 z-20 relative select-none">
+        <header className="relative z-20 flex items-center justify-between border-b border-white/5 bg-[#070a10]/75 px-4 py-3 backdrop-blur-xl sm:px-6 select-none">
           {/* Top Left: Expanded mode toggle button */}
           <div className="flex items-center gap-3">
             {isFullscreen ? (
@@ -1304,6 +1308,27 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                 <SidebarIcon className="w-4.5 h-4.5" />
               </button>
             )}
+            <div className="flex items-center gap-2.5">
+              <div className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-blue-400/20 bg-gradient-to-br from-blue-500/20 to-cyan-400/5 shadow-[0_0_24px_rgba(0,131,254,0.18)]">
+                <Image
+                  src="/async-logo.svg"
+                  alt="ASYNC"
+                  width={28}
+                  height={28}
+                  className="h-7 w-7 object-contain"
+                />
+                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#070a10] bg-emerald-400" />
+              </div>
+              <div className="hidden sm:block">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-black tracking-[0.16em] text-white">ASYNC</span>
+                  <span className="rounded-full border border-blue-400/20 bg-blue-500/10 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-wider text-blue-300">
+                    IA
+                  </span>
+                </div>
+                <p className="text-[9px] font-medium text-[#717987]">Copiloto de código • online</p>
+              </div>
+            </div>
             {activeRepo && (
               <a
                 href={activeRepo.url}
@@ -1359,29 +1384,46 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
         {/* Chat / Welcome Area */}
         {messages.length === 0 ? (
-          /* EMPTY STATE (DeepSeek Layout Customized for Ducky) */
-          <div className="flex-grow flex flex-col justify-center items-center overflow-y-auto px-4 py-8 max-w-3xl w-full mx-auto relative z-10">
-            <div className="w-full max-w-2xl flex flex-col items-center gap-6 text-center -mt-16">
-              {/* Ducky IA Branding */}
-              <div className="flex items-center justify-center gap-3.5 select-none mb-1 animate-in fade-in zoom-in-95 duration-500">
-                <Image
-                  src="/Logo_ia_ducky.png"
-                  alt="Ducky IA Logo"
-                  width={40}
-                  height={40}
-                  className="object-contain"
-                />
-                <span className="text-2xl font-bold tracking-tight text-white font-sans">
-                  {mode === 'Rápido'
-                    ? 'Conversar com o Ducky Rápido'
-                    : mode === 'Deep Debug'
-                      ? 'Depuração Profunda com o Ducky'
-                      : 'Analisar Repositório com o Ducky'}
-                </span>
+          /* ASYNC welcome state */
+          <div className="relative z-10 mx-auto flex w-full max-w-4xl flex-grow flex-col items-center justify-center overflow-y-auto px-4 py-8">
+            <div className="-mt-10 flex w-full max-w-2xl flex-col items-center gap-6 text-center">
+              <div className="flex flex-col items-center gap-4 select-none animate-in fade-in zoom-in-95 duration-500">
+                <div className="relative">
+                  <div className="absolute inset-0 scale-150 rounded-full bg-blue-500/20 blur-2xl" />
+                  <div className="relative flex h-24 w-24 items-center justify-center rounded-[28px] border border-blue-400/25 bg-gradient-to-br from-blue-500/20 via-[#101827] to-cyan-400/10 shadow-[0_24px_70px_-18px_rgba(0,131,254,0.85)]">
+                    <Image
+                      src="/async-logo.svg"
+                      alt="ASYNC IA"
+                      width={72}
+                      height={72}
+                      className="h-[72px] w-[72px] object-contain drop-shadow-[0_10px_24px_rgba(0,131,254,0.3)]"
+                    />
+                  </div>
+                  <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-emerald-400/20 bg-[#08130f] px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.18em] text-emerald-300 shadow-lg">
+                    online agora
+                  </span>
+                </div>
+
+                <div className="mt-2 space-y-2">
+                  <span className="inline-flex rounded-full border border-blue-400/20 bg-blue-500/10 px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-blue-300">
+                    DevDeck Intelligence
+                  </span>
+                  <h1 className="font-sans text-3xl font-black tracking-tight text-white sm:text-4xl">
+                    {mode === 'Rápido'
+                      ? 'Como a ASYNC pode ajudar?'
+                      : mode === 'Deep Debug'
+                        ? 'Depuração profunda com ASYNC'
+                        : 'Analise seu repositório com ASYNC'}
+                  </h1>
+                  <p className="mx-auto max-w-lg text-xs font-medium leading-relaxed text-[#828a99] sm:text-sm">
+                    Seu copiloto de programação para investigar bugs, explicar conceitos, refatorar
+                    código e entender projetos inteiros.
+                  </p>
+                </div>
               </div>
 
               {/* Mode switch tabs capsule (Rápido, Deep Debug, Repositório) */}
-              <div className="flex bg-[#111115] border border-[#1f1f23] rounded-full p-1 select-none animate-in fade-in duration-300">
+              <div className="flex rounded-full border border-white/8 bg-[#0c111b]/90 p-1.5 shadow-xl backdrop-blur-xl select-none animate-in fade-in duration-300">
                 <button
                   onClick={() => setMode('Rápido')}
                   className={`flex items-center gap-1.5 px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
@@ -1685,10 +1727,10 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                         </div>
                         <span>
                           {mode === 'Deep Debug'
-                            ? 'Ducky está analisando o escopo do seu projeto...'
+                            ? 'ASYNC está analisando o escopo do seu projeto...'
                             : mode === 'Repositório'
-                              ? 'Ducky está explorando o repositório...'
-                              : 'Ducky está analisando seu código...'}
+                              ? 'ASYNC está explorando o repositório...'
+                              : 'ASYNC está analisando seu código...'}
                         </span>
                       </div>
                     </div>
@@ -1708,7 +1750,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                 <div className="mt-2.5 text-[9px] text-[#71767b] max-w-xl text-center flex items-center justify-center gap-1.5 select-none">
                   <Sparkles className="w-3 h-3 text-blue-500" />
                   <span>
-                    Ducky AI Premium — Tire dúvidas ilimitadas e ative análise de repositórios do
+                    ASYNC Premium — Tire dúvidas ilimitadas e ative análise de repositórios do
                     GitHub.
                   </span>
                 </div>
@@ -1778,7 +1820,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
               type="text"
               value={historySearchQuery}
               onChange={(e) => setHistorySearchQuery(e.target.value)}
-              placeholder="Pesquisar histórico do Ducky"
+              placeholder="Pesquisar histórico da ASYNC"
               className="bg-transparent border-none outline-none text-xs text-dd-text placeholder-[#53535f] w-full"
             />
             {historySearchQuery && (

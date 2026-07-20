@@ -21,6 +21,7 @@ import {
   MoreHorizontal,
   Flame,
   Users,
+  Sparkles,
 } from 'lucide-react';
 import { PostComposerExtras } from '@/components/PostComposerExtras';
 import { MarkdownEditor, type NotionEditorRef } from '@/components/MarkdownEditor';
@@ -394,6 +395,12 @@ export function Sidebar({ user }: SidebarProps) {
       active: pathname.startsWith('/trails'),
     },
     {
+      label: 'ASYNC IA',
+      href: '/async',
+      icon: Sparkles,
+      active: pathname.startsWith('/async') || pathname.startsWith('/ducky'),
+    },
+    {
       label: 'Notificações',
       href: '/notifications',
       icon: Bell,
@@ -448,6 +455,14 @@ export function Sidebar({ user }: SidebarProps) {
                 <div className="relative flex items-center justify-center w-5 h-5">
                   {item.label === 'Notificações' ? (
                     <NotificationBellIcon unreadCount={unreadCount} active={item.active} />
+                  ) : item.label === 'ASYNC IA' ? (
+                    <Image
+                      src="/async-logo.svg"
+                      alt=""
+                      width={22}
+                      height={22}
+                      className="h-5.5 w-5.5 object-contain transition-transform duration-200 group-hover:scale-110"
+                    />
                   ) : (
                     <Icon
                       className={`w-5 h-5 transition-transform group-hover:scale-105 duration-200 ${item.active ? 'text-dd-text fill-current' : 'text-dd-muted'}`}
@@ -502,18 +517,18 @@ export function Sidebar({ user }: SidebarProps) {
                             Bate-papo
                           </Link>
                           <Link
-                            href="/ducky"
+                            href="/async"
                             className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors border-b border-dd-border/40"
                             onClick={() => setMoreMenuOpen(false)}
                           >
                             <Image
-                              src="/Logo_ia_ducky.png"
-                              alt="Ducky"
+                              src="/async-logo.svg"
+                              alt="ASYNC"
                               width={18}
                               height={18}
                               className="object-contain shrink-0"
                             />
-                            Ducky
+                            ASYNC IA
                           </Link>
                           <Link
                             href="/guilds"
@@ -680,6 +695,19 @@ export function Sidebar({ user }: SidebarProps) {
           </Link>
 
           <div className="flex items-center gap-2.5">
+            <Link
+              href="/async"
+              aria-label="Abrir ASYNC IA"
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 transition-all hover:scale-105 hover:border-blue-500/40"
+            >
+              <Image
+                src="/async-logo.svg"
+                alt=""
+                width={22}
+                height={22}
+                className="h-5.5 w-5.5 object-contain"
+              />
+            </Link>
             {activeUser && (
               <div className="relative">
                 <button
@@ -994,7 +1022,7 @@ export function Sidebar({ user }: SidebarProps) {
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-blue-500 text-lg">✓</span>
-                <span>Acesso exclusivo ao Ducky AI para tirar dúvidas</span>
+                <span>Acesso exclusivo à ASYNC IA para tirar dúvidas</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-blue-500 text-lg">✓</span>

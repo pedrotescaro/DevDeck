@@ -225,7 +225,7 @@ export default function SettingsPage() {
     {
       id: 'sons',
       title: 'Efeitos sonoros',
-      description: 'Ative ou desative os efeitos sonoros de interações e dducky.',
+      description: 'Ative ou desative os efeitos sonoros de interações e da ASYNC.',
       icon: Volume2,
       keywords: ['sons', 'efeito', 'sonoro', 'audio', 'sound', 'barulho', 'volume'],
     },

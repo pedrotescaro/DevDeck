@@ -32,9 +32,9 @@ export function ScreenshotCarousel() {
         'Progresso ativo por linguagem. Acompanhe seu XP em TypeScript, Python, Rust, Go e suba de nível.',
     },
     {
-      name: 'ducky',
-      title: 'Pato de Borracha (Ducky)',
-      url: 'devdeck.com/ducky',
+      name: 'async',
+      title: 'ASYNC — Copiloto de Código',
+      url: 'devdeck.com/async',
       description:
         'Nosso assistente com IA. Debugue e comente linhas de código diretamente no editor integrado.',
     },
