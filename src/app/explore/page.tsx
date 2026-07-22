@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { createClient } from '@/lib/supabase/client';
 import { Sidebar } from '@/components/Sidebar';
 import { PostCard } from '@/components/PostCard';
 import { FollowButton } from '@/components/motion/FollowButton';
 import { EmptyState } from '@/components/motion/EmptyState';
+import { getCurrentUser } from '@/lib/client/current-user';
 import { Search as SearchIcon, Settings, MoreHorizontal, ArrowLeft } from 'lucide-react';
 
 interface SuggestedUser {
@@ -39,47 +39,52 @@ export default function ExplorePage() {
   const [followingMap, setFollowingMap] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const supabase = createClient();
-        const {
-          data: { user: authUser },
-        } = await supabase.auth.getUser();
+    let active = true;
+    const controller = new AbortController();
 
-        if (!authUser) {
-          router.push('/login');
+    const fetchPageData = async () => {
+      try {
+        const [userData, resSuggestions] = await Promise.all([
+          getCurrentUser<any>(),
+          fetch('/api/users/suggestions', { signal: controller.signal }),
+        ]);
+
+        if (!userData) {
+          router.replace('/login');
           return;
         }
 
-        const resUser = await fetch('/api/users/me');
-        if (resUser.ok) {
-          const userData = await resUser.json();
-          setUser(userData);
+        const suggestionsData = resSuggestions.ok ? await resSuggestions.json() : [];
 
-          // Fetch followings to populate followingMap
-          const resFollowing = await fetch(`/api/users/${userData.id}/following`);
-          if (resFollowing.ok) {
-            const followingData = await resFollowing.json();
-            const fMap: Record<string, boolean> = {};
-            followingData.forEach((f: any) => {
-              fMap[f.id] = true;
-            });
-            setFollowingMap(fMap);
-          }
-        }
+        if (!active) return;
+        setSuggestions(suggestionsData);
 
-        // Fetch user suggestions
-        const resSuggestions = await fetch('/api/users/suggestions');
-        if (resSuggestions.ok) {
-          const data = await resSuggestions.json();
-          setSuggestions(data);
+        setUser(userData);
+
+        const resFollowing = await fetch(`/api/users/${userData.id}/following`, {
+          signal: controller.signal,
+        });
+        if (resFollowing.ok) {
+          const followingData = await resFollowing.json();
+          if (!active) return;
+          const fMap: Record<string, boolean> = {};
+          followingData.forEach((f: any) => {
+            fMap[f.id] = true;
+          });
+          setFollowingMap(fMap);
         }
       } catch (err) {
+        if ((err as Error).name === 'AbortError') return;
         console.error('Error fetching explore data:', err);
       }
     };
 
-    fetchUserData();
+    fetchPageData();
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
   }, [router]);
 
   const executeSearch = async (query: string) => {
@@ -349,7 +354,7 @@ export default function ExplorePage() {
   const currentTrends = trendsByTab[activeTab] || [];
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-[1225px] flex-col bg-dd-bg text-dd-text antialiased md:flex-row">
+    <div className="dd-platform-shell">
       <Sidebar user={user} />
 
       <div className="flex min-w-0 flex-grow flex-col md:flex-row xl:max-w-[950px]">

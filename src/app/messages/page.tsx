@@ -27,6 +27,7 @@ import {
   Heart,
 } from 'lucide-react';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
+import { getCurrentUser } from '@/lib/client/current-user';
 
 function useClickOutside(
   ref: React.RefObject<HTMLElement | null>,
@@ -140,38 +141,40 @@ export default function MessagesPage() {
   const { playSound } = useSoundEffects(soundEnabled);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const supabase = createClient();
-        const {
-          data: { user: authUser },
-        } = await supabase.auth.getUser();
+    let active = true;
+    const controller = new AbortController();
 
-        if (!authUser) {
-          router.push('/login');
+    const fetchPageData = async () => {
+      try {
+        const [userData, resChats] = await Promise.all([
+          getCurrentUser<any>(),
+          fetch('/api/messages/chats', { signal: controller.signal }),
+        ]);
+
+        if (!userData) {
+          router.replace('/login');
           return;
         }
 
-        const resUser = await fetch('/api/users/me');
-        if (resUser.ok) {
-          const userData = await resUser.json();
-          setUser(userData);
-        }
+        const chatData = resChats.ok ? await resChats.json() : [];
 
-        // Fetch active chats
-        const resChats = await fetch('/api/messages/chats');
-        if (resChats.ok) {
-          const data = await resChats.json();
-          setChats(data);
-        }
+        if (!active) return;
+        setUser(userData);
+        setChats(chatData);
       } catch (err) {
+        if ((err as Error).name === 'AbortError') return;
         console.error('Error fetching messages page data:', err);
       } finally {
-        setLoadingChats(false);
+        if (active) setLoadingChats(false);
       }
     };
 
-    fetchUserData();
+    fetchPageData();
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
   }, [router]);
 
   // Fetch message history for active chat
@@ -533,10 +536,10 @@ export default function MessagesPage() {
   );
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-dd-bg text-dd-text antialiased overflow-hidden">
+    <div className="dd-platform-shell h-screen overflow-hidden">
       <Sidebar user={user} />
 
-      <div className="flex-grow flex min-w-0 bg-dd-bg h-full overflow-hidden">
+      <div className="flex h-full min-w-0 flex-grow overflow-hidden bg-dd-bg xl:max-w-[950px]">
         <div className="flex w-full h-full overflow-hidden">
           {/* Left Panel: Conversation List Sidebar (Matching image 4) */}
           <div className="w-80 md:w-96 border-r border-dd-border/60 flex flex-col shrink-0 h-full overflow-hidden">

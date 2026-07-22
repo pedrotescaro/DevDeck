@@ -7,18 +7,29 @@ import { AppError } from '@/lib/errors';
 export const GET = apiHandler(async () => {
   const user = await requireAuth();
 
-  const guilds = await prisma.guild.findMany({
-    where: { is_public: true },
-    include: {
-      _count: { select: { members: true } },
-      owner: { select: { username: true, avatar_url: true } },
-      members: {
-        where: { user_id: user.id },
-        take: 1,
+  const [guilds, myGuilds] = await Promise.all([
+    prisma.guild.findMany({
+      where: { is_public: true },
+      include: {
+        _count: { select: { members: true } },
+        owner: { select: { username: true, avatar_url: true } },
+        members: {
+          where: { user_id: user.id },
+          take: 1,
+        },
       },
-    },
-    orderBy: { created_at: 'desc' },
-  });
+      orderBy: { created_at: 'desc' },
+    }),
+    prisma.guild.findMany({
+      where: {
+        members: { some: { user_id: user.id } },
+      },
+      include: {
+        _count: { select: { members: true } },
+        owner: { select: { username: true, avatar_url: true } },
+      },
+    }),
+  ]);
 
   const guildsWithJoinStatus = guilds.map((g) => ({
     id: g.id,
@@ -34,17 +45,6 @@ export const GET = apiHandler(async () => {
     isMember: g.members.length > 0,
     ownerId: g.owner_id,
   }));
-
-  // Also fetch user's own guilds
-  const myGuilds = await prisma.guild.findMany({
-    where: {
-      members: { some: { user_id: user.id } },
-    },
-    include: {
-      _count: { select: { members: true } },
-      owner: { select: { username: true, avatar_url: true } },
-    },
-  });
 
   const serializedMyGuilds = myGuilds.map((g) => ({
     id: g.id,

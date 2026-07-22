@@ -21,6 +21,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { LanguageTag } from '@/components/LanguageTag';
 import { AuthorAvatar } from '@/components/AuthorAvatar';
 import { cn } from '@/lib/cn';
+import { getCurrentUser } from '@/lib/client/current-user';
 
 interface GuildData {
   id: string;
@@ -244,8 +245,7 @@ export function GuildsClient({ initialGuilds = [], initialMyGuilds = [] }: Guild
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    fetch('/api/users/me')
-      .then((response) => (response.ok ? response.json() : null))
+    getCurrentUser<any>()
       .then((data) => setUser(data))
       .catch(() => {});
   }, []);
@@ -367,7 +367,7 @@ export function GuildsClient({ initialGuilds = [], initialMyGuilds = [] }: Guild
   const hasFilters = Boolean(searchQuery.trim() || languageFilter);
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-[1225px] flex-col bg-dd-bg text-dd-text antialiased md:flex-row">
+    <div className="dd-platform-shell">
       <Sidebar user={user} />
 
       <div className="flex min-w-0 flex-grow flex-col md:flex-row xl:max-w-[950px]">

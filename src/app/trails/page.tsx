@@ -13,12 +13,12 @@ export default async function TrailsPage() {
   }
 
   // Buscar todas as trilhas do usuário atual
-  const dbTrails = await prisma.languageTrail.findMany({
+  const dbTrailsPromise = prisma.languageTrail.findMany({
     where: { user_id: user.id },
   });
 
   // Buscar todas as tentativas de quiz feitas pelo usuário
-  const dbAttempts = await prisma.quizAttempt.findMany({
+  const dbAttemptsPromise = prisma.quizAttempt.findMany({
     where: { user_id: user.id },
     select: {
       quiz_id: true,
@@ -28,6 +28,8 @@ export default async function TrailsPage() {
   });
 
   // Mapear tentativas para serialização fácil no cliente
+  const [dbTrails, dbAttempts] = await Promise.all([dbTrailsPromise, dbAttemptsPromise]);
+
   const attemptsMap: Record<string, boolean> = {};
   const attemptSelectionsMap: Record<string, number> = {};
   dbAttempts.forEach((att) => {

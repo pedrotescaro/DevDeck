@@ -48,6 +48,15 @@ const ALLOWED_ORIGINS = [process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:30
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  experimental: {
+    // Mantem segmentos dinamicos recentes no cache do router. Isso torna voltas
+    // e alternancias entre as areas principais instantaneas sem cachear respostas
+    // de API ou dados no servidor.
+    staleTimes: {
+      dynamic: 30,
+      static: 300,
+    },
+  },
   images: {
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',

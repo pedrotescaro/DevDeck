@@ -22,6 +22,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { LanguageTag } from '@/components/LanguageTag';
 import { AuthorAvatar } from '@/components/AuthorAvatar';
 import { cn } from '@/lib/cn';
+import { getCurrentUser } from '@/lib/client/current-user';
 
 interface GuildDetailProps {
   params: Promise<{ slug: string }>;
@@ -103,7 +104,7 @@ const COVER_THEME: Record<string, string> = {
 
 function CommunityDetailSkeleton() {
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-[1225px] flex-col bg-dd-bg md:flex-row">
+    <div className="dd-platform-shell">
       <div className="hidden w-64 shrink-0 border-r border-dd-border md:block xl:w-[275px]" />
       <div className="flex min-w-0 flex-1 xl:max-w-[950px]">
         <main className="w-full max-w-[600px] border-r border-dd-border">
@@ -140,7 +141,7 @@ export default function GuildDetailPage({ params }: GuildDetailProps) {
           return response.json();
         })
       ),
-      fetch('/api/users/me').then((response) => (response.ok ? response.json() : null)),
+      getCurrentUser<CurrentUser>(),
     ])
       .then(([guildData, userData]) => {
         if (!active) return;
@@ -245,7 +246,7 @@ export default function GuildDetailPage({ params }: GuildDetailProps) {
   const joinedMembers = guild.members.slice(0, 4);
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-[1225px] flex-col bg-dd-bg text-dd-text antialiased md:flex-row">
+    <div className="dd-platform-shell">
       <Sidebar user={user} />
 
       <div className="flex min-w-0 flex-grow flex-col md:flex-row xl:max-w-[950px]">

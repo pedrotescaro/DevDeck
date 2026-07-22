@@ -26,24 +26,21 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
     }
 
     // Calcular estatísticas do usuário
-    const answersCount = await prisma.answer.count({
+    const answersCountPromise = prisma.answer.count({
       where: { author_id: user.id },
     });
 
-    const acceptedCount = await prisma.answer.count({
+    const acceptedCountPromise = prisma.answer.count({
       where: { author_id: user.id, is_accepted: true },
     });
 
-    const totalQuizAttempts = await prisma.quizAttempt.count({
+    const totalQuizAttemptsPromise = prisma.quizAttempt.count({
       where: { user_id: user.id },
     });
 
-    const correctQuizAttempts = await prisma.quizAttempt.count({
+    const correctQuizAttemptsPromise = prisma.quizAttempt.count({
       where: { user_id: user.id, is_correct: true },
     });
-
-    const accuracy =
-      totalQuizAttempts > 0 ? Math.round((correctQuizAttempts / totalQuizAttempts) * 100) : 0;
 
     // Fetch author posts with cursor-based pagination (10 per page)
     const { searchParams } = new URL(request.url);
@@ -68,7 +65,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
       ];
     }
 
-    const posts = await prisma.post.findMany({
+    const postsPromise = prisma.post.findMany({
       where: postWhereClause,
       orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
       take: limit + 1,
@@ -87,6 +84,18 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
         bookmarks: { where: { user_id: user.id } },
       },
     });
+
+    const [answersCount, acceptedCount, totalQuizAttempts, correctQuizAttempts, posts] =
+      await Promise.all([
+        answersCountPromise,
+        acceptedCountPromise,
+        totalQuizAttemptsPromise,
+        correctQuizAttemptsPromise,
+        postsPromise,
+      ]);
+
+    const accuracy =
+      totalQuizAttempts > 0 ? Math.round((correctQuizAttempts / totalQuizAttempts) * 100) : 0;
 
     const hasNext = posts.length > limit;
     const items = hasNext ? posts.slice(0, limit) : posts;

@@ -6,16 +6,14 @@ import { PostDetailContent } from './PostDetailContent';
 export const revalidate = 0; // Desabilitar cache para dados dinâmicos de comentários/respostas
 
 export default async function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const user = await getAuthUser();
+  const [user, { id }] = await Promise.all([getAuthUser(), params]);
 
   if (!user) {
     redirect('/login');
   }
 
-  const { id } = await params;
-
   // Incrementar visualizações do post no lado do servidor
-  await prisma.post
+  const viewUpdatePromise = prisma.post
     .update({
       where: { id },
       data: {
@@ -28,7 +26,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
       // Silenciar erro se o ID for inválido
     });
 
-  const post = await prisma.post.findUnique({
+  const postPromise = prisma.post.findUnique({
     where: { id },
     include: {
       author: {
@@ -89,12 +87,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
     },
   });
 
-  if (!post) {
-    notFound();
-  }
-
-  // Verificar se o post está salvo nos bookmarks do usuário
-  const bookmark = await prisma.bookmark.findUnique({
+  const bookmarkPromise = prisma.bookmark.findUnique({
     where: {
       user_id_post_id: {
         user_id: user.id,
@@ -102,6 +95,14 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
       },
     },
   });
+
+  const [, post, bookmark] = await Promise.all([viewUpdatePromise, postPromise, bookmarkPromise]);
+
+  if (!post) {
+    notFound();
+  }
+
+  // Verificar se o post está salvo nos bookmarks do usuário
   const initialIsSaved = !!bookmark;
 
   // Serializar datas

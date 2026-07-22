@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { createClient } from '@/lib/supabase/client';
 import { Sidebar } from '@/components/Sidebar';
 import { Footer } from '@/components/Footer';
+import { getCurrentUser, invalidateCurrentUser } from '@/lib/client/current-user';
 import {
   User,
   GraduationCap,
@@ -83,43 +83,38 @@ export default function SettingsPage() {
   };
 
   useEffect(() => {
+    let active = true;
+
     const fetchUserData = async () => {
       try {
-        const supabase = createClient();
-        const {
-          data: { user: authUser },
-        } = await supabase.auth.getUser();
+        const profileData = await getCurrentUser<any>();
 
-        if (!authUser) {
-          router.push('/login');
+        if (!profileData) {
+          router.replace('/login');
           return;
         }
 
-        const res = await fetch(
-          `/api/profile/${authUser.user_metadata?.username || authUser.email?.split('@')[0]}`
-        );
-        if (res.ok) {
-          const profileData = await res.json();
-          setUser({
-            ...profileData.user,
-            id: authUser.id,
-          });
-          setBio(profileData.user.bio || '');
-          setInstitution(profileData.user.institution || '');
-          setGithubUsername(profileData.user.github_username || '');
-          setDiscordUsername(profileData.user.discord_username || '');
-          setBannerUrl(profileData.user.banner_url || '');
-          setPronouns(profileData.user.pronouns || '');
-          setBirthday(profileData.user.birthday ? profileData.user.birthday.split('T')[0] : '');
-        }
+        if (!active) return;
+        setUser(profileData);
+        setBio(profileData.bio || '');
+        setInstitution(profileData.institution || '');
+        setGithubUsername(profileData.github_username || '');
+        setDiscordUsername(profileData.discord_username || '');
+        setBannerUrl(profileData.banner_url || '');
+        setPronouns(profileData.pronouns || '');
+        setBirthday(profileData.birthday ? profileData.birthday.split('T')[0] : '');
       } catch (err) {
         console.error('Error fetching settings user:', err);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
     fetchUserData();
+
+    return () => {
+      active = false;
+    };
   }, [router]);
 
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -169,6 +164,7 @@ export default function SettingsPage() {
       });
 
       if (res.ok) {
+        invalidateCurrentUser();
         setSuccess(true);
       } else {
         const data = await res.json();
@@ -185,6 +181,7 @@ export default function SettingsPage() {
   const handleSignOut = async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
+      invalidateCurrentUser();
       router.push('/');
       router.refresh();
     } catch (err) {
@@ -247,20 +244,22 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-dd-bg items-center justify-center text-dd-text antialiased">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
-          <p className="text-xs text-dd-muted">Carregando configurações...</p>
+      <div className="dd-platform-shell">
+        <Sidebar user={user} />
+        <div className="flex min-w-0 flex-grow xl:max-w-[950px]">
+          <div className="flex min-h-screen w-full items-center justify-center border-r border-dd-border">
+            <div className="flex flex-col items-center gap-3">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+              <p className="text-xs text-dd-muted">Carregando configurações...</p>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div
-      data-testid="settings-shell"
-      className="mx-auto flex min-h-screen w-full max-w-[1225px] flex-col bg-dd-bg text-dd-text antialiased md:flex-row"
-    >
+    <div data-testid="settings-shell" className="dd-platform-shell">
       <Sidebar user={user} />
 
       <div className="flex min-w-0 flex-grow xl:max-w-[950px]">

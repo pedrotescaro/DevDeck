@@ -6,13 +6,11 @@ import { DuelDetailContent } from './DuelDetailContent';
 export const revalidate = 0; // Desabilitar cache para dados dinâmicos de duelos em tempo real
 
 export default async function DuelDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const user = await getAuthUser();
+  const [user, { id }] = await Promise.all([getAuthUser(), params]);
 
   if (!user) {
     redirect('/login');
   }
-
-  const { id } = await params;
 
   // Buscar duelo específico
   const duel = await prisma.duel.findUnique({

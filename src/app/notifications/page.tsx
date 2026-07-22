@@ -4,12 +4,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { createClient } from '@/lib/supabase/client';
 import { Sidebar } from '@/components/Sidebar';
 import { PostSkeletonList } from '@/components/motion/PostSkeleton';
 import { EmptyState } from '@/components/motion/EmptyState';
 import { staggerContainerVariants, staggerItemVariants } from '@/lib/motion';
 import { cn } from '@/lib/cn';
+import { getCurrentUser } from '@/lib/client/current-user';
 import { Bell, MessageSquare, Sparkles, Swords, Settings, Heart, X } from 'lucide-react';
 import Link from 'next/link';
 
@@ -41,38 +41,40 @@ export default function NotificationsPage() {
   const [showPushBanner, setShowPushBanner] = useState(true);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const supabase = createClient();
-        const {
-          data: { user: authUser },
-        } = await supabase.auth.getUser();
+    let active = true;
+    const controller = new AbortController();
 
-        if (!authUser) {
-          router.push('/login');
+    const fetchPageData = async () => {
+      try {
+        const [userData, resNotifications] = await Promise.all([
+          getCurrentUser<any>(),
+          fetch('/api/notifications', { signal: controller.signal }),
+        ]);
+
+        if (!userData) {
+          router.replace('/login');
           return;
         }
 
-        const resUser = await fetch('/api/users/me');
-        if (resUser.ok) {
-          const userData = await resUser.json();
-          setUser(userData);
-        }
+        const notificationData = resNotifications.ok ? await resNotifications.json() : [];
 
-        // Fetch notifications
-        const resNotifications = await fetch('/api/notifications');
-        if (resNotifications.ok) {
-          const notifs = await resNotifications.json();
-          setNotifications(notifs);
-        }
+        if (!active) return;
+        setUser(userData);
+        setNotifications(notificationData);
       } catch (err) {
+        if ((err as Error).name === 'AbortError') return;
         console.error('Error fetching notifications page data:', err);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
-    fetchUserData();
+    fetchPageData();
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
   }, [router]);
 
   const handleMarkAllAsRead = useCallback(async () => {
@@ -165,10 +167,7 @@ export default function NotificationsPage() {
   const filteredNotifs = getFilteredNotifications();
 
   return (
-    <div
-      data-testid="notifications-shell"
-      className="mx-auto flex min-h-screen w-full max-w-[1225px] flex-col bg-dd-bg text-dd-text antialiased md:flex-row"
-    >
+    <div data-testid="notifications-shell" className="dd-platform-shell">
       <Sidebar user={user} />
 
       <div className="flex min-w-0 flex-grow flex-col md:flex-row xl:max-w-[950px]">

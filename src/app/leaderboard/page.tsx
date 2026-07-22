@@ -13,7 +13,7 @@ export default async function LeaderboardPage() {
   }
 
   // Buscar ranking global inicial (Top 10)
-  const leaders = await prisma.user.findMany({
+  const leadersPromise = prisma.user.findMany({
     orderBy: { total_xp: 'desc' },
     take: 10,
     select: {
@@ -23,6 +23,12 @@ export default async function LeaderboardPage() {
     },
   });
 
+  const trailsPromise = prisma.languageTrail.findMany({
+    where: { user_id: user.id },
+  });
+
+  const [leaders, trails] = await Promise.all([leadersPromise, trailsPromise]);
+
   const formattedLeaders = leaders.map((leader, index) => ({
     rank: index + 1,
     username: leader.username,
@@ -30,10 +36,6 @@ export default async function LeaderboardPage() {
     xp: leader.total_xp,
     level: Math.max(1, Math.floor(leader.total_xp / 1000) + 1), // Nível global dinâmico
   }));
-
-  const trails = await prisma.languageTrail.findMany({
-    where: { user_id: user.id },
-  });
 
   return (
     <LeaderboardClient

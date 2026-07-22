@@ -28,6 +28,7 @@ import { EmptyState } from '@/components/motion/EmptyState';
 import { LevelUpOverlay } from '@/components/motion/LevelUpOverlay';
 import { POST_CHAR_LIMIT, crossfadeVariants, springGentle } from '@/lib/motion';
 import { cn } from '@/lib/cn';
+import { getCurrentUser } from '@/lib/client/current-user';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { useSearchWithDebounce } from '@/hooks/useSearchWithDebounce';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
@@ -222,13 +223,8 @@ export function FeedContent({
   const [feedError, setFeedError] = useState<string | null>(null);
 
   useEffect(() => {
-    const controller = new AbortController();
     const timer = window.setTimeout(() => {
-      fetch('/api/users/me', { signal: controller.signal })
-        .then((res) => {
-          if (res.ok) return res.json();
-          throw new Error();
-        })
+      getCurrentUser<any>()
         .then((data) => {
           if (data) {
             if (data.total_xp !== undefined) {
@@ -244,7 +240,6 @@ export function FeedContent({
 
     return () => {
       window.clearTimeout(timer);
-      controller.abort();
     };
   }, []);
 
@@ -549,6 +544,7 @@ export function FeedContent({
           setDailyAttempt(data.attempt);
         }
       } catch (err) {
+        if (controller.signal.aborted || isAbortedRequest(err)) return;
         console.error('Error loading daily quiz:', err);
       }
     };
@@ -1174,7 +1170,7 @@ export function FeedContent({
   return (
     <div
       data-testid="app-shell"
-      className="mx-auto flex min-h-screen w-full max-w-[1225px] flex-col bg-dd-bg text-dd-text antialiased selection:bg-blue-500/35 selection:text-white md:flex-row"
+      className="dd-platform-shell selection:bg-blue-500/35 selection:text-white"
     >
       <LevelUpOverlay
         visible={levelUpVisible}

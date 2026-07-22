@@ -6,13 +6,11 @@ import { ProfileContent } from './ProfileContent';
 export const revalidate = 0; // Desabilitar cache para dados dinâmicos do perfil
 
 export default async function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
-  const user = await getAuthUser();
+  const [user, { username }] = await Promise.all([getAuthUser(), params]);
 
   if (!user) {
     redirect('/login');
   }
-
-  const { username } = await params;
 
   // Buscar usuário dono do perfil
   const profileUser = await prisma.user.findFirst({
@@ -36,26 +34,35 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   }
 
   // Buscar todos os badges cadastrados no sistema
-  const allBadges = await prisma.badge.findMany({
-    orderBy: { slug: 'asc' },
-  });
+  const profileId = profileUser.id;
 
   // Calcular estatísticas
-  const answersCount = await prisma.answer.count({
-    where: { author_id: profileUser.id },
-  });
-
-  const acceptedCount = await prisma.answer.count({
-    where: { author_id: profileUser.id, is_accepted: true },
-  });
-
-  const totalAttempts = await prisma.quizAttempt.count({
-    where: { user_id: profileUser.id },
-  });
-
-  const correctAttempts = await prisma.quizAttempt.count({
-    where: { user_id: profileUser.id, is_correct: true },
-  });
+  const [
+    allBadges,
+    answersCount,
+    acceptedCount,
+    totalAttempts,
+    correctAttempts,
+    follow,
+    followersCount,
+    followingCount,
+  ] = await Promise.all([
+    prisma.badge.findMany({ orderBy: { slug: 'asc' } }),
+    prisma.answer.count({ where: { author_id: profileId } }),
+    prisma.answer.count({ where: { author_id: profileId, is_accepted: true } }),
+    prisma.quizAttempt.count({ where: { user_id: profileId } }),
+    prisma.quizAttempt.count({ where: { user_id: profileId, is_correct: true } }),
+    prisma.follow.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId: user.id,
+          followingId: profileId,
+        },
+      },
+    }),
+    prisma.follow.count({ where: { followingId: profileId } }),
+    prisma.follow.count({ where: { followerId: profileId } }),
+  ]);
 
   const accuracy = totalAttempts > 0 ? Math.round((correctAttempts / totalAttempts) * 100) : 0;
 
@@ -94,25 +101,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   }));
 
   // Verificar se o usuário atual segue este perfil
-  const isFollowing = user
-    ? (await prisma.follow.findUnique({
-        where: {
-          followerId_followingId: {
-            followerId: user.id,
-            followingId: profileUser.id,
-          },
-        },
-      })) !== null
-    : false;
-
-  // Calcular contagem de seguidores e seguindo
-  const followersCount = await prisma.follow.count({
-    where: { followingId: profileUser.id },
-  });
-
-  const followingCount = await prisma.follow.count({
-    where: { followerId: profileUser.id },
-  });
+  const isFollowing = follow !== null;
 
   return (
     <ProfileContent
