@@ -55,11 +55,11 @@ export function BookmarksContent({ user, initialPosts }: BookmarksContentProps) 
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased">
+    <div className="dd-platform-shell">
       <Sidebar user={user} />
 
-      <div className="flex-grow flex flex-col md:flex-row min-w-0">
-        <main className="flex-grow max-w-2xl w-full border-r border-dd-border/80 min-h-screen bg-dd-bg pb-24 md:pb-8 flex flex-col">
+      <div className="flex min-w-0 flex-grow flex-col md:flex-row xl:max-w-[950px]">
+        <main className="flex min-h-screen w-full max-w-[600px] flex-grow flex-col border-r border-dd-border/80 bg-dd-bg pb-24 md:pb-8">
           {/* Header (Twitter style: Back arrow + Title + count) */}
           <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60 px-4 py-3 flex items-center gap-4">
             <button

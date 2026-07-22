@@ -160,7 +160,7 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
   const opponentPercent = totalVotes > 0 ? 100 - challengerPercent : 50;
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-[1225px] flex-col bg-dd-bg text-dd-text antialiased md:flex-row">
+    <div className="dd-platform-shell">
       {/* XP Toast */}
       {toastXp && (
         <div className="fixed top-20 right-6 z-50 animate-slide-in-right rounded-xl border border-emerald-500/30 bg-dd-surface/90 backdrop-blur-xl p-4 shadow-2xl flex items-center gap-3">

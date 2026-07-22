@@ -251,10 +251,7 @@ export function ProfileContent({
   });
 
   return (
-    <div
-      data-testid="profile-shell"
-      className="mx-auto flex min-h-screen w-full max-w-[1225px] flex-col bg-dd-bg text-dd-text antialiased md:flex-row"
-    >
+    <div data-testid="profile-shell" className="dd-platform-shell">
       <Sidebar user={user} />
 
       <div className="flex min-w-0 flex-grow flex-col md:flex-row xl:max-w-[950px]">

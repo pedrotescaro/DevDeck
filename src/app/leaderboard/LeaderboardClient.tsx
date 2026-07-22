@@ -69,7 +69,7 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
   const displayPodium = podiumOrder.length > 0 ? podiumOrder : top3;
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-[1225px] flex-col bg-dd-bg text-dd-text antialiased selection:bg-blue-500/35 selection:text-white md:flex-row">
+    <div className="dd-platform-shell selection:bg-blue-500/35 selection:text-white">
       <Sidebar user={initialUser} />
 
       <div className="flex min-w-0 flex-grow flex-col md:flex-row xl:max-w-[950px]">

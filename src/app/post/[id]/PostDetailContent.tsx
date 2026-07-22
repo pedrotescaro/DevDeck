@@ -417,7 +417,7 @@ export function PostDetailContent({
   const presentedPost = parsePostExtras(post.body);
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased selection:bg-blue-500/35 selection:text-white">
+    <div className="dd-platform-shell selection:bg-blue-500/35 selection:text-white">
       {/* XP Toast */}
       {toastXp && (
         <div className="fixed top-20 right-6 z-50 animate-slide-in-right rounded-xl border border-emerald-500/30 bg-dd-surface/90 backdrop-blur-xl p-4 shadow-2xl flex items-center gap-3">
@@ -433,8 +433,8 @@ export function PostDetailContent({
 
       <Sidebar user={user} />
 
-      <div className="flex-grow flex flex-col md:flex-row min-w-0">
-        <main className="flex-grow max-w-2xl w-full border-r border-dd-border/80 min-h-screen bg-dd-bg pb-24 md:pb-8 flex flex-col">
+      <div className="flex min-w-0 flex-grow flex-col md:flex-row xl:max-w-[950px]">
+        <main className="flex min-h-screen w-full max-w-[600px] flex-grow flex-col border-r border-dd-border/80 bg-dd-bg pb-24 md:pb-8">
           {/* Header (Twitter style: Back arrow + Title) */}
           <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60 px-4 py-3 flex items-center gap-4">
             <button

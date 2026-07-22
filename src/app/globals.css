@@ -24,7 +24,6 @@
   --font-code: var(--font-jetbrains-mono);
 }
 
-
 :root {
   --color-dd-accent: #0083fe;
   --color-dd-purple: #7c6ff7;
@@ -61,6 +60,10 @@
   --color-dd-muted: #71767b;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   background-color: var(--color-dd-bg);
   color: var(--color-dd-text);
@@ -69,6 +72,31 @@ body {
     background-color 0.25s ease,
     color 0.25s ease,
     border-color 0.25s ease;
+}
+
+/* Estrutura unica das areas autenticadas. Manter estas dimensoes centralizadas
+   evita que a sidebar mude de posicao entre paginas ou com a scrollbar. */
+.dd-platform-shell {
+  display: flex;
+  width: 100%;
+  max-width: 1225px;
+  min-height: 100vh;
+  margin-inline: auto;
+  flex-direction: column;
+  background-color: var(--color-dd-bg);
+  color: var(--color-dd-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.dd-platform-shell.dd-platform-shell--fullscreen {
+  max-width: none;
+}
+
+@media (min-width: 768px) {
+  .dd-platform-shell {
+    flex-direction: row;
+  }
 }
 
 /* Custom scrollbar for dark theme */
@@ -93,8 +121,8 @@ body {
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .scrollbar-none {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 /* Styled scrollbar for Ducky chat (orange theme) */
@@ -790,7 +818,8 @@ body {
 }
 
 @keyframes dd-fire-flicker {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1) rotate(-1deg);
     filter: drop-shadow(0 0 1px rgba(0, 131, 254, 0.6)) brightness(1);
   }
@@ -819,7 +848,8 @@ body {
 }
 
 @keyframes tiktok-fire {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1) scaleY(1) rotate(-1deg);
     filter: drop-shadow(0 0 2px rgba(0, 131, 254, 0.6)) brightness(1);
   }
@@ -855,4 +885,3 @@ body {
   display: inline-block;
   transform-origin: bottom center;
 }
-

@@ -66,7 +66,7 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
   };
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-[1225px] flex-col bg-dd-bg text-dd-text antialiased md:flex-row">
+    <div className="dd-platform-shell">
       <Sidebar user={user} />
 
       <div className="flex min-w-0 flex-grow flex-col md:flex-row xl:max-w-[950px]">

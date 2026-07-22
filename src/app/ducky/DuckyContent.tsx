@@ -1383,7 +1383,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
   return (
     <div
       data-testid="async-shell"
-      className={`relative mx-auto flex h-screen w-full flex-col overflow-hidden bg-dd-bg text-dd-text antialiased transition-colors duration-200 md:flex-row ${isFullscreen ? 'max-w-none' : 'max-w-[1225px]'}`}
+      className={`dd-platform-shell relative h-screen overflow-hidden transition-colors duration-200 ${isFullscreen ? 'dd-platform-shell--fullscreen' : ''}`}
     >
       {/* Sidebar rendered conditionally based on expanded mode */}
       {!isFullscreen && <Sidebar user={user} />}
