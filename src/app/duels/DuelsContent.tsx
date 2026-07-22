@@ -66,12 +66,12 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased">
+    <div className="mx-auto flex min-h-screen w-full max-w-[1225px] flex-col bg-dd-bg text-dd-text antialiased md:flex-row">
       <Sidebar user={user} />
 
-      <div className="flex-grow flex flex-col md:flex-row min-w-0">
+      <div className="flex min-w-0 flex-grow flex-col md:flex-row xl:max-w-[950px]">
         {/* Coluna Central */}
-        <main className="flex-grow max-w-2xl w-full border-r border-dd-border/80 min-h-screen pb-24 md:pb-8 flex flex-col min-w-0 bg-dd-bg">
+        <main className="flex min-h-screen w-full max-w-[600px] min-w-0 flex-grow flex-col border-r border-dd-border/80 bg-dd-bg pb-24 md:pb-8">
           {/* Header Fixo */}
           <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60 p-3.5 flex items-center justify-between gap-3 shrink-0">
             <div className="flex items-center gap-3">
@@ -294,7 +294,7 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
         </main>
 
         {/* Coluna Direita */}
-        <aside className="hidden lg:block w-80 p-4 space-y-4 shrink-0 border-l border-dd-border/80 min-h-screen bg-dd-bg">
+        <aside className="hidden min-h-screen w-[350px] shrink-0 space-y-4 border-l border-dd-border/80 bg-dd-bg p-5 xl:block">
           {/* Widget 1: Como Funciona */}
           <div className="bg-dd-sidebar-bg border border-dd-border rounded-2xl p-4.5 space-y-4">
             <div className="flex items-center gap-2 border-b border-dd-border/50 pb-2.5">

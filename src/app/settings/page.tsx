@@ -257,10 +257,13 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased">
+    <div
+      data-testid="settings-shell"
+      className="mx-auto flex min-h-screen w-full max-w-[1225px] flex-col bg-dd-bg text-dd-text antialiased md:flex-row"
+    >
       <Sidebar user={user} />
 
-      <div className="flex-grow flex min-w-0">
+      <div className="flex min-w-0 flex-grow xl:max-w-[950px]">
         {/* Central Settings List Column */}
         <div
           className={`w-full md:w-[350px] border-r border-dd-border flex-shrink-0 flex flex-col bg-dd-bg ${
@@ -343,7 +346,7 @@ export default function SettingsPage() {
 
         {/* Right-hand Detail Panel Column */}
         <div
-          className={`flex-grow flex flex-col min-w-0 bg-dd-bg ${
+          className={`flex w-full max-w-[600px] min-w-0 flex-grow flex-col border-r border-dd-border bg-dd-bg ${
             !mobileShowDetails ? 'hidden md:flex' : 'flex'
           }`}
         >

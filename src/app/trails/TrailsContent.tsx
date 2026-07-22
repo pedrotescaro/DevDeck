@@ -1222,11 +1222,11 @@ export function TrailsContent({
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased">
+    <div className="mx-auto flex min-h-screen w-full max-w-[1225px] flex-col bg-dd-bg text-dd-text antialiased md:flex-row">
       <Sidebar user={user} />
 
-      <div className="flex-grow flex flex-col md:flex-row min-w-0">
-        <main className="flex-grow max-w-2xl w-full border-r border-dd-border/80 min-h-screen bg-dd-bg pb-24 md:pb-8 flex flex-col">
+      <div className="flex min-w-0 flex-grow flex-col md:flex-row xl:max-w-[950px]">
+        <main className="flex min-h-screen w-full max-w-[600px] flex-grow flex-col border-r border-dd-border/80 bg-dd-bg pb-24 md:pb-8">
           {/* Header (Twitter style: Sticky + Title + Subtitle) */}
           <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60 px-4 py-3 flex items-center justify-between shrink-0">
             <div>
@@ -1625,7 +1625,7 @@ export function TrailsContent({
         </main>
 
         {/* Right Sidebar: Duelos, ASYNC Chat, Leaderboard */}
-        <aside className="hidden lg:flex w-80 shrink-0 flex-col gap-4 p-4 sticky top-0 h-screen overflow-y-auto">
+        <aside className="sticky top-0 hidden h-screen w-[350px] shrink-0 flex-col gap-4 overflow-y-auto p-5 xl:flex">
           {/* Widget 1: Duelos de Código */}
           <div className="bg-dd-sidebar-bg border border-dd-border rounded-2xl p-4 space-y-3">
             <div className="flex items-center gap-2 text-blue-500">

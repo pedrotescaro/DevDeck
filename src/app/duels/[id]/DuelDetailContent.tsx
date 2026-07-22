@@ -160,7 +160,7 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
   const opponentPercent = totalVotes > 0 ? 100 - challengerPercent : 50;
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased">
+    <div className="mx-auto flex min-h-screen w-full max-w-[1225px] flex-col bg-dd-bg text-dd-text antialiased md:flex-row">
       {/* XP Toast */}
       {toastXp && (
         <div className="fixed top-20 right-6 z-50 animate-slide-in-right rounded-xl border border-emerald-500/30 bg-dd-surface/90 backdrop-blur-xl p-4 shadow-2xl flex items-center gap-3">
@@ -176,9 +176,9 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
 
       <Sidebar user={user} />
 
-      <div className="flex-grow flex flex-col md:flex-row min-w-0">
+      <div className="flex min-w-0 flex-grow flex-col md:flex-row xl:max-w-[950px]">
         {/* Coluna Central */}
-        <main className="flex-grow max-w-2xl w-full border-r border-dd-border/80 min-h-screen pb-24 md:pb-8 flex flex-col min-w-0 bg-dd-bg">
+        <main className="flex min-h-screen w-full max-w-[600px] min-w-0 flex-grow flex-col border-r border-dd-border/80 bg-dd-bg pb-24 md:pb-8">
           {/* Header Fixo */}
           <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60 p-3.5 flex items-center gap-3 shrink-0">
             <Link
@@ -381,7 +381,7 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
         </main>
 
         {/* Coluna Direita (Widgets) */}
-        <aside className="hidden lg:block w-80 p-4 space-y-4 shrink-0 border-l border-dd-border/80 min-h-screen bg-dd-bg">
+        <aside className="hidden min-h-screen w-[350px] shrink-0 space-y-4 border-l border-dd-border/80 bg-dd-bg p-5 xl:block">
           {/* Widget 1: Status do Duelo */}
           <div className="bg-dd-sidebar-bg border border-dd-border rounded-2xl p-4.5 space-y-3.5">
             <h3 className="text-xs font-black text-dd-text uppercase tracking-wider border-b border-dd-border/50 pb-2">

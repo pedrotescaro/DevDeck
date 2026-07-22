@@ -349,12 +349,12 @@ export default function ExplorePage() {
   const currentTrends = trendsByTab[activeTab] || [];
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased">
+    <div className="mx-auto flex min-h-screen w-full max-w-[1225px] flex-col bg-dd-bg text-dd-text antialiased md:flex-row">
       <Sidebar user={user} />
 
-      <div className="flex-grow flex flex-col md:flex-row min-w-0">
+      <div className="flex min-w-0 flex-grow flex-col md:flex-row xl:max-w-[950px]">
         {/* Left Side: Search Feed & Trends (Matching image 2) */}
-        <main className="flex-grow max-w-2xl w-full border-r border-dd-border/80 min-h-screen bg-dd-bg pb-24 md:pb-8">
+        <main className="min-h-screen w-full max-w-[600px] flex-grow border-r border-dd-border/80 bg-dd-bg pb-24 md:pb-8">
           {/* Header Search Bar */}
           <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60 p-3 flex items-center gap-3">
             {hasSearched && (
@@ -599,7 +599,7 @@ export default function ExplorePage() {
         </main>
 
         {/* Right Side: Who to Follow Widget (Matching image 2) */}
-        <aside className="hidden lg:block w-80 p-4 space-y-4 shrink-0">
+        <aside className="hidden w-[350px] shrink-0 space-y-4 p-5 xl:block">
           <div className="bg-dd-sidebar-bg border border-dd-border rounded-2xl p-4 space-y-4">
             <h3 className="text-sm font-black text-dd-text">Quem seguir</h3>
 

@@ -165,11 +165,14 @@ export default function NotificationsPage() {
   const filteredNotifs = getFilteredNotifications();
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased">
+    <div
+      data-testid="notifications-shell"
+      className="mx-auto flex min-h-screen w-full max-w-[1225px] flex-col bg-dd-bg text-dd-text antialiased md:flex-row"
+    >
       <Sidebar user={user} />
 
-      <div className="flex-grow flex flex-col md:flex-row min-w-0">
-        <main className="flex-grow max-w-2xl w-full border-r border-dd-border/80 min-h-screen bg-dd-bg pb-24 md:pb-8">
+      <div className="flex min-w-0 flex-grow flex-col md:flex-row xl:max-w-[950px]">
+        <main className="min-h-screen w-full max-w-[600px] flex-grow border-r border-dd-border/80 bg-dd-bg pb-24 md:pb-8">
           {/* Header (Matching image 3 style) */}
           <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60">
             <div className="flex items-center justify-between px-4 py-3">
@@ -351,6 +354,7 @@ export default function NotificationsPage() {
             </div>
           )}
         </main>
+        <aside aria-hidden="true" className="hidden w-[350px] shrink-0 xl:block" />
       </div>
     </div>
   );
