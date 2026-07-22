@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   BookOpen,
@@ -24,7 +25,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { PostComposerExtras } from '@/components/PostComposerExtras';
-import { MarkdownEditor, type NotionEditorRef } from '@/components/MarkdownEditor';
+import type { NotionEditorRef } from '@/components/MarkdownEditor';
 import { extractPostMetadata } from '@/lib/editor/extract-metadata';
 import { ComposeModal } from '@/components/motion/ComposeModal';
 import { NotificationBellIcon } from '@/components/motion/NotificationBellIcon';
@@ -34,6 +35,15 @@ import { MentionDropdown } from '@/components/motion/MentionDropdown';
 import { appendPostExtras, ReplyAudience, resetPostComposerExtras } from '@/lib/post-composer';
 import { POST_CHAR_LIMIT } from '@/lib/motion';
 import { ThemeLogo } from '@/components/ThemeLogo';
+import { getCurrentUser, invalidateCurrentUser } from '@/lib/client/current-user';
+
+const MarkdownEditor = dynamic(
+  () => import('@/components/MarkdownEditor').then((module) => module.MarkdownEditor),
+  {
+    ssr: false,
+    loading: () => <div className="dd-skeleton h-32 w-full rounded-xl" />,
+  }
+);
 
 interface SidebarUser {
   id: string;
@@ -130,12 +140,9 @@ export function Sidebar({ user }: SidebarProps) {
     }
 
     // Always fetch the full user profile from /api/users/me in background to keep data fresh and accurate
-    fetch('/api/users/me')
-      .then((res) => {
-        if (res.ok) return res.json();
-        throw new Error('Not logged in');
-      })
+    getCurrentUser<SidebarUser>()
       .then((data) => {
+        if (!data) throw new Error('Not logged in');
         setActiveUser(data);
         inMemoryUser = data;
         if (typeof window !== 'undefined') {
@@ -190,17 +197,18 @@ export function Sidebar({ user }: SidebarProps) {
   const [toast, setToast] = useState<{ message: string; visible: boolean } | null>(null);
   const [premiumModalOpen, setPremiumModalOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
-  const [secondsLeft, setSecondsLeft] = useState(21279); // 05:54:39 is 21279 seconds
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setSecondsLeft((prev) => {
-        if (prev <= 1) return 21279;
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMoreMenuOpen(false);
+        setDropdownOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setDropdownOpen, setMoreMenuOpen]);
 
   useEffect(() => {
     if (toast?.visible) {
@@ -215,17 +223,11 @@ export function Sidebar({ user }: SidebarProps) {
     setToast({ message, visible: true });
   };
 
-  const formatTime = (totalSeconds: number) => {
-    const hrs = Math.floor(totalSeconds / 3600);
-    const mins = Math.floor((totalSeconds % 3600) / 60);
-    const secs = totalSeconds % 60;
-    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
   const handleSignOut = async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
       inMemoryUser = null;
+      invalidateCurrentUser();
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem('devdeck_user');
       }
@@ -368,12 +370,10 @@ export function Sidebar({ user }: SidebarProps) {
 
   const navItems: Array<{
     label: string;
-    href?: string;
-    onClick?: () => void;
+    href: string;
     icon: any;
     active?: boolean;
-    badge?: 'dot' | 'timer';
-    isMore?: boolean;
+    badge?: 'dot';
   }> = [
     {
       label: 'Página Inicial',
@@ -389,10 +389,22 @@ export function Sidebar({ user }: SidebarProps) {
       active: pathname === '/explore',
     },
     {
+      label: 'Notificações',
+      href: '/notifications',
+      icon: Bell,
+      active: pathname === '/notifications',
+    },
+    {
       label: 'Aprender com DevDeck',
       href: '/trails',
       icon: BookOpen,
       active: pathname.startsWith('/trails'),
+    },
+    {
+      label: 'Bate-papo',
+      href: '/messages',
+      icon: MessageCircle,
+      active: pathname.startsWith('/messages'),
     },
     {
       label: 'ASYNC',
@@ -401,10 +413,10 @@ export function Sidebar({ user }: SidebarProps) {
       active: pathname.startsWith('/async') || pathname.startsWith('/ducky'),
     },
     {
-      label: 'Notificações',
-      href: '/notifications',
-      icon: Bell,
-      active: pathname === '/notifications',
+      label: 'Itens salvos',
+      href: '/bookmarks',
+      icon: Bookmark,
+      active: pathname.startsWith('/bookmarks'),
     },
     {
       label: 'Perfil',
@@ -412,13 +424,11 @@ export function Sidebar({ user }: SidebarProps) {
       icon: UserIcon,
       active: activeUser ? pathname === `/profile/${activeUser.username}` : false,
     },
-    {
-      label: 'Mais',
-      onClick: () => setMoreMenuOpen(!moreMenuOpen),
-      icon: MoreHorizontal,
-      isMore: true,
-    },
   ];
+
+  const moreMenuIsActive = ['/guilds', '/duels', '/leaderboard', '/settings'].some((route) =>
+    pathname.startsWith(route)
+  );
 
   return (
     <>
@@ -479,97 +489,87 @@ export function Sidebar({ user }: SidebarProps) {
                 <>
                   {iconEl}
                   <span>{item.label}</span>
-                  {item.badge === 'timer' && (
-                    <span className="ml-auto text-[9px] font-bold bg-[#f5a623] text-black px-1.5 py-0.5 rounded-full font-mono">
-                      {formatTime(secondsLeft)}
-                    </span>
-                  )}
                 </>
               );
 
-              if (item.href) {
-                return (
-                  <Link key={item.label} href={item.href} className={linkClasses}>
-                    {contentEl}
-                  </Link>
-                );
-              }
-
-              if (item.isMore) {
-                return (
-                  <div key={item.label} className="relative">
-                    <button onClick={item.onClick} className={linkClasses}>
-                      {contentEl}
-                    </button>
-                    {moreMenuOpen && (
-                      <>
-                        <div
-                          className="fixed inset-0 z-40 cursor-default"
-                          onClick={() => setMoreMenuOpen(false)}
-                        />
-                        <div className="absolute bottom-full left-0 w-56 mb-2 rounded-xl border border-dd-border bg-dd-surface/95 backdrop-blur-xl shadow-2xl z-50 py-1.5 font-sans overflow-hidden animate-slide-up">
-                          <Link
-                            href="/messages"
-                            className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors border-b border-dd-border/40"
-                            onClick={() => setMoreMenuOpen(false)}
-                          >
-                            <MessageCircle className="w-4.5 h-4.5 text-dd-muted" />
-                            Bate-papo
-                          </Link>
-
-                          <Link
-                            href="/guilds"
-                            className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors border-b border-dd-border/40"
-                            onClick={() => setMoreMenuOpen(false)}
-                          >
-                            <Users className="w-4.5 h-4.5 text-dd-muted" />
-                            Comunidades
-                          </Link>
-                          <Link
-                            href="/bookmarks"
-                            className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors border-b border-dd-border/40"
-                            onClick={() => setMoreMenuOpen(false)}
-                          >
-                            <Bookmark className="w-4.5 h-4.5 text-dd-muted" />
-                            Itens salvos
-                          </Link>
-                          <Link
-                            href="/duels"
-                            className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors border-b border-dd-border/40"
-                            onClick={() => setMoreMenuOpen(false)}
-                          >
-                            <Swords className="w-4.5 h-4.5 text-dd-muted" />
-                            Duelos de Código
-                          </Link>
-                          <Link
-                            href="/leaderboard"
-                            className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors border-b border-dd-border/40"
-                            onClick={() => setMoreMenuOpen(false)}
-                          >
-                            <Trophy className="w-4.5 h-4.5 text-dd-muted" />
-                            Classificação Geral
-                          </Link>
-                          <Link
-                            href="/settings"
-                            className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors"
-                            onClick={() => setMoreMenuOpen(false)}
-                          >
-                            <SettingsIcon className="w-4.5 h-4.5 text-dd-muted" />
-                            Configurações
-                          </Link>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                );
-              }
-
               return (
-                <button key={item.label} onClick={item.onClick} className={linkClasses}>
+                <Link key={item.label} href={item.href} className={linkClasses}>
                   {contentEl}
-                </button>
+                </Link>
               );
             })}
+
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setDropdownOpen(false);
+                  setMoreMenuOpen((open) => !open);
+                }}
+                aria-expanded={moreMenuOpen}
+                aria-haspopup="menu"
+                className={`flex w-full cursor-pointer items-center gap-3.5 rounded-xl border border-transparent px-3.5 py-2.5 text-left text-sm font-semibold transition-all duration-200 group ${
+                  moreMenuIsActive
+                    ? 'bg-transparent font-black text-dd-text'
+                    : 'text-dd-muted hover:bg-dd-surface/60 hover:text-dd-text'
+                }`}
+              >
+                <div className="flex h-5 w-5 items-center justify-center">
+                  <MoreHorizontal className="h-5 w-5 transition-transform duration-200 group-hover:scale-105" />
+                </div>
+                <span>Mais</span>
+              </button>
+
+              {moreMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40 cursor-default"
+                    onClick={() => setMoreMenuOpen(false)}
+                  />
+                  <div
+                    role="menu"
+                    className="absolute bottom-full left-0 z-50 mb-2 w-[290px] max-w-[calc(100vw-2rem)] origin-bottom-left overflow-hidden rounded-2xl border border-dd-border/70 bg-dd-surface p-2 font-sans shadow-[0_12px_40px_rgba(0,0,0,0.4)] animate-slide-up"
+                  >
+                    <Link
+                      href="/guilds"
+                      role="menuitem"
+                      className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                      onClick={() => setMoreMenuOpen(false)}
+                    >
+                      <Users className="h-5.5 w-5.5 shrink-0" />
+                      Comunidades
+                    </Link>
+                    <Link
+                      href="/duels"
+                      role="menuitem"
+                      className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                      onClick={() => setMoreMenuOpen(false)}
+                    >
+                      <Swords className="h-5.5 w-5.5 shrink-0" />
+                      Duelos de Código
+                    </Link>
+                    <Link
+                      href="/leaderboard"
+                      role="menuitem"
+                      className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                      onClick={() => setMoreMenuOpen(false)}
+                    >
+                      <Trophy className="h-5.5 w-5.5 shrink-0" />
+                      Classificação Geral
+                    </Link>
+                    <Link
+                      href="/settings"
+                      role="menuitem"
+                      className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                      onClick={() => setMoreMenuOpen(false)}
+                    >
+                      <SettingsIcon className="h-5.5 w-5.5 shrink-0" />
+                      Configurações
+                    </Link>
+                  </div>
+                </>
+              )}
+            </div>
           </nav>
 
           {/* Post action button (tightened padding) */}
@@ -597,7 +597,11 @@ export function Sidebar({ user }: SidebarProps) {
         {activeUser && (
           <div className="relative">
             <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
+              type="button"
+              onClick={() => {
+                setMoreMenuOpen(false);
+                setDropdownOpen((open) => !open);
+              }}
               aria-expanded={dropdownOpen}
               aria-haspopup="menu"
               className="group w-full cursor-pointer rounded-2xl border border-transparent p-3 text-left transition-all duration-200 hover:border-dd-border hover:bg-dd-surface/40"
@@ -649,32 +653,38 @@ export function Sidebar({ user }: SidebarProps) {
                   className="fixed inset-0 z-40 cursor-default"
                   onClick={() => setDropdownOpen(false)}
                 />
-                <div className="absolute bottom-full left-0 right-0 mb-2 rounded-xl border border-dd-border bg-dd-surface/95 backdrop-blur-xl shadow-2xl z-50 py-1.5 font-sans overflow-hidden animate-slide-up">
+                <div
+                  role="menu"
+                  className="absolute bottom-full left-0 z-50 mb-2 w-[290px] max-w-[calc(100vw-2rem)] origin-bottom-left overflow-hidden rounded-2xl border border-dd-border/70 bg-dd-surface p-2 font-sans shadow-[0_12px_40px_rgba(0,0,0,0.4)] animate-slide-up"
+                >
                   <Link
                     href={`/profile/${activeUser.username}`}
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors"
+                    role="menuitem"
+                    className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
                     onClick={() => setDropdownOpen(false)}
                   >
-                    <UserIcon className="w-4 h-4 text-dd-muted" />
+                    <UserIcon className="h-5.5 w-5.5 shrink-0" />
                     Meu Perfil
                   </Link>
                   <Link
                     href="/settings"
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors"
+                    role="menuitem"
+                    className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
                     onClick={() => setDropdownOpen(false)}
                   >
-                    <SettingsIcon className="w-4 h-4 text-dd-muted" />
+                    <SettingsIcon className="h-5.5 w-5.5 shrink-0" />
                     Configurações
                   </Link>
-                  <hr className="border-dd-border my-1" />
                   <button
+                    type="button"
+                    role="menuitem"
                     onClick={() => {
                       setDropdownOpen(false);
                       handleSignOut();
                     }}
-                    className="flex w-full items-center gap-2.5 px-4 py-2.5 text-xs font-bold text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors cursor-pointer"
+                    className="flex w-full cursor-pointer items-center gap-4 rounded-xl px-4 py-3.5 text-left text-[15px] font-extrabold leading-none text-red-500 transition-colors hover:bg-red-500/10 focus-visible:bg-red-500/10 focus-visible:outline-none"
                   >
-                    <LogOut className="w-4 h-4 text-red-500" />
+                    <LogOut className="h-5.5 w-5.5 shrink-0" />
                     Sair da Conta
                   </button>
                 </div>
@@ -712,7 +722,13 @@ export function Sidebar({ user }: SidebarProps) {
             {activeUser && (
               <div className="relative">
                 <button
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  type="button"
+                  onClick={() => {
+                    setMoreMenuOpen(false);
+                    setDropdownOpen((open) => !open);
+                  }}
+                  aria-expanded={dropdownOpen}
+                  aria-haspopup="menu"
                   className="flex items-center focus:outline-none"
                 >
                   {activeUser.avatar_url ? (
@@ -733,32 +749,38 @@ export function Sidebar({ user }: SidebarProps) {
                 {dropdownOpen && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
-                    <div className="absolute right-0 mt-2 w-48 rounded-xl border border-dd-border bg-dd-surface/95 backdrop-blur-xl shadow-2xl z-50 py-1.5 font-sans overflow-hidden">
+                    <div
+                      role="menu"
+                      className="absolute right-0 z-50 mt-2 w-60 overflow-hidden rounded-2xl border border-dd-border/70 bg-dd-surface p-2 font-sans shadow-[0_12px_40px_rgba(0,0,0,0.4)]"
+                    >
                       <Link
                         href={`/profile/${activeUser.username}`}
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors"
+                        role="menuitem"
+                        className="flex items-center gap-3.5 rounded-xl px-3.5 py-3 text-sm font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
                         onClick={() => setDropdownOpen(false)}
                       >
-                        <UserIcon className="w-3.5 h-3.5 text-dd-muted" />
+                        <UserIcon className="h-5 w-5 shrink-0" />
                         Meu Perfil
                       </Link>
                       <Link
                         href="/settings"
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-dd-text hover:bg-dd-surface hover:text-dd-text transition-colors"
+                        role="menuitem"
+                        className="flex items-center gap-3.5 rounded-xl px-3.5 py-3 text-sm font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
                         onClick={() => setDropdownOpen(false)}
                       >
-                        <SettingsIcon className="w-3.5 h-3.5 text-dd-muted" />
+                        <SettingsIcon className="h-5 w-5 shrink-0" />
                         Configurações
                       </Link>
-                      <hr className="border-dd-border my-1" />
                       <button
+                        type="button"
+                        role="menuitem"
                         onClick={() => {
                           setDropdownOpen(false);
                           handleSignOut();
                         }}
-                        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-xs font-bold text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors cursor-pointer"
+                        className="flex w-full cursor-pointer items-center gap-3.5 rounded-xl px-3.5 py-3 text-left text-sm font-extrabold leading-none text-red-500 transition-colors hover:bg-red-500/10 focus-visible:bg-red-500/10 focus-visible:outline-none"
                       >
-                        <LogOut className="w-3.5 h-3.5 text-red-500" />
+                        <LogOut className="h-5 w-5 shrink-0" />
                         Sair
                       </button>
                     </div>
@@ -801,18 +823,10 @@ export function Sidebar({ user }: SidebarProps) {
                 item.active ? 'text-dd-text font-black' : 'text-dd-muted hover:text-dd-text'
               }`;
 
-              if (item.href) {
-                return (
-                  <Link key={item.label} href={item.href} className={classes}>
-                    {iconEl}
-                  </Link>
-                );
-              }
-
               return (
-                <button key={item.label} onClick={item.onClick} className={classes}>
+                <Link key={item.label} href={item.href} className={classes}>
                   {iconEl}
-                </button>
+                </Link>
               );
             })}
 
