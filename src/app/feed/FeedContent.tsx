@@ -4,17 +4,16 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Sidebar } from '@/components/Sidebar';
 import { PostCard } from '@/components/PostCard';
-import { QuizWidget } from '@/components/QuizWidget';
-import { DuelCard } from '@/components/DuelCard';
 import { LanguageTag } from '@/components/LanguageTag';
 import { Footer } from '@/components/Footer';
 import { BadgeEmblem } from '@/components/BadgeGrid';
 import { PostComposerExtras } from '@/components/PostComposerExtras';
-import { MarkdownEditor, type NotionEditorRef } from '@/components/MarkdownEditor';
+import type { NotionEditorRef } from '@/components/MarkdownEditor';
 import { AuthorAvatar } from '@/components/AuthorAvatar';
 import { extractPostMetadata } from '@/lib/editor/extract-metadata';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
@@ -55,7 +54,30 @@ import {
   Heart,
   BarChart2,
   ChevronDown,
+  RefreshCw,
 } from 'lucide-react';
+
+const MarkdownEditor = dynamic(
+  () => import('@/components/MarkdownEditor').then((module) => module.MarkdownEditor),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="dd-skeleton-post space-y-2 py-2" aria-label="Carregando editor">
+        <div className="dd-skeleton h-3.5 w-4/5 rounded-full" />
+        <div className="dd-skeleton h-3.5 w-2/5 rounded-full" />
+      </div>
+    ),
+  }
+);
+
+const QuizWidget = dynamic(
+  () => import('@/components/QuizWidget').then((module) => module.QuizWidget),
+  { loading: () => <div className="dd-skeleton-post dd-skeleton h-44 rounded-xl" /> }
+);
+
+const DuelCard = dynamic(() => import('@/components/DuelCard').then((module) => module.DuelCard), {
+  loading: () => <div className="dd-skeleton-post dd-skeleton h-52 rounded-xl" />,
+});
 
 interface LanguageTrail {
   id: string;
@@ -77,6 +99,22 @@ interface Badge {
 
 function getLevelFromXp(xp: number) {
   return Math.max(1, Math.floor(xp / 1000) + 1);
+}
+
+function isAbortedRequest(error: unknown) {
+  return error instanceof DOMException && error.name === 'AbortError';
+}
+
+async function fetchWithSingleRetry(url: string, init: RequestInit) {
+  try {
+    return await fetch(url, init);
+  } catch (error) {
+    if (init.signal?.aborted || !navigator.onLine) throw error;
+
+    // HMR e reinícios rápidos podem interromper uma requisição por poucos milissegundos.
+    await new Promise((resolve) => window.setTimeout(resolve, 400));
+    return fetch(url, init);
+  }
 }
 
 function highlightMatches(text: string, query: string) {
@@ -106,14 +144,16 @@ interface FeedContentProps {
     badges: Badge[];
   };
   initialPosts: any[];
-  initialDuels: any[];
+  initialDuels?: any[];
+  initialNextCursor?: string | null;
   initialBookmarks?: Record<string, boolean>;
 }
 
 export function FeedContent({
   initialUser,
   initialPosts,
-  initialDuels,
+  initialDuels = [],
+  initialNextCursor,
   initialBookmarks = {},
 }: FeedContentProps) {
   const router = useRouter();
@@ -123,6 +163,7 @@ export function FeedContent({
   const [showFollowingSortMenu, setShowFollowingSortMenu] = useState(false);
   const [posts, setPosts] = useState<any[]>(initialPosts);
   const [duels, setDuels] = useState<any[]>(initialDuels);
+  const [duelsLoading, setDuelsLoading] = useState(initialDuels.length === 0);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [leaderboardLanguage, setLeaderboardLanguage] = useState<string>('GLOBAL');
   const [engagementView, setEngagementView] = useState<'streak' | 'weekly'>('streak');
@@ -151,10 +192,16 @@ export function FeedContent({
     }
   };
 
-  const [nextCursor, setNextCursor] = useState<string | null>(() => getInitialCursor(initialPosts));
-  const [hasMore, setHasMore] = useState(initialPosts.length >= 10);
+  const [nextCursor, setNextCursor] = useState<string | null>(() =>
+    initialNextCursor === undefined ? getInitialCursor(initialPosts) : initialNextCursor
+  );
+  const [hasMore, setHasMore] = useState(
+    initialNextCursor === undefined ? initialPosts.length >= 10 : initialNextCursor !== null
+  );
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadingSearch, setLoadingSearch] = useState(false);
+  const [refreshingPosts, setRefreshingPosts] = useState(false);
+  const refreshRequestRef = useRef<AbortController | null>(null);
   const [newPostsCount, setNewPostsCount] = useState(0);
   const FEED_PAGE_SIZE = 10;
   const [postImage, setPostImage] = useState('');
@@ -175,22 +222,30 @@ export function FeedContent({
   const [feedError, setFeedError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/users/me')
-      .then((res) => {
-        if (res.ok) return res.json();
-        throw new Error();
-      })
-      .then((data) => {
-        if (data) {
-          if (data.total_xp !== undefined) {
-            setCurrentXp(data.total_xp);
-            setCurrentLevel(getLevelFromXp(data.total_xp));
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      fetch('/api/users/me', { signal: controller.signal })
+        .then((res) => {
+          if (res.ok) return res.json();
+          throw new Error();
+        })
+        .then((data) => {
+          if (data) {
+            if (data.total_xp !== undefined) {
+              setCurrentXp(data.total_xp);
+              setCurrentLevel(getLevelFromXp(data.total_xp));
+            }
+            const streakVal = data.streak_days ?? data.streak ?? 0;
+            setCurrentStreak(streakVal);
           }
-          const streakVal = data.streak_days ?? data.streak ?? 0;
-          setCurrentStreak(streakVal);
-        }
-      })
-      .catch(() => {});
+        })
+        .catch(() => {});
+    }, 700);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
   }, []);
 
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -273,11 +328,13 @@ export function FeedContent({
       setLoadingSearch(false);
       return;
     }
+    const controller = new AbortController();
     setLoadingSearch(true);
     const delayDebounce = setTimeout(async () => {
       try {
         const res = await fetch(
-          `/api/search?q=${encodeURIComponent(searchQuery)}&type=posts&limit=${FEED_PAGE_SIZE}`
+          `/api/search?q=${encodeURIComponent(searchQuery)}&type=posts&limit=${FEED_PAGE_SIZE}`,
+          { signal: controller.signal }
         );
         if (res.ok) {
           const data = await res.json();
@@ -287,17 +344,22 @@ export function FeedContent({
           setFeedError(null);
         }
       } catch (err) {
+        if (controller.signal.aborted) return;
         console.error('Search posts error:', err);
-        setFeedError('Nao foi possivel atualizar a busca agora.');
+        setFeedError('Não foi possível atualizar a busca agora.');
       } finally {
-        setLoadingSearch(false);
+        if (!controller.signal.aborted) setLoadingSearch(false);
       }
     }, 300);
-    return () => clearTimeout(delayDebounce);
+    return () => {
+      clearTimeout(delayDebounce);
+      controller.abort();
+    };
   }, [searchQuery]);
 
   // Carregar posts quando o filtro (Para você / Seguindo) muda
   useEffect(() => {
+    const controller = new AbortController();
     const fetchFilteredPosts = async () => {
       setLoadingSearch(true);
       try {
@@ -305,7 +367,7 @@ export function FeedContent({
           feedFilter === 'following'
             ? `/api/posts?filter=following&sort=${followingSort}&limit=${FEED_PAGE_SIZE}&useCursor=true`
             : `/api/posts?limit=${FEED_PAGE_SIZE}&useCursor=true`;
-        const res = await fetch(url);
+        const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           setPosts(data.items || []);
@@ -313,9 +375,10 @@ export function FeedContent({
           setHasMore(!!data.nextCursor);
         }
       } catch (err) {
+        if (controller.signal.aborted) return;
         console.error('Error fetching filtered posts:', err);
       } finally {
-        setLoadingSearch(false);
+        if (!controller.signal.aborted) setLoadingSearch(false);
       }
     };
 
@@ -325,8 +388,10 @@ export function FeedContent({
     }
 
     if (!searchQuery.trim()) {
-      fetchFilteredPosts();
+      void fetchFilteredPosts();
     }
+
+    return () => controller.abort();
   }, [feedFilter, followingSort, searchQuery]);
 
   const loadMorePosts = useCallback(async () => {
@@ -366,47 +431,118 @@ export function FeedContent({
     loading: loadingMore,
   });
 
-  useEffect(() => {
-    if (activeTab !== 'feed' || searchQuery.trim()) return;
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/posts?limit=5`);
-        if (!res.ok) return;
-        const latest: { id: string; created_at: string }[] = await res.json();
-        const topPost = posts.find((p) => !p._pending && !String(p.id).startsWith('temp-'));
-        if (!topPost || latest.length === 0) return;
-        const topTime = new Date(topPost.created_at).getTime();
-        const newer = latest.filter(
-          (p) => new Date(p.created_at).getTime() > topTime && p.id !== topPost.id
-        );
-        setNewPostsCount(newer.length);
-      } catch {
-        /* silent */
-      }
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [posts, activeTab, searchQuery]);
+  const newestVisiblePostTimestamp = useMemo(() => {
+    const newestPost = posts.find((post) => !post._pending && !String(post.id).startsWith('temp-'));
+    return newestPost?.created_at ? new Date(newestPost.created_at).toISOString() : null;
+  }, [posts]);
 
-  const handleLoadNewPosts = async () => {
+  const firstPageUrl = useCallback(() => {
+    const params = new URLSearchParams({
+      limit: String(FEED_PAGE_SIZE),
+      useCursor: 'true',
+    });
+    if (feedFilter === 'following') {
+      params.set('filter', 'following');
+      params.set('sort', followingSort);
+    }
+    return `/api/posts?${params.toString()}`;
+  }, [feedFilter, followingSort]);
+
+  useEffect(() => {
+    if (activeTab !== 'feed' || searchQuery.trim() || !newestVisiblePostTimestamp) return;
+
+    const controller = new AbortController();
+    let checking = false;
+
+    const checkForNewPosts = async () => {
+      if (checking || document.visibilityState === 'hidden') return;
+      checking = true;
+      try {
+        const params = new URLSearchParams({
+          mode: 'count',
+          after: newestVisiblePostTimestamp,
+        });
+        if (feedFilter === 'following') params.set('filter', 'following');
+
+        const res = await fetch(`/api/posts?${params.toString()}`, {
+          cache: 'no-store',
+          signal: controller.signal,
+        });
+        if (!res.ok) return;
+        const data: { count?: number } = await res.json();
+        setNewPostsCount(Math.max(0, data.count ?? 0));
+      } catch {
+        // O feed atual continua utilizável mesmo se a verificação em background falhar.
+      } finally {
+        checking = false;
+      }
+    };
+
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === 'visible') void checkForNewPosts();
+    };
+
+    const interval = window.setInterval(checkForNewPosts, 30000);
+    window.addEventListener('focus', handleVisibilityOrFocus);
+    document.addEventListener('visibilitychange', handleVisibilityOrFocus);
+
+    return () => {
+      controller.abort();
+      window.clearInterval(interval);
+      window.removeEventListener('focus', handleVisibilityOrFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+    };
+  }, [activeTab, feedFilter, newestVisiblePostTimestamp, searchQuery]);
+
+  const handleLoadNewPosts = useCallback(async () => {
+    if (refreshRequestRef.current) return;
+
+    const controller = new AbortController();
+    refreshRequestRef.current = controller;
+    const timeout = window.setTimeout(() => controller.abort(), 12000);
+    setRefreshingPosts(true);
     try {
-      const res = await fetch(`/api/posts?limit=10`);
-      if (!res.ok) return;
-      const latest = await res.json();
-      setPosts((prev) => {
-        const ids = new Set(prev.map((p) => p.id));
-        const fresh = latest.filter((p: { id: string }) => !ids.has(p.id));
-        return [...fresh, ...prev];
+      const res = await fetchWithSingleRetry(firstPageUrl(), {
+        cache: 'no-store',
+        signal: controller.signal,
+      });
+      if (!res.ok) throw new Error('Falha ao atualizar o feed');
+      const data: { items?: any[] } = await res.json();
+      const latest = data.items ?? [];
+
+      setPosts((previousPosts) => {
+        const latestIds = new Set(latest.map((post) => post.id));
+        return [...latest, ...previousPosts.filter((post) => !latestIds.has(post.id))];
       });
       setNewPostsCount(0);
+      setFeedError(null);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
-      console.error('Load new posts error:', err);
+      if (isAbortedRequest(err)) {
+        setFeedError('A atualização demorou mais que o esperado. O feed atual foi mantido.');
+      } else {
+        setFeedError(
+          navigator.onLine
+            ? 'Não foi possível conectar ao servidor. O feed atual foi mantido; tente novamente em instantes.'
+            : 'Você está sem conexão. O feed atual continuará disponível até a internet voltar.'
+        );
+      }
+    } finally {
+      window.clearTimeout(timeout);
+      if (refreshRequestRef.current === controller) refreshRequestRef.current = null;
+      setRefreshingPosts(false);
     }
-  };
+  }, [firstPageUrl]);
 
   useEffect(() => {
+    return () => refreshRequestRef.current?.abort();
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
     const fetchDailyQuiz = async () => {
       try {
-        const res = await fetch('/api/quiz/daily');
+        const res = await fetch('/api/quiz/daily', { signal: controller.signal });
         if (res.ok) {
           const data = await res.json();
           setDailyQuiz(data.quiz);
@@ -416,7 +552,11 @@ export function FeedContent({
         console.error('Error loading daily quiz:', err);
       }
     };
-    fetchDailyQuiz();
+    const timer = window.setTimeout(fetchDailyQuiz, 450);
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
   }, []);
 
   // Fetch weekly activity data (days with quiz answers)
@@ -437,7 +577,8 @@ export function FeedContent({
   }, []);
 
   useEffect(() => {
-    refetchWeeklyActivity();
+    const timer = window.setTimeout(refetchWeeklyActivity, 900);
+    return () => window.clearTimeout(timer);
   }, [refetchWeeklyActivity]);
 
   const handleBodyChange = async (val: string, inputType: 'inline' | 'modal') => {
@@ -632,31 +773,29 @@ export function FeedContent({
     );
   };
 
-  // Fetch posts helper
-  const refreshPosts = async () => {
-    try {
-      const res = await fetch('/api/posts');
-      if (res.ok) {
-        const data = await res.json();
-        setPosts(data);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   // Fetch duels helper
-  const refreshDuels = async () => {
+  const refreshDuels = useCallback(async () => {
+    setDuelsLoading(true);
     try {
-      const res = await fetch('/api/duels');
+      const res = await fetch('/api/duels?limit=24');
       if (res.ok) {
         const data = await res.json();
         setDuels(data);
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setDuelsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (initialDuels.length > 0) return;
+
+    const loadDuels = () => void refreshDuels();
+    const timer = globalThis.setTimeout(loadDuels, 750);
+    return () => globalThis.clearTimeout(timer);
+  }, [initialDuels.length, refreshDuels]);
 
   // Fetch leaderboard ranking
   const fetchRankings = async (lang: string) => {
@@ -1033,7 +1172,10 @@ export function FeedContent({
   );
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased selection:bg-blue-500/35 selection:text-white">
+    <div
+      data-testid="app-shell"
+      className="mx-auto flex min-h-screen w-full max-w-[1225px] flex-col bg-dd-bg text-dd-text antialiased selection:bg-blue-500/35 selection:text-white md:flex-row"
+    >
       <LevelUpOverlay
         visible={levelUpVisible}
         level={currentLevel}
@@ -1043,6 +1185,7 @@ export function FeedContent({
         count={newPostsCount}
         onClick={handleLoadNewPosts}
         visible={activeTab === 'feed' && !searchQuery.trim()}
+        loading={refreshingPosts}
       />
       {/* XP Toast Notification */}
       {toastXp && (
@@ -1064,105 +1207,126 @@ export function FeedContent({
 
       <Sidebar user={initialUser} />
 
-      <div className="flex-grow flex flex-col md:flex-row min-w-0">
+      <div className="flex min-w-0 flex-grow flex-col md:flex-row xl:max-w-[950px]">
         {/* ========================================================================= */}
         {/* COLUNA CENTRAL: O Feed Principal e PostCard */}
         {/* ========================================================================= */}
-        <main className="flex-grow max-w-2xl w-full border-r border-dd-border/80 min-h-screen bg-dd-bg pb-24 md:pb-8 flex flex-col">
+        <main
+          data-testid="primary-column"
+          className="flex min-h-screen w-full max-w-[600px] flex-grow flex-col border-r border-dd-border/80 bg-dd-bg pb-24 md:pb-8"
+        >
           {/* Seletor de Abas Feed / Quizzes */}
           <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md flex border-b border-dd-border/60 select-none">
-            <button
-              onClick={() => setFeedFilter('for-you')}
-              className={`relative flex-1 py-3 text-xs font-bold transition-colors cursor-pointer ${
-                feedFilter === 'for-you'
-                  ? 'text-dd-text'
-                  : 'text-dd-muted hover:text-dd-text hover:bg-dd-surface/30'
-              }`}
+            <div
+              role="tablist"
+              aria-label="Filtros do feed"
+              data-testid="feed-tabs"
+              className="relative flex min-w-0 flex-1 overflow-visible"
             >
-              Para você
-              {feedFilter === 'for-you' && (
-                <motion.div
-                  layoutId="feedTabIndicator"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-full"
-                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                />
-              )}
-            </button>
-            <div className="relative flex-1 flex">
               <button
-                onClick={() => setFeedFilter('following')}
-                className={`relative flex-1 py-3 text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
-                  feedFilter === 'following'
+                role="tab"
+                aria-selected={feedFilter === 'for-you'}
+                onClick={() => setFeedFilter('for-you')}
+                className={`relative flex-1 py-3 text-xs font-bold transition-colors cursor-pointer ${
+                  feedFilter === 'for-you'
                     ? 'text-dd-text'
                     : 'text-dd-muted hover:text-dd-text hover:bg-dd-surface/30'
                 }`}
               >
-                Seguindo
-                {feedFilter === 'following' && (
-                  <span className="text-[10px] text-dd-muted font-normal">
-                    ({followingSort === 'recent' ? 'Recente' : 'Popular'})
-                  </span>
-                )}
-                {feedFilter === 'following' && (
-                  <motion.div
-                    layoutId="feedTabIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-full"
-                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                  />
-                )}
+                Para você
               </button>
-              {feedFilter === 'following' && (
+              <div className="relative flex flex-1">
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowFollowingSortMenu(!showFollowingSortMenu);
-                  }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full hover:bg-dd-surface/50 text-dd-muted hover:text-dd-text transition-colors z-10 cursor-pointer"
+                  role="tab"
+                  aria-selected={feedFilter === 'following'}
+                  onClick={() => setFeedFilter('following')}
+                  className={`relative flex-1 py-3 text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
+                    feedFilter === 'following'
+                      ? 'text-dd-text'
+                      : 'text-dd-muted hover:text-dd-text hover:bg-dd-surface/30'
+                  }`}
                 >
-                  <ChevronDown
-                    className={`w-3.5 h-3.5 transition-transform ${showFollowingSortMenu ? 'rotate-180' : ''}`}
-                  />
+                  Seguindo
+                  {feedFilter === 'following' && (
+                    <span className="text-[10px] text-dd-muted font-normal">
+                      ({followingSort === 'recent' ? 'Recente' : 'Popular'})
+                    </span>
+                  )}
                 </button>
-              )}
-              <AnimatePresence>
-                {showFollowingSortMenu && feedFilter === 'following' && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute top-full right-0 mt-1 w-36 rounded-xl border border-dd-border bg-dd-surface shadow-lg backdrop-blur-xl z-50 overflow-hidden py-1"
+                {feedFilter === 'following' && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowFollowingSortMenu(!showFollowingSortMenu);
+                    }}
+                    aria-label="Ordenar publicações seguidas"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full hover:bg-dd-surface/50 text-dd-muted hover:text-dd-text transition-colors z-10 cursor-pointer"
                   >
-                    <button
-                      onClick={() => {
-                        setFollowingSort('recent');
-                        setShowFollowingSortMenu(false);
-                      }}
-                      className={`w-full text-left px-4 py-2.5 text-xs transition-colors cursor-pointer ${
-                        followingSort === 'recent'
-                          ? 'text-blue-400 font-bold bg-blue-500/5'
-                          : 'text-dd-text hover:bg-dd-surface/80'
-                      }`}
-                    >
-                      Recente
-                    </button>
-                    <button
-                      onClick={() => {
-                        setFollowingSort('popular');
-                        setShowFollowingSortMenu(false);
-                      }}
-                      className={`w-full text-left px-4 py-2.5 text-xs transition-colors cursor-pointer ${
-                        followingSort === 'popular'
-                          ? 'text-blue-400 font-bold bg-blue-500/5'
-                          : 'text-dd-text hover:bg-dd-surface/80'
-                      }`}
-                    >
-                      Popular
-                    </button>
-                  </motion.div>
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 transition-transform ${showFollowingSortMenu ? 'rotate-180' : ''}`}
+                    />
+                  </button>
                 )}
-              </AnimatePresence>
+                <AnimatePresence>
+                  {showFollowingSortMenu && feedFilter === 'following' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute top-full right-0 mt-1 w-36 rounded-xl border border-dd-border bg-dd-surface shadow-lg backdrop-blur-xl z-50 overflow-hidden py-1"
+                    >
+                      <button
+                        onClick={() => {
+                          setFollowingSort('recent');
+                          setShowFollowingSortMenu(false);
+                        }}
+                        className={`w-full text-left px-4 py-2.5 text-xs transition-colors cursor-pointer ${
+                          followingSort === 'recent'
+                            ? 'text-blue-400 font-bold bg-blue-500/5'
+                            : 'text-dd-text hover:bg-dd-surface/80'
+                        }`}
+                      >
+                        Recente
+                      </button>
+                      <button
+                        onClick={() => {
+                          setFollowingSort('popular');
+                          setShowFollowingSortMenu(false);
+                        }}
+                        className={`w-full text-left px-4 py-2.5 text-xs transition-colors cursor-pointer ${
+                          followingSort === 'popular'
+                            ? 'text-blue-400 font-bold bg-blue-500/5'
+                            : 'text-dd-text hover:bg-dd-surface/80'
+                        }`}
+                      >
+                        Popular
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              <span
+                aria-hidden="true"
+                data-testid="feed-tab-indicator"
+                className={cn(
+                  'pointer-events-none absolute bottom-0 left-0 z-20 h-0.5 w-1/2 rounded-full bg-blue-500 transition-transform duration-200 ease-out motion-reduce:transition-none',
+                  feedFilter === 'following' && 'translate-x-full'
+                )}
+              />
             </div>
+            <button
+              type="button"
+              onClick={handleLoadNewPosts}
+              disabled={
+                refreshingPosts || loadingSearch || activeTab !== 'feed' || !!searchQuery.trim()
+              }
+              aria-label="Atualizar publicações"
+              title="Atualizar publicações"
+              className="dd-focus-ring dd-touch flex w-12 shrink-0 items-center justify-center text-dd-muted transition-colors hover:bg-dd-surface/40 hover:text-blue-500 disabled:cursor-wait disabled:opacity-60"
+            >
+              <RefreshCw className={cn('h-4 w-4', refreshingPosts && 'animate-spin')} />
+            </button>
           </div>
 
           {/* Feed Tab View */}
@@ -1351,7 +1515,7 @@ export function FeedContent({
 
               <div className="flex flex-col">
                 {loadingSearch ? (
-                  <PostSkeletonList count={3} />
+                  <PostSkeletonList count={3} variant="feed" />
                 ) : posts.length === 0 ? (
                   <EmptyState
                     type={searchQuery.trim() ? 'search' : 'feed'}
@@ -1359,46 +1523,44 @@ export function FeedContent({
                     className="bg-transparent border-0 rounded-none py-12 px-6"
                   />
                 ) : (
-                  <LayoutGroup>
-                    <AnimatePresence mode="popLayout">
-                      {posts.map((post) => {
-                        const postWithBookmarks = {
-                          ...post,
-                          bookmarks: bookmarkedPostIds[post.id] ? [{ id: 'temp-id' }] : [],
-                        };
-                        return (
-                          <motion.div
-                            key={post._clientKey ?? post.id}
-                            layout
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-                            transition={springGentle}
-                            className="border-b border-dd-border/50 last:border-b-0"
-                          >
-                            <PostCard
-                              post={postWithBookmarks}
-                              isOwner={post.author.username === initialUser.username}
-                              flat={true}
-                              onBookmarkToggle={(postId, isBookmarked) => {
-                                handleBookmarkToggle(postId);
-                              }}
-                              onDelete={(postId) => {
-                                setPosts((prev) => prev.filter((p) => p.id !== postId));
-                              }}
-                              onEdit={(postId, updatedPost) => {
-                                setPosts((prev) =>
-                                  prev.map((p) => (p.id === postId ? { ...p, ...updatedPost } : p))
-                                );
-                              }}
-                            />
-                          </motion.div>
-                        );
-                      })}
-                    </AnimatePresence>
-                  </LayoutGroup>
+                  <AnimatePresence initial={false}>
+                    {posts.map((post) => {
+                      const postWithBookmarks = {
+                        ...post,
+                        bookmarks: bookmarkedPostIds[post.id] ? [{ id: 'temp-id' }] : [],
+                      };
+                      return (
+                        <motion.div
+                          key={post._clientKey ?? post.id}
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+                          transition={springGentle}
+                        >
+                          <PostCard
+                            post={postWithBookmarks}
+                            isOwner={post.author.username === initialUser.username}
+                            flat={true}
+                            onBookmarkToggle={(postId, isBookmarked) => {
+                              handleBookmarkToggle(postId);
+                            }}
+                            onDelete={(postId) => {
+                              setPosts((prev) => prev.filter((p) => p.id !== postId));
+                            }}
+                            onEdit={(postId, updatedPost) => {
+                              setPosts((prev) =>
+                                prev.map((p) => (p.id === postId ? { ...p, ...updatedPost } : p))
+                              );
+                            }}
+                          />
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
                 )}
-                {loadingMore && <PostSkeletonList count={2} />}
+                {loadingMore && (
+                  <PostSkeletonList count={2} variant="feed" label="Carregando mais publicações" />
+                )}
                 {!searchQuery.trim() && hasMore && (
                   <div ref={scrollSentinelRef} className="h-1" aria-hidden />
                 )}
@@ -1613,7 +1775,12 @@ export function FeedContent({
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {duels.length === 0 ? (
+                {duelsLoading ? (
+                  <div className="col-span-2 grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div className="dd-skeleton-post dd-skeleton h-52 rounded-xl" />
+                    <div className="dd-skeleton-post dd-skeleton h-52 rounded-xl" />
+                  </div>
+                ) : duels.length === 0 ? (
                   <div className="col-span-2 rounded-xl border border-dd-border bg-dd-surface/10 p-12 text-center text-dd-muted text-sm">
                     Nenhum duelo de código ocorrendo no momento. Inicie um novo duelo acima!
                   </div>
@@ -1727,7 +1894,10 @@ export function FeedContent({
         {/* ========================================================================= */}
         {/* COLUNA DIREITA: GamificationWidget (Engajamento e Streak) */}
         {/* ========================================================================= */}
-        <aside className="hidden lg:block w-80 xl:w-96 shrink-0 p-6 space-y-6 sticky top-0 h-screen overflow-y-auto scrollbar-none">
+        <aside
+          data-testid="secondary-column"
+          className="sticky top-0 hidden h-screen w-[350px] shrink-0 space-y-6 overflow-y-auto p-5 scrollbar-none xl:block"
+        >
           {/* Search Bar */}
           <div className="relative w-full">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -2061,7 +2231,12 @@ export function FeedContent({
               Duelos em Destaque
             </span>
 
-            {activeDuels.length === 0 ? (
+            {duelsLoading ? (
+              <div className="space-y-3" aria-label="Carregando duelos em destaque">
+                <div className="dd-skeleton-post dd-skeleton h-20 rounded-lg" />
+                <div className="dd-skeleton-post dd-skeleton h-20 rounded-lg" />
+              </div>
+            ) : activeDuels.length === 0 ? (
               <p className="text-xs text-dd-muted italic py-1">Nenhum duelo ativo no momento.</p>
             ) : (
               <div className="space-y-3">

@@ -114,13 +114,16 @@ export const PostService = {
 
     const whereClause: any = {};
 
-    if (filter === 'following' && userId) {
-      const followingRelations = await prisma.follow.findMany({
-        where: { followerId: userId },
-        select: { followingId: true },
-      });
-      const followingIds = followingRelations.map((r) => r.followingId);
-      whereClause.author_id = { in: followingIds };
+    if (filter === 'following') {
+      if (!userId) {
+        whereClause.id = { equals: '__anonymous_following_feed__' };
+      } else {
+        whereClause.author = {
+          followers: {
+            some: { followerId: userId },
+          },
+        };
+      }
     }
 
     if (language) {
@@ -176,9 +179,12 @@ export const PostService = {
             attempts: userId ? { where: { user_id: userId } } : { where: { id: 'none' } },
           },
         },
-        votes: userId ? { where: { user_id: userId } } : { where: { id: 'none' } },
-        bookmarks: userId ? { where: { user_id: userId } } : { where: { id: 'none' } },
-        reactions: userId ? { where: { user_id: userId } } : { where: { id: 'none' } },
+        votes: userId
+          ? { where: { user_id: userId }, select: { value: true } }
+          : { where: { id: 'none' }, select: { value: true } },
+        bookmarks: userId
+          ? { where: { user_id: userId }, select: { id: true } }
+          : { where: { id: 'none' }, select: { id: true } },
       },
     });
 
@@ -195,5 +201,25 @@ export const PostService = {
       items,
       nextCursor,
     };
+  },
+
+  async countNewer(userId: string | null, params: { after: Date; filter?: string }) {
+    const where: any = {
+      created_at: { gt: params.after },
+    };
+
+    if (params.filter === 'following') {
+      if (!userId) {
+        where.id = { equals: '__anonymous_following_feed__' };
+      } else {
+        where.author = {
+          followers: {
+            some: { followerId: userId },
+          },
+        };
+      }
+    }
+
+    return prisma.post.count({ where });
   },
 };

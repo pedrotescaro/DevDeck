@@ -68,7 +68,7 @@ describe('POST /api/posts integration', () => {
       }),
     });
 
-    const response = await POST(request);
+    const response = await POST(request, { params: Promise.resolve({}) });
     expect(response.status).toBe(401);
     const json = await response.json();
     expect(json.error).toBe('Não autorizado');
@@ -96,7 +96,7 @@ describe('POST /api/posts integration', () => {
       }),
     });
 
-    const response = await POST(request);
+    const response = await POST(request, { params: Promise.resolve({}) });
     expect(response.status).toBe(201);
     const json = await response.json();
     expect(json.post.id).toBe('post-123');

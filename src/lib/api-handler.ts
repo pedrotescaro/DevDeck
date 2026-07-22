@@ -18,7 +18,7 @@ export interface ApiContext {
 }
 
 export function apiHandler(handler: (req: Request, ctx: ApiContext) => Promise<Response>) {
-  return async (req: Request, segmentData?: { params: Promise<any> }) => {
+  return async (req: Request, segmentData: { params: Promise<any> }) => {
     const requestId = crypto.randomUUID();
     const store: RateLimitStore = {};
 
@@ -29,7 +29,7 @@ export function apiHandler(handler: (req: Request, ctx: ApiContext) => Promise<R
         // Execute the actual route logic
         const response = await handler(req, {
           session,
-          params: segmentData ? segmentData.params : Promise.resolve({}),
+          params: segmentData.params,
         });
 
         // Attach Rate Limit headers if set during execution

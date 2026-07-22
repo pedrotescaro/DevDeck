@@ -192,31 +192,28 @@ body {
   min-width: 2.75rem;
 }
 
-@keyframes dd-shimmer {
-  0% {
-    background-position: -200% 0;
-  }
+@keyframes dd-skeleton-pulse {
+  0%,
   100% {
-    background-position: 200% 0;
+    opacity: 0.58;
+  }
+  50% {
+    opacity: 1;
   }
 }
 
 .dd-skeleton {
-  border-radius: 0.5rem;
-  background: linear-gradient(
-    90deg,
-    var(--color-dd-surface) 0%,
-    color-mix(in srgb, var(--color-dd-border) 60%, transparent) 50%,
-    var(--color-dd-surface) 100%
-  );
-  background-size: 200% 100%;
-  animation: dd-shimmer 1.4s ease-in-out infinite;
+  background-color: var(--color-dd-border);
+}
+
+.dd-skeleton-post {
+  animation: dd-skeleton-pulse 1.45s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dd-skeleton {
+  .dd-skeleton-post {
     animation: none;
-    opacity: 0.6;
+    opacity: 0.72;
   }
 }
 
