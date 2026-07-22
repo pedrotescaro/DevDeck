@@ -123,6 +123,53 @@ export function appendPostExtras(
   return finalBody;
 }
 
+export interface ParsedPostExtras {
+  content: string;
+  isSensitive: boolean;
+  location: string | null;
+}
+
+const SENSITIVE_POST_MARKER = '⚠️ Conteúdo sensível';
+const LOCATION_POST_MARKER = /^📍\s+(.+)$/;
+const TRAILING_POST_METADATA =
+  /^(?:📅 Publicação planejada para|🔒 Apenas (?:seguidores|pessoas mencionadas))/;
+
+/**
+ * Separates the legacy composer markers from the visible post copy.
+ * Posts already published keep working without a database migration.
+ */
+export function parsePostExtras(body: string): ParsedPostExtras {
+  const blocks = body.trim().split(/\n{2,}/);
+  let isSensitive = false;
+  let location: string | null = null;
+
+  if (blocks[0]?.trim().replace('\ufe0f', '') === SENSITIVE_POST_MARKER.replace('\ufe0f', '')) {
+    blocks.shift();
+    isSensitive = true;
+  }
+
+  for (let index = blocks.length - 1; index >= 0; index -= 1) {
+    const block = blocks[index].trim();
+    const locationMatch = block.match(LOCATION_POST_MARKER);
+
+    if (locationMatch) {
+      location = locationMatch[1].trim();
+      blocks.splice(index, 1);
+      break;
+    }
+
+    if (!TRAILING_POST_METADATA.test(block)) {
+      break;
+    }
+  }
+
+  return {
+    content: blocks.join('\n\n').trim(),
+    isSensitive,
+    location,
+  };
+}
+
 export function resetPostComposerExtras() {
   return {
     replyAudience: 'everyone' as ReplyAudience,

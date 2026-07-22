@@ -11,14 +11,15 @@ import { AnswerThread } from '@/components/AnswerThread';
 import type { AnswerNode } from '@/components/answer-types';
 import { MarkdownEditor, type NotionEditorRef } from '@/components/MarkdownEditor';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
-import { Sparkles, MessageSquare, ArrowLeft, Flag, MapPin, X } from 'lucide-react';
+import { Sparkles, MessageSquare, ArrowLeft, Flag, X } from 'lucide-react';
 import { RepostMenu } from '@/components/motion/RepostMenu';
 import { BookmarkButton } from '@/components/motion/BookmarkButton';
 import { LikeButton } from '@/components/motion/LikeButton';
 import { PostComposerExtras } from '@/components/PostComposerExtras';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { AuthorAvatar } from '@/components/AuthorAvatar';
-import { ReplyAudience } from '@/lib/post-composer';
+import { PostLocation, SensitiveContentGate } from '@/components/PostPresentation';
+import { parsePostExtras, ReplyAudience } from '@/lib/post-composer';
 import { cn } from '@/lib/cn';
 
 interface PostDetailContentProps {
@@ -413,6 +414,7 @@ export function PostDetailContent({
   };
 
   const isPostAuthor = post.author_id === user.id;
+  const presentedPost = parsePostExtras(post.body);
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased selection:bg-blue-500/35 selection:text-white">
@@ -473,13 +475,15 @@ export function PostDetailContent({
               </div>
             </div>
 
-            <MarkdownRenderer content={post.body} compact={false} />
+            <SensitiveContentGate isSensitive={presentedPost.isSensitive}>
+              <MarkdownRenderer content={presentedPost.content} compact={false} />
 
-            {post.code_snippet && !post.body.includes('```') && (
-              <div className="rounded-lg border border-dd-border bg-dd-bg p-4 overflow-x-auto shadow-inner">
-                {highlightCode(post.code_snippet)}
-              </div>
-            )}
+              {post.code_snippet && !presentedPost.content.includes('```') && (
+                <div className="rounded-lg border border-dd-border bg-dd-bg p-4 overflow-x-auto shadow-inner">
+                  {highlightCode(post.code_snippet)}
+                </div>
+              )}
+            </SensitiveContentGate>
 
             {/* Metadata Row: Time, Date, Views (Twitter style) */}
             <div className="text-[11px] text-dd-muted font-medium pt-3 border-t border-dd-border/30 flex flex-wrap items-center gap-1.5 select-none">
@@ -497,13 +501,13 @@ export function PostDetailContent({
                   year: 'numeric',
                 })}
               </span>
-              {post.location && (
+              {(post.location || presentedPost.location) && (
                 <>
                   <span>·</span>
-                  <span className="flex items-center gap-1">
-                    <MapPin className="w-3 h-3 text-dd-muted" />
-                    {post.location}
-                  </span>
+                  <PostLocation
+                    location={post.location || presentedPost.location}
+                    className="max-w-48"
+                  />
                 </>
               )}
               <span>·</span>

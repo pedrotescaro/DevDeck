@@ -22,12 +22,14 @@ import { BookmarkButton } from './motion/BookmarkButton';
 import { RepostMenu } from './motion/RepostMenu';
 import { AuthorAvatar } from '@/components/AuthorAvatar';
 import { MarkdownRenderer } from './MarkdownRenderer';
+import { PostLocation, SensitiveContentGate } from './PostPresentation';
 import { cn } from '@/lib/cn';
 import { formatRelativeTime } from '@/lib/date';
 import { ComposeModal } from '@/components/motion/ComposeModal';
 import { MarkdownEditor, type NotionEditorRef } from '@/components/MarkdownEditor';
 import { CharCounter } from '@/components/motion/CharCounter';
 import { POST_CHAR_LIMIT } from '@/lib/motion';
+import { parsePostExtras } from '@/lib/post-composer';
 
 interface PostAuthor {
   username: string;
@@ -341,6 +343,8 @@ export function PostCard({
     );
   };
 
+  const presentedPost = parsePostExtras(postBody);
+
   return (
     <div onClick={handleCardClick} className="block group cursor-pointer">
       <article
@@ -453,76 +457,80 @@ export function PostCard({
           </div>
         </div>
 
-        {/* Body preview */}
-        <div className="mb-3 text-dd-muted">
-          <MarkdownRenderer content={postBody} compact />
-        </div>
-
-        {/* Image preview */}
-        {post.image_url && (
-          <div className="mt-3 mb-3 relative rounded-xl overflow-hidden border border-dd-border max-h-80 bg-dd-surface/20">
-            <Image
-              src={post.image_url}
-              alt={`Post de @${post.author.username}`}
-              width={800}
-              height={320}
-              className="w-full h-full object-cover max-h-80"
-              onError={(e) => {
-                (e.target as HTMLElement).style.display = 'none';
-              }}
-            />
+        <SensitiveContentGate isSensitive={presentedPost.isSensitive}>
+          {/* Body preview */}
+          <div className="mb-3 text-dd-muted">
+            <MarkdownRenderer content={presentedPost.content} compact />
           </div>
-        )}
 
-        {/* Code snippet preview */}
-        {postCodeSnippet && !postBody.includes('```') && (
-          <div className="rounded-lg border border-dd-border bg-dd-bg p-4 mb-3 overflow-x-auto max-h-60 shadow-inner">
-            {highlightCode(postCodeSnippet)}
-          </div>
-        )}
-
-        {/* Quiz challenge preview (Attachment card style like Twitter/X card preview) */}
-        {post.quizzes && post.quizzes.length > 0 && (
-          <div
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              router.push(`/post/${post.id}`);
-            }}
-            className="mt-3 mb-3 p-3.5 rounded-xl border border-dd-border bg-dd-surface/30 backdrop-blur-sm flex items-center justify-between gap-4 hover:bg-dd-surface/50 hover:border-blue-500/20 transition-all duration-200 group/quiz cursor-pointer"
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0 group-hover/quiz:scale-105 transition-transform duration-200">
-                <Sparkles className="w-4.5 h-4.5 text-blue-400" />
-              </div>
-              <div className="text-left min-w-0">
-                <h4 className="text-xs font-black text-dd-text truncate">Quiz de Aprendizado</h4>
-                <p className="text-[10px] text-dd-muted font-medium mt-0.5 truncate">
-                  {Boolean(post.quizzes[0].attempts && post.quizzes[0].attempts.length > 0)
-                    ? 'Você já respondeu a este desafio!'
-                    : 'Coloque seus conhecimentos em prática e ganhe +15 XP.'}
-                </p>
-              </div>
+          {/* Image preview */}
+          {post.image_url && (
+            <div className="mt-3 mb-3 relative rounded-xl overflow-hidden border border-dd-border max-h-80 bg-dd-surface/20">
+              <Image
+                src={post.image_url}
+                alt={`Post de @${post.author.username}`}
+                width={800}
+                height={320}
+                className="w-full h-full object-cover max-h-80"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
             </div>
+          )}
 
-            <Link
-              href={`/post/${post.id}`}
-              onClick={(e) => e.stopPropagation()}
-              className={cn(
-                'inline-flex items-center justify-center gap-1 px-4 py-1.5 rounded-full font-bold text-[10px] leading-tight transition-all duration-200 shrink-0 shadow-sm border',
-                Boolean(post.quizzes[0].attempts && post.quizzes[0].attempts.length > 0)
-                  ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20'
-                  : 'bg-blue-500 border-transparent hover:bg-blue-600 text-white'
-              )}
+          {/* Code snippet preview */}
+          {postCodeSnippet && !presentedPost.content.includes('```') && (
+            <div className="rounded-lg border border-dd-border bg-dd-bg p-4 mb-3 overflow-x-auto max-h-60 shadow-inner">
+              {highlightCode(postCodeSnippet)}
+            </div>
+          )}
+
+          {/* Quiz challenge preview (Attachment card style like Twitter/X card preview) */}
+          {post.quizzes && post.quizzes.length > 0 && (
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                router.push(`/post/${post.id}`);
+              }}
+              className="mt-3 mb-3 p-3.5 rounded-xl border border-dd-border bg-dd-surface/30 backdrop-blur-sm flex items-center justify-between gap-4 hover:bg-dd-surface/50 hover:border-blue-500/20 transition-all duration-200 group/quiz cursor-pointer"
             >
-              <span>
-                {Boolean(post.quizzes[0].attempts && post.quizzes[0].attempts.length > 0)
-                  ? 'Ver Resultados'
-                  : 'Resolver Quiz'}
-              </span>
-            </Link>
-          </div>
-        )}
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0 group-hover/quiz:scale-105 transition-transform duration-200">
+                  <Sparkles className="w-4.5 h-4.5 text-blue-400" />
+                </div>
+                <div className="text-left min-w-0">
+                  <h4 className="text-xs font-black text-dd-text truncate">Quiz de Aprendizado</h4>
+                  <p className="text-[10px] text-dd-muted font-medium mt-0.5 truncate">
+                    {Boolean(post.quizzes[0].attempts && post.quizzes[0].attempts.length > 0)
+                      ? 'Você já respondeu a este desafio!'
+                      : 'Coloque seus conhecimentos em prática e ganhe +15 XP.'}
+                  </p>
+                </div>
+              </div>
+
+              <Link
+                href={`/post/${post.id}`}
+                onClick={(e) => e.stopPropagation()}
+                className={cn(
+                  'inline-flex items-center justify-center gap-1 px-4 py-1.5 rounded-full font-bold text-[10px] leading-tight transition-all duration-200 shrink-0 shadow-sm border',
+                  Boolean(post.quizzes[0].attempts && post.quizzes[0].attempts.length > 0)
+                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20'
+                    : 'bg-blue-500 border-transparent hover:bg-blue-600 text-white'
+                )}
+              >
+                <span>
+                  {Boolean(post.quizzes[0].attempts && post.quizzes[0].attempts.length > 0)
+                    ? 'Ver Resultados'
+                    : 'Resolver Quiz'}
+                </span>
+              </Link>
+            </div>
+          )}
+        </SensitiveContentGate>
+
+        <PostLocation location={presentedPost.location} className="mb-3" />
 
         {/* Footer */}
         <div

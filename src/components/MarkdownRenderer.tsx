@@ -256,7 +256,8 @@ function CodeBlock({
   const rawLanguage = className?.match(/language-([^\s]+)/)?.[1] ?? 'text';
   const isStatic = rawLanguage.endsWith('-static');
   const language = isStatic ? rawLanguage.slice(0, -7) : rawLanguage;
-  const collapsed = compact && !expanded;
+  const lineCount = code.split('\n').length;
+  const collapsed = compact && lineCount > 3 && !expanded;
   const canRun = !isStatic && isRunnableLanguage(language);
 
   if (isStatic) {
@@ -339,7 +340,7 @@ function CodeBlock({
               }}
               className="rounded-md border border-dd-border bg-dd-surface px-2.5 py-1 text-[10px] font-bold text-dd-text shadow-sm transition-colors hover:border-dd-accent hover:text-dd-accent cursor-pointer"
             >
-              Ver codigo completo
+              Ver código completo
             </button>
           </div>
         )}

@@ -23,7 +23,7 @@ describe('POST /api/run', () => {
       body: JSON.stringify({ code: "console.log('ok')", language }),
     });
 
-    const response = await POST(request);
+    const response = await POST(request, { params: Promise.resolve({}) });
     const json = await response.json();
 
     expect(response.status).toBe(400);
