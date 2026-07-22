@@ -1,313 +1,549 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState, type ComponentType } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import { Language } from '@prisma/client';
+import {
+  ArrowLeft,
+  CalendarDays,
+  Check,
+  Crown,
+  Globe2,
+  LoaderCircle,
+  LogOut,
+  MessageCircle,
+  Shield,
+  ShieldCheck,
+  UserPlus,
+  UsersRound,
+} from 'lucide-react';
 import { Sidebar } from '@/components/Sidebar';
 import { LanguageTag } from '@/components/LanguageTag';
-import { ArrowLeft, Users, UserPlus, LogOut, Calendar, Crown, Shield, Globe } from 'lucide-react';
-import { Language } from '@prisma/client';
+import { AuthorAvatar } from '@/components/AuthorAvatar';
+import { cn } from '@/lib/cn';
 
 interface GuildDetailProps {
   params: Promise<{ slug: string }>;
 }
 
+interface GuildMember {
+  id: string;
+  role: 'OWNER' | 'ADMIN' | 'MEMBER';
+  joined_at: string;
+  user: {
+    id: string;
+    username: string;
+    avatar_url: string | null;
+    total_xp: number;
+  };
+}
+
+interface GuildDetail {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  icon: string | null;
+  language: string | null;
+  is_public: boolean;
+  created_at: string;
+  owner: {
+    id: string;
+    username: string;
+    avatar_url: string | null;
+    total_xp: number;
+  };
+  memberCount: number;
+  members: GuildMember[];
+  userRole: GuildMember['role'] | null;
+  isMember: boolean;
+}
+
+interface CurrentUser {
+  id: string;
+  username: string;
+  avatar_url?: string | null;
+  total_xp: number;
+  streak?: number;
+}
+
+type CommunityDetailTab = 'about' | 'members';
+
+const ROLE_ICON: Record<GuildMember['role'], ComponentType<{ className?: string }>> = {
+  OWNER: Crown,
+  ADMIN: Shield,
+  MEMBER: UsersRound,
+};
+
+const ROLE_LABEL: Record<GuildMember['role'], string> = {
+  OWNER: 'Criador',
+  ADMIN: 'Moderador',
+  MEMBER: 'Membro',
+};
+
+const ROLE_COLOR: Record<GuildMember['role'], string> = {
+  OWNER: 'text-amber-400',
+  ADMIN: 'text-blue-400',
+  MEMBER: 'text-dd-muted',
+};
+
+const COVER_THEME: Record<string, string> = {
+  TS: 'from-blue-700 via-sky-500 to-cyan-400',
+  JS: 'from-amber-500 via-yellow-400 to-orange-400',
+  PYTHON: 'from-blue-700 via-indigo-500 to-amber-400',
+  RUST: 'from-orange-800 via-amber-700 to-stone-700',
+  GO: 'from-cyan-700 via-sky-500 to-blue-500',
+  CPP: 'from-indigo-800 via-blue-600 to-fuchsia-600',
+  JAVA: 'from-red-800 via-orange-600 to-amber-500',
+  KOTLIN: 'from-violet-800 via-fuchsia-600 to-orange-500',
+  SWIFT: 'from-orange-700 via-red-500 to-pink-500',
+  DEFAULT: 'from-blue-800 via-indigo-600 to-violet-600',
+};
+
+function CommunityDetailSkeleton() {
+  return (
+    <div className="mx-auto flex min-h-screen w-full max-w-[1225px] flex-col bg-dd-bg md:flex-row">
+      <div className="hidden w-64 shrink-0 border-r border-dd-border md:block xl:w-[275px]" />
+      <div className="flex min-w-0 flex-1 xl:max-w-[950px]">
+        <main className="w-full max-w-[600px] border-r border-dd-border">
+          <div className="h-14 animate-pulse border-b border-dd-border bg-dd-surface/30" />
+          <div className="h-40 animate-pulse bg-dd-surface/60" />
+          <div className="space-y-4 px-5 py-6">
+            <div className="h-7 w-1/2 animate-pulse rounded-full bg-dd-surface" />
+            <div className="h-14 animate-pulse rounded-xl bg-dd-surface/70" />
+            <div className="h-40 animate-pulse rounded-2xl bg-dd-surface/40" />
+          </div>
+        </main>
+        <div className="hidden w-[350px] shrink-0 xl:block" />
+      </div>
+    </div>
+  );
+}
+
 export default function GuildDetailPage({ params }: GuildDetailProps) {
   const router = useRouter();
-  const [guild, setGuild] = useState<any>(null);
+  const [guild, setGuild] = useState<GuildDetail | null>(null);
+  const [user, setUser] = useState<CurrentUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [membershipPending, setMembershipPending] = useState(false);
+  const [activeTab, setActiveTab] = useState<CommunityDetailTab>('about');
   const [error, setError] = useState<string | null>(null);
-  const [slug, setSlug] = useState<string | null>(null);
 
   useEffect(() => {
-    params.then((p) => setSlug(p.slug));
+    let active = true;
+
+    Promise.all([
+      params.then(({ slug }) =>
+        fetch(`/api/guilds/by-slug/${slug}`, { cache: 'no-store' }).then((response) => {
+          if (!response.ok) throw new Error('Comunidade não encontrada.');
+          return response.json();
+        })
+      ),
+      fetch('/api/users/me').then((response) => (response.ok ? response.json() : null)),
+    ])
+      .then(([guildData, userData]) => {
+        if (!active) return;
+        setGuild(guildData);
+        setUser(userData);
+      })
+      .catch((reason: Error) => {
+        if (active) setError(reason.message);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
   }, [params]);
 
-  useEffect(() => {
-    if (!slug) return;
-    setLoading(true);
-    fetch(`/api/guilds/by-slug/${slug}`)
-      .then((r) => {
-        if (!r.ok) throw new Error('Guilda não encontrada');
-        return r.json();
-      })
-      .then((data) => {
-        setGuild(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, [slug]);
-
-  useEffect(() => {
-    fetch('/api/users/me')
-      .then((r) => r.ok && r.json())
-      .then((data) => setUser(data))
-      .catch(() => {});
-  }, []);
-
-  // If we don't have the guild by-slug API yet, fetch from guilds list and find by slug
-  useEffect(() => {
-    if (!slug || guild) return;
-    fetch('/api/guilds')
-      .then((r) => r.ok && r.json())
-      .then((data) => {
-        if (!data.guilds) return;
-        const found = data.guilds.find((g: any) => g.slug === slug);
-        if (found) {
-          fetch(`/api/guilds/${found.id}`)
-            .then((r) => r.ok && r.json())
-            .then((g) => {
-              setGuild(g);
-              setLoading(false);
-            });
-        }
-      });
-  }, [slug, guild]);
-
   const handleJoin = async () => {
-    if (!guild) return;
+    if (!guild || membershipPending) return;
+    setMembershipPending(true);
+    setError(null);
+
     try {
-      const res = await fetch(`/api/guilds/${guild.id}/members`, { method: 'POST' });
-      if (res.ok) {
-        const data = await res.json();
-        setGuild((prev: any) => ({
-          ...prev,
-          isMember: true,
-          userRole: 'MEMBER',
-          members: [
-            ...prev.members,
-            {
-              id: data.membership.id,
-              role: 'MEMBER',
-              joined_at: data.membership.joined_at,
-              user: data.membership.user,
-            },
-          ],
-          memberCount: prev.memberCount + 1,
-        }));
-      }
-    } catch (err) {
-      console.error(err);
+      const response = await fetch(`/api/guilds/${guild.id}/members`, { method: 'POST' });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Não foi possível participar.');
+
+      setGuild((current) =>
+        current
+          ? {
+              ...current,
+              isMember: true,
+              userRole: 'MEMBER',
+              members: [
+                ...current.members,
+                {
+                  id: data.membership.id,
+                  role: 'MEMBER',
+                  joined_at: data.membership.joined_at,
+                  user: data.membership.user,
+                },
+              ],
+              memberCount: current.memberCount + 1,
+            }
+          : current
+      );
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Não foi possível participar.');
+    } finally {
+      setMembershipPending(false);
     }
   };
 
   const handleLeave = async () => {
-    if (!guild) return;
+    if (!guild || membershipPending) return;
+    setMembershipPending(true);
+    setError(null);
+
     try {
-      const res = await fetch(`/api/guilds/${guild.id}/members`, { method: 'DELETE' });
-      if (res.ok) {
-        router.push('/guilds');
-      }
-    } catch (err) {
-      console.error(err);
+      const response = await fetch(`/api/guilds/${guild.id}/members`, { method: 'DELETE' });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.message || 'Não foi possível sair da comunidade.');
+
+      setGuild((current) =>
+        current
+          ? {
+              ...current,
+              isMember: false,
+              userRole: null,
+              members: current.members.filter((member) => member.user.id !== user?.id),
+              memberCount: Math.max(0, current.memberCount - 1),
+            }
+          : current
+      );
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Não foi possível sair da comunidade.');
+    } finally {
+      setMembershipPending(false);
     }
   };
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('pt-BR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
-  };
+  if (loading) return <CommunityDetailSkeleton />;
 
-  const roleIcon: Record<string, any> = {
-    OWNER: Crown,
-    ADMIN: Shield,
-    MEMBER: Users,
-  };
-
-  const roleLabel: Record<string, string> = {
-    OWNER: 'Líder',
-    ADMIN: 'Admin',
-    MEMBER: 'Membro',
-  };
-
-  const roleColor: Record<string, string> = {
-    OWNER: 'text-amber-400',
-    ADMIN: 'text-blue-400',
-    MEMBER: 'text-dd-muted',
-  };
-
-  if (loading) {
+  if (!guild) {
     return (
-      <div className="flex min-h-screen bg-dd-bg items-center justify-center">
-        <div className="text-xs text-dd-muted animate-pulse font-semibold">Carregando...</div>
-      </div>
-    );
-  }
-
-  if (error || !guild) {
-    return (
-      <div className="flex flex-col min-h-screen bg-dd-bg items-center justify-center gap-4">
-        <p className="text-sm text-dd-muted">{error || 'Guilda não encontrada'}</p>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-dd-bg px-6 text-center">
+        <UsersRound className="h-10 w-10 text-dd-muted/50" />
+        <h1 className="mt-4 text-lg font-black text-dd-text">Comunidade não encontrada</h1>
+        <p className="mt-1 text-xs text-dd-muted">{error || 'Este espaço não está disponível.'}</p>
         <Link
           href="/guilds"
-          className="text-xs font-bold text-blue-500 hover:text-blue-400 transition-colors"
+          className="mt-5 rounded-full bg-blue-500 px-5 py-2.5 text-xs font-black text-white"
         >
-          ← Voltar para Guildas
+          Voltar para Comunidades
         </Link>
       </div>
     );
   }
 
+  const coverTheme = COVER_THEME[guild.language ?? 'DEFAULT'] ?? COVER_THEME.DEFAULT;
+  const joinedMembers = guild.members.slice(0, 4);
+
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-dd-bg text-dd-text antialiased">
+    <div className="mx-auto flex min-h-screen w-full max-w-[1225px] flex-col bg-dd-bg text-dd-text antialiased md:flex-row">
       <Sidebar user={user} />
-      <div className="flex-grow flex flex-col md:flex-row min-w-0">
-        <main className="flex-grow max-w-2xl w-full border-r border-dd-border/80 min-h-screen pb-24 md:pb-8">
-          {/* Header */}
-          <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60 px-5 py-4 flex items-center gap-4">
+
+      <div className="flex min-w-0 flex-grow flex-col md:flex-row xl:max-w-[950px]">
+        <main className="min-h-screen w-full max-w-[600px] flex-grow border-r border-dd-border/80 pb-24 md:pb-8">
+          <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-dd-border/70 bg-dd-bg/95 px-4 backdrop-blur-xl">
             <button
+              type="button"
               onClick={() => router.back()}
-              className="p-2 hover:bg-dd-surface rounded-full transition-colors text-dd-text cursor-pointer"
+              aria-label="Voltar"
+              className="dd-focus-ring dd-touch flex cursor-pointer items-center justify-center rounded-full text-dd-text transition-colors hover:bg-dd-surface"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="h-5 w-5" />
             </button>
-            <div>
-              <h1 className="text-base font-extrabold text-dd-text">{guild.name}</h1>
-              <p className="text-[10px] text-dd-muted uppercase font-bold tracking-wider">
-                {guild.memberCount} {guild.memberCount === 1 ? 'membro' : 'membros'}
+            <div className="min-w-0">
+              <h1 className="truncate text-sm font-black text-dd-text">{guild.name}</h1>
+              <p className="text-[10px] text-dd-muted">
+                {guild.memberCount.toLocaleString('pt-BR')}{' '}
+                {guild.memberCount === 1 ? 'membro' : 'membros'}
               </p>
             </div>
-          </div>
+          </header>
 
-          {/* Guild Banner/Info */}
-          <div className="h-32 bg-gradient-to-r from-blue-500/20 via-blue-400/10 to-transparent border-b border-dd-border/40 flex items-end px-5 pb-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-400 flex items-center justify-center text-2xl font-black text-white shadow-lg shadow-blue-500/20">
-              {guild.name[0].toUpperCase()}
+          <section>
+            <div
+              className={cn('relative h-40 overflow-hidden bg-gradient-to-br sm:h-44', coverTheme)}
+            >
+              <span className="absolute -right-12 -top-20 h-56 w-56 rounded-full bg-white/15 blur-xl" />
+              <span className="absolute bottom-5 right-6 text-xs font-black uppercase tracking-[0.2em] text-white/60">
+                Comunidade
+              </span>
             </div>
-          </div>
 
-          {/* Guild Details */}
-          <div className="px-5 pt-4 space-y-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-extrabold">{guild.name}</h2>
-                  {guild.language && <LanguageTag language={guild.language as Language} />}
+            <div className="px-4 sm:px-5">
+              <div className="-mt-10 flex items-end justify-between gap-4">
+                <div className="relative flex h-20 w-20 shrink-0 items-center justify-center rounded-3xl border-4 border-dd-bg bg-blue-600 text-3xl font-black text-white shadow-xl">
+                  {guild.icon || guild.name[0]?.toUpperCase() || 'C'}
                 </div>
-                <p className="text-xs text-dd-muted mt-1">
-                  Criada em {formatDate(guild.created_at)} por{' '}
-                  <span className="text-blue-400 font-semibold">@{guild.owner.username}</span>
-                </p>
-              </div>
-              <div>
+
                 {!guild.isMember ? (
                   <button
+                    type="button"
                     onClick={handleJoin}
-                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs px-5 py-2.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5"
+                    disabled={membershipPending}
+                    className="dd-focus-ring mb-1 inline-flex h-9 min-w-24 cursor-pointer items-center justify-center gap-1.5 rounded-full bg-dd-text px-4 text-xs font-black text-dd-bg transition-opacity hover:opacity-85 disabled:cursor-wait disabled:opacity-60"
                   >
-                    <UserPlus className="w-3.5 h-3.5" />
-                    Entrar
+                    {membershipPending ? (
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <UserPlus className="h-4 w-4" />
+                    )}
+                    Participar
                   </button>
                 ) : guild.userRole !== 'OWNER' ? (
                   <button
+                    type="button"
                     onClick={handleLeave}
-                    className="border border-red-500/30 text-red-400 hover:bg-red-500/10 font-bold text-xs px-5 py-2.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5"
+                    disabled={membershipPending}
+                    className="dd-focus-ring mb-1 inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full border border-dd-border px-4 text-xs font-black text-dd-text transition-colors hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-400 disabled:cursor-wait disabled:opacity-60"
                   >
-                    <LogOut className="w-3.5 h-3.5" />
-                    Sair
+                    {membershipPending ? (
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Check className="h-4 w-4" />
+                    )}
+                    Participando
                   </button>
-                ) : null}
+                ) : (
+                  <span className="mb-1 inline-flex h-9 items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 text-xs font-black text-amber-400">
+                    <Crown className="h-4 w-4" />
+                    Criador
+                  </span>
+                )}
+              </div>
+
+              <div className="mt-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-xl font-black tracking-tight text-dd-text">{guild.name}</h2>
+                  {guild.language && <LanguageTag language={guild.language as Language} />}
+                </div>
+                <p className="mt-2 max-w-xl text-xs leading-5 text-dd-muted">
+                  {guild.description ||
+                    'Um espaço para compartilhar conhecimento, fazer perguntas e evoluir em conjunto.'}
+                </p>
+
+                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-dd-muted">
+                  <Link
+                    href={`/profile/${guild.owner.username}`}
+                    className="flex items-center gap-2 hover:text-blue-400"
+                  >
+                    <AuthorAvatar
+                      username={guild.owner.username}
+                      avatar_url={guild.owner.avatar_url}
+                      className="h-6 w-6 text-[9px]"
+                    />
+                    Criada por{' '}
+                    <strong className="font-bold text-dd-text">@{guild.owner.username}</strong>
+                  </Link>
+                  <span className="flex items-center gap-1.5">
+                    <Globe2 className="h-3.5 w-3.5" />
+                    {guild.is_public ? 'Pública' : 'Privada'}
+                  </span>
+                </div>
+
+                {joinedMembers.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('members')}
+                    className="mt-4 flex cursor-pointer items-center text-[11px] text-dd-muted hover:text-dd-text"
+                  >
+                    <span className="mr-2 flex -space-x-2">
+                      {joinedMembers.map((member) => (
+                        <AuthorAvatar
+                          key={member.id}
+                          username={member.user.username}
+                          avatar_url={member.user.avatar_url}
+                          className="h-6 w-6 border-2 border-dd-bg text-[8px]"
+                        />
+                      ))}
+                    </span>
+                    <strong className="mr-1 font-black text-dd-text">
+                      {guild.memberCount.toLocaleString('pt-BR')}
+                    </strong>
+                    {guild.memberCount === 1 ? 'membro' : 'membros'}
+                  </button>
+                )}
               </div>
             </div>
+          </section>
 
-            {guild.description && (
-              <div className="bg-dd-surface/30 border border-dd-border/60 rounded-xl p-4">
-                <p className="text-xs text-dd-text leading-relaxed">{guild.description}</p>
-              </div>
-            )}
-
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="bg-dd-surface/40 border border-dd-border/60 rounded-xl p-4 text-center">
-                <Users className="w-4 h-4 text-blue-500 mx-auto mb-1" />
-                <div className="text-lg font-black text-dd-text">{guild.memberCount}</div>
-                <div className="text-[9px] font-bold uppercase tracking-wider text-dd-muted">
-                  Membros
-                </div>
-              </div>
-              <div className="bg-dd-surface/40 border border-dd-border/60 rounded-xl p-4 text-center">
-                <Calendar className="w-4 h-4 text-blue-500 mx-auto mb-1" />
-                <div className="text-lg font-black text-dd-text">
-                  {new Date(guild.created_at).toLocaleDateString('pt-BR', { month: 'short' })}
-                </div>
-                <div className="text-[9px] font-bold uppercase tracking-wider text-dd-muted">
-                  Criada em
-                </div>
-              </div>
-              <div className="bg-dd-surface/40 border border-dd-border/60 rounded-xl p-4 text-center">
-                <Globe className="w-4 h-4 text-blue-500 mx-auto mb-1" />
-                <div className="text-lg font-black text-dd-text">
-                  {guild.is_public ? 'Pública' : 'Privada'}
-                </div>
-                <div className="text-[9px] font-bold uppercase tracking-wider text-dd-muted">
-                  Tipo
-                </div>
-              </div>
+          {error && (
+            <div className="mx-4 mt-4 rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-xs font-semibold text-red-400 sm:mx-5">
+              {error}
             </div>
+          )}
 
-            {/* Members */}
-            <div className="pt-2">
-              <h3 className="text-[10px] font-bold uppercase tracking-wider text-dd-muted mb-3 flex items-center gap-1.5">
-                <Users className="w-3 h-3 text-blue-500" />
-                Membros ({guild.memberCount})
-              </h3>
-              <div className="space-y-1">
-                {guild.members?.map((member: any) => {
-                  const RoleIcon = roleIcon[member.role] || Users;
+          <div
+            className="mt-5 flex border-y border-dd-border/70"
+            role="tablist"
+            aria-label="Conteúdo da comunidade"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'about'}
+              onClick={() => setActiveTab('about')}
+              className={cn(
+                'relative h-12 flex-1 cursor-pointer text-xs font-bold transition-colors hover:bg-dd-surface/35',
+                activeTab === 'about' ? 'text-dd-text' : 'text-dd-muted'
+              )}
+            >
+              Sobre
+              {activeTab === 'about' && (
+                <span className="absolute inset-x-1/3 bottom-0 h-0.5 rounded-full bg-blue-500" />
+              )}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'members'}
+              onClick={() => setActiveTab('members')}
+              className={cn(
+                'relative h-12 flex-1 cursor-pointer text-xs font-bold transition-colors hover:bg-dd-surface/35',
+                activeTab === 'members' ? 'text-dd-text' : 'text-dd-muted'
+              )}
+            >
+              Membros
+              {activeTab === 'members' && (
+                <span className="absolute inset-x-1/3 bottom-0 h-0.5 rounded-full bg-blue-500" />
+              )}
+            </button>
+          </div>
+
+          {activeTab === 'about' ? (
+            <section className="space-y-4 px-4 py-5 sm:px-5">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-blue-500">
+                  Propósito
+                </p>
+                <h3 className="mt-1 text-base font-black text-dd-text">Sobre esta comunidade</h3>
+                <p className="mt-2 text-xs leading-5 text-dd-muted">
+                  {guild.description ||
+                    'Conecte-se com outros desenvolvedores, compartilhe descobertas e participe de conversas relevantes.'}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-2xl border border-dd-border bg-dd-surface/25 p-4">
+                  <CalendarDays className="h-4 w-4 text-blue-500" />
+                  <p className="mt-3 text-sm font-black text-dd-text">
+                    {new Date(guild.created_at).toLocaleDateString('pt-BR', {
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </p>
+                  <p className="mt-0.5 text-[10px] text-dd-muted">Criada em</p>
+                </div>
+                <div className="rounded-2xl border border-dd-border bg-dd-surface/25 p-4">
+                  <UsersRound className="h-4 w-4 text-blue-500" />
+                  <p className="mt-3 text-sm font-black text-dd-text">
+                    {guild.memberCount.toLocaleString('pt-BR')}
+                  </p>
+                  <p className="mt-0.5 text-[10px] text-dd-muted">Participantes</p>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-dd-border bg-dd-surface/20 p-4">
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="h-4 w-4 text-blue-500" />
+                  <h3 className="text-xs font-black text-dd-text">Boas conversas começam aqui</h3>
+                </div>
+                <p className="mt-2 text-[11px] leading-5 text-dd-muted">
+                  Mantenha o foco no tema, respeite os outros membros e compartilhe conhecimento que
+                  ajude a comunidade a crescer.
+                </p>
+              </div>
+            </section>
+          ) : (
+            <section className="px-3 py-3 sm:px-4">
+              <div className="mb-2 flex items-center justify-between px-2 py-2">
+                <h3 className="text-sm font-black text-dd-text">Membros</h3>
+                <span className="text-[10px] font-semibold text-dd-muted">
+                  {guild.memberCount.toLocaleString('pt-BR')}
+                </span>
+              </div>
+              <div className="divide-y divide-dd-border/55">
+                {guild.members.map((member) => {
+                  const RoleIcon = ROLE_ICON[member.role];
                   return (
                     <Link
                       key={member.id}
                       href={`/profile/${member.user.username}`}
-                      className="flex items-center justify-between p-3 rounded-xl hover:bg-dd-surface/50 transition-colors group"
+                      className="flex items-center justify-between gap-3 rounded-xl px-2 py-3 transition-colors hover:bg-dd-surface/35"
                     >
-                      <div className="flex items-center gap-3 min-w-0">
-                        {member.user.avatar_url ? (
-                          <Image
-                            src={member.user.avatar_url}
-                            alt={member.user.username}
-                            width={36}
-                            height={36}
-                            className="w-9 h-9 rounded-full object-cover border border-dd-border shrink-0"
-                          />
-                        ) : (
-                          <div className="w-9 h-9 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center text-sm font-bold shrink-0">
-                            {member.user.username[0].toUpperCase()}
-                          </div>
-                        )}
+                      <div className="flex min-w-0 items-center gap-3">
+                        <AuthorAvatar
+                          username={member.user.username}
+                          avatar_url={member.user.avatar_url}
+                          size="md"
+                        />
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <p className="text-sm font-bold text-dd-text truncate group-hover:text-blue-400 transition-colors">
-                              {member.user.username}
+                            <p className="truncate text-xs font-black text-dd-text">
+                              @{member.user.username}
                             </p>
-                            <RoleIcon
-                              className={`w-3 h-3 ${roleColor[member.role] || 'text-dd-muted'}`}
-                            />
+                            <RoleIcon className={cn('h-3 w-3', ROLE_COLOR[member.role])} />
                           </div>
-                          <p className="text-[10px] text-dd-muted">
-                            {roleLabel[member.role] || 'Membro'} · Entrou em{' '}
+                          <p className="mt-0.5 text-[10px] text-dd-muted">
+                            {ROLE_LABEL[member.role]} · desde{' '}
                             {new Date(member.joined_at).toLocaleDateString('pt-BR')}
                           </p>
                         </div>
                       </div>
-                      <div className="text-[10px] font-mono text-dd-muted font-bold">
-                        {member.user.total_xp?.toLocaleString() || 0} XP
-                      </div>
+                      <span className="shrink-0 text-[10px] font-bold text-dd-muted">
+                        {member.user.total_xp.toLocaleString('pt-BR')} XP
+                      </span>
                     </Link>
                   );
                 })}
               </div>
-            </div>
-          </div>
+            </section>
+          )}
         </main>
+
+        <aside className="hidden w-[350px] shrink-0 px-5 py-5 xl:block">
+          <div className="sticky top-5 space-y-4">
+            <section className="rounded-2xl border border-dd-border bg-dd-surface/25 p-5">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-blue-500" />
+                <h2 className="text-sm font-black text-dd-text">Espaço da comunidade</h2>
+              </div>
+              <p className="mt-2 text-[11px] leading-5 text-dd-muted">
+                Comunidades são espaços dedicados para conversas mais relevantes e próximas.
+              </p>
+              <div className="mt-4 space-y-3 border-t border-dd-border/60 pt-4 text-[11px] text-dd-muted">
+                <div className="flex items-center gap-2">
+                  <Globe2 className="h-3.5 w-3.5 text-blue-500" />
+                  {guild.is_public ? 'Qualquer pessoa pode participar' : 'Entrada restrita'}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Crown className="h-3.5 w-3.5 text-amber-400" />
+                  Administrada por @{guild.owner.username}
+                </div>
+              </div>
+            </section>
+
+            {guild.isMember && guild.userRole !== 'OWNER' && (
+              <button
+                type="button"
+                onClick={handleLeave}
+                disabled={membershipPending}
+                className="dd-focus-ring flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-dd-border py-2.5 text-xs font-bold text-dd-muted transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400 disabled:opacity-50"
+              >
+                <LogOut className="h-4 w-4" />
+                Sair da comunidade
+              </button>
+            )}
+          </div>
+        </aside>
       </div>
     </div>
   );

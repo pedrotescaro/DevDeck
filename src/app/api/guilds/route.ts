@@ -28,7 +28,7 @@ export const GET = apiHandler(async () => {
     icon: g.icon,
     language: g.language,
     is_public: g.is_public,
-    created_at: g.created_at,
+    createdAt: g.created_at.toISOString(),
     memberCount: g._count.members,
     owner: g.owner,
     isMember: g.members.length > 0,
@@ -46,7 +46,22 @@ export const GET = apiHandler(async () => {
     },
   });
 
-  return NextResponse.json({ guilds: guildsWithJoinStatus, myGuilds });
+  const serializedMyGuilds = myGuilds.map((g) => ({
+    id: g.id,
+    name: g.name,
+    slug: g.slug,
+    description: g.description,
+    icon: g.icon,
+    language: g.language,
+    is_public: g.is_public,
+    createdAt: g.created_at.toISOString(),
+    memberCount: g._count.members,
+    owner: g.owner,
+    isMember: true,
+    ownerId: g.owner_id,
+  }));
+
+  return NextResponse.json({ guilds: guildsWithJoinStatus, myGuilds: serializedMyGuilds });
 });
 
 export const POST = apiHandler(async (req) => {
