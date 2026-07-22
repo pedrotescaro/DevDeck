@@ -576,7 +576,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
   } | null>(null);
 
   const [thinking, setThinking] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // History drawer states
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
@@ -1043,14 +1043,14 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
     const repoMode = mode === 'Repositório';
     const repoFollowUp = repoMode && activeRepo;
     return (
-      <div className="w-full bg-[#0d111a] border border-[#1e2638] rounded-[20px] p-4 flex flex-col justify-between min-h-[148px] shadow-lg focus-within:border-blue-500/50 transition-all duration-300 max-w-2xl mx-auto backdrop-blur-xl">
+      <div className="mx-auto flex min-h-[148px] w-full max-w-2xl flex-col justify-between rounded-[20px] border border-dd-border bg-dd-surface/60 p-4 shadow-lg backdrop-blur-xl transition-all duration-300 focus-within:border-blue-500/50">
         {/* Attachment chips preview */}
         {attachedFiles.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-2">
             {attachedFiles.map((f) => (
               <div
                 key={f.id}
-                className="flex items-center gap-1.5 pl-2 pr-1 py-1 bg-[#1c1c1f] border border-[#2c2c35] rounded-lg text-[11px] text-dd-text max-w-[200px]"
+                className="flex max-w-[200px] items-center gap-1.5 rounded-lg border border-dd-border bg-dd-bg py-1 pl-2 pr-1 text-[11px] text-dd-text"
               >
                 {f.kind === 'image' ? (
                   <ImageIcon className="w-3.5 h-3.5 text-blue-500 shrink-0" />
@@ -1061,7 +1061,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                 <button
                   type="button"
                   onClick={() => removeAttachment(f.id)}
-                  className="p-0.5 hover:bg-[#2c2c35] rounded text-[#8b8b93] hover:text-dd-text transition-colors cursor-pointer shrink-0"
+                  className="shrink-0 cursor-pointer rounded p-0.5 text-dd-muted transition-colors hover:bg-dd-surface hover:text-dd-text"
                   title="Remover anexo"
                 >
                   <X className="w-3 h-3" />
@@ -1092,11 +1092,11 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                 : 'Pergunte à ASYNC sobre seu código...'
           }
           rows={2}
-          className="w-full bg-transparent border-0 outline-0 ring-0 text-sm text-dd-text placeholder-[#53535f] resize-none py-1.5 max-h-36 overflow-y-auto font-sans leading-relaxed focus:ring-0 focus:outline-none disabled:opacity-50"
+          className="max-h-36 w-full resize-none overflow-y-auto border-0 bg-transparent py-1.5 font-sans text-sm leading-relaxed text-dd-text outline-0 ring-0 placeholder:text-dd-muted focus:outline-none focus:ring-0 disabled:opacity-50"
         />
 
         {/* Bottom row */}
-        <div className="flex items-center justify-between border-t border-[#1f1f23]/40 pt-3 mt-2 select-none">
+        <div className="mt-2 flex select-none items-center justify-between border-t border-dd-border/60 pt-3">
           {/* Left side: Toggles */}
           <div className="flex items-center gap-2">
             {/* Think Deeper Toggle */}
@@ -1106,8 +1106,8 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
               disabled={repoMode}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-medium border transition-all cursor-pointer select-none disabled:opacity-40 disabled:cursor-not-allowed ${
                 deepThinkActive
-                  ? 'bg-[#0a1929] border-blue-500/60 text-[#0083fe]'
-                  : 'bg-[#141824]/80 border-[#232a3b] text-[#8b8b93] hover:bg-[#1a2133] hover:text-dd-text'
+                  ? 'border-blue-500/60 bg-blue-500/10 text-[#0083fe]'
+                  : 'border-dd-border bg-dd-bg/70 text-dd-muted hover:bg-dd-surface hover:text-dd-text'
               }`}
             >
               <Gear className="w-3.5 h-3.5" />
@@ -1120,8 +1120,8 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
               onClick={() => setSearchActive(!searchActive)}
               className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-medium border transition-all cursor-pointer select-none ${
                 searchActive
-                  ? 'bg-[#0a1929] border-blue-500/60 text-[#0083fe]'
-                  : 'bg-[#141824]/80 border-[#232a3b] text-[#8b8b93] hover:bg-[#1a2133] hover:text-dd-text'
+                  ? 'border-blue-500/60 bg-blue-500/10 text-[#0083fe]'
+                  : 'border-dd-border bg-dd-bg/70 text-dd-muted hover:bg-dd-surface hover:text-dd-text'
               }`}
             >
               <Globe className="w-3.5 h-3.5" />
@@ -1142,7 +1142,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="p-2 hover:bg-[#232329] rounded-full text-[#8b8b93] hover:text-dd-text transition-all cursor-pointer"
+              className="cursor-pointer rounded-full p-2 text-dd-muted transition-all hover:bg-dd-surface hover:text-dd-text"
               title="Anexar arquivo"
             >
               <Paperclip className="w-4 h-4" />
@@ -1174,14 +1174,14 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
   const renderBottomBanner = () => {
     return (
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm bg-[#131316]/90 border border-[#232329] rounded-2xl p-3.5 flex items-center justify-between gap-4 shadow-2xl z-20 backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-500 select-none">
+      <div className="absolute bottom-6 left-1/2 z-20 flex w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 animate-in select-none items-center justify-between gap-4 rounded-2xl border border-dd-border bg-dd-surface/90 p-3.5 shadow-2xl backdrop-blur-md fade-in slide-in-from-bottom-4 duration-500">
         <div className="flex items-center gap-3 text-left">
           <div className="w-8 h-8 rounded-lg bg-[#0a1929] border border-[#7c3a0d]/30 flex items-center justify-center text-[#0083fe] text-xs">
             ✨
           </div>
           <div className="font-sans">
-            <p className="text-[11px] font-bold text-white leading-tight">Potencialize a ASYNC</p>
-            <p className="text-[9px] text-[#8b8b93] font-medium leading-tight mt-0.5">
+            <p className="text-[11px] font-bold leading-tight text-dd-text">Potencialize a ASYNC</p>
+            <p className="mt-0.5 text-[9px] font-medium leading-tight text-dd-muted">
               Mais contexto, análises profundas e repositórios completos
             </p>
           </div>
@@ -1226,8 +1226,8 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
     if (images.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center py-12 text-center select-none">
-          <ImageIcon className="w-8 h-8 text-[#53535f] mb-2" />
-          <p className="text-xs text-[#71767b]">Nenhuma imagem encontrada no seu histórico.</p>
+          <ImageIcon className="mb-2 h-8 w-8 text-dd-muted" />
+          <p className="text-xs text-dd-muted">Nenhuma imagem encontrada no seu histórico.</p>
         </div>
       );
     }
@@ -1238,7 +1238,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
           <div
             key={idx}
             onClick={() => handleSelectSession(img.session)}
-            className="group relative aspect-square bg-[#131316] border border-[#1f1f23] rounded-lg overflow-hidden cursor-pointer hover:border-blue-500/40 transition-all shadow-sm"
+            className="group relative aspect-square cursor-pointer overflow-hidden rounded-lg border border-dd-border bg-dd-surface shadow-sm transition-all hover:border-blue-500/40"
             title={`Carregar conversa: "${img.session.title}"`}
           >
             <Image
@@ -1275,13 +1275,13 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
         <div className="flex flex-col items-center justify-center py-12 text-center select-none">
           <svg
             viewBox="0 0 24 24"
-            className="w-8 h-8 text-[#53535f] mb-2 fill-none stroke-current"
+            className="mb-2 h-8 w-8 fill-none stroke-current text-dd-muted"
             strokeWidth="2"
           >
             <circle cx="12" cy="12" r="10" />
             <path d="M12 8v4M12 16h.01" />
           </svg>
-          <p className="text-xs text-[#71767b]">
+          <p className="text-xs text-dd-muted">
             {isSavedOnly ? 'Nenhum item salvo encontrado.' : 'Nenhuma conversa encontrada.'}
           </p>
         </div>
@@ -1336,7 +1336,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
       <div className="flex flex-col gap-5 select-none">
         {orderedGroupKeys.map((gKey) => (
           <div key={gKey} className="flex flex-col gap-1.5">
-            <h3 className="text-[10px] font-bold text-[#71767b] tracking-wider uppercase pl-2.5">
+            <h3 className="pl-2.5 text-[10px] font-bold uppercase tracking-wider text-dd-muted">
               {gKey}
             </h3>
             <div className="flex flex-col gap-0.5">
@@ -1346,15 +1346,15 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                   onClick={() => handleSelectSession(s)}
                   className={`group flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-all border ${
                     activeChatId === s.id
-                      ? 'bg-blue-500/10 border-blue-500/20 text-white font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]'
-                      : 'bg-transparent border-transparent hover:bg-[#131316]/60 text-[#b3b3b9] hover:text-white'
+                      ? 'border-blue-500/20 bg-blue-500/10 font-medium text-dd-text shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]'
+                      : 'border-transparent bg-transparent text-dd-muted hover:bg-dd-surface/60 hover:text-dd-text'
                   }`}
                 >
                   <span className="text-xs truncate flex-1 pr-2 leading-relaxed">{s.title}</span>
                   <div className="flex items-center gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shrink-0">
                     <button
                       onClick={(e) => toggleBookmarkSession(s.id, e)}
-                      className="p-1 hover:bg-[#1c1c1f] rounded text-[#8b8b93] hover:text-blue-500 transition-colors cursor-pointer"
+                      className="cursor-pointer rounded p-1 text-dd-muted transition-colors hover:bg-dd-surface hover:text-blue-500"
                       title={s.isSaved ? 'Remover dos salvos' : 'Salvar conversa'}
                     >
                       {s.isSaved ? (
@@ -1365,7 +1365,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                     </button>
                     <button
                       onClick={(e) => deleteSession(s.id, e)}
-                      className="p-1 hover:bg-[#1c1c1f] rounded text-[#8b8b93] hover:text-red-500 transition-colors cursor-pointer"
+                      className="cursor-pointer rounded p-1 text-dd-muted transition-colors hover:bg-dd-surface hover:text-red-500"
                       title="Excluir conversa"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -1381,23 +1381,27 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
   };
 
   return (
-    <div className="relative flex h-screen flex-col overflow-hidden bg-[#05070b] text-dd-text antialiased md:flex-row">
+    <div
+      data-testid="async-shell"
+      className={`relative mx-auto flex h-screen w-full flex-col overflow-hidden bg-dd-bg text-dd-text antialiased transition-colors duration-200 md:flex-row ${isFullscreen ? 'max-w-none' : 'max-w-[1225px]'}`}
+    >
       {/* Sidebar rendered conditionally based on expanded mode */}
       {!isFullscreen && <Sidebar user={user} />}
 
       <div
-        className={`relative flex min-h-0 min-w-0 flex-grow flex-col overflow-hidden bg-[#05070b] ${!isFullscreen ? 'border-l border-[#1f1f23]/40' : ''}`}
+        data-testid="async-content"
+        className={`relative flex min-h-0 min-w-0 flex-grow flex-col overflow-hidden bg-dd-bg transition-colors duration-200 ${!isFullscreen ? 'border-r border-dd-border' : ''}`}
       >
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden" />
 
         {/* Top Header */}
-        <header className="relative z-20 flex items-center justify-between border-b border-white/5 bg-[#070a10]/75 px-4 py-3 backdrop-blur-xl sm:px-6 select-none">
+        <header className="relative z-20 flex select-none items-center justify-between border-b border-dd-border/60 bg-dd-bg/80 px-4 py-3 backdrop-blur-xl transition-colors duration-200 sm:px-6">
           {/* Top Left: Expanded mode toggle button */}
           <div className="flex items-center gap-3">
             {isFullscreen ? (
               <button
                 onClick={() => setIsFullscreen(false)}
-                className="p-2 hover:bg-[#16161a] text-dd-muted hover:text-dd-text rounded-full transition-all cursor-pointer animate-in fade-in duration-300"
+                className="animate-in cursor-pointer rounded-full p-2 text-dd-muted transition-all fade-in duration-300 hover:bg-dd-surface hover:text-dd-text"
                 title="Mostrar barra lateral (Sair do modo expandido)"
               >
                 <svg
@@ -1414,7 +1418,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
             ) : (
               <button
                 onClick={() => setIsFullscreen(true)}
-                className="p-2 hover:bg-[#16161a] text-[#8b8b93] hover:text-dd-text rounded-full transition-all cursor-pointer animate-in fade-in duration-300"
+                className="animate-in cursor-pointer rounded-full p-2 text-dd-muted transition-all fade-in duration-300 hover:bg-dd-surface hover:text-dd-text"
                 title="Modo Foco (Ocultar barra lateral)"
               >
                 <SidebarIcon className="w-4.5 h-4.5" />
@@ -1430,9 +1434,9 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
               />
               <div className="hidden sm:block">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-black tracking-[0.16em] text-white">ASYNC</span>
+                  <span className="text-sm font-black tracking-[0.16em] text-dd-text">ASYNC</span>
                 </div>
-                <p className="text-[10px] font-medium text-[#717987]">Copiloto de código</p>
+                <p className="text-[10px] font-medium text-dd-muted">Copiloto de código</p>
               </div>
             </div>
             {activeRepo && (
@@ -1440,7 +1444,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                 href={activeRepo.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0c0c0e] border border-[#1f1f23] hover:border-[#38383e] rounded-lg text-[10px] font-bold text-dd-muted hover:text-dd-text transition-all"
+                className="flex items-center gap-1.5 rounded-lg border border-dd-border bg-dd-surface px-3 py-1.5 text-[10px] font-bold text-dd-muted transition-all hover:border-blue-500/40 hover:text-dd-text"
                 title={activeRepo.url}
               >
                 <Github className="w-3.5 h-3.5 text-blue-500" />
@@ -1467,7 +1471,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
             {/* History Link / Button */}
             <button
               onClick={() => setIsHistoryOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-[#8b8b93] hover:text-dd-text font-medium text-xs cursor-pointer bg-transparent border-0 transition-colors"
+              className="flex cursor-pointer items-center gap-1.5 border-0 bg-transparent px-3 py-1.5 text-xs font-medium text-dd-muted transition-colors hover:text-dd-text"
               title="Ver histórico de conversas"
             >
               <History className="w-3.5 h-3.5" />
@@ -1478,7 +1482,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
             <button
               onClick={() => setIsPrivate(!isPrivate)}
               className={`flex items-center gap-1.5 px-3 py-1.5 font-bold uppercase transition-all cursor-pointer bg-transparent border-0 text-xs ${
-                isPrivate ? 'text-purple-400' : 'text-[#8b8b93] hover:text-dd-text'
+                isPrivate ? 'text-purple-400' : 'text-dd-muted hover:text-dd-text'
               }`}
               title={isPrivate ? 'Histórico pausado (Modo Privado)' : 'Ativar Modo Privado'}
             >
@@ -1501,19 +1505,19 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                   height={56}
                   className="h-14 w-14 object-contain"
                 />
-                <h1 className="font-sans text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                <h1 className="font-sans text-3xl font-bold tracking-tight text-dd-text sm:text-4xl">
                   Comece a conversar agora
                 </h1>
               </div>
 
               {/* Mode switch tabs capsule (Rápido, Deep Debug, Repositório) */}
-              <div className="flex rounded-full border border-white/10 bg-[#0c111c]/90 p-1.5 shadow-xl backdrop-blur-xl select-none animate-in fade-in duration-300">
+              <div className="flex animate-in select-none rounded-full border border-dd-border bg-dd-surface/60 p-1.5 shadow-xl backdrop-blur-xl fade-in duration-300">
                 <button
                   onClick={() => setMode('Rápido')}
                   className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     mode === 'Rápido'
-                      ? 'bg-[#0a1929] border border-blue-500/80 text-[#0083fe] shadow-sm'
-                      : 'text-[#8b8b93] hover:text-dd-text border border-transparent'
+                      ? 'border border-blue-500/80 bg-blue-500/10 text-[#0083fe] shadow-sm'
+                      : 'border border-transparent text-dd-muted hover:text-dd-text'
                   }`}
                 >
                   <Zap className="w-3.5 h-3.5" />
@@ -1524,8 +1528,8 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                   onClick={() => setMode('Deep Debug')}
                   className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     mode === 'Deep Debug'
-                      ? 'bg-[#0a1929] border border-blue-500/80 text-[#0083fe] shadow-sm'
-                      : 'text-[#8b8b93] hover:text-dd-text border border-transparent'
+                      ? 'border border-blue-500/80 bg-blue-500/10 text-[#0083fe] shadow-sm'
+                      : 'border border-transparent text-dd-muted hover:text-dd-text'
                   }`}
                 >
                   <Target className="w-3.5 h-3.5" />
@@ -1536,8 +1540,8 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                   onClick={() => setMode('Repositório')}
                   className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     mode === 'Repositório'
-                      ? 'bg-[#0a1929] border border-blue-500/80 text-[#0083fe] shadow-sm'
-                      : 'text-[#8b8b93] hover:text-dd-text border border-transparent'
+                      ? 'border border-blue-500/80 bg-blue-500/10 text-[#0083fe] shadow-sm'
+                      : 'border border-transparent text-dd-muted hover:text-dd-text'
                   }`}
                 >
                   <Folder className="w-3.5 h-3.5" />
@@ -1548,9 +1552,9 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
               {/* Repository URL input (only in repo mode) */}
               {mode === 'Repositório' ? (
                 <div className="w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className="flex items-center gap-2 bg-[#131316]/90 border border-[#232329] focus-within:border-blue-500/40 rounded-2xl p-2 shadow-2xl backdrop-blur-md transition-all">
+                  <div className="flex items-center gap-2 rounded-2xl border border-dd-border bg-dd-surface/60 p-2 shadow-2xl backdrop-blur-md transition-all focus-within:border-blue-500/40">
                     <div className="pl-2">
-                      <Github className="w-5 h-5 text-[#8b8b93]" />
+                      <Github className="h-5 w-5 text-dd-muted" />
                     </div>
                     <input
                       type="text"
@@ -1561,7 +1565,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                       }}
                       disabled={thinking}
                       placeholder="github.com/usuario/repositorio"
-                      className="flex-grow bg-transparent outline-0 text-sm text-dd-text placeholder-[#53535f] py-2 font-sans disabled:opacity-50"
+                      className="flex-grow bg-transparent py-2 font-sans text-sm text-dd-text outline-0 placeholder:text-dd-muted disabled:opacity-50"
                     />
                     <button
                       onClick={handleRepoAnalyze}
@@ -1576,7 +1580,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                       <span>{thinking ? 'Analisando...' : 'Analisar'}</span>
                     </button>
                   </div>
-                  <p className="mt-3 text-[11px] text-[#71767b] flex items-center justify-center gap-1.5 select-none">
+                  <p className="mt-3 flex select-none items-center justify-center gap-1.5 text-[11px] text-dd-muted">
                     <Github className="w-3 h-3" />
                     Cole o link de um repositório público (ou privado, se configurado) para análise
                     automática.
@@ -1592,28 +1596,28 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                 <div className="flex flex-wrap items-center justify-center gap-2.5 w-full select-none animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <button
                     onClick={() => handleSuggestionClick('Explicar Bug')}
-                    className="flex items-center gap-2 px-4 py-2 border border-[#1d2433] bg-[#0d121c]/90 hover:bg-[#141b2a] hover:border-[#2d374d] text-xs font-medium text-[#8b8b93] hover:text-white rounded-full transition-all duration-200 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+                    className="flex cursor-pointer items-center gap-2 rounded-full border border-dd-border bg-dd-surface/50 px-4 py-2 text-xs font-medium text-dd-muted shadow-sm transition-all duration-200 hover:scale-[1.02] hover:border-blue-500/30 hover:bg-dd-surface hover:text-dd-text active:scale-[0.98]"
                   >
                     <Gear className="w-3.5 h-3.5 text-blue-400" />
                     <span>Explicar Bug</span>
                   </button>
                   <button
                     onClick={() => handleSuggestionClick('Refatorar Código')}
-                    className="flex items-center gap-2 px-4 py-2 border border-[#1d2433] bg-[#0d121c]/90 hover:bg-[#141b2a] hover:border-[#2d374d] text-xs font-medium text-[#8b8b93] hover:text-white rounded-full transition-all duration-200 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+                    className="flex cursor-pointer items-center gap-2 rounded-full border border-dd-border bg-dd-surface/50 px-4 py-2 text-xs font-medium text-dd-muted shadow-sm transition-all duration-200 hover:scale-[1.02] hover:border-blue-500/30 hover:bg-dd-surface hover:text-dd-text active:scale-[0.98]"
                   >
                     <Wrench className="w-3.5 h-3.5 text-blue-400" />
                     <span>Refatorar Código</span>
                   </button>
                   <button
                     onClick={() => setMode('Repositório')}
-                    className="flex items-center gap-2 px-4 py-2 border border-[#1d2433] bg-[#0d121c]/90 hover:bg-[#141b2a] hover:border-[#2d374d] text-xs font-medium text-[#8b8b93] hover:text-white rounded-full transition-all duration-200 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+                    className="flex cursor-pointer items-center gap-2 rounded-full border border-dd-border bg-dd-surface/50 px-4 py-2 text-xs font-medium text-dd-muted shadow-sm transition-all duration-200 hover:scale-[1.02] hover:border-blue-500/30 hover:bg-dd-surface hover:text-dd-text active:scale-[0.98]"
                   >
                     <Folder className="w-3.5 h-3.5 text-blue-400" />
                     <span>Repositório</span>
                   </button>
                   <button
                     onClick={() => handleSuggestionClick('Escrever Testes')}
-                    className="flex items-center gap-2 px-4 py-2 border border-[#1d2433] bg-[#0d121c]/90 hover:bg-[#141b2a] hover:border-[#2d374d] text-xs font-medium text-[#8b8b93] hover:text-white rounded-full transition-all duration-200 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+                    className="flex cursor-pointer items-center gap-2 rounded-full border border-dd-border bg-dd-surface/50 px-4 py-2 text-xs font-medium text-dd-muted shadow-sm transition-all duration-200 hover:scale-[1.02] hover:border-blue-500/30 hover:bg-dd-surface hover:text-dd-text active:scale-[0.98]"
                   >
                     <FlaskConical className="w-3.5 h-3.5 text-blue-400" />
                     <span>Escrever Testes</span>
@@ -1644,7 +1648,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                       /* DUCKY (AI) MESSAGE: Left-aligned plain text with icons underneath */
                       <div
                         key={msg.id}
-                        className="flex flex-col items-start w-full py-4 border-b border-[#1f1f23]/10 animate-in fade-in duration-200"
+                        className="flex w-full animate-in flex-col items-start border-b border-dd-border/40 py-4 fade-in duration-200"
                       >
                         {/* Repo badge on top of repo-analysis messages */}
                         {msg.repo && !msg.isStreaming && (
@@ -1652,7 +1656,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                             href={msg.repo.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="mb-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#0c0c0e] border border-[#1f1f23] hover:border-[#38383e] rounded-md text-[10px] font-bold text-dd-muted hover:text-dd-text transition-all"
+                            className="mb-2.5 inline-flex items-center gap-1.5 rounded-md border border-dd-border bg-dd-surface px-2.5 py-1 text-[10px] font-bold text-dd-muted transition-all hover:border-blue-500/40 hover:text-dd-text"
                           >
                             <Github className="w-3 h-3 text-blue-500" />
                             <span>
@@ -1670,7 +1674,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
                         {/* Action icons below Ducky message */}
                         {!msg.isStreaming && (
-                          <div className="flex items-center gap-3.5 mt-2.5 text-[#53535f] select-none">
+                          <div className="mt-2.5 flex select-none items-center gap-3.5 text-dd-muted">
                             <button
                               onClick={() => navigator.clipboard.writeText(msg.text)}
                               className="hover:text-dd-text transition-colors cursor-pointer"
@@ -1718,7 +1722,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                             {msg.attachments.map((a, idx) => (
                               <div
                                 key={idx}
-                                className="flex items-center gap-1 px-2 py-1 bg-[#1c1c1f] border border-[#2c2c35] rounded-md text-[10px] text-dd-text"
+                                className="flex items-center gap-1 rounded-md border border-dd-border bg-dd-surface px-2 py-1 text-[10px] text-dd-text"
                               >
                                 {a.kind === 'image' ? (
                                   <>
@@ -1742,12 +1746,12 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                             ))}
                           </div>
                         )}
-                        <div className="bg-[#1c1c1f] hover:bg-[#232328] border border-[#2c2c35]/40 text-dd-text px-4 py-2 rounded-2xl max-w-[70%] text-sm break-words whitespace-pre-wrap font-sans transition-colors">
+                        <div className="max-w-[70%] whitespace-pre-wrap break-words rounded-2xl border border-dd-border bg-dd-surface px-4 py-2 font-sans text-sm text-dd-text transition-colors hover:bg-dd-surface/80">
                           {msg.text}
                         </div>
 
                         {/* Action icons below user message */}
-                        <div className="flex items-center gap-3 mt-1.5 text-[#53535f] select-none mr-2">
+                        <div className="mr-2 mt-1.5 flex select-none items-center gap-3 text-dd-muted">
                           <button
                             onClick={() => navigator.clipboard.writeText(msg.text)}
                             className="hover:text-dd-text transition-colors cursor-pointer"
@@ -1772,8 +1776,8 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
                   {/* Thinking Indicator */}
                   {thinking && (
-                    <div className="flex flex-col items-start w-full py-4 border-b border-[#1f1f23]/10 animate-in fade-in duration-200">
-                      <div className="flex items-center gap-2.5 text-xs text-[#71767b] py-1 font-sans">
+                    <div className="flex w-full animate-in flex-col items-start border-b border-dd-border/40 py-4 fade-in duration-200">
+                      <div className="flex items-center gap-2.5 py-1 font-sans text-xs text-dd-muted">
                         <div className="flex gap-1.5">
                           <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
                           <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
@@ -1796,12 +1800,12 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
             </div>
 
             {/* Bottom Fixed Input Card */}
-            <div className="shrink-0 bg-gradient-to-t from-[#060606] via-[#060606] to-[#060606]/80 px-4 pt-2 pb-4 z-20 border-t border-[#1f1f23]/40">
+            <div className="z-20 shrink-0 border-t border-dd-border/60 bg-dd-bg/95 px-4 pb-4 pt-2 backdrop-blur-md">
               <div className="max-w-3xl w-full mx-auto flex flex-col items-center">
                 {renderInputCard()}
 
                 {/* Premium Promotion Hint */}
-                <div className="mt-2.5 text-[9px] text-[#71767b] max-w-xl text-center flex items-center justify-center gap-1.5 select-none">
+                <div className="mt-2.5 flex max-w-xl select-none items-center justify-center gap-1.5 text-center text-[9px] text-dd-muted">
                   <Sparkles className="w-3 h-3 text-blue-500" />
                   <span>
                     ASYNC Premium — Tire dúvidas ilimitadas e ative análise de repositórios do
@@ -1824,24 +1828,24 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
       {/* History Drawer Panel */}
       <div
-        className={`fixed top-0 right-0 h-screen w-full max-w-[360px] md:max-w-[400px] bg-[#0c0c0e]/95 border-l border-[#1f1f23]/60 shadow-2xl z-50 flex flex-col transition-transform duration-300 ease-out backdrop-blur-md ${
+        className={`fixed right-0 top-0 z-50 flex h-screen w-full max-w-[360px] flex-col border-l border-dd-border bg-dd-bg/95 shadow-2xl backdrop-blur-md transition-transform duration-300 ease-out md:max-w-[400px] ${
           isHistoryOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         {/* Drawer Header */}
-        <div className="flex items-center gap-4 px-4 pt-5 pb-3 border-b border-[#1c1c1f]/40 select-none shrink-0">
+        <div className="flex shrink-0 select-none items-center gap-4 border-b border-dd-border/60 px-4 pb-3 pt-5">
           <button
             onClick={() => setIsHistoryOpen(false)}
-            className="p-1.5 hover:bg-[#1c1c1f] rounded-full text-[#8b8b93] hover:text-dd-text transition-colors cursor-pointer"
+            className="cursor-pointer rounded-full p-1.5 text-dd-muted transition-colors hover:bg-dd-surface hover:text-dd-text"
             title="Fechar"
           >
             <X className="w-5 h-5" />
           </button>
-          <h2 className="text-base font-bold text-white">História</h2>
+          <h2 className="text-base font-bold text-dd-text">História</h2>
         </div>
 
         {/* Drawer Tabs */}
-        <div className="flex px-2 border-b border-[#1c1c1f] select-none shrink-0">
+        <div className="flex shrink-0 select-none border-b border-dd-border px-2">
           {(['chats', 'saved', 'images'] as const).map((tab) => {
             const isActive = historyActiveTab === tab;
             const labels = {
@@ -1854,7 +1858,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                 key={tab}
                 onClick={() => setHistoryActiveTab(tab)}
                 className={`flex-1 py-3 text-center text-xs font-semibold relative transition-colors cursor-pointer ${
-                  isActive ? 'text-white font-bold' : 'text-[#8b8b93] hover:text-dd-text'
+                  isActive ? 'font-bold text-dd-text' : 'text-dd-muted hover:text-dd-text'
                 }`}
               >
                 {labels[tab]}
@@ -1867,20 +1871,20 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
         </div>
 
         {/* Search Input Bar */}
-        <div className="p-4 border-b border-[#1c1c1f]/40 shrink-0">
-          <div className="relative flex items-center bg-[#131316] border border-[#1f1f23] rounded-full px-3.5 py-2 focus-within:border-blue-500/40 transition-colors">
-            <Search className="w-4 h-4 text-[#53535f] mr-2.5 shrink-0" />
+        <div className="shrink-0 border-b border-dd-border/60 p-4">
+          <div className="relative flex items-center rounded-full border border-dd-border bg-dd-surface px-3.5 py-2 transition-colors focus-within:border-blue-500/40">
+            <Search className="mr-2.5 h-4 w-4 shrink-0 text-dd-muted" />
             <input
               type="text"
               value={historySearchQuery}
               onChange={(e) => setHistorySearchQuery(e.target.value)}
               placeholder="Pesquisar histórico da ASYNC"
-              className="bg-transparent border-none outline-none text-xs text-dd-text placeholder-[#53535f] w-full"
+              className="w-full border-none bg-transparent text-xs text-dd-text outline-none placeholder:text-dd-muted"
             />
             {historySearchQuery && (
               <button
                 onClick={() => setHistorySearchQuery('')}
-                className="p-0.5 hover:bg-[#1c1c1f] rounded text-[#8b8b93] hover:text-dd-text transition-colors cursor-pointer shrink-0"
+                className="shrink-0 cursor-pointer rounded p-0.5 text-dd-muted transition-colors hover:bg-dd-surface hover:text-dd-text"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
