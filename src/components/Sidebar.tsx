@@ -425,7 +425,7 @@ export function Sidebar({ user }: SidebarProps) {
       {/* ========================================== */}
       {/* DESKTOP SIDEBAR (Twitter-like) */}
       {/* ========================================== */}
-      <aside className="hidden md:flex flex-col justify-between w-64 lg:w-72 h-screen sticky top-0 border-r border-dd-border bg-dd-bg p-5 z-40 select-none">
+      <aside className="hidden md:flex flex-col justify-between w-64 xl:w-[275px] h-screen sticky top-0 border-r border-dd-border bg-dd-bg p-5 z-40 select-none shrink-0">
         <div className="space-y-5">
           {/* Logo */}
           <Link href="/feed" className="flex items-center gap-2.5 px-3 py-0 group w-fit">
@@ -523,7 +523,7 @@ export function Sidebar({ user }: SidebarProps) {
                             onClick={() => setMoreMenuOpen(false)}
                           >
                             <Users className="w-4.5 h-4.5 text-dd-muted" />
-                            Guildas
+                            Comunidades
                           </Link>
                           <Link
                             href="/bookmarks"
@@ -598,45 +598,49 @@ export function Sidebar({ user }: SidebarProps) {
           <div className="relative">
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="group w-full flex items-start justify-between p-3.5 rounded-2xl border border-transparent hover:border-dd-border hover:bg-dd-surface/40 transition-all duration-200 cursor-pointer"
+              aria-expanded={dropdownOpen}
+              aria-haspopup="menu"
+              className="group w-full cursor-pointer rounded-2xl border border-transparent p-3 text-left transition-all duration-200 hover:border-dd-border hover:bg-dd-surface/40"
             >
-              <div className="flex items-start gap-3.5 min-w-0 flex-grow">
+              <div className="flex w-full min-w-0 items-center gap-3">
                 {activeUser.avatar_url ? (
                   <Image
                     src={activeUser.avatar_url}
                     alt={activeUser.username}
-                    width={40}
-                    height={40}
-                    className="w-10 h-10 rounded-full object-cover border border-dd-border shrink-0 mt-0.5"
+                    width={44}
+                    height={44}
+                    className="h-11 w-11 shrink-0 rounded-full border border-dd-border object-cover"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm font-bold border border-blue-500/10 shrink-0 mt-0.5">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-blue-500/10 bg-blue-500/20 text-sm font-bold text-blue-400">
                     {initials}
                   </div>
                 )}
-                <div className="text-left min-w-0 font-sans flex-grow">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <p className="text-sm font-bold text-dd-text truncate leading-tight">
+                <div className="min-w-0 flex-1 font-sans">
+                  <div className="flex min-w-0 items-center justify-between gap-2">
+                    <p className="min-w-0 truncate text-sm font-bold leading-tight text-dd-text">
                       {activeUser.username}
+                    </p>
+                    <MoreHorizontal className="h-5 w-5 shrink-0 text-dd-muted transition-colors duration-200 group-hover:text-dd-text" />
+                  </div>
+                  <div className="mt-1 flex min-w-0 items-center gap-2">
+                    <p className="min-w-0 flex-1 truncate text-[11px] font-medium leading-none text-dd-muted">
+                      @{activeUser.username.toLowerCase()}
                     </p>
                     <span className="px-1.5 py-0.5 rounded bg-blue-500/10 border border-blue-500/30 text-[9.5px] font-extrabold text-blue-500 leading-none shadow-sm shrink-0">
                       Lvl {Math.max(1, Math.floor((activeUser.total_xp ?? 0) / 1000) + 1)}
                     </span>
                   </div>
-                  <p className="text-[11px] text-dd-muted font-medium truncate leading-none mt-1">
-                    @{activeUser.username.toLowerCase()}
-                  </p>
-                  <div className="flex items-center gap-2 mt-3 select-none">
-                    <Flame className="w-6 h-6 text-blue-500 fill-blue-500 shrink-0" />
-                    <span className="text-[11px] font-extrabold text-blue-500 leading-none">
-                      {activeUser.streak_days ?? activeUser.streak ?? 0}{' '}
-                      {(activeUser.streak_days ?? activeUser.streak ?? 0) === 1 ? 'dia' : 'dias'} de
-                      domínio
-                    </span>
-                  </div>
                 </div>
               </div>
-              <MoreHorizontal className="w-5 h-5 text-dd-muted shrink-0 mt-1.5 transition-colors duration-200 group-hover:text-dd-text" />
+              <div className="ml-14 mt-2.5 flex w-fit select-none items-center gap-1.5 rounded-full bg-blue-500/10 px-2.5 py-1.5 text-blue-500">
+                <Flame className="h-4 w-4 shrink-0 fill-blue-500" />
+                <span className="text-[10.5px] font-extrabold leading-none">
+                  {activeUser.streak_days ?? activeUser.streak ?? 0}{' '}
+                  {(activeUser.streak_days ?? activeUser.streak ?? 0) === 1 ? 'dia' : 'dias'} de
+                  domínio
+                </span>
+              </div>
             </button>
 
             {dropdownOpen && (
