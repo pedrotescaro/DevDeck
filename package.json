@@ -31,7 +31,7 @@
     "@tabler/icons-react": "^3.46.0",
     "@tiptap/extension-bubble-menu": "^3.27.0",
     "@tiptap/extension-code-block": "^3.27.0",
-    "@tiptap/extension-link": "^3.27.0",
+    "@tiptap/extension-link": "^3.27.1",
     "@tiptap/extension-placeholder": "^3.27.0",
     "@tiptap/html": "^3.27.0",
     "@tiptap/pm": "^3.27.0",
