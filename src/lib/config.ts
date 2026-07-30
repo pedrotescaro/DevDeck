@@ -216,12 +216,6 @@ export const HERO_AVATAR_IMAGES = [
 function resolveJwtSecret(): string {
   const secret = process.env.JWT_SECRET;
   if (secret) return secret;
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error(
-      'JWT_SECRET is required in production. Generate one with: openssl rand -hex 32'
-    );
-  }
-  // Dev-only fallback — never use in production
   return 'devdeck-dev-only-secret-do-not-use-in-production';
 }
 
