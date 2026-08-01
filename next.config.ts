@@ -33,7 +33,7 @@ const securityHeaders = [
       // Note: 'unsafe-inline' é necessário para scripts inline do Next.js.
       // Para maior segurança, implementar nonce-based CSP (requer middleware).
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' blob: data: https://images.unsplash.com https://api.dicebear.com https://avatars.githubusercontent.com https://assets.aceternity.com",
+      "img-src 'self' blob: data: https://images.unsplash.com https://api.dicebear.com https://avatars.githubusercontent.com https://lh3.googleusercontent.com https://assets.aceternity.com",
       "font-src 'self' data: https://fonts.gstatic.com",
       "connect-src 'self' ws: wss: https://*.supabase.co https://api.github.com https://wandbox.org https://generativelanguage.googleapis.com https://api.groq.com https://api.openai.com http://localhost:11434",
       "object-src 'none'",
@@ -65,6 +65,11 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'api.dicebear.com' },
       { protocol: 'https', hostname: 'avatars.githubusercontent.com' },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        pathname: '/**',
+      },
       { protocol: 'https', hostname: 'assets.aceternity.com' },
       { protocol: 'https', hostname: '*.supabase.co' },
     ],
