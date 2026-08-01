@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { AVATAR_API_URL, DEFAULT_LANGUAGE_TRAILS } from '@/lib/config';
 import { signJwt, setJwtCookie } from '@/lib/jwt';
 import { logger } from '@/lib/logger';
+import { getOAuthSignupBio } from '@/lib/supabase/oauth';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -59,9 +60,7 @@ export async function GET(request: Request) {
               email: email!,
               avatar_url:
                 data.user.user_metadata?.avatar_url || `${avatarBaseUrl}?seed=${finalUsername}`,
-              bio: isDiscord
-                ? 'Novo desenvolvedor no DevDeck via Discord! 🎮'
-                : 'Novo desenvolvedor no DevDeck via GitHub! 🚀',
+              bio: getOAuthSignupBio(provider),
               github_username: isGithub ? username : null,
               discord_username: isDiscord
                 ? data.user.user_metadata?.full_name ||

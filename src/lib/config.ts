@@ -224,6 +224,15 @@ export const JWT_SECRET = resolveJwtSecret();
 /** JWT token expiration time. Default: 7 days. */
 export const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
+function jwtExpirationToSeconds(value: string): number {
+  const match = /^(\d+)([smhd])$/.exec(value.trim().toLowerCase());
+  if (!match) return 7 * 24 * 60 * 60;
+
+  const amount = Number.parseInt(match[1], 10);
+  const unitSeconds = { s: 1, m: 60, h: 60 * 60, d: 24 * 60 * 60 } as const;
+  return amount * unitSeconds[match[2] as keyof typeof unitSeconds];
+}
+
 /** JWT cookie name used for the secondary auth token. */
 export const JWT_COOKIE_NAME = 'devdeck-jwt';
 
@@ -233,5 +242,5 @@ export const JWT_COOKIE_OPTIONS = {
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax' as const,
   path: '/',
-  maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
+  maxAge: jwtExpirationToSeconds(JWT_EXPIRES_IN),
 };

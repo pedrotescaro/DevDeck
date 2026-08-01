@@ -1,17 +1,11 @@
 import { NextResponse } from 'next/server';
-import { getAuthUser } from '@/lib/auth';
+import { apiHandler } from '@/lib/api-handler';
+import { UnauthorizedError } from '@/lib/errors';
 
-export async function GET() {
-  try {
-    const user = await getAuthUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    return NextResponse.json(user);
-  } catch (error) {
-    console.error('Error in /api/users/me:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+export const GET = apiHandler(async (_request, { session }) => {
+  if (!session) {
+    throw new UnauthorizedError();
   }
-}
+
+  return NextResponse.json(session);
+});

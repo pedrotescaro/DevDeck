@@ -14,7 +14,7 @@
 
 import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
 import { cookies } from 'next/headers';
-import { JWT_SECRET, JWT_COOKIE_NAME, JWT_COOKIE_OPTIONS } from '@/lib/config';
+import { JWT_SECRET, JWT_COOKIE_NAME, JWT_COOKIE_OPTIONS, JWT_EXPIRES_IN } from '@/lib/config';
 import { logger } from '@/lib/logger';
 
 export interface JwtPayload {
@@ -40,7 +40,7 @@ export async function signJwt(payload: {
     .setProtectedHeader({ alg: 'HS256' })
     .setSubject(payload.userId)
     .setIssuedAt()
-    .setExpirationTime('7d')
+    .setExpirationTime(JWT_EXPIRES_IN)
     .sign(getEncodedJwtSecret());
 }
 

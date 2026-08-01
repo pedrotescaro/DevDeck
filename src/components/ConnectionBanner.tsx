@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Wifi, WifiOff } from 'lucide-react';
 
-type ConnectionState = 'online' | 'offline' | 'restored';
+type ConnectionState = 'online' | 'offline' | 'degraded' | 'restored';
 
 export default function ConnectionBanner() {
   const [connectionState, setConnectionState] = useState<ConnectionState>('online');
@@ -14,6 +14,13 @@ export default function ConnectionBanner() {
     const clearHideTimer = () => {
       if (hideTimerRef.current !== null) window.clearTimeout(hideTimerRef.current);
       hideTimerRef.current = null;
+    };
+
+    const showRestored = () => {
+      clearHideTimer();
+      wasOfflineRef.current = false;
+      setConnectionState('restored');
+      hideTimerRef.current = window.setTimeout(() => setConnectionState('online'), 2500);
     };
 
     const handleOffline = () => {
@@ -28,26 +35,40 @@ export default function ConnectionBanner() {
         setConnectionState('online');
         return;
       }
+      showRestored();
+    };
 
-      wasOfflineRef.current = false;
-      setConnectionState('restored');
-      hideTimerRef.current = window.setTimeout(() => setConnectionState('online'), 2500);
+    const handleAppConnectionState = (event: Event) => {
+      const state = (event as CustomEvent<{ state?: 'degraded' | 'restored' }>).detail?.state;
+      if (!state) return;
+
+      if (state === 'restored') {
+        showRestored();
+        return;
+      }
+
+      clearHideTimer();
+      wasOfflineRef.current = true;
+      setConnectionState('degraded');
     };
 
     if (!navigator.onLine) handleOffline();
     window.addEventListener('offline', handleOffline);
     window.addEventListener('online', handleOnline);
+    window.addEventListener('devdeck:connection-state', handleAppConnectionState);
 
     return () => {
       clearHideTimer();
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('online', handleOnline);
+      window.removeEventListener('devdeck:connection-state', handleAppConnectionState);
     };
   }, []);
 
   if (connectionState === 'online') return null;
 
   const restored = connectionState === 'restored';
+  const degraded = connectionState === 'degraded';
 
   return (
     <div
@@ -60,7 +81,11 @@ export default function ConnectionBanner() {
       }`}
     >
       {restored ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
-      {restored ? 'Conexão restabelecida.' : 'Você está offline. Exibindo o conteúdo já carregado.'}
+      {restored
+        ? 'Conexão restabelecida.'
+        : degraded
+          ? 'Conexão instável. Tentando reconectar…'
+          : 'Você está offline. Exibindo o conteúdo já carregado.'}
     </div>
   );
 }

@@ -62,4 +62,31 @@ describe('current user request cache', () => {
     expect((await getCurrentUser<{ id: string }>())?.id).toBe('user-2');
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
+
+  it('retries a temporary server outage without treating it as logout', async () => {
+    const connectionStates: string[] = [];
+    const handleConnectionState = (event: Event) => {
+      const state = (event as CustomEvent<{ state: string }>).detail.state;
+      connectionStates.push(state);
+    };
+    window.addEventListener('devdeck:connection-state', handleConnectionState);
+
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(null, { status: 503 }))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ id: 'user-1' }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const user = await getCurrentUser<{ id: string }>();
+    window.removeEventListener('devdeck:connection-state', handleConnectionState);
+
+    expect(user?.id).toBe('user-1');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(connectionStates).toEqual(['degraded', 'restored']);
+  });
 });

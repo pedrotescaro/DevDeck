@@ -1,0 +1,26 @@
+.hero {
+  isolation: isolate;
+  background-color: #000;
+  background-image: url('/bg-glass-3.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.formPanel {
+  background: #111;
+}
+
+.brandLogo {
+  filter: drop-shadow(0 3px 9px rgba(0, 0, 0, 0.24));
+}
+
+.brandText {
+  text-shadow: 0 2px 9px rgba(0, 0, 0, 0.25);
+}
+
+@media (max-width: 1023px) {
+  .formPanel {
+    background: radial-gradient(circle at 50% 0%, rgba(0, 120, 255, 0.12), transparent 32%), #111;
+  }
+}

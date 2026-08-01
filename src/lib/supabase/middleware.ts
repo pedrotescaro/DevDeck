@@ -3,11 +3,40 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { verifyJwt } from '@/lib/jwt';
 import { JWT_COOKIE_NAME } from '@/lib/config';
+import { isTemporaryAuthFailure } from '@/lib/supabase/auth-errors';
+import { getErrorSummary } from '@/lib/connection-errors';
+import { logger } from '@/lib/logger';
+
+const PROTECTED_ROUTE_PREFIXES = [
+  '/async',
+  '/bookmarks',
+  '/duels',
+  '/explore',
+  '/feed',
+  '/guilds',
+  '/leaderboard',
+  '/messages',
+  '/notifications',
+  '/post',
+  '/profile',
+  '/quiz',
+  '/settings',
+  '/trails',
+] as const;
+
+function copySessionState(source: NextResponse, target: NextResponse) {
+  source.cookies.getAll().forEach((cookie) => target.cookies.set(cookie));
+
+  for (const headerName of ['cache-control', 'expires', 'pragma']) {
+    const value = source.headers.get(headerName);
+    if (value) target.headers.set(headerName, value);
+  }
+
+  return target;
+}
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+  let supabaseResponse = NextResponse.next({ request });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
@@ -19,72 +48,64 @@ export async function updateSession(request: NextRequest) {
       },
       setAll(cookiesToSet, headers) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        supabaseResponse = NextResponse.next({
-          request,
-        });
+        supabaseResponse = NextResponse.next({ request });
         cookiesToSet.forEach(({ name, value, options }) =>
           supabaseResponse.cookies.set(name, value, options)
         );
-        Object.entries(headers).forEach(([key, value]) => supabaseResponse.headers.set(key, value));
+        Object.entries(headers).forEach(([header, value]) =>
+          supabaseResponse.headers.set(header, value)
+        );
       },
     },
   });
 
-  // ── Authentication check ─────────────────────────────────────
-  // Strategy 1: JWT cookie (fast, no external call)
-  // Strategy 2: Supabase session (fallback)
-  let user = null;
+  // This verified-claims call is also what refreshes expired Supabase tokens.
+  // It must run even while the secondary JWT is still valid.
+  let user: { id: string } | null = null;
+  try {
+    const { data, error } = await supabase.auth.getClaims();
+    const userId = typeof data?.claims?.sub === 'string' ? data.claims.sub : null;
 
-  const jwtToken = request.cookies.get(JWT_COOKIE_NAME)?.value;
-  if (jwtToken) {
-    const jwtPayload = await verifyJwt(jwtToken);
-    if (jwtPayload?.sub) {
-      // JWT is valid — treat as authenticated
-      // We trust the JWT for middleware-level route protection.
-      // The full user object is resolved in getAuthUser() on the server.
-      user = { id: jwtPayload.sub } as any;
-    }
-  }
+    if (userId) {
+      user = { id: userId };
+    } else if (error && isTemporaryAuthFailure(error)) {
+      // Refresh tokens are single-use. A parallel refresh or short outage may
+      // fail while another response is synchronizing a newer browser cookie.
+      const jwtToken = request.cookies.get(JWT_COOKIE_NAME)?.value;
+      const jwtPayload = jwtToken ? await verifyJwt(jwtToken) : null;
+      if (jwtPayload?.sub) user = { id: jwtPayload.sub };
 
-  // Fall back to Supabase if JWT is missing/invalid
-  if (!user) {
-    try {
-      const {
-        data: { user: supabaseUser },
-      } = await supabase.auth.getUser();
-      user = supabaseUser;
-    } catch (error) {
-      console.error('Supabase auth error in middleware:', error);
+      logger.warn('Temporary Supabase auth failure in proxy', {
+        ...getErrorSummary(error),
+        usedJwtFallback: Boolean(user),
+      });
+    } else if (error) {
+      logger.debug('Supabase session is not valid in proxy', getErrorSummary(error));
     }
+  } catch (error) {
+    const jwtToken = request.cookies.get(JWT_COOKIE_NAME)?.value;
+    const jwtPayload = isTemporaryAuthFailure(error) && jwtToken ? await verifyJwt(jwtToken) : null;
+    if (jwtPayload?.sub) user = { id: jwtPayload.sub };
+
+    logger.warn('Supabase auth check failed in proxy', {
+      ...getErrorSummary(error),
+      usedJwtFallback: Boolean(user),
+    });
   }
 
   const pathname = request.nextUrl.pathname;
-
-  // List of protected routes
-  const isProtectedRoute =
-    pathname.startsWith('/feed') ||
-    pathname.startsWith('/post') ||
-    pathname.startsWith('/quiz') ||
-    pathname.startsWith('/duels') ||
-    pathname.startsWith('/profile') ||
-    pathname.startsWith('/settings');
+  const isProtectedRoute = PROTECTED_ROUTE_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
 
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
-    const redirectResponse = NextResponse.redirect(url);
-
-    // 🔥 CORREÇÃO: Copia os cookies que o Supabase tentou atualizar
-    supabaseResponse.cookies.getAll().forEach((cookie) => {
-      redirectResponse.cookies.set(cookie.name, cookie.value);
-    });
-
-    return redirectResponse;
+    return copySessionState(supabaseResponse, NextResponse.redirect(url));
   }
 
-  // Redirect authenticated users trying to access auth pages to the feed
-  // BUT allow access to /login when session_expired (DB may be unreachable,
-  // so the JWT is valid but the server can't load the user from the DB).
+  // Keep the explicit reason escape hatch for a failed database lookup. It
+  // prevents a valid-but-unusable cookie from creating a redirect loop.
   const reasonParam = request.nextUrl.searchParams.get('reason');
   if (
     user &&
@@ -93,14 +114,7 @@ export async function updateSession(request: NextRequest) {
   ) {
     const url = request.nextUrl.clone();
     url.pathname = '/feed';
-    const redirectResponse = NextResponse.redirect(url);
-
-    // 🔥 CORREÇÃO: Faz o mesmo aqui por segurança
-    supabaseResponse.cookies.getAll().forEach((cookie) => {
-      redirectResponse.cookies.set(cookie.name, cookie.value);
-    });
-
-    return redirectResponse;
+    return copySessionState(supabaseResponse, NextResponse.redirect(url));
   }
 
   return supabaseResponse;

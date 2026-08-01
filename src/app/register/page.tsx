@@ -5,7 +5,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Eye, EyeOff, Lock, Mail, User, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { OAUTH_PROVIDER_LABELS, type OAuthProvider } from '@/lib/supabase/oauth';
+import { CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { DiscordIcon, GitHubIcon, GoogleIcon } from '@/components/auth/OAuthProviderIcons';
+import Loader from '@/components/Loader';
+import styles from '../login/login.module.css';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -36,14 +40,14 @@ export default function RegisterPage() {
     return true;
   };
 
-  const handleGithubLogin = async () => {
+  const handleOAuthLogin = async (provider: OAuthProvider) => {
     setError(null);
     if (!checkSupabaseConfig()) return;
 
     try {
       const supabase = createClient();
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider: 'github',
+        provider,
         options: {
           redirectTo: `${window.location.origin}/api/auth/callback`,
         },
@@ -54,29 +58,7 @@ export default function RegisterPage() {
       }
     } catch (err) {
       console.error(err);
-      setError('Erro ao autenticar com o GitHub. Tente novamente.');
-    }
-  };
-
-  const handleDiscordLogin = async () => {
-    setError(null);
-    if (!checkSupabaseConfig()) return;
-
-    try {
-      const supabase = createClient();
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider: 'discord',
-        options: {
-          redirectTo: `${window.location.origin}/api/auth/callback`,
-        },
-      });
-
-      if (oauthError) {
-        setError(oauthError.message);
-      }
-    } catch (err) {
-      console.error(err);
-      setError('Erro ao autenticar com o Discord. Tente novamente.');
+      setError(`Erro ao autenticar com o ${OAUTH_PROVIDER_LABELS[provider]}. Tente novamente.`);
     }
   };
 
@@ -141,231 +123,273 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#000000] text-white antialiased px-4 py-12 relative overflow-hidden select-none font-sans">
-      {/* Landing page blue radial background glow */}
-      <div
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] pointer-events-none select-none opacity-25"
-        style={{
-          background: 'radial-gradient(circle, #0083fe 0%, transparent 65%)',
-          filter: 'blur(100px)',
-        }}
-      />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.03),transparent_50%)]" />
-
-      {/* Top Left back link */}
-      <div className="absolute top-6 left-6 z-30">
-        <Link
-          href="/"
-          className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-slate-400 hover:text-white transition-colors"
+    <main className="min-h-svh bg-[#111] font-sans text-white antialiased">
+      <div className="grid min-h-svh w-full lg:grid-cols-[53%_47%]">
+        <aside
+          className={[
+            styles.hero,
+            'relative m-3 mr-0 hidden min-h-[calc(100svh-24px)] overflow-hidden rounded-xl lg:flex lg:items-center lg:justify-center',
+          ].join(' ')}
         >
-          <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-0.5" />
-          <span>Voltar para a Home</span>
-        </Link>
-      </div>
-
-      <div className="w-full max-w-md rounded-3xl p-8 sm:p-10 bg-[#080808]/90 backdrop-blur-xl border border-white/10 shadow-[0_25px_60px_-15px_rgba(0,131,254,0.15)] relative z-10">
-        <div className="flex flex-col items-center mb-8 text-center">
-          <Link href="/" className="flex items-center gap-2.5 mb-4 group">
-            <div className="flex items-center justify-center size-9 rounded-xl bg-blue-500/10 border border-blue-500/20">
+          <div className="relative z-10 flex w-full -translate-y-[1.5%] flex-col items-center px-10 text-center">
+            <Link href="/" className="inline-flex items-center gap-5">
               <Image
                 src="/logo.svg"
-                alt="DevDeck Logo"
-                width={22}
-                height={22}
-                className="object-contain"
+                alt="Logo da DevDeck"
+                width={62}
+                height={62}
+                className={[styles.brandLogo, 'h-[62px] w-[62px] object-contain'].join(' ')}
               />
-            </div>
-            <span className="font-bold text-xl tracking-tight text-white">DevDeck</span>
-          </Link>
-          <h2 className="text-2xl font-bold tracking-tight text-white mb-1.5 sm:text-3xl">
-            Criar Minha Conta
-          </h2>
-          <p className="text-xs text-slate-400">
-            Entre para a comunidade e construa seu histórico técnico.
-          </p>
-        </div>
-
-        {error && (
-          <div className="mb-6 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5 text-xs text-rose-300 leading-relaxed font-mono">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleRegister} className="space-y-4">
-          <div>
-            <label
-              className="font-mono text-[10px] tracking-widest uppercase text-slate-400 mb-1.5 block"
-              htmlFor="username"
-            >
-              Nome de Usuário
-            </label>
-            <div className="relative">
-              <User
-                size={16}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"
-              />
-              <input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                className="w-full rounded-xl border border-white/10 bg-black/60 pl-10 pr-4 py-3 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all"
-                placeholder="seu_username"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label
-              className="font-mono text-[10px] tracking-widest uppercase text-slate-400 mb-1.5 block"
-              htmlFor="email"
-            >
-              Endereço de E-mail
-            </label>
-            <div className="relative">
-              <Mail
-                size={16}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"
-              />
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full rounded-xl border border-white/10 bg-black/60 pl-10 pr-4 py-3 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all"
-                placeholder="seu-email@dev.com"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label
-              className="font-mono text-[10px] tracking-widest uppercase text-slate-400 mb-1.5 block"
-              htmlFor="password"
-            >
-              Sua Senha (Mínimo 6 caracteres)
-            </label>
-            <div className="relative">
-              <Lock
-                size={16}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"
-              />
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                className="w-full rounded-xl border border-white/10 bg-black/60 pl-10 pr-10 py-3 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all"
-                placeholder="••••••••"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
-                tabIndex={-1}
+              <span
+                className={[
+                  styles.brandText,
+                  'text-[43px] font-bold tracking-[-0.055em] text-white',
+                ].join(' ')}
               >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-          </div>
+                DevDeck
+              </span>
+            </Link>
 
-          <div>
-            <label
-              className="font-mono text-[10px] tracking-widest uppercase text-slate-400 mb-1.5 block"
-              htmlFor="confirmPassword"
+            <h1
+              className={[
+                styles.brandText,
+                'mt-8 max-w-[560px] text-[32px] font-semibold leading-[1.14] tracking-[-0.045em] text-white xl:text-[36px]',
+              ].join(' ')}
             >
-              Confirmar Senha
-            </label>
-            <div className="relative">
-              <Lock
-                size={16}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"
+              Unlock the best of DevDeck. Access to the future community.
+            </h1>
+            <p
+              className={[
+                styles.brandText,
+                'mt-7 text-[17px] font-medium tracking-[-0.025em] text-white/85',
+              ].join(' ')}
+            >
+              Developers creating amazing experiences.
+            </p>
+          </div>
+        </aside>
+
+        <section
+          className={[
+            styles.formPanel,
+            'flex min-h-svh items-start justify-center px-8 py-8 sm:px-12 lg:py-[8vh] lg:px-[clamp(3rem,5.4vw,4rem)]',
+          ].join(' ')}
+        >
+          <div className="w-full max-w-[466px]">
+            <Link href="/" className="mb-8 inline-flex items-center gap-3 lg:hidden">
+              <Image
+                src="/logo.svg"
+                alt="Logo da DevDeck"
+                width={38}
+                height={38}
+                className={[styles.brandLogo, 'h-[38px] w-[38px] object-contain'].join(' ')}
               />
-              <input
-                id="confirmPassword"
-                type={showConfirmPassword ? 'text' : 'password'}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="w-full rounded-xl border border-white/10 bg-black/60 pl-10 pr-10 py-3 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all"
-                placeholder="••••••••"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
-                tabIndex={-1}
+              <span
+                className={[styles.brandText, 'text-2xl font-bold tracking-[-0.04em]'].join(' ')}
               >
-                {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-            {confirmPassword && password === confirmPassword && (
-              <p className="mt-1 flex items-center gap-1 font-mono text-[10px] text-emerald-400">
-                <CheckCircle2 size={12} /> Senhas coincidem
-              </p>
+                DevDeck
+              </span>
+            </Link>
+
+            {loading ? (
+              <Loader
+                title="Criando sua conta..."
+                subtitle="Estamos preparando seu perfil na DevDeck"
+                size="md"
+                className="min-h-[520px] px-0"
+              />
+            ) : (
+              <>
+                <header className="text-center">
+                  <h2 className="text-[28px] font-semibold leading-tight tracking-[-0.045em] text-white">
+                    Crie sua conta
+                  </h2>
+                  <p className="mt-3 text-[15px] text-[#9cb6df]">Entre para a comunidade hoje</p>
+                </header>
+
+                {error && (
+                  <div
+                    role="alert"
+                    className="mt-5 rounded-lg border border-rose-400/25 bg-rose-400/[0.08] px-4 py-3 text-sm leading-5 text-rose-200"
+                  >
+                    {error}
+                  </div>
+                )}
+
+                <div className="mt-8 grid grid-cols-3 gap-2.5">
+                  <button
+                    type="button"
+                    aria-label="Cadastrar com Google"
+                    onClick={() => handleOAuthLogin('google')}
+                    className="flex h-9 items-center justify-center gap-1.5 rounded-md border border-white/[0.06] bg-[#1a1a1a] px-1.5 text-[9px] font-medium whitespace-nowrap text-white/85 transition-colors hover:border-[#4285F4]/45 hover:bg-[#202020] sm:gap-2 sm:px-2 sm:text-[10px] cursor-pointer"
+                  >
+                    <GoogleIcon className="h-3.5 w-3.5 shrink-0" />
+                    <span>Google</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    aria-label="Cadastrar com GitHub"
+                    onClick={() => handleOAuthLogin('github')}
+                    className="flex h-9 items-center justify-center gap-1.5 rounded-md border border-white/[0.06] bg-[#1a1a1a] px-1.5 text-[9px] font-medium whitespace-nowrap text-white/85 transition-colors hover:border-white/20 hover:bg-[#202020] sm:gap-2 sm:px-2 sm:text-[10px] cursor-pointer"
+                  >
+                    <GitHubIcon className="h-3.5 w-3.5 shrink-0" />
+                    <span>GitHub</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    aria-label="Cadastrar com Discord"
+                    onClick={() => handleOAuthLogin('discord')}
+                    className="flex h-9 items-center justify-center gap-1.5 rounded-md border border-white/[0.06] bg-[#1a1a1a] px-1.5 text-[9px] font-medium whitespace-nowrap text-white/85 transition-colors hover:border-[#5865F2]/45 hover:bg-[#202020] sm:gap-2 sm:px-2 sm:text-[10px] cursor-pointer"
+                  >
+                    <DiscordIcon className="h-3.5 w-4 shrink-0 text-[#5865F2]" />
+                    <span>Discord</span>
+                  </button>
+                </div>
+
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-white/[0.08]" />
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="bg-[#111] px-4 text-[11px] font-medium uppercase tracking-[-0.025em] text-[#8ea1bf]">
+                      ou continue com e-mail
+                    </span>
+                  </div>
+                </div>
+
+                <form onSubmit={handleRegister} className="space-y-4">
+                  <div>
+                    <label
+                      className="mb-2 block text-[13px] font-medium text-white"
+                      htmlFor="username"
+                    >
+                      Nome de usuário
+                    </label>
+                    <input
+                      id="username"
+                      type="text"
+                      value={username}
+                      onChange={(event) => setUsername(event.target.value)}
+                      required
+                      autoComplete="username"
+                      className="h-[49px] w-full rounded-md border border-white/[0.06] bg-[#1a1a1a] px-4 text-sm text-white outline-none transition-colors placeholder:text-[#9db0cf] hover:border-white/10 focus:border-[#469cff]"
+                      placeholder="seu_usuario"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      className="mb-2 block text-[13px] font-medium text-white"
+                      htmlFor="email"
+                    >
+                      Endereço de e-mail
+                    </label>
+                    <input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      required
+                      autoComplete="email"
+                      className="h-[49px] w-full rounded-md border border-white/[0.06] bg-[#1a1a1a] px-4 text-sm text-white outline-none transition-colors placeholder:text-[#9db0cf] hover:border-white/10 focus:border-[#469cff]"
+                      placeholder="voce@email.com"
+                    />
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <label
+                        className="mb-2 block text-[13px] font-medium text-white"
+                        htmlFor="password"
+                      >
+                        Senha
+                      </label>
+                      <div className="relative">
+                        <input
+                          id="password"
+                          type={showPassword ? 'text' : 'password'}
+                          value={password}
+                          onChange={(event) => setPassword(event.target.value)}
+                          required
+                          minLength={6}
+                          autoComplete="new-password"
+                          className="h-[49px] w-full rounded-md border border-white/[0.06] bg-[#1a1a1a] px-4 pr-11 text-sm text-white outline-none transition-colors placeholder:text-[#9db0cf] hover:border-white/10 focus:border-[#469cff]"
+                          placeholder="Mínimo 6 caracteres"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((current) => !current)}
+                          aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                          aria-pressed={showPassword}
+                          className="absolute right-1.5 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-[#8c94a4] transition-colors hover:bg-white/5 hover:text-white"
+                        >
+                          {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label
+                        className="mb-2 block text-[13px] font-medium text-white"
+                        htmlFor="confirmPassword"
+                      >
+                        Confirmar senha
+                      </label>
+                      <div className="relative">
+                        <input
+                          id="confirmPassword"
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          value={confirmPassword}
+                          onChange={(event) => setConfirmPassword(event.target.value)}
+                          required
+                          minLength={6}
+                          autoComplete="new-password"
+                          className="h-[49px] w-full rounded-md border border-white/[0.06] bg-[#1a1a1a] px-4 pr-11 text-sm text-white outline-none transition-colors placeholder:text-[#9db0cf] hover:border-white/10 focus:border-[#469cff]"
+                          placeholder="Repita a senha"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword((current) => !current)}
+                          aria-label={
+                            showConfirmPassword ? 'Ocultar confirmação' : 'Mostrar confirmação'
+                          }
+                          aria-pressed={showConfirmPassword}
+                          className="absolute right-1.5 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-[#8c94a4] transition-colors hover:bg-white/5 hover:text-white"
+                        >
+                          {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {confirmPassword && password === confirmPassword && (
+                    <p className="flex items-center gap-1.5 text-[11px] text-emerald-400">
+                      <CheckCircle2 size={13} /> Senhas coincidem
+                    </p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex h-[49px] w-full items-center justify-center rounded-md bg-[#f1f1f3] text-sm font-semibold text-black transition-colors hover:bg-white disabled:cursor-wait disabled:opacity-60 cursor-pointer"
+                  >
+                    {loading ? 'Criando conta...' : 'Criar conta'}
+                  </button>
+                </form>
+
+                <p className="mt-6 text-center text-xs text-[#a7b8d5]">
+                  Já tem uma conta?{' '}
+                  <Link href="/login" className="font-semibold text-white hover:underline">
+                    Entrar
+                  </Link>
+                </p>
+              </>
             )}
           </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-xl bg-[#0083fe] hover:bg-[#1a8cd8] text-white font-bold text-xs py-3.5 tracking-wider uppercase transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98] disabled:opacity-50 cursor-pointer"
-          >
-            {loading ? 'Criando Conta...' : 'Cadastrar na Arena'}
-          </button>
-        </form>
-
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-white/10" />
-          </div>
-          <div className="relative flex justify-center text-[10px] font-mono tracking-widest uppercase">
-            <span className="bg-[#080808] px-3 text-slate-500 font-medium">Ou continue com</span>
-          </div>
-        </div>
-
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={handleGithubLogin}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-xs font-semibold uppercase text-slate-200 transition-all hover:bg-white/5 hover:border-white/20 active:scale-[0.98] cursor-pointer"
-          >
-            <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.579.688.481C19.137 20.164 22 16.418 22 12c0-5.523-4.477-10-10-10z"
-              />
-            </svg>
-            GitHub
-          </button>
-
-          <button
-            type="button"
-            onClick={handleDiscordLogin}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-xs font-semibold uppercase text-slate-200 transition-all hover:bg-white/5 hover:border-[#5865F2]/50 active:scale-[0.98] cursor-pointer"
-          >
-            <svg className="h-4.5 w-4.5 fill-current text-[#5865F2]" viewBox="0 0 127.14 96.36">
-              <path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.95,54.65.62,77.53a107.4,107.4,0,0,0,32,16.29,80.1,80.1,0,0,0,6.72-11,68.6,68.6,0,0,1-10.64-5.12c.91-.67,1.81-1.37,2.65-2.1a77,77,0,0,0,74.5,0c.84.73,1.74,1.43,2.65,2.1a68.6,68.6,0,0,1-10.64,5.12,80.1,80.1,0,0,0,6.72,11,107.4,107.4,0,0,0,32-16.29C130.41,47.55,123.57,24.78,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5.16-12.72,11.43-12.72S53.9,46,53.9,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53s5.16-12.72,11.45-12.72S96.14,46,96.14,53,91,65.69,84.69,65.69Z" />
-            </svg>
-            Discord
-          </button>
-        </div>
-
-        <p className="mt-8 text-center text-xs text-slate-400 font-medium">
-          Já tem uma conta?{' '}
-          <Link
-            href="/login"
-            className="text-blue-400 hover:text-blue-300 hover:underline font-semibold transition-colors"
-          >
-            Entrar
-          </Link>
-        </p>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }

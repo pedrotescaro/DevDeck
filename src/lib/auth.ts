@@ -1,15 +1,14 @@
+import { cache } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { supabaseAdmin } from '@/lib/supabase/admin';
-import { cache } from 'react';
-import { ForbiddenError, UnauthorizedError } from './errors';
-import { getJwtUser } from './jwt';
+import { ConnectionError, ForbiddenError, UnauthorizedError } from '@/lib/errors';
+import { getJwtUser } from '@/lib/jwt';
 import { logger } from '@/lib/logger';
+import { getErrorSummary, isTransientConnectionError } from '@/lib/connection-errors';
+import { isTemporaryAuthFailure } from '@/lib/supabase/auth-errors';
 
-/**
- * Fetch user from database via Prisma (direct PostgreSQL connection).
- * Returns null if the connection fails.
- */
+/** Fetch a user through the direct PostgreSQL connection. */
 async function fetchUserViaPrisma(userId: string) {
   return prisma.user.findUnique({
     where: { id: userId },
@@ -21,28 +20,42 @@ async function fetchUserViaPrisma(userId: string) {
 }
 
 /**
- * Fetch user via Supabase REST API (HTTPS, port 443).
- * Used as fallback when PostgreSQL port is blocked by the network.
+ * Fetch a user through the Supabase Data API on port 443. This is the fallback
+ * for networks that temporarily cannot reach the PostgreSQL pooler.
  */
 async function fetchUserViaRest(userId: string) {
   const { data: user, error } = await supabaseAdmin
     .from('User')
     .select('*')
     .eq('id', userId)
-    .single();
+    .maybeSingle();
 
-  if (error || !user) return null;
+  if (error) throw error;
+  if (!user) return null;
 
-  // Fetch related data
   const [badgesRes, trailsRes] = await Promise.all([
     supabaseAdmin.from('UserBadge').select('*, badge:Badge(*)').eq('user_id', userId),
     supabaseAdmin.from('LanguageTrail').select('*').eq('user_id', userId),
   ]);
 
-  // Normalize dates for compatibility with Prisma-style objects
-  const trails = (trailsRes.data || []).map((t: any) => ({
-    ...t,
-    last_activity_at: t.last_activity_at ? new Date(t.last_activity_at) : null,
+  // The core user record is enough to keep the session alive. Related data can
+  // degrade to an empty list and recover on the next request.
+  if (badgesRes.error) {
+    logger.warn('Could not load badges through Supabase REST fallback', {
+      userId,
+      ...getErrorSummary(badgesRes.error),
+    });
+  }
+  if (trailsRes.error) {
+    logger.warn('Could not load trails through Supabase REST fallback', {
+      userId,
+      ...getErrorSummary(trailsRes.error),
+    });
+  }
+
+  const trails = (trailsRes.data || []).map((trail: any) => ({
+    ...trail,
+    last_activity_at: trail.last_activity_at ? new Date(trail.last_activity_at) : null,
   }));
 
   return {
@@ -50,114 +63,108 @@ async function fetchUserViaRest(userId: string) {
     created_at: user.created_at ? new Date(user.created_at) : new Date(),
     last_active_at: user.last_active_at ? new Date(user.last_active_at) : null,
     birthday: user.birthday ? new Date(user.birthday) : null,
-    badges: (badgesRes.data || []).map((ub: any) => ({
-      ...ub,
-      earned_at: ub.earned_at ? new Date(ub.earned_at) : new Date(),
+    badges: (badgesRes.data || []).map((userBadge: any) => ({
+      ...userBadge,
+      earned_at: userBadge.earned_at ? new Date(userBadge.earned_at) : new Date(),
     })),
     trails,
   };
 }
 
-/**
- * Try Prisma first; if it times out, fall back to Supabase REST API.
- */
+/** Try PostgreSQL first and fail over to HTTPS only for transient errors. */
 async function findUserWithFallback(userId: string) {
   try {
-    const user = await fetchUserViaPrisma(userId);
-    return user;
-  } catch (prismaError: any) {
-    if (
-      prismaError?.code === 'ETIMEDOUT' ||
-      prismaError?.code === 'ENETUNREACH' ||
-      prismaError?.code === 'ECONNREFUSED'
-    ) {
-      logger.warn('Prisma connection failed, falling back to Supabase REST API', {
-        code: prismaError.code,
+    return await fetchUserViaPrisma(userId);
+  } catch (prismaError) {
+    if (!isTransientConnectionError(prismaError)) throw prismaError;
+
+    logger.warn('Prisma connection failed, falling back to Supabase REST API', {
+      userId,
+      ...getErrorSummary(prismaError),
+    });
+
+    try {
+      return await fetchUserViaRest(userId);
+    } catch (restError) {
+      logger.error('Both user data connections failed', {
+        userId,
+        prisma: getErrorSummary(prismaError),
+        rest: getErrorSummary(restError),
       });
-      return fetchUserViaRest(userId);
+      throw new ConnectionError(
+        'USER_DATA_UNAVAILABLE',
+        'Conexão temporariamente indisponível. Sua sessão continua ativa.'
+      );
     }
-    throw prismaError;
   }
 }
 
 /**
- * Get the authenticated user.
+ * Resolve the authenticated application user.
  *
- * Authentication strategy (in order of priority):
- * 1. JWT cookie — fast, no external service call
- * 2. Supabase session — fallback when JWT is missing/expired
- *
- * Database strategy:
- * 1. Prisma (direct PostgreSQL) — fast, full ORM
- * 2. Supabase REST API (HTTPS) — fallback when PostgreSQL ports are blocked
- *
- * After Supabase auth succeeds, a JWT is set for subsequent requests.
+ * Supabase verified claims remain authoritative and keep refresh-token rotation
+ * working. The secondary JWT is accepted only for a temporary Auth/network
+ * failure, never for an invalid, missing, expired or revoked session.
  */
 export const getAuthUser = cache(async () => {
   try {
-    // ── Strategy 1: JWT verification (fast path) ──────────────
-    const jwtPayload = await getJwtUser();
-    if (jwtPayload?.sub) {
-      const dbUser = await findUserWithFallback(jwtPayload.sub);
+    const supabase = await createClient();
+    const { data, error } = await supabase.auth.getClaims();
+    let userId = typeof data?.claims?.sub === 'string' ? data.claims.sub : null;
 
-      if (dbUser) {
-        syncUserStreaks(dbUser);
-        return dbUser;
-      }
-      // JWT points to a user that no longer exists — fall through to Supabase
-      logger.warn('JWT user not found in DB, falling back to Supabase', {
-        userId: jwtPayload.sub,
+    if (!userId && error && isTemporaryAuthFailure(error)) {
+      const jwtPayload = await getJwtUser();
+      userId = jwtPayload?.sub ?? null;
+
+      logger.warn('Temporary Supabase auth failure while resolving user', {
+        ...getErrorSummary(error),
+        usedJwtFallback: Boolean(userId),
       });
+
+      if (!userId) {
+        throw new ConnectionError(
+          'AUTH_TEMPORARILY_UNAVAILABLE',
+          'Não foi possível renovar sua sessão agora. Tente novamente em instantes.'
+        );
+      }
+    } else if (!userId && error) {
+      logger.debug('Supabase session is invalid while resolving user', getErrorSummary(error));
     }
 
-    // ── Strategy 2: Supabase session (fallback) ───────────────
-    const supabase = await createClient();
-    const {
-      data: { user: supabaseUser },
-    } = await supabase.auth.getUser();
+    if (!userId) return null;
 
-    if (!supabaseUser) return null;
-
-    const dbUser = await findUserWithFallback(supabaseUser.id);
-
+    const dbUser = await findUserWithFallback(userId);
     if (!dbUser) {
-      logger.warn('Orphaned Supabase session, signing out', {
-        userId: supabaseUser.id,
-      });
-      await supabase.auth.signOut();
+      logger.warn('Authenticated user does not exist in the application database', { userId });
       return null;
     }
-
-    // NOTE: JWT issuance happens in Route Handlers only (callback, register),
-    // where Next.js allows cookie modification.
 
     syncUserStreaks(dbUser);
     return dbUser;
   } catch (error) {
-    const errObj = error as any;
-    logger.error('Error in getAuthUser', {
-      error: String(error),
-      code: errObj?.code,
-      meta: JSON.stringify(errObj?.meta),
-      message: errObj?.message,
-    });
-    return null;
+    logger.error('Error in getAuthUser', getErrorSummary(error));
+
+    if (error instanceof ConnectionError) throw error;
+    if (isTransientConnectionError(error)) {
+      throw new ConnectionError(
+        'CONNECTION_ERROR',
+        'Conexão temporariamente indisponível. Sua sessão continua ativa.'
+      );
+    }
+    throw error;
   }
 });
 
-/**
- * Background streak sync — fire and forget.
- * Extracted to avoid duplicating the logic.
- */
+/** Keep aggregate streak fields synchronized without blocking the request. */
 function syncUserStreaks(dbUser: any) {
   const maxTrailStreak = (dbUser.trails || []).reduce(
-    (max: number, t: any) => Math.max(max, t.streak),
+    (max: number, trail: any) => Math.max(max, trail.streak),
     0
   );
-  const latestTrailActivity = (dbUser.trails || []).reduce((latest: Date | null, t: any) => {
-    if (!t.last_activity_at) return latest;
-    if (!latest) return t.last_activity_at;
-    return t.last_activity_at.getTime() > latest.getTime() ? t.last_activity_at : latest;
+  const latestTrailActivity = (dbUser.trails || []).reduce((latest: Date | null, trail: any) => {
+    if (!trail.last_activity_at) return latest;
+    if (!latest) return trail.last_activity_at;
+    return trail.last_activity_at.getTime() > latest.getTime() ? trail.last_activity_at : latest;
   }, null);
 
   let needsUpdate = false;
@@ -179,17 +186,17 @@ function syncUserStreaks(dbUser: any) {
   }
 
   if (needsUpdate) {
-    // Try Prisma first, fall back to REST API
     prisma.user.update({ where: { id: dbUser.id }, data: updateData }).catch(() => {
       supabaseAdmin
         .from('User')
         .update(updateData)
         .eq('id', dbUser.id)
         .then(({ error }) => {
-          if (error)
+          if (error) {
             logger.error('Failed to auto-heal user streak/activity via REST', {
               error: String(error),
             });
+          }
         });
     });
   }
