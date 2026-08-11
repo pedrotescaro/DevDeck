@@ -36,9 +36,10 @@ const heroAvatars: AvatarData[] = [
 
 interface LandingHeroProps {
   initialUser: any;
+  isReady?: boolean;
 }
 
-export default function LandingHero({ initialUser }: LandingHeroProps) {
+export default function LandingHero({ initialUser, isReady = true }: LandingHeroProps) {
   return (
     <section
       className="relative min-h-screen w-full overflow-hidden bg-[var(--lp-bg)] px-0 pb-20 pt-32 sm:pt-36"
@@ -68,8 +69,7 @@ export default function LandingHero({ initialUser }: LandingHeroProps) {
         <motion.div
           className="lp-hero-content flex w-full max-w-5xl flex-col items-center text-center"
           initial="hidden"
-          whileInView="show"
-          viewport={{ once: true }}
+          animate={isReady ? 'show' : 'hidden'}
           variants={container}
         >
           <h1 className="mb-8 max-w-5xl px-1 font-sans text-[clamp(2.35rem,6vw,4.25rem)] font-semibold leading-[1.03] tracking-[-0.055em] text-white sm:px-0">

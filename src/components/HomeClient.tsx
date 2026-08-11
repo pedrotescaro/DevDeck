@@ -40,7 +40,7 @@ export default function HomeClient({ initialUser }: HomeClientProps) {
       <LandingNav initialUser={initialUser} />
 
       {/* Hero Section */}
-      <LandingHero initialUser={initialUser} />
+      <LandingHero initialUser={initialUser} isReady={!showEntryLoader} />
 
       {/* Redesigned product experience */}
       <main className="relative z-10">
