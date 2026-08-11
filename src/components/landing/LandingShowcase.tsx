@@ -1055,9 +1055,9 @@ export default function LandingShowcase({ initialUser }: LandingShowcaseProps) {
           index="01"
           eyebrow="How it works"
           title={
-            <>
-              One contribution. <span className="text-blue-400">Three signals of skill.</span>
-            </>
+            <span className="block whitespace-nowrap text-[clamp(1.75rem,4.17vw,3.75rem)]">
+              Every action becomes <span className="text-blue-400">proof.</span>
+            </span>
           }
           description="DevDeck turns technical discussions into verifiable evidence: you publish, prove your understanding, and grow in public."
         />

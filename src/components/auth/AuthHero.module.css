@@ -3,10 +3,12 @@
   background: #000;
 }
 
-.terminal {
+.effect {
   position: absolute;
   inset: 0;
   z-index: 0;
+  background: #020711 url('/hero.png') center / cover no-repeat;
+  pointer-events: none;
 }
 
 .overlay {

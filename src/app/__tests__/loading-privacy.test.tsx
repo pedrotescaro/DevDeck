@@ -5,7 +5,7 @@ import FeedLoading from '@/app/feed/loading';
 
 describe.each([
   ['global', PlatformLoading, 'Loading DevDeck', 'site-entry-loader'],
-  ['feed protegido', FeedLoading, 'Carregando seu feed...', 'route-loading-screen'],
+  ['feed protegido', FeedLoading, 'Loading DevDeck', 'site-entry-loader'],
 ])('estado de carregamento %s', (_, LoadingComponent, loadingTitle, testId) => {
   it('não revela a interface da plataforma antes da autenticação', () => {
     const { container } = render(<LoadingComponent />);

@@ -1,10 +1,5 @@
-import { RouteLoadingScreen } from '@/components/RouteLoadingScreen';
+import SiteEntryLoader from '@/components/landing/SiteEntryLoader';
 
 export default function FeedLoading() {
-  return (
-    <RouteLoadingScreen
-      title="Carregando seu feed..."
-      subtitle="Buscando as novidades da comunidade"
-    />
-  );
+  return <SiteEntryLoader />;
 }

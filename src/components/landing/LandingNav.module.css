@@ -1,0 +1,60 @@
+.signUpButton {
+  display: inline-flex;
+  height: 2.5rem;
+  padding-inline: 1.25rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 800px;
+  background: #fff;
+  color: #000;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.07);
+  transition: letter-spacing 900ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.signUpButton:hover,
+.signUpButton:focus-visible {
+  letter-spacing: 0.075em;
+}
+
+.signUpButton:focus-visible {
+  outline: 3px solid rgba(70, 156, 255, 0.45);
+  outline-offset: 4px;
+}
+
+.loginLink {
+  display: none;
+  color: var(--lp-fg-dim);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  transition: color 250ms ease;
+}
+
+.loginLink:hover,
+.loginLink:focus-visible {
+  color: #fff;
+}
+
+.loginLink:focus-visible {
+  outline: 2px solid rgba(70, 156, 255, 0.55);
+  outline-offset: 4px;
+}
+
+@media (min-width: 640px) {
+  .loginLink {
+    display: inline-flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signUpButton,
+  .loginLink {
+    transition-duration: 1ms;
+  }
+}

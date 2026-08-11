@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import styles from './LandingNav.module.css';
 
 const NAV_LINKS = [
   { label: 'How it works', href: '#how' },
@@ -92,17 +93,10 @@ export default function LandingNav({ initialUser }: LandingNavProps) {
             </Link>
           ) : (
             <div className="flex items-center gap-3">
-              <Link
-                href="/login"
-                className="hidden rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors hover:text-white sm:inline-flex"
-                style={{ color: 'var(--lp-fg-dim)' }}
-              >
+              <Link href="/login" className={styles.loginLink}>
                 Log in
               </Link>
-              <Link
-                href="/register"
-                className="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-blue-100 sm:px-5"
-              >
+              <Link href="/register" className={styles.signUpButton}>
                 Sign up
               </Link>
             </div>

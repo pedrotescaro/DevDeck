@@ -495,7 +495,7 @@ html.lp-landing-page::-webkit-scrollbar-thumb:hover {
   background: var(--lp-accent-bright);
 }
 
-/* === Hero Terminal Background & Overlays === */
+/* === Hero Distortion Background & Overlays === */
 #hero {
   position: relative;
   overflow: hidden;
@@ -513,7 +513,6 @@ html.lp-landing-page::-webkit-scrollbar-thumb:hover {
   pointer-events: none;
 }
 
-.lp-hero-content h1,
 .lp-hero-content > p {
   text-shadow: 0 3px 26px rgba(2, 6, 14, 0.92);
 }

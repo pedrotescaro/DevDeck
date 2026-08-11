@@ -2,36 +2,29 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import FaultyTerminal from '@/components/landing/FaultyTerminal';
+import RippleDistortion from '@/components/RippleDistortion';
 import styles from './AuthHero.module.css';
 
 export default function AuthHero() {
   return (
     <aside
       className={`${styles.hero} relative m-3 mr-0 hidden min-h-[calc(100svh-24px)] overflow-hidden rounded-xl lg:flex lg:items-center lg:justify-center`}
-      data-testid="auth-terminal-hero"
+      data-testid="auth-visual-hero"
     >
-      <FaultyTerminal
-        aria-hidden="true"
-        className={styles.terminal}
-        data-testid="auth-terminal-effect"
-        scale={1.45}
-        gridMul={[2, 1]}
-        digitSize={1.2}
-        timeScale={0.78}
-        scanlineIntensity={0.72}
-        glitchAmount={0.95}
-        flickerAmount={0.74}
-        noiseAmp={0.86}
-        chromaticAberration={0}
-        dither={0}
-        curvature={0.05}
-        tint="#0083FE"
-        mouseReact
-        mouseStrength={0.95}
-        pageLoadAnimation
-        brightness={1.18}
-      />
+      <div className={styles.effect} aria-hidden="true" data-testid="auth-ripple-effect">
+        <RippleDistortion
+          src="/hero.png"
+          brushSize={150}
+          strength={0.2}
+          swirl={1}
+          rings={4}
+          grayscale={false}
+          tint="#0083FE"
+          highlightColor="#0083FE"
+          trigger="both"
+          quality="medium"
+        />
+      </div>
 
       <div className={styles.overlay} aria-hidden="true" />
 

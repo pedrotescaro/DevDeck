@@ -1,10 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import RippleDistortion from '@/components/RippleDistortion';
 import AnimatedAvatarGroup, { type AvatarData } from '@/components/smoothui/animated-avatar-group';
-import FaultyTerminal from './FaultyTerminal';
+import styles from './LandingHero.module.css';
 
 const container = {
   hidden: {},
@@ -44,25 +44,19 @@ export default function LandingHero({ initialUser }: LandingHeroProps) {
       className="relative min-h-screen w-full overflow-hidden bg-[var(--lp-bg)] px-0 pb-20 pt-32 sm:pt-36"
       id="hero"
     >
-      {/* Interactive terminal field */}
+      {/* Interactive image distortion field */}
       <div className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true">
-        <FaultyTerminal
-          scale={1.45}
-          gridMul={[2, 1]}
-          digitSize={1.2}
-          timeScale={0.78}
-          scanlineIntensity={0.72}
-          glitchAmount={0.95}
-          flickerAmount={0.74}
-          noiseAmp={0.86}
-          chromaticAberration={0}
-          dither={0}
-          curvature={0.05}
+        <RippleDistortion
+          src="/hero.png"
+          brushSize={150}
+          strength={0.2}
+          swirl={1}
+          rings={4}
+          grayscale={false}
           tint="#0083FE"
-          mouseReact
-          mouseStrength={0.95}
-          pageLoadAnimation
-          brightness={1.18}
+          highlightColor="#0083FE"
+          trigger="both"
+          quality="medium"
         />
       </div>
 
@@ -134,16 +128,24 @@ export default function LandingHero({ initialUser }: LandingHeroProps) {
               show: { opacity: 1, y: 0, transition: { duration: 0.7, delay: 0.45 } },
             }}
           >
-            <Link
-              href={initialUser ? '/feed' : '/register'}
-              className="inline-flex min-h-12 items-center justify-center gap-3 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-[#04101f] transition-transform hover:-translate-y-0.5"
-            >
-              <span>{initialUser ? 'Go to Feed' : 'Enter the Arena'}</span>
-              <ArrowRight size={16} />
+            <Link href={initialUser ? '/feed' : '/register'} className={styles.smoothButton}>
+              <span className={styles.buttonPre}>
+                {initialUser ? 'Go to Feed' : "Let's Get Started"}
+              </span>
+              <span className={styles.buttonPost} aria-hidden="true">
+                <span>{initialUser ? 'Open Your Feed' : 'Create Your Profile'}</span>
+                <span className={styles.buttonIcon}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M10.5 2c.45 5.18 3.32 8.05 8.5 8.5-5.18.45-8.05 3.32-8.5 8.5C10.05 13.82 7.18 10.95 2 10.5 7.18 10.05 10.05 7.18 10.5 2Z" />
+                    <path d="M18.25 15.5c.15 1.72 1.03 2.6 2.75 2.75-1.72.15-2.6 1.03-2.75 2.75-.15-1.72-1.03-2.6-2.75-2.75 1.72-.15 2.6-1.03 2.75-2.75Z" />
+                  </svg>
+                </span>
+              </span>
+              <span className={styles.buttonOverlay} aria-hidden="true" />
             </Link>
             <a
               href="#platform"
-              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/15 bg-white/[0.04] px-6 py-3 text-sm font-medium text-white hover:bg-white/[0.08] transition-colors"
+              className="inline-flex items-center justify-center text-sm font-medium text-white/80 transition-colors hover:text-white"
             >
               <span>View a real post</span>
             </a>
