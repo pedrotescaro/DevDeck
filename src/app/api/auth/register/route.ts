@@ -29,7 +29,7 @@ export const POST = apiHandler(async (request) => {
   });
 
   if (existingUsername) {
-    return NextResponse.json({ error: 'Nome de usuário já está em uso' }, { status: 400 });
+    return NextResponse.json({ error: 'Username is already in use' }, { status: 400 });
   }
 
   // Check email unique
@@ -38,7 +38,7 @@ export const POST = apiHandler(async (request) => {
   });
 
   if (existingEmail) {
-    return NextResponse.json({ error: 'Endereço de e-mail já está em uso' }, { status: 400 });
+    return NextResponse.json({ error: 'Email address is already in use' }, { status: 400 });
   }
 
   // Create server-side Supabase client
@@ -58,14 +58,17 @@ export const POST = apiHandler(async (request) => {
   if (authError) {
     const message =
       authError.message === 'fetch failed'
-        ? 'Não foi possível conectar ao Supabase. Verifique sua conexão ou SUPABASE_SSL_INSECURE no .env.local.'
+        ? 'Could not connect to Supabase. Check your connection or SUPABASE_SSL_INSECURE in .env.local.'
         : authError.message;
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
   const authUser = authData.user;
   if (!authUser) {
-    return NextResponse.json({ error: 'Erro ao criar conta de autenticação' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Could not create the authentication account' },
+      { status: 500 }
+    );
   }
 
   const avatarBaseUrl = AVATAR_API_URL;
@@ -77,7 +80,7 @@ export const POST = apiHandler(async (request) => {
       username,
       email,
       avatar_url: `${avatarBaseUrl}?seed=${username}`,
-      bio: 'Novo desenvolvedor no DevDeck! 🚀',
+      bio: 'New developer on DevDeck! 🚀',
       total_xp: 0,
     },
   });

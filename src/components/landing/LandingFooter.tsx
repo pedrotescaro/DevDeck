@@ -4,12 +4,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const footerLinks = [
-  { label: 'A Plataforma', href: '#platform' },
-  { label: 'Trilhas', href: '#trails' },
-  { label: 'Duelos', href: '#duels' },
-  { label: 'Perfis', href: '#profiles' },
-  { label: 'Privacidade', href: '#' },
-  { label: 'Termos', href: '#' },
+  { label: 'Platform', href: '#platform' },
+  { label: 'Tracks', href: '#trails' },
+  { label: 'Duels', href: '#duels' },
+  { label: 'Privacy', href: '#' },
+  { label: 'Terms', href: '#' },
 ];
 
 const socialLinks = [
@@ -108,7 +107,7 @@ export default function LandingFooter() {
       {/* Bottom bar — copyright + socials */}
       <div className="mx-auto max-w-5xl px-6 py-6 flex flex-col-reverse sm:flex-row items-center justify-between gap-4">
         <p className="lp-font-heading text-[11px] text-[var(--lp-muted)] tracking-wide">
-          © {new Date().getFullYear()} DevDeck. Todos os direitos reservados.
+          © {new Date().getFullYear()} DevDeck. All rights reserved.
         </p>
 
         <div className="flex items-center gap-4">

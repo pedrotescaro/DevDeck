@@ -82,10 +82,10 @@ export default function ConnectionBanner() {
     >
       {restored ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
       {restored
-        ? 'Conexão restabelecida.'
+        ? 'Connection restored.'
         : degraded
-          ? 'Conexão instável. Tentando reconectar…'
-          : 'Você está offline. Exibindo o conteúdo já carregado.'}
+          ? 'Unstable connection. Trying to reconnect…'
+          : 'You’re offline. Showing previously loaded content.'}
     </div>
   );
 }

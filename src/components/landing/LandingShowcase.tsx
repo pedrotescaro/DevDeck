@@ -70,26 +70,26 @@ function SectionHeading({
   description: string;
 }) {
   return (
-    <div data-reveal className="mb-12 flex max-w-3xl flex-col gap-5 lg:mb-16">
+    <div data-reveal className="mb-14 flex max-w-4xl flex-col gap-6 px-1 sm:mb-16 sm:px-0 lg:mb-20">
       <div className="flex items-center gap-3 font-mono text-[11px] font-semibold uppercase tracking-[0.24em] text-blue-400">
         <span className="flex size-7 items-center justify-center rounded-full border border-blue-400/30 bg-blue-400/10 text-[9px]">
           {index}
         </span>
         {eyebrow}
       </div>
-      <h2 className="font-sans text-4xl font-semibold tracking-[-0.045em] text-white sm:text-5xl lg:text-6xl">
+      <h2 className="font-sans text-4xl font-semibold leading-[1.05] tracking-[-0.045em] text-white sm:text-5xl lg:text-6xl">
         {title}
       </h2>
-      <p className="max-w-2xl text-base leading-7 text-slate-400 sm:text-lg">{description}</p>
+      <p className="max-w-3xl pt-1 text-base leading-8 text-slate-400 sm:text-lg">{description}</p>
     </div>
   );
 }
 
 function FlowPreview() {
   const nodes = [
-    { icon: MessageSquareText, label: 'Post real', value: 'React + cache' },
-    { icon: BrainCircuit, label: 'Quiz IA', value: '4 alternativas' },
-    { icon: Zap, label: 'XP validado', value: '+45 XP' },
+    { icon: MessageSquareText, label: 'Real post', value: 'React + cache' },
+    { icon: BrainCircuit, label: 'AI quiz', value: '4 choices' },
+    { icon: Zap, label: 'Verified XP', value: '+45 XP' },
   ];
 
   return (
@@ -126,15 +126,15 @@ function QuizPreview() {
     <div className="absolute inset-x-5 top-5 rounded-2xl border border-white/10 bg-black/30 p-5">
       <div className="mb-4 flex items-center justify-between">
         <span className="rounded-full bg-violet-400/10 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-violet-300">
-          Gerado por IA
+          AI-generated
         </span>
         <BrainCircuit size={18} className="text-violet-300" />
       </div>
       <p className="text-sm font-medium leading-6 text-slate-200">
-        Qual estrat&eacute;gia evita uma nova busca quando o dado ainda &eacute; v&aacute;lido?
+        Which strategy avoids another request while the data is still valid?
       </p>
       <div className="mt-4 grid gap-2">
-        {['Cache com TTL', 'Novo request', 'Remover memo'].map((option, index) => (
+        {['TTL cache', 'New request', 'Remove memoization'].map((option, index) => (
           <div
             key={option}
             className={cn(
@@ -159,10 +159,10 @@ function MetricsPreview() {
   return (
     <div className="absolute inset-x-5 top-5 grid grid-cols-2 gap-3">
       {[
-        ['Contribui\u00e7\u00f5es', '148'],
-        ['Aceitas', '62'],
+        ['Contributions', '148'],
+        ['Accepted', '62'],
         ['Badges', '18'],
-        ['Sequ\u00eancia', '12d'],
+        ['Streak', '12d'],
       ].map(([label, value]) => (
         <div key={label} className="rounded-2xl border border-white/10 bg-black/25 p-4">
           <p className="text-2xl font-semibold text-white">{value}</p>
@@ -181,21 +181,21 @@ function HistoryPreview() {
       <div className="flex items-center justify-between rounded-xl border border-blue-400/20 bg-blue-500/10 px-3.5 py-2.5 text-xs">
         <div className="flex items-center gap-2">
           <BadgeCheck size={16} className="text-blue-400" />
-          <span className="font-semibold text-white">Duelo Vencido</span>
+          <span className="font-semibold text-white">Duel won</span>
         </div>
         <span className="font-mono text-[9px] text-blue-300">+100 ELO</span>
       </div>
       <div className="flex items-center justify-between rounded-xl border border-emerald-400/20 bg-emerald-500/10 px-3.5 py-2.5 text-xs">
         <div className="flex items-center gap-2">
           <CheckCircle2 size={16} className="text-emerald-400" />
-          <span className="font-semibold text-white">Trilha TypeScript 100%</span>
+          <span className="font-semibold text-white">TypeScript track 100%</span>
         </div>
-        <span className="font-mono text-[9px] text-emerald-300">N&iacute;vel 19</span>
+        <span className="font-mono text-[9px] text-emerald-300">Level 19</span>
       </div>
       <div className="flex items-center justify-between rounded-xl border border-violet-400/20 bg-violet-500/10 px-3.5 py-2.5 text-xs">
         <div className="flex items-center gap-2">
           <Flame size={16} className="text-orange-400" />
-          <span className="font-semibold text-white">12 Dias de Ofensiva</span>
+          <span className="font-semibold text-white">12-day streak</span>
         </div>
         <span className="font-mono text-[9px] text-violet-300">+45 XP</span>
       </div>
@@ -282,20 +282,20 @@ function PlatformMockup() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const sidebarNavItems = [
-    { id: 'home', label: 'Página Inicial', icon: Home },
-    { id: 'explore', label: 'Explorar', icon: Search },
-    { id: 'notifications', label: 'Notificações', icon: Bell },
-    { id: 'learn', label: 'Aprender com DevDeck', icon: BookOpen },
-    { id: 'chat', label: 'Bate-papo', icon: MessageCircle },
+    { id: 'home', label: 'Home', icon: Home },
+    { id: 'explore', label: 'Explore', icon: Search },
+    { id: 'notifications', label: 'Notifications', icon: Bell },
+    { id: 'learn', label: 'Learn with DevDeck', icon: BookOpen },
+    { id: 'chat', label: 'Chat', icon: MessageCircle },
     { id: 'async', label: 'ASYNC', icon: Zap },
-    { id: 'bookmarks', label: 'Itens salvos', icon: Bookmark },
-    { id: 'profile', label: 'Perfil', icon: User },
-    { id: 'more', label: 'Mais', icon: MoreHorizontal },
+    { id: 'bookmarks', label: 'Bookmarks', icon: Bookmark },
+    { id: 'profile', label: 'Profile', icon: User },
+    { id: 'more', label: 'More', icon: MoreHorizontal },
   ];
 
   const handlePost = () => {
     if (!composerText.trim()) return;
-    setUserPosts((prev) => [{ id: Date.now(), text: composerText, time: 'agora' }, ...prev]);
+    setUserPosts((prev) => [{ id: Date.now(), text: composerText, time: 'now' }, ...prev]);
     setComposerText('');
   };
 
@@ -310,10 +310,10 @@ function PlatformMockup() {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-[24px] border border-white/10 bg-[#000000] text-white shadow-2xl shadow-black/80 font-sans text-xs">
-      <div className="grid min-h-[640px] grid-cols-1 md:grid-cols-[200px_1fr] lg:grid-cols-[220px_1fr_300px]">
+    <div className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[#000000] font-sans text-xs text-white shadow-2xl shadow-black/80 md:rounded-[24px]">
+      <div className="grid grid-cols-1 md:min-h-[640px] md:grid-cols-[200px_1fr] lg:grid-cols-[220px_1fr_300px]">
         {/* ================= LEFT SIDEBAR ================= */}
-        <aside className="border-r border-white/10 p-4 flex flex-col justify-between bg-[#000000]">
+        <aside className="hidden border-r border-white/10 bg-[#000000] p-4 md:flex md:flex-col md:justify-between">
           <div className="space-y-4">
             {/* Logo */}
             <div className="flex items-center gap-2 px-2 py-1">
@@ -362,7 +362,7 @@ function PlatformMockup() {
               className="w-full bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white font-bold py-3 px-6 rounded-full flex items-center justify-center gap-2 shadow-md transition-colors"
             >
               <Pencil size={16} />
-              <span>Postar</span>
+              <span>Post</span>
             </button>
           </div>
 
@@ -374,24 +374,58 @@ function PlatformMockup() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-white text-xs truncate">usuario</span>
+                  <span className="font-bold text-white text-xs truncate">user</span>
                   <span className="px-1.5 py-0.2 bg-slate-800 text-slate-400 font-mono text-[9px] rounded">
                     Lvl 1
                   </span>
                 </div>
-                <p className="text-[10px] text-slate-500 truncate">@usuario</p>
+                <p className="text-[10px] text-slate-500 truncate">@user</p>
               </div>
             </div>
 
             <div className="mx-2 flex items-center gap-1.5 px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full text-[10px] text-blue-400 font-medium">
               <Flame size={12} className="text-orange-400" />
-              <span>1 dia de domínio</span>
+              <span>1 day of mastery</span>
             </div>
           </div>
         </aside>
 
         {/* ================= CENTER FEED ================= */}
-        <main className="border-r border-white/10 bg-[#000000] flex flex-col min-w-0">
+        <main className="flex min-w-0 flex-col bg-[#000000] lg:border-r lg:border-white/10">
+          {/* Mobile app header */}
+          <div className="flex h-14 items-center justify-between border-b border-white/10 px-4 md:hidden">
+            <div className="flex items-center gap-2.5">
+              <div className="flex size-8 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10">
+                <NextImage
+                  src="/logo.svg"
+                  alt=""
+                  width={18}
+                  height={18}
+                  className="size-4 object-contain"
+                />
+              </div>
+              <div>
+                <p className="text-sm font-bold tracking-tight text-white">DevDeck</p>
+                <p className="font-mono text-[8px] uppercase tracking-[0.16em] text-blue-400">
+                  Community feed
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveNav('profile')}
+              aria-label="Open profile"
+              className={cn(
+                'flex size-8 items-center justify-center rounded-full border text-[10px] font-bold transition-colors',
+                activeNav === 'profile'
+                  ? 'border-blue-400/50 bg-blue-400/15 text-blue-300'
+                  : 'border-white/10 bg-slate-900 text-white hover:border-blue-400/40'
+              )}
+            >
+              US
+            </button>
+          </div>
+
           {/* Feed Header Tabs */}
           <div className="relative flex items-center border-b border-white/10 h-13 bg-[#000000]/90 backdrop-blur-md sticky top-0 z-10">
             <div className="grid grid-cols-2 w-full h-full pr-12">
@@ -402,7 +436,7 @@ function PlatformMockup() {
                   activeFeedTab === 'foryou' ? 'text-white' : 'text-[#71767b] hover:text-slate-300'
                 )}
               >
-                <span>Para você</span>
+                <span>For you</span>
                 {activeFeedTab === 'foryou' && (
                   <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1d9bf0]" />
                 )}
@@ -416,7 +450,7 @@ function PlatformMockup() {
                     : 'text-[#71767b] hover:text-slate-300'
                 )}
               >
-                <span>Seguindo</span>
+                <span>Following</span>
                 {activeFeedTab === 'following' && (
                   <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1d9bf0]" />
                 )}
@@ -427,7 +461,7 @@ function PlatformMockup() {
             </button>
           </div>
 
-          <div className="p-4 sm:p-5 space-y-4 overflow-y-auto max-h-[620px]">
+          <div className="max-h-[520px] space-y-4 overflow-y-auto overscroll-contain p-3 sm:max-h-[620px] sm:p-5">
             {/* Post Composer Box */}
             <div className="border-b border-white/10 pb-4 space-y-3">
               <div className="flex gap-3">
@@ -439,12 +473,12 @@ function PlatformMockup() {
                     type="text"
                     value={composerText}
                     onChange={(e) => setComposerText(e.target.value)}
-                    placeholder="O que está acontecendo?"
+                    placeholder="What’s happening?"
                     className="w-full bg-transparent text-xs text-white placeholder:text-[#71767b] outline-none pt-1 font-medium"
                   />
                   <div className="flex items-center gap-1.5 text-[11px] text-[#1d9bf0] font-semibold">
                     <Globe size={13} />
-                    <span>Qualquer pessoa pode responder</span>
+                    <span>Anyone can reply</span>
                   </div>
                 </div>
               </div>
@@ -467,7 +501,7 @@ function PlatformMockup() {
                       : 'bg-[#1d9bf0]/50 cursor-not-allowed'
                   )}
                 >
-                  Postar
+                  Post
                 </button>
               </div>
             </div>
@@ -482,12 +516,12 @@ function PlatformMockup() {
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-white text-xs">@usuario</span>
+                        <span className="font-bold text-white text-xs">@user</span>
                         <span className="px-1.5 py-0.2 bg-slate-800 text-slate-400 font-mono text-[9px] rounded">
                           Lvl 1
                         </span>
                       </div>
-                      <span className="text-slate-500 text-[10px] block">Postado {post.time}</span>
+                      <span className="text-slate-500 text-[10px] block">Posted {post.time}</span>
                     </div>
                   </div>
                   <MoreHorizontal size={14} className="text-slate-500" />
@@ -505,26 +539,26 @@ function PlatformMockup() {
                   </div>
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <span className="font-bold text-white text-xs">@usuario</span>
+                      <span className="font-bold text-white text-xs">@user</span>
                       <span className="px-1.5 py-0.2 bg-slate-800 text-slate-400 font-mono text-[9px] rounded">
                         Lvl 1
                       </span>
                     </div>
-                    <span className="text-slate-500 text-[10px] block">Postado 2h atrás</span>
+                    <span className="text-slate-500 text-[10px] block">Posted 2h ago</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-semibold">
-                    Arquitetura
+                    Architecture
                   </span>
                   <MoreHorizontal size={14} className="text-slate-500" />
                 </div>
               </div>
 
               <p className="text-xs text-slate-200 leading-5">
-                Acabei de finalizar a migra&ccedil;&atilde;o das nossas rotas cr&iacute;ticas para
-                renderiza&ccedil;&atilde;o otimista com cache distribu&iacute;do no Next.js. O tempo
-                de resposta caiu de 380ms para 42ms em produ&ccedil;&atilde;o! &#128640;
+                I just finished migrating our critical routes to optimistic rendering with
+                distributed caching in Next.js. Response time dropped from 380ms to 42ms in
+                production! &#128640;
               </p>
 
               {/* Action Bar */}
@@ -565,11 +599,11 @@ function PlatformMockup() {
                     US
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="font-bold text-white text-xs">@usuario</span>
+                    <span className="font-bold text-white text-xs">@user</span>
                     <span className="px-1.5 py-0.2 bg-slate-800 text-slate-400 font-mono text-[9px] rounded">
                       Lvl 1
                     </span>
-                    <span className="text-slate-500 text-[10px]">&middot; Postado 8d atrás</span>
+                    <span className="text-slate-500 text-[10px]">&middot; Posted 8d ago</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -592,11 +626,11 @@ function PlatformMockup() {
                       className="flex items-center gap-1.5 px-3 py-1 bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white text-[10px] font-semibold rounded-full transition-colors"
                     >
                       <Play size={11} className="fill-white" />
-                      <span>{isRunningCode ? 'Rodando...' : 'Executar'}</span>
+                      <span>{isRunningCode ? 'Running...' : 'Run'}</span>
                     </button>
                     <button className="flex items-center gap-1.5 px-3 py-1 bg-white/5 hover:bg-white/10 text-slate-300 text-[10px] font-medium rounded-full border border-white/10 transition-colors">
                       <Copy size={11} />
-                      <span>Copiar</span>
+                      <span>Copy</span>
                     </button>
                   </div>
                 </div>
@@ -618,21 +652,23 @@ function PlatformMockup() {
                     <Sparkles size={18} />
                   </div>
                   <div>
-                    <h5 className="font-bold text-white text-xs">Quiz de Aprendizado</h5>
-                    <p className="text-[10px] text-slate-400">Você já respondeu a este desafio!</p>
+                    <h5 className="font-bold text-white text-xs">Learning Quiz</h5>
+                    <p className="text-[10px] text-slate-400">
+                      You already completed this challenge!
+                    </p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowQuizResults(!showQuizResults)}
                   className="px-3.5 py-1.5 rounded-full border border-emerald-500/40 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 font-semibold text-[10px] transition-colors self-start sm:self-auto"
                 >
-                  {showQuizResults ? 'Ocultar Resultados' : 'Ver Resultados'}
+                  {showQuizResults ? 'Hide Results' : 'View Results'}
                 </button>
               </div>
 
               {showQuizResults && (
                 <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 text-[11px] text-emerald-300 font-mono">
-                  ✓ Desafio concluído com sucesso! +45 XP adicionados ao perfil.
+                  &#10003; Challenge completed! +45 XP added to your profile.
                 </div>
               )}
 
@@ -672,6 +708,37 @@ function PlatformMockup() {
               </div>
             </div>
           </div>
+
+          {/* Mobile app navigation */}
+          <nav
+            aria-label="App navigation"
+            className="grid grid-cols-4 border-t border-white/10 bg-[#050505]/95 px-1 py-1.5 backdrop-blur-md md:hidden"
+          >
+            {[
+              { id: 'home', label: 'Home', icon: Home },
+              { id: 'explore', label: 'Explore', icon: Search },
+              { id: 'learn', label: 'Learn', icon: BookOpen },
+              { id: 'profile', label: 'Profile', icon: User },
+            ].map((item) => {
+              const Icon = item.icon;
+              const isActive = activeNav === item.id;
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setActiveNav(item.id)}
+                  className={cn(
+                    'flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-2 font-medium transition-colors',
+                    isActive ? 'bg-blue-400/10 text-blue-400' : 'text-slate-500 hover:text-white'
+                  )}
+                >
+                  <Icon size={16} strokeWidth={isActive ? 2.5 : 2} />
+                  <span className="truncate text-[8px]">{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
         </main>
 
         {/* ================= RIGHT SIDEBAR ================= */}
@@ -683,7 +750,7 @@ function PlatformMockup() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar"
+              placeholder="Search"
               className="w-full bg-transparent text-white placeholder:text-slate-500 outline-none text-xs"
             />
           </div>
@@ -692,7 +759,7 @@ function PlatformMockup() {
           <div className="rounded-2xl border border-white/10 bg-[#080808] p-4 space-y-4">
             <div className="flex items-center justify-between">
               <span className="font-bold text-[10px] uppercase tracking-wider text-slate-400">
-                ENGAJAMENTO
+                ENGAGEMENT
               </span>
               <span className="size-2 rounded-full bg-blue-500" />
             </div>
@@ -701,7 +768,7 @@ function PlatformMockup() {
             <div className="flex flex-col items-center justify-center py-2 text-center">
               <Flame size={44} className="text-[#1d9bf0] fill-[#1d9bf0]/20 animate-pulse" />
               <p className="mt-2 text-xs font-semibold text-blue-400 tracking-wide">
-                &lt; 1 dia de ofensiva &gt;
+                &lt; 1 day streak &gt;
               </p>
             </div>
 
@@ -732,12 +799,12 @@ function PlatformMockup() {
             {/* XP and Level */}
             <div className="space-y-2 border-t border-white/5 pt-3">
               <div className="flex justify-between text-xs font-semibold">
-                <span className="text-slate-400">XP Acumulado</span>
+                <span className="text-slate-400">XP Earned</span>
                 <span className="text-white">425 XP</span>
               </div>
               <div className="space-y-1">
                 <div className="flex justify-between text-[10px] font-mono text-slate-400">
-                  <span>PROGRESSO DO NIVEL</span>
+                  <span>LEVEL PROGRESS</span>
                   <span>LVL 1</span>
                 </div>
                 <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
@@ -751,7 +818,7 @@ function PlatformMockup() {
           <div className="rounded-2xl border border-white/10 bg-[#080808] p-4 space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-bold text-[10px] uppercase tracking-wider text-slate-400">
-                CONQUISTAS
+                ACHIEVEMENTS
               </span>
               <Bookmark size={14} className="text-blue-400" />
             </div>
@@ -763,7 +830,7 @@ function PlatformMockup() {
                   className="aspect-square rounded-xl border border-white/5 bg-white/[0.02] flex flex-col items-center justify-center p-2 text-center"
                 >
                   <Lock size={16} className="text-slate-600 mb-1" />
-                  <span className="text-[8px] text-slate-600 font-mono">Bloqueado</span>
+                  <span className="text-[8px] text-slate-600 font-mono">Locked</span>
                 </div>
               ))}
             </div>
@@ -773,7 +840,7 @@ function PlatformMockup() {
           <div className="rounded-2xl border border-white/10 bg-[#080808] p-4 space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-bold text-[10px] uppercase tracking-wider text-slate-400">
-                MINHAS TRILHAS
+                MY TRACKS
               </span>
               <Sparkles size={14} className="text-blue-400" />
             </div>
@@ -842,6 +909,12 @@ function PlatformMockup() {
           </div>
         </aside>
       </div>
+      <div
+        className="flex h-5 items-start justify-center bg-black pt-2 md:hidden"
+        aria-hidden="true"
+      >
+        <span className="h-1 w-24 rounded-full bg-white/65" />
+      </div>
     </div>
   );
 }
@@ -858,7 +931,7 @@ function TrailCard({ trail, index }: { trail: (typeof trails)[number]; index: nu
       <div className="flex items-start justify-between">
         <div>
           <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-500">
-            Trilha 0{index + 1}
+            Track 0{index + 1}
           </p>
           <h3 className="mt-3 text-2xl font-semibold text-white">{trail.language}</h3>
         </div>
@@ -868,7 +941,7 @@ function TrailCard({ trail, index }: { trail: (typeof trails)[number]; index: nu
       </div>
       <div className="mt-12">
         <div className="mb-3 flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.14em] text-slate-500">
-          <span>{trail.modules} m&oacute;dulos</span>
+          <span>{trail.modules} modules</span>
           <span style={{ color: trail.color }}>{trail.progress}%</span>
         </div>
         <div className="h-1.5 overflow-hidden rounded-full bg-white/8">
@@ -883,7 +956,7 @@ function TrailCard({ trail, index }: { trail: (typeof trails)[number]; index: nu
         </div>
       </div>
       <div className="mt-7 flex items-center justify-between border-t border-white/8 pt-5 text-xs">
-        <span className="text-slate-500">Pr&oacute;ximo: padr&otilde;es avan&ccedil;ados</span>
+        <span className="text-slate-500">Next: advanced patterns</span>
         <ArrowRight size={15} style={{ color: trail.color }} />
       </div>
     </article>
@@ -952,14 +1025,14 @@ export default function LandingShowcase({ initialUser }: LandingShowcaseProps) {
     <div ref={rootRef} className="relative overflow-hidden bg-black text-white">
       <section
         className="relative border-y border-white/8 bg-black px-6 py-5"
-        aria-label="Atividade da plataforma"
+        aria-label="Platform activity"
       >
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-8 gap-y-3 font-mono text-[9px] uppercase tracking-[0.16em] text-slate-500 sm:justify-between">
           {[
-            ['AO VIVO', '284 devs'],
-            ['POSTS HOJE', '+1.247'],
-            ['XP DISTRIBU\u00cdDO', '84.290'],
-            ['DUELOS ATIVOS', '38'],
+            ['LIVE', '284 devs'],
+            ['POSTS TODAY', '+1,247'],
+            ['XP DISTRIBUTED', '84,290'],
+            ['ACTIVE DUELS', '38'],
           ].map(([label, value], index) => (
             <div key={label} className="flex items-center gap-3">
               {index === 0 && (
@@ -975,53 +1048,52 @@ export default function LandingShowcase({ initialUser }: LandingShowcaseProps) {
       <section
         id="how"
         data-anime-section
-        className="relative mx-auto max-w-7xl px-6 py-28 lg:py-36 bento-section"
+        className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-28 lg:py-36 bento-section"
       >
         <GlobalSpotlight gridRef={howGridRef} glowColor="0, 131, 254" spotlightRadius={300} />
         <SectionHeading
           index="01"
-          eyebrow="Como funciona"
+          eyebrow="How it works"
           title={
             <>
-              Uma contribui&ccedil;&atilde;o.{' '}
-              <span className="text-blue-400">Tr&ecirc;s sinais de habilidade.</span>
+              One contribution. <span className="text-blue-400">Three signals of skill.</span>
             </>
           }
-          description="O DevDeck transforma discuss&otilde;es t&eacute;cnicas em evid&ecirc;ncia verific&aacute;vel: voc&ecirc; publica, prova que entendeu e evolui em p&uacute;blico."
+          description="DevDeck turns technical discussions into verifiable evidence: you publish, prove your understanding, and grow in public."
         />
         <div ref={howGridRef} className="bento-section">
           <BentoGrid className="auto-rows-[22rem] grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6">
             <FeatureCard
               className="md:col-span-2 lg:col-span-4"
               icon={GitBranch}
-              label="Fluxo completo"
-              title="Do problema real ao XP comprovado"
-              description="Cada post aciona uma jornada clara &mdash; discuss&atilde;o, quiz contextual e progress&atilde;o registrada no perfil."
+              label="Complete flow"
+              title="From a real problem to verified XP"
+              description="Every post starts a clear journey — discussion, contextual quiz, and progress recorded on your profile."
               preview={<FlowPreview />}
               beam
             />
             <FeatureCard
               className="lg:col-span-2"
               icon={BrainCircuit}
-              label="Quiz adaptativo"
-              title="IA que testa contexto"
-              description="Perguntas nascem do c&oacute;digo publicado, sem exerc&iacute;cios gen&eacute;ricos."
+              label="Adaptive quiz"
+              title="AI that tests context"
+              description="Questions come from the published code, never generic exercises."
               preview={<QuizPreview />}
             />
             <FeatureCard
               className="lg:col-span-3"
               icon={Users2}
-              label="Comunidade"
-              title="Feedback que vira reputa&ccedil;&atilde;o"
-              description="Respostas &uacute;teis ganham visibilidade e fortalecem seu hist&oacute;rico p&uacute;blico."
+              label="Community"
+              title="Feedback that builds reputation"
+              description="Helpful answers gain visibility and strengthen your public track record."
               preview={<MetricsPreview />}
             />
             <FeatureCard
               className="lg:col-span-3"
               icon={ShieldCheck}
-              label="Prova verific&aacute;vel"
-              title="Seu hist&oacute;rico fala primeiro"
-              description="Trilhas, duelos e contribui&ccedil;&otilde;es comp&otilde;em um retrato vivo da sua evolu&ccedil;&atilde;o."
+              label="Verifiable proof"
+              title="Let your track record speak first"
+              description="Tracks, duels, and contributions create a living picture of your growth."
               preview={<HistoryPreview />}
             />
           </BentoGrid>
@@ -1031,28 +1103,54 @@ export default function LandingShowcase({ initialUser }: LandingShowcaseProps) {
       <section
         id="platform"
         data-anime-section
-        className="relative border-y border-white/8 bg-black px-6 py-28 lg:py-36"
+        className="relative border-y border-white/8 bg-black px-4 py-24 sm:px-6 sm:py-28 lg:py-36"
       >
         <div className="mx-auto max-w-7xl">
           <SectionHeading
             index="02"
-            eyebrow="A plataforma"
+            eyebrow="The platform"
             title={
               <>
-                Tudo acontece em um <span className="text-blue-400">&uacute;nico fluxo.</span>
+                Everything happens in <span className="text-blue-400">one flow.</span>
               </>
             }
-            description="Feed, trilhas, quizzes, duelos e perfil conectados para que cada a&ccedil;&atilde;o fortale&ccedil;a sua identidade t&eacute;cnica."
+            description="Feed, tracks, quizzes, duels, and profile work together so every action strengthens your technical identity."
           />
-          <div data-reveal className={cn(cardClass, 'p-2 sm:p-3')}>
-            <PlatformMockup />
-            <BorderBeam
-              duration={12}
-              size={180}
-              borderWidth={1.2}
-              colorFrom="#0083fe"
-              colorTo="#60a5fa"
+          <div data-reveal className="relative mx-auto w-full max-w-[380px] md:max-w-none">
+            <span
+              aria-hidden="true"
+              className="absolute -left-1 top-28 h-11 w-1 rounded-l-full bg-[#303640] shadow-[inset_1px_0_rgba(255,255,255,0.18)] md:hidden"
             />
+            <span
+              aria-hidden="true"
+              className="absolute -left-1 top-44 h-16 w-1 rounded-l-full bg-[#303640] shadow-[inset_1px_0_rgba(255,255,255,0.18)] md:hidden"
+            />
+            <span
+              aria-hidden="true"
+              className="absolute -right-1 top-36 h-20 w-1 rounded-r-full bg-[#303640] shadow-[inset_-1px_0_rgba(255,255,255,0.18)] md:hidden"
+            />
+
+            <div className="relative overflow-hidden rounded-[44px] border-[5px] border-[#242932] bg-[#030303] p-1.5 pt-8 shadow-[0_30px_80px_-24px_rgba(0,131,254,0.38),0_22px_65px_-30px_rgba(0,0,0,0.95)] md:rounded-[28px] md:border md:border-white/10 md:bg-[#080808] md:p-3 md:shadow-[0_28px_100px_-55px_rgba(0,0,0,0.9)]">
+              <div
+                aria-hidden="true"
+                className="absolute left-1/2 top-2 z-30 flex h-5 w-24 -translate-x-1/2 items-center justify-end rounded-full border border-white/5 bg-black px-2 shadow-[0_1px_0_rgba(255,255,255,0.08)] md:hidden"
+              >
+                <span className="size-1.5 rounded-full bg-[#0b1d33] ring-1 ring-blue-400/20" />
+              </div>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-[6px] z-20 rounded-[36px] bg-[linear-gradient(135deg,rgba(255,255,255,0.055),transparent_22%)] md:hidden"
+              />
+
+              <PlatformMockup />
+              <BorderBeam
+                duration={12}
+                size={180}
+                borderWidth={1.2}
+                colorFrom="#0083fe"
+                colorTo="#60a5fa"
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -1060,18 +1158,17 @@ export default function LandingShowcase({ initialUser }: LandingShowcaseProps) {
       <section
         id="trails"
         data-anime-section
-        className="relative mx-auto max-w-7xl px-6 py-28 lg:py-36"
+        className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-28 lg:py-36"
       >
         <SectionHeading
           index="03"
-          eyebrow="Trilhas e progress&atilde;o"
+          eyebrow="Tracks and progression"
           title={
             <>
-              Evolu&ccedil;&atilde;o que voc&ecirc; consegue{' '}
-              <span className="text-blue-400">enxergar.</span>
+              Growth you can <span className="text-blue-400">see.</span>
             </>
           }
-          description="Cada tecnologia tem seu pr&oacute;prio caminho, n&iacute;vel e evid&ecirc;ncias. Voc&ecirc; sabe onde est&aacute; e o que falta dominar."
+          description="Each technology has its own path, level, and evidence. You always know where you are and what to master next."
         />
         <div className="grid gap-4 lg:grid-cols-3">
           {trails.map((trail, index) => (
@@ -1087,18 +1184,17 @@ export default function LandingShowcase({ initialUser }: LandingShowcaseProps) {
           <div className="flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.2em] text-orange-300">
-                <Flame size={14} /> Sistema de progress&atilde;o
+                <Flame size={14} /> Progression system
               </div>
               <h3 className="mt-5 max-w-lg text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                Consist&ecirc;ncia vira vantagem competitiva.
+                Consistency becomes a competitive edge.
               </h3>
               <p className="mt-4 max-w-xl text-sm leading-7 text-slate-400">
-                Ofensivas, conquistas e ligas recompensam profundidade &mdash; n&atilde;o apenas
-                volume de atividade.
+                Streaks, achievements, and leagues reward depth — not just activity volume.
               </p>
             </div>
             <div className="mt-8 flex flex-wrap gap-2 font-mono text-[9px] uppercase tracking-[0.14em] text-slate-400">
-              {['Streak 12 dias', 'Liga diamante', '18 badges'].map((item) => (
+              {['12-day streak', 'Diamond league', '18 badges'].map((item) => (
                 <span
                   key={item}
                   className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2"
@@ -1109,10 +1205,10 @@ export default function LandingShowcase({ initialUser }: LandingShowcaseProps) {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <MetricCard icon={Flame} value="12" label="Dias seguidos" />
-            <MetricCard icon={Trophy} value="#24" label="Ranking global" />
-            <MetricCard icon={BadgeCheck} value="18" label="Conquistas" />
-            <MetricCard icon={Zap} value="8.4k" label="XP total" />
+            <MetricCard icon={Flame} value="12" label="Day streak" />
+            <MetricCard icon={Trophy} value="#24" label="Global ranking" />
+            <MetricCard icon={BadgeCheck} value="18" label="Achievements" />
+            <MetricCard icon={Zap} value="8.4k" label="Total XP" />
           </div>
           <BorderBeam duration={11} size={150} colorFrom="#0083fe" colorTo="#60a5fa" />
         </div>
@@ -1121,25 +1217,25 @@ export default function LandingShowcase({ initialUser }: LandingShowcaseProps) {
       <section
         id="duels"
         data-anime-section
-        className="relative border-y border-white/8 bg-black px-6 py-28 lg:py-36"
+        className="relative border-y border-white/8 bg-black px-4 py-24 sm:px-6 sm:py-28 lg:py-36"
       >
         <div className="mx-auto max-w-7xl">
           <SectionHeading
             index="04"
-            eyebrow="Duelos de c&oacute;digo"
+            eyebrow="Code duels"
             title={
               <>
-                Press&atilde;o real. <span className="text-blue-400">C&oacute;digo melhor.</span>
+                Real pressure. <span className="text-blue-400">Better code.</span>
               </>
             }
-            description="Entre em partidas r&aacute;pidas contra devs do seu n&iacute;vel e prove decis&otilde;es t&eacute;cnicas com o tempo correndo."
+            description="Jump into fast matches against developers at your level and prove your technical decisions while the clock is running."
           />
           <div data-reveal className={cn(cardClass, 'grid lg:grid-cols-[0.78fr_1.22fr]')}>
             <div className="flex flex-col justify-between border-b border-white/8 p-7 lg:border-b-0 lg:border-r lg:p-10">
               <div>
                 <div className="flex items-center justify-between">
                   <span className="rounded-full bg-rose-400/10 px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-rose-300">
-                    Round final
+                    Final round
                   </span>
                   <span className="font-mono text-sm text-white">02:14</span>
                 </div>
@@ -1163,10 +1259,10 @@ export default function LandingShowcase({ initialUser }: LandingShowcaseProps) {
               </div>
               <div className="mt-10 rounded-2xl border border-blue-400/20 bg-blue-400/[0.06] p-5">
                 <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-blue-300">
-                  Desafio
+                  Challenge
                 </p>
                 <p className="mt-3 text-sm leading-6 text-slate-300">
-                  Reduza a complexidade sem alterar a ordem de sa&iacute;da.
+                  Reduce complexity without changing the output order.
                 </p>
               </div>
             </div>
@@ -1174,7 +1270,7 @@ export default function LandingShowcase({ initialUser }: LandingShowcaseProps) {
             <div className="min-w-0 bg-black p-4 sm:p-6 flex flex-col justify-between">
               <div className="w-full mb-3 flex items-center justify-end">
                 <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-400">
-                  COMPARE PROBLEMA VS SOLUÇÃO (HOVER)
+                  COMPARE PROBLEM VS SOLUTION (HOVER)
                 </span>
               </div>
               <div className="w-full flex justify-center overflow-hidden rounded-2xl bg-black">
@@ -1189,7 +1285,7 @@ export default function LandingShowcase({ initialUser }: LandingShowcaseProps) {
               </div>
               <div className="mt-3 w-full flex items-center justify-between rounded-xl border border-emerald-400/15 bg-emerald-400/[0.05] px-4 py-2.5 text-xs">
                 <span className="flex items-center gap-2 text-emerald-300">
-                  <Check size={14} /> 14 testes aprovados
+                  <Check size={14} /> 14 tests passed
                 </span>
                 <span className="font-mono text-[9px] text-slate-500">38ms</span>
               </div>
@@ -1200,133 +1296,13 @@ export default function LandingShowcase({ initialUser }: LandingShowcaseProps) {
       </section>
 
       <section
-        id="profiles"
-        data-anime-section
-        className="relative mx-auto max-w-7xl px-6 py-28 lg:py-36"
-      >
-        <SectionHeading
-          index="05"
-          eyebrow="Perfil t&eacute;cnico"
-          title={
-            <>
-              Um perfil que mostra <span className="text-blue-400">como voc&ecirc; pensa.</span>
-            </>
-          }
-          description="Empresas e comunidade enxergam decis&otilde;es, consist&ecirc;ncia e dom&iacute;nio por tecnologia &mdash; com contexto, n&atilde;o s&oacute; n&uacute;meros."
-        />
-        <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
-          <article data-reveal className={cn(cardClass, 'p-6 sm:p-9')}>
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-              <div className="relative flex size-24 shrink-0 items-center justify-center rounded-[28px] bg-gradient-to-br from-blue-500 to-violet-600 text-2xl font-bold">
-                US
-                <span className="absolute -bottom-2 -right-2 flex size-8 items-center justify-center rounded-full border-4 border-[#080808] bg-emerald-400 text-[#080808]">
-                  <Check size={14} strokeWidth={3} />
-                </span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-3">
-                  <h3 className="text-3xl font-semibold tracking-tight">Usu&aacute;rio Dev</h3>
-                  <span className="rounded-full border border-blue-400/20 bg-blue-400/10 px-3 py-1 font-mono text-[8px] uppercase tracking-[0.14em] text-blue-300">
-                    Dispon&iacute;vel
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-slate-400">
-                  Frontend Engineer &middot; sistemas distribu&iacute;dos e DX
-                </p>
-                <p className="mt-4 font-mono text-[9px] text-slate-500">
-                  S&atilde;o Paulo, BR &middot; user.dev
-                </p>
-              </div>
-            </div>
-            <div className="mt-9 grid gap-3 sm:grid-cols-3">
-              {[
-                ['8.420', 'XP total'],
-                ['148', 'Contribui\u00e7\u00f5es'],
-                ['62', 'Aceitas'],
-              ].map(([value, label]) => (
-                <div key={label} className="rounded-2xl border border-white/8 bg-white/[0.025] p-5">
-                  <p className="text-2xl font-semibold">{value}</p>
-                  <p className="mt-2 font-mono text-[8px] uppercase tracking-[0.14em] text-slate-500">
-                    {label}
-                  </p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-8">
-              <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-slate-500">
-                Dom&iacute;nio por tecnologia
-              </p>
-              <div className="mt-5 grid gap-4">
-                {trails.map((trail) => (
-                  <div
-                    key={trail.language}
-                    className="grid grid-cols-[92px_1fr_42px] items-center gap-3 text-xs"
-                  >
-                    <span className="text-slate-300">{trail.language}</span>
-                    <div className="h-1 overflow-hidden rounded-full bg-white/8">
-                      <div
-                        className="h-full rounded-full"
-                        style={{ width: `${trail.progress}%`, backgroundColor: trail.color }}
-                      />
-                    </div>
-                    <span className="font-mono text-[9px] text-slate-500">L{trail.level}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </article>
-
-          <div className="grid gap-4">
-            <article data-reveal className={cn(cardClass, 'p-7')}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-slate-500">
-                    Conquista rara
-                  </p>
-                  <h3 className="mt-3 text-xl font-semibold">Arquitetura resiliente</h3>
-                </div>
-                <span className="flex size-14 items-center justify-center rounded-2xl bg-amber-400/10 text-amber-300">
-                  <Trophy size={24} />
-                </span>
-              </div>
-              <p className="mt-6 text-sm leading-6 text-slate-400">
-                Concedida a 2,4% dos membros ap&oacute;s tr&ecirc;s duelos avan&ccedil;ados sem
-                regress&atilde;o.
-              </p>
-            </article>
-            <article data-reveal className={cn(cardClass, 'p-7')}>
-              <div className="flex items-center gap-3 text-emerald-300">
-                <ShieldCheck size={20} />
-                <span className="font-mono text-[9px] uppercase tracking-[0.16em]">
-                  Sinais verificados
-                </span>
-              </div>
-              <div className="mt-6 grid gap-3">
-                {['GitHub conectado', '62 respostas aceitas', '18 conquistas p\u00fablicas'].map(
-                  (item) => (
-                    <div
-                      key={item}
-                      className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.025] px-4 py-3 text-sm text-slate-300"
-                    >
-                      <Check size={14} className="text-emerald-400" />
-                      {item}
-                    </div>
-                  )
-                )}
-              </div>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section
         id="start"
         data-anime-section
-        className="relative border-t border-white/8 px-6 py-24 lg:py-32"
+        className="relative border-t border-white/8 px-4 py-24 sm:px-6 lg:py-32"
       >
         <div
           data-reveal
-          className="relative mx-auto max-w-7xl overflow-hidden rounded-[34px] border border-blue-300/15 bg-black px-6 py-20 text-center sm:px-10 lg:py-28"
+          className="relative mx-auto max-w-7xl overflow-hidden rounded-[34px] border border-blue-300/15 bg-black px-5 py-16 text-center sm:px-10 sm:py-20 lg:py-28"
         >
           <div className="absolute inset-0 opacity-30">
             <Aurora
@@ -1339,28 +1315,27 @@ export default function LandingShowcase({ initialUser }: LandingShowcaseProps) {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_48%,rgba(0,0,0,0.45),rgba(0,0,0,0.94)_70%)]" />
           <div className="relative z-10 mx-auto max-w-3xl">
             <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-white/10 bg-black/20 px-4 py-2 font-mono text-[9px] uppercase tracking-[0.18em] text-blue-200">
-              <Terminal size={13} /> Sua pr&oacute;xima linha vale XP
+              <Terminal size={13} /> Your next line earns XP
             </div>
-            <h2 className="mt-7 font-sans text-4xl font-semibold tracking-[-0.05em] text-white sm:text-6xl lg:text-7xl">
-              Pare de apenas dizer que sabe. <span className="text-blue-300">Mostre.</span>
+            <h2 className="mt-7 font-sans text-4xl font-semibold leading-[1.05] tracking-[-0.05em] text-white sm:text-6xl lg:text-7xl">
+              Stop saying you can. <span className="text-blue-300">Show it.</span>
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-blue-50/65">
-              Transforme experi&ecirc;ncia real em reputa&ccedil;&atilde;o t&eacute;cnica
-              p&uacute;blica.
+              Turn real experience into public technical reputation.
             </p>
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
                 href={initialUser ? '/feed' : '/register'}
                 className="inline-flex min-h-12 items-center justify-center gap-3 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-[#04101f] transition-transform hover:-translate-y-0.5"
               >
-                {initialUser ? 'Ir para o Feed' : 'Criar meu perfil'}
+                {initialUser ? 'Go to Feed' : 'Create my profile'}
                 <ArrowRight size={16} />
               </Link>
               <a
                 href="#how"
                 className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/15 bg-white/[0.04] px-6 py-3 text-sm font-medium text-white hover:bg-white/[0.08]"
               >
-                Rever como funciona
+                Review how it works
               </a>
             </div>
           </div>

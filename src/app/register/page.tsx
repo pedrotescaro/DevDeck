@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { OAUTH_PROVIDER_LABELS, type OAuthProvider } from '@/lib/supabase/oauth';
 import { CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import AuthHero from '@/components/auth/AuthHero';
 import { DiscordIcon, GitHubIcon, GoogleIcon } from '@/components/auth/OAuthProviderIcons';
 import Loader from '@/components/Loader';
 import styles from '../login/login.module.css';
@@ -33,7 +34,7 @@ export default function RegisterPage() {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     if (!supabaseUrl || supabaseUrl.includes('placeholder')) {
       setError(
-        'Configure as variáveis de ambiente NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY no painel do Vercel para autenticação.'
+        'Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in the Vercel dashboard to enable authentication.'
       );
       return false;
     }
@@ -58,7 +59,7 @@ export default function RegisterPage() {
       }
     } catch (err) {
       console.error(err);
-      setError(`Erro ao autenticar com o ${OAUTH_PROVIDER_LABELS[provider]}. Tente novamente.`);
+      setError(`Could not authenticate with ${OAUTH_PROVIDER_LABELS[provider]}. Please try again.`);
     }
   };
 
@@ -67,7 +68,7 @@ export default function RegisterPage() {
     setError(null);
 
     if (password !== confirmPassword) {
-      setError('As senhas não coincidem. Digite a mesma senha nos dois campos.');
+      setError('Passwords do not match. Enter the same password in both fields.');
       return;
     }
 
@@ -92,7 +93,7 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || 'Erro ao tentar cadastrar.');
+        setError(data.error || 'Could not create your account.');
         setLoading(false);
         return;
       }
@@ -106,7 +107,7 @@ export default function RegisterPage() {
 
       if (loginError) {
         setError(
-          'Conta criada com sucesso, mas ocorreu um erro ao entrar automaticamente. Faça login manualmente.'
+          'Your account was created, but automatic sign-in failed. Please sign in manually.'
         );
         setLoading(false);
         router.push('/login');
@@ -117,7 +118,7 @@ export default function RegisterPage() {
       router.refresh();
     } catch (err) {
       console.error(err);
-      setError('Ocorreu um erro no servidor. Tente novamente.');
+      setError('A server error occurred. Please try again.');
       setLoading(false);
     }
   };
@@ -125,61 +126,19 @@ export default function RegisterPage() {
   return (
     <main className="min-h-svh bg-[#111] font-sans text-white antialiased">
       <div className="grid min-h-svh w-full lg:grid-cols-[53%_47%]">
-        <aside
-          className={[
-            styles.hero,
-            'relative m-3 mr-0 hidden min-h-[calc(100svh-24px)] overflow-hidden rounded-xl lg:flex lg:items-center lg:justify-center',
-          ].join(' ')}
-        >
-          <div className="relative z-10 flex w-full -translate-y-[1.5%] flex-col items-center px-10 text-center">
-            <Link href="/" className="inline-flex items-center gap-5">
-              <Image
-                src="/logo.svg"
-                alt="Logo da DevDeck"
-                width={62}
-                height={62}
-                className={[styles.brandLogo, 'h-[62px] w-[62px] object-contain'].join(' ')}
-              />
-              <span
-                className={[
-                  styles.brandText,
-                  'text-[43px] font-bold tracking-[-0.055em] text-white',
-                ].join(' ')}
-              >
-                DevDeck
-              </span>
-            </Link>
-
-            <h1
-              className={[
-                styles.brandText,
-                'mt-8 max-w-[560px] text-[32px] font-semibold leading-[1.14] tracking-[-0.045em] text-white xl:text-[36px]',
-              ].join(' ')}
-            >
-              Unlock the best of DevDeck. Access to the future community.
-            </h1>
-            <p
-              className={[
-                styles.brandText,
-                'mt-7 text-[17px] font-medium tracking-[-0.025em] text-white/85',
-              ].join(' ')}
-            >
-              Developers creating amazing experiences.
-            </p>
-          </div>
-        </aside>
+        <AuthHero />
 
         <section
           className={[
             styles.formPanel,
-            'flex min-h-svh items-start justify-center px-8 py-8 sm:px-12 lg:py-[8vh] lg:px-[clamp(3rem,5.4vw,4rem)]',
+            'flex min-h-svh items-start justify-center px-5 py-8 sm:px-12 lg:py-[8vh] lg:px-[clamp(3rem,5.4vw,4rem)]',
           ].join(' ')}
         >
           <div className="w-full max-w-[466px]">
             <Link href="/" className="mb-8 inline-flex items-center gap-3 lg:hidden">
               <Image
                 src="/logo.svg"
-                alt="Logo da DevDeck"
+                alt="DevDeck logo"
                 width={38}
                 height={38}
                 className={[styles.brandLogo, 'h-[38px] w-[38px] object-contain'].join(' ')}
@@ -193,8 +152,8 @@ export default function RegisterPage() {
 
             {loading ? (
               <Loader
-                title="Criando sua conta..."
-                subtitle="Estamos preparando seu perfil na DevDeck"
+                title="Creating your account..."
+                subtitle="We’re preparing your DevDeck profile"
                 size="md"
                 className="min-h-[520px] px-0"
               />
@@ -202,9 +161,11 @@ export default function RegisterPage() {
               <>
                 <header className="text-center">
                   <h2 className="text-[28px] font-semibold leading-tight tracking-[-0.045em] text-white">
-                    Crie sua conta
+                    Create your account
                   </h2>
-                  <p className="mt-3 text-[15px] text-[#9cb6df]">Entre para a comunidade hoje</p>
+                  <p className="mt-4 text-[15px] leading-6 text-[#9cb6df]">
+                    Join the community today
+                  </p>
                 </header>
 
                 {error && (
@@ -219,7 +180,7 @@ export default function RegisterPage() {
                 <div className="mt-8 grid grid-cols-3 gap-2.5">
                   <button
                     type="button"
-                    aria-label="Cadastrar com Google"
+                    aria-label="Sign up with Google"
                     onClick={() => handleOAuthLogin('google')}
                     className="flex h-9 items-center justify-center gap-1.5 rounded-md border border-white/[0.06] bg-[#1a1a1a] px-1.5 text-[9px] font-medium whitespace-nowrap text-white/85 transition-colors hover:border-[#4285F4]/45 hover:bg-[#202020] sm:gap-2 sm:px-2 sm:text-[10px] cursor-pointer"
                   >
@@ -229,7 +190,7 @@ export default function RegisterPage() {
 
                   <button
                     type="button"
-                    aria-label="Cadastrar com GitHub"
+                    aria-label="Sign up with GitHub"
                     onClick={() => handleOAuthLogin('github')}
                     className="flex h-9 items-center justify-center gap-1.5 rounded-md border border-white/[0.06] bg-[#1a1a1a] px-1.5 text-[9px] font-medium whitespace-nowrap text-white/85 transition-colors hover:border-white/20 hover:bg-[#202020] sm:gap-2 sm:px-2 sm:text-[10px] cursor-pointer"
                   >
@@ -239,7 +200,7 @@ export default function RegisterPage() {
 
                   <button
                     type="button"
-                    aria-label="Cadastrar com Discord"
+                    aria-label="Sign up with Discord"
                     onClick={() => handleOAuthLogin('discord')}
                     className="flex h-9 items-center justify-center gap-1.5 rounded-md border border-white/[0.06] bg-[#1a1a1a] px-1.5 text-[9px] font-medium whitespace-nowrap text-white/85 transition-colors hover:border-[#5865F2]/45 hover:bg-[#202020] sm:gap-2 sm:px-2 sm:text-[10px] cursor-pointer"
                   >
@@ -254,7 +215,7 @@ export default function RegisterPage() {
                   </div>
                   <div className="relative flex justify-center">
                     <span className="bg-[#111] px-4 text-[11px] font-medium uppercase tracking-[-0.025em] text-[#8ea1bf]">
-                      ou continue com e-mail
+                      or continue with email
                     </span>
                   </div>
                 </div>
@@ -265,7 +226,7 @@ export default function RegisterPage() {
                       className="mb-2 block text-[13px] font-medium text-white"
                       htmlFor="username"
                     >
-                      Nome de usuário
+                      Username
                     </label>
                     <input
                       id="username"
@@ -275,7 +236,7 @@ export default function RegisterPage() {
                       required
                       autoComplete="username"
                       className="h-[49px] w-full rounded-md border border-white/[0.06] bg-[#1a1a1a] px-4 text-sm text-white outline-none transition-colors placeholder:text-[#9db0cf] hover:border-white/10 focus:border-[#469cff]"
-                      placeholder="seu_usuario"
+                      placeholder="your_username"
                     />
                   </div>
 
@@ -284,7 +245,7 @@ export default function RegisterPage() {
                       className="mb-2 block text-[13px] font-medium text-white"
                       htmlFor="email"
                     >
-                      Endereço de e-mail
+                      Email address
                     </label>
                     <input
                       id="email"
@@ -294,7 +255,7 @@ export default function RegisterPage() {
                       required
                       autoComplete="email"
                       className="h-[49px] w-full rounded-md border border-white/[0.06] bg-[#1a1a1a] px-4 text-sm text-white outline-none transition-colors placeholder:text-[#9db0cf] hover:border-white/10 focus:border-[#469cff]"
-                      placeholder="voce@email.com"
+                      placeholder="you@email.com"
                     />
                   </div>
 
@@ -304,7 +265,7 @@ export default function RegisterPage() {
                         className="mb-2 block text-[13px] font-medium text-white"
                         htmlFor="password"
                       >
-                        Senha
+                        Password
                       </label>
                       <div className="relative">
                         <input
@@ -316,12 +277,12 @@ export default function RegisterPage() {
                           minLength={6}
                           autoComplete="new-password"
                           className="h-[49px] w-full rounded-md border border-white/[0.06] bg-[#1a1a1a] px-4 pr-11 text-sm text-white outline-none transition-colors placeholder:text-[#9db0cf] hover:border-white/10 focus:border-[#469cff]"
-                          placeholder="Mínimo 6 caracteres"
+                          placeholder="At least 6 characters"
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword((current) => !current)}
-                          aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                          aria-label={showPassword ? 'Hide password' : 'Show password'}
                           aria-pressed={showPassword}
                           className="absolute right-1.5 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-[#8c94a4] transition-colors hover:bg-white/5 hover:text-white"
                         >
@@ -335,7 +296,7 @@ export default function RegisterPage() {
                         className="mb-2 block text-[13px] font-medium text-white"
                         htmlFor="confirmPassword"
                       >
-                        Confirmar senha
+                        Confirm password
                       </label>
                       <div className="relative">
                         <input
@@ -347,13 +308,13 @@ export default function RegisterPage() {
                           minLength={6}
                           autoComplete="new-password"
                           className="h-[49px] w-full rounded-md border border-white/[0.06] bg-[#1a1a1a] px-4 pr-11 text-sm text-white outline-none transition-colors placeholder:text-[#9db0cf] hover:border-white/10 focus:border-[#469cff]"
-                          placeholder="Repita a senha"
+                          placeholder="Repeat your password"
                         />
                         <button
                           type="button"
                           onClick={() => setShowConfirmPassword((current) => !current)}
                           aria-label={
-                            showConfirmPassword ? 'Ocultar confirmação' : 'Mostrar confirmação'
+                            showConfirmPassword ? 'Hide confirmation' : 'Show confirmation'
                           }
                           aria-pressed={showConfirmPassword}
                           className="absolute right-1.5 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-[#8c94a4] transition-colors hover:bg-white/5 hover:text-white"
@@ -366,7 +327,7 @@ export default function RegisterPage() {
 
                   {confirmPassword && password === confirmPassword && (
                     <p className="flex items-center gap-1.5 text-[11px] text-emerald-400">
-                      <CheckCircle2 size={13} /> Senhas coincidem
+                      <CheckCircle2 size={13} /> Passwords match
                     </p>
                   )}
 
@@ -375,14 +336,14 @@ export default function RegisterPage() {
                     disabled={loading}
                     className="flex h-[49px] w-full items-center justify-center rounded-md bg-[#f1f1f3] text-sm font-semibold text-black transition-colors hover:bg-white disabled:cursor-wait disabled:opacity-60 cursor-pointer"
                   >
-                    {loading ? 'Criando conta...' : 'Criar conta'}
+                    {loading ? 'Creating account...' : 'Create account'}
                   </button>
                 </form>
 
                 <p className="mt-6 text-center text-xs text-[#a7b8d5]">
-                  Já tem uma conta?{' '}
+                  Already have an account?{' '}
                   <Link href="/login" className="font-semibold text-white hover:underline">
-                    Entrar
+                    Sign in
                   </Link>
                 </p>
               </>

@@ -1,5 +1,5 @@
-import { RouteLoadingScreen } from '@/components/RouteLoadingScreen';
+import SiteEntryLoader from '@/components/landing/SiteEntryLoader';
 
 export default function PlatformLoading() {
-  return <RouteLoadingScreen />;
+  return <SiteEntryLoader />;
 }

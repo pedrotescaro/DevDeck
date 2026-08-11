@@ -58,18 +58,18 @@ export default function LandingHero({ initialUser }: LandingHeroProps) {
           chromaticAberration={0}
           dither={0}
           curvature={0.05}
-          tint="#0083fe"
+          tint="#0083FE"
           mouseReact
           mouseStrength={0.95}
           pageLoadAnimation
-          brightness={0.9}
+          brightness={1.18}
         />
       </div>
 
       {/* Contrast layer and brand glows */}
       <div className="lp-hero-overlay z-10" />
 
-      <div className="relative z-30 mx-auto flex min-h-[calc(100vh-9rem)] max-w-6xl items-center justify-center px-6 py-10 lg:px-10">
+      <div className="relative z-30 mx-auto flex min-h-[calc(100vh-9rem)] max-w-6xl items-center justify-center px-4 py-12 sm:px-6 lg:px-10">
         {/* Centered hero content */}
         <motion.div
           className="lp-hero-content flex w-full max-w-5xl flex-col items-center text-center"
@@ -78,35 +78,27 @@ export default function LandingHero({ initialUser }: LandingHeroProps) {
           viewport={{ once: true }}
           variants={container}
         >
-          <h1 className="lp-font-display mb-7 max-w-5xl text-[clamp(3.25rem,8vw,6.5rem)] uppercase leading-[0.98] text-[var(--lp-fg)]">
+          <h1 className="mb-8 max-w-5xl px-1 font-sans text-[clamp(2.35rem,6vw,4.25rem)] font-semibold leading-[1.03] tracking-[-0.055em] text-white sm:px-0">
             <span className="overflow-hidden block pt-3 pb-1 -mt-3">
               <motion.span variants={lineReveal} className="inline-block">
-                Poste código.
-              </motion.span>
-            </span>
-            <span className="overflow-hidden block pt-3 pb-1 -mt-3">
-              <motion.span variants={lineReveal} className="inline-block lp-text-stroke">
-                Ganhe XP.
+                Unlock the best of DevDeck.
               </motion.span>
             </span>
             <span className="overflow-hidden block pt-3 pb-1 -mt-3">
               <motion.span variants={lineReveal} className="inline-block">
-                Suba de <span style={{ color: 'var(--lp-accent)' }}>nível.</span>
+                Access to the future community.
               </motion.span>
             </span>
           </h1>
 
           <motion.p
-            className="mb-8 max-w-2xl text-sm leading-relaxed md:text-base"
-            style={{ color: 'var(--lp-fg-dim)' }}
+            className="mb-9 max-w-2xl px-2 font-sans text-[15px] font-medium leading-7 tracking-[-0.025em] text-white sm:px-0 md:text-[17px]"
             variants={{
               hidden: { opacity: 0, y: 20 },
               show: { opacity: 1, y: 0, transition: { duration: 0.7, delay: 0.3 } },
             }}
           >
-            Poste problemas reais, ganhe XP com a comunidade e resolva quizzes gerados por IA. Seu
-            perfil deixa de ser apenas um currículo e se torna{' '}
-            <span style={{ color: 'var(--lp-fg)' }}>prova real de suas habilidades</span>.
+            Developers creating amazing experiences.
           </motion.p>
 
           {/* Circular avatar social proof stack */}
@@ -127,10 +119,10 @@ export default function LandingHero({ initialUser }: LandingHeroProps) {
             />
             <div className="flex flex-col items-center sm:items-start">
               <span className="lp-font-mono text-[9px] tracking-[0.15em] uppercase text-[var(--lp-muted)] leading-none mb-1">
-                MEMBROS ATIVOS
+                ACTIVE MEMBERS
               </span>
               <span className="lp-font-heading font-semibold text-xs text-[var(--lp-fg)] leading-none">
-                1.840+ programadores na arena
+                1,840+ developers in the arena
               </span>
             </div>
           </motion.div>
@@ -146,62 +138,17 @@ export default function LandingHero({ initialUser }: LandingHeroProps) {
               href={initialUser ? '/feed' : '/register'}
               className="inline-flex min-h-12 items-center justify-center gap-3 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-[#04101f] transition-transform hover:-translate-y-0.5"
             >
-              <span>{initialUser ? 'Ir para o Feed' : 'Entrar na Arena'}</span>
+              <span>{initialUser ? 'Go to Feed' : 'Enter the Arena'}</span>
               <ArrowRight size={16} />
             </Link>
             <a
               href="#platform"
               className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/15 bg-white/[0.04] px-6 py-3 text-sm font-medium text-white hover:bg-white/[0.08] transition-colors"
             >
-              <span>Ver um post real</span>
+              <span>View a real post</span>
             </a>
           </motion.div>
-
-          {/* Bottom stats */}
-          <div className="w-full max-w-2xl border-t border-[var(--lp-border)] pt-6">
-            {/* Live stats */}
-            <motion.div
-              className="lp-font-mono flex flex-wrap items-center justify-center gap-4 text-[10px] uppercase tracking-[0.15em]"
-              style={{ color: 'var(--lp-muted)' }}
-              variants={{
-                hidden: { opacity: 0 },
-                show: { opacity: 1, transition: { duration: 0.7, delay: 0.5 } },
-              }}
-            >
-              <span className="flex items-center gap-2" style={{ color: 'var(--lp-accent)' }}>
-                <span
-                  className="lp-pulse-dot w-1.5 h-1.5 rounded-full"
-                  style={{ backgroundColor: 'var(--lp-accent)' }}
-                />
-                AO VIVO
-              </span>
-              <span>
-                <span style={{ color: 'var(--lp-fg)' }} className="font-medium">
-                  +1.247
-                </span>{' '}
-                posts
-              </span>
-              <span style={{ color: 'var(--lp-muted-2)' }}>/</span>
-              <span>
-                <span style={{ color: 'var(--lp-fg)' }} className="font-medium">
-                  +612
-                </span>{' '}
-                devs subindo
-              </span>
-            </motion.div>
-          </div>
         </motion.div>
-      </div>
-
-      {/* Effect label */}
-      <div className="absolute bottom-8 right-6 z-30 hidden items-center gap-4 sm:flex lg:right-10">
-        <span
-          className="lp-pulse-dot h-1.5 w-1.5 rounded-full"
-          style={{ backgroundColor: 'var(--lp-accent)' }}
-        />
-        <span className="lp-font-mono text-[9px] tracking-[0.1em] uppercase text-[var(--lp-accent)] font-semibold whitespace-nowrap">
-          TERMINAL DA ARENA
-        </span>
       </div>
     </section>
   );

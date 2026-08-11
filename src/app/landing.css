@@ -38,8 +38,9 @@
   font-family: var(--font-space-grotesk), 'Space Grotesk', sans-serif;
 }
 
-.lp-font-mono {
-  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+.lp-font-mono,
+html.lp-landing-page .font-mono {
+  font-family: var(--font-inter), Inter, sans-serif;
 }
 
 /* === Grain Overlay === */
@@ -127,9 +128,10 @@
 /* === Nav Link === */
 .lp-nav-link {
   position: relative;
-  font-family: var(--font-space-grotesk), 'Space Grotesk', sans-serif;
+  font-family: var(--font-inter), Inter, sans-serif;
   font-size: 0.85rem;
-  letter-spacing: 0.05em;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--lp-fg-dim);
   transition: color 0.3s;
 }

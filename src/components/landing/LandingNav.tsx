@@ -6,11 +6,10 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 
 const NAV_LINKS = [
-  { label: 'Como funciona', href: '#how' },
-  { label: 'A Plataforma', href: '#platform' },
-  { label: 'Trilhas', href: '#trails' },
-  { label: 'Duelos', href: '#duels' },
-  { label: 'Perfis', href: '#profiles' },
+  { label: 'How it works', href: '#how' },
+  { label: 'Platform', href: '#platform' },
+  { label: 'Tracks', href: '#trails' },
+  { label: 'Duels', href: '#duels' },
 ];
 
 interface LandingNavProps {
@@ -44,7 +43,7 @@ export default function LandingNav({ initialUser }: LandingNavProps) {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-      className={`fixed inset-x-0 z-50 mx-auto overflow-hidden border transition-[top,width,max-width,background-color,border-color,border-radius,box-shadow,backdrop-filter] duration-500 ease-out ${
+      className={`fixed inset-x-0 z-50 mx-auto overflow-hidden border font-sans transition-[top,width,max-width,background-color,border-color,border-radius,box-shadow,backdrop-filter] duration-500 ease-out ${
         isScrolled
           ? 'top-4 w-[calc(100%_-_3rem)] max-w-6xl rounded-2xl border-white/10 bg-black/90 shadow-2xl backdrop-blur-2xl'
           : 'top-3 w-[calc(100%_-_1.5rem)] max-w-[1536px] rounded-none border-transparent bg-transparent shadow-none backdrop-blur-none'
@@ -89,7 +88,7 @@ export default function LandingNav({ initialUser }: LandingNavProps) {
               href="/feed"
               className="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-blue-100"
             >
-              Ir para o Feed
+              Go to Feed
             </Link>
           ) : (
             <div className="flex items-center gap-3">
@@ -98,13 +97,13 @@ export default function LandingNav({ initialUser }: LandingNavProps) {
                 className="hidden rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors hover:text-white sm:inline-flex"
                 style={{ color: 'var(--lp-fg-dim)' }}
               >
-                Entrar
+                Log in
               </Link>
               <Link
                 href="/register"
                 className="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-blue-100 sm:px-5"
               >
-                Cadastrar-se
+                Sign up
               </Link>
             </div>
           )}

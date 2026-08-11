@@ -43,9 +43,9 @@ const bebasNeue = Bebas_Neue({
 });
 
 export const metadata: Metadata = {
-  title: 'DevDeck — Rede Social Gamificada para Programadores',
+  title: 'DevDeck — The Gamified Community for Developers',
   description:
-    'Suba de nível respondendo perguntas, fazendo duelos de código e conquistando badges.',
+    'Level up through real discussions, code duels, adaptive quizzes, and verifiable skills.',
   icons: {
     icon: '/logo.svg',
     shortcut: '/logo.svg',

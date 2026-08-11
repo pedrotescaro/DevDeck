@@ -1,12 +1,3 @@
-.hero {
-  isolation: isolate;
-  background-color: #000;
-  background-image: url('/bg-glass-3.png');
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-
 .formPanel {
   background: #111;
 }
