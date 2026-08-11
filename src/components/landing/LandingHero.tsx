@@ -54,10 +54,11 @@ export default function LandingHero({ initialUser, isReady = true }: LandingHero
           swirl={1}
           rings={4}
           grayscale={false}
-          tint="#0083FE"
-          highlightColor="#0083FE"
+          tint="#0085FE"
+          highlightColor="#0085FE"
           trigger="both"
           quality="medium"
+          forceMotion
         />
       </div>
 

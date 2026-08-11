@@ -1,29 +1,49 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
-import RippleDistortion from '@/components/RippleDistortion';
 import styles from './AuthHero.module.css';
 
+const RippleDistortion = dynamic(() => import('@/components/RippleDistortion'), {
+  ssr: false,
+});
+
 export default function AuthHero() {
+  const [canRenderRipple, setCanRenderRipple] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 1024px)');
+    const syncViewport = () => setCanRenderRipple(media.matches);
+
+    syncViewport();
+    media.addEventListener('change', syncViewport);
+
+    return () => media.removeEventListener('change', syncViewport);
+  }, []);
+
   return (
     <aside
       className={`${styles.hero} relative m-3 mr-0 hidden min-h-[calc(100svh-24px)] overflow-hidden rounded-xl lg:flex lg:items-center lg:justify-center`}
       data-testid="auth-visual-hero"
     >
       <div className={styles.effect} aria-hidden="true" data-testid="auth-ripple-effect">
-        <RippleDistortion
-          src="/hero.png"
-          brushSize={150}
-          strength={0.2}
-          swirl={1}
-          rings={4}
-          grayscale={false}
-          tint="#0083FE"
-          highlightColor="#0083FE"
-          trigger="both"
-          quality="medium"
-        />
+        {canRenderRipple ? (
+          <RippleDistortion
+            src="/hero.png"
+            brushSize={150}
+            strength={0.2}
+            swirl={1}
+            rings={4}
+            grayscale={false}
+            tint="#0085FE"
+            highlightColor="#0085FE"
+            trigger="both"
+            quality="medium"
+            forceMotion
+          />
+        ) : null}
       </div>
 
       <div className={styles.overlay} aria-hidden="true" />

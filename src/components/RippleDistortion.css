@@ -3,7 +3,11 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #000;
+  contain: layout paint;
+  background-color: #000;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .ripple-distortion canvas {

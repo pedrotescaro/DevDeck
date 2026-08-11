@@ -1,10 +1,16 @@
+'use client';
+
 import { useEffect, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import { Renderer, Program, Mesh, Geometry, Triangle, Texture, RenderTarget } from 'ogl';
 import './RippleDistortion.css';
 
+type RippleTrigger = 'hover' | 'click' | 'both';
+type RippleQuality = 'low' | 'medium' | 'high';
+
 const MAX_WAVES = 100;
-const QUALITY_SCALE: Record<string, number> = { low: 0.4, medium: 0.7, high: 1 };
+const QUALITY_SCALE: Record<RippleQuality, number> = { low: 0.4, medium: 0.7, high: 1 };
+const QUALITY_DPR: Record<RippleQuality, number> = { low: 1, medium: 1.25, high: 2 };
 const START_SCALE = 1.5;
 const LIFE_CONSTANT = Math.log(500);
 
@@ -131,9 +137,6 @@ void main() {
 }
 `;
 
-type RippleTrigger = 'hover' | 'click' | 'both';
-type RippleQuality = 'low' | 'medium' | 'high';
-
 export interface RippleDistortionProps {
   src?: string;
   brushSize?: number;
@@ -153,6 +156,7 @@ export interface RippleDistortionProps {
   clickStrength?: number;
   quality?: RippleQuality;
   enabled?: boolean;
+  forceMotion?: boolean;
   className?: string;
   style?: CSSProperties;
 }
@@ -236,35 +240,55 @@ const RippleDistortion = ({
   clickStrength = 2,
   quality = 'low',
   enabled = true,
+  forceMotion = false,
   className = '',
   style,
 }: RippleDistortionProps) => {
   const mountRef = useRef<HTMLDivElement | null>(null);
-  const configRef = useRef<WaveConfig>({} as WaveConfig);
+  const configRef = useRef<WaveConfig>({
+    brushSize,
+    spread,
+    fade,
+    spacing,
+    clickStrength,
+    trigger,
+    enabled,
+  });
   const uniformsRef = useRef<RippleUniforms | null>(null);
+  const requestRenderRef = useRef<() => void>(() => {});
+  const clearWavesRef = useRef<() => void>(() => {});
 
-  configRef.current = { brushSize, spread, fade, spacing, clickStrength, trigger, enabled };
+  useEffect(() => {
+    configRef.current = { brushSize, spread, fade, spacing, clickStrength, trigger, enabled };
+  }, [brushSize, spread, fade, spacing, clickStrength, trigger, enabled]);
 
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
 
-    const reduceMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let reduceMotion = !forceMotion && motionPreference.matches;
+    let requestRender: () => void = () => {};
 
-    const renderer = new Renderer({
-      alpha: false,
-      antialias: false,
-      dpr: Math.min(window.devicePixelRatio || 1, 2),
-    });
+    let renderer: Renderer;
+    try {
+      renderer = new Renderer({
+        alpha: false,
+        antialias: false,
+        depth: false,
+        dpr: Math.min(window.devicePixelRatio || 1, QUALITY_DPR[quality]),
+      });
+    } catch {
+      return;
+    }
     const gl = renderer.gl;
     gl.clearColor(0, 0, 0, 1);
     const canvas = gl.canvas;
     canvas.style.width = '100%';
     canvas.style.height = '100%';
     canvas.style.display = 'block';
+    canvas.style.opacity = '0';
+    canvas.style.transition = 'opacity 180ms ease';
     mount.appendChild(canvas);
 
     const imageTexture = new Texture(gl, {
@@ -276,6 +300,7 @@ const RippleDistortion = ({
     });
 
     let disposed = false;
+    let imageReady = false;
     const image = new window.Image();
     image.crossOrigin = 'anonymous';
     image.decoding = 'async';
@@ -283,6 +308,8 @@ const RippleDistortion = ({
       if (disposed) return;
       imageTexture.image = image;
       compositeUniforms.uTextureSize.value = [image.naturalWidth || 1, image.naturalHeight || 1];
+      imageReady = true;
+      requestRender();
     };
     image.src = src;
 
@@ -362,6 +389,9 @@ const RippleDistortion = ({
 
     let width = 1;
     let height = 1;
+    let raf = 0;
+    let previousTime = 0;
+    let isInView = true;
 
     const resize = () => {
       width = Math.max(1, mount.clientWidth);
@@ -374,6 +404,7 @@ const RippleDistortion = ({
       const fieldH = Math.max(2, Math.round(height * scale));
       displacementTarget.setSize(fieldW, fieldH);
       compositeUniforms.uTexel.value = [1 / fieldW, 1 / fieldH];
+      requestRender();
     };
 
     const ro = new ResizeObserver(resize);
@@ -390,6 +421,7 @@ const RippleDistortion = ({
       wave.target = START_SCALE * Math.max(1, cfg.spread) * power;
       wave.size = Math.max(1, cfg.brushSize);
       wave.opacity = 1;
+      requestRender();
     };
 
     const localPoint = (clientX: number, clientY: number): [number, number] | null => {
@@ -408,23 +440,48 @@ const RippleDistortion = ({
 
     let previousX = 0;
     let previousY = 0;
+    let hasPreviousPoint = false;
 
     const onMove = (event: PointerEvent) => {
       const cfg = configRef.current;
-      if (!cfg.enabled || reduceMotion || cfg.trigger === 'click') return;
+      if (
+        !cfg.enabled ||
+        reduceMotion ||
+        cfg.trigger === 'click' ||
+        !isInView ||
+        document.hidden ||
+        width <= 1 ||
+        height <= 1
+      ) {
+        return;
+      }
       const point = localPoint(event.clientX, event.clientY);
-      if (!point) return;
+      if (!point) {
+        hasPreviousPoint = false;
+        return;
+      }
       const step = Math.max(1, cfg.spacing);
-      if (Math.abs(point[0] - previousX) > step || Math.abs(point[1] - previousY) > step) {
+      if (!hasPreviousPoint || Math.hypot(point[0] - previousX, point[1] - previousY) >= step) {
         setNewWave(point[0], point[1], 1);
         previousX = point[0];
         previousY = point[1];
+        hasPreviousPoint = true;
       }
     };
 
     const onDown = (event: PointerEvent) => {
       const cfg = configRef.current;
-      if (!cfg.enabled || reduceMotion || cfg.trigger === 'hover') return;
+      if (
+        !cfg.enabled ||
+        reduceMotion ||
+        cfg.trigger === 'hover' ||
+        !isInView ||
+        document.hidden ||
+        width <= 1 ||
+        height <= 1
+      ) {
+        return;
+      }
       const point = localPoint(event.clientX, event.clientY);
       if (!point) return;
       setNewWave(point[0], point[1], Math.max(1, cfg.clickStrength));
@@ -433,14 +490,17 @@ const RippleDistortion = ({
     window.addEventListener('pointermove', onMove, { passive: true });
     window.addEventListener('pointerdown', onDown, { passive: true });
 
-    let raf = 0;
-    let previousTime = 0;
-
     const loop = (now: number) => {
-      raf = requestAnimationFrame(loop);
+      raf = 0;
+      if (disposed || !isInView || document.hidden) {
+        previousTime = 0;
+        return;
+      }
+
       const delta = previousTime ? Math.min(0.05, (now - previousTime) / 1000) : 0;
       previousTime = now;
       const cfg = configRef.current;
+      let hasActiveWaves = false;
 
       const growth = reduceMotion ? 0 : 1 - Math.exp(-delta * 1.09);
       const decay = reduceMotion
@@ -463,6 +523,8 @@ const RippleDistortion = ({
           continue;
         }
 
+        hasActiveWaves = true;
+
         const half = (wave.scale * wave.size) / 2;
         offsets[i * 2] = (wave.x / width) * 2 - 1;
         offsets[i * 2 + 1] = (wave.y / height) * 2 - 1;
@@ -477,22 +539,83 @@ const RippleDistortion = ({
 
       renderer.render({ scene: waveMesh, target: displacementTarget, clear: true });
       renderer.render({ scene: compositeMesh });
+
+      if (imageReady) canvas.style.opacity = '1';
+
+      if (hasActiveWaves) requestRender();
     };
-    raf = requestAnimationFrame(loop);
+
+    requestRender = () => {
+      if (disposed || raf || !isInView || document.hidden) return;
+      raf = requestAnimationFrame(loop);
+    };
+
+    const clearWaves = () => {
+      for (const wave of waves) wave.opacity = 0;
+      opacities.fill(0);
+      previousTime = 0;
+      requestRender();
+    };
+
+    requestRenderRef.current = requestRender;
+    clearWavesRef.current = clearWaves;
+
+    const onMotionPreferenceChange = (event: MediaQueryListEvent) => {
+      reduceMotion = !forceMotion && event.matches;
+      if (reduceMotion) clearWaves();
+      else requestRender();
+    };
+
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+        previousTime = 0;
+        return;
+      }
+      requestRender();
+    };
+
+    const visibilityObserver =
+      typeof IntersectionObserver === 'undefined'
+        ? null
+        : new IntersectionObserver(
+            ([entry]) => {
+              isInView = entry?.isIntersecting ?? true;
+              if (!isInView) {
+                cancelAnimationFrame(raf);
+                raf = 0;
+                previousTime = 0;
+                return;
+              }
+              requestRender();
+            },
+            { rootMargin: '160px' }
+          );
+
+    visibilityObserver?.observe(mount);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    motionPreference.addEventListener('change', onMotionPreferenceChange);
+    requestRender();
 
     return () => {
       disposed = true;
       cancelAnimationFrame(raf);
       ro.disconnect();
+      visibilityObserver?.disconnect();
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      motionPreference.removeEventListener('change', onMotionPreferenceChange);
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerdown', onDown);
       uniformsRef.current = null;
+      requestRenderRef.current = () => {};
+      clearWavesRef.current = () => {};
       if (canvas.parentNode === mount) mount.removeChild(canvas);
       const ext = gl.getExtension('WEBGL_lose_context');
       if (ext) ext.loseContext();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [src, quality]);
+  }, [src, quality, forceMotion]);
 
   useEffect(() => {
     const u = uniformsRef.current;
@@ -506,9 +629,21 @@ const RippleDistortion = ({
     u.composite.uGrayscale.value = grayscale ? 1 : 0;
     u.composite.uHighlight.value = hexToRGB(highlightColor);
     u.composite.uTint.value = hexToRGB(tint);
+    requestRenderRef.current();
   }, [rings, strength, swirl, dispersion, glint, tintAmount, grayscale, highlightColor, tint]);
 
-  return <div ref={mountRef} className={`ripple-distortion ${className}`.trim()} style={style} />;
+  useEffect(() => {
+    if (enabled) requestRenderRef.current();
+    else clearWavesRef.current();
+  }, [enabled]);
+
+  return (
+    <div
+      ref={mountRef}
+      className={`ripple-distortion ${className}`.trim()}
+      style={{ backgroundImage: `url("${src}")`, ...style }}
+    />
+  );
 };
 
 export default RippleDistortion;
