@@ -123,11 +123,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .smoothButton,
-  .buttonPre,
-  .buttonPost,
-  .buttonIcon,
-  .buttonOverlay {
+  .smoothButton:not([data-force-motion='true']),
+  .smoothButton:not([data-force-motion='true']) .buttonPre,
+  .smoothButton:not([data-force-motion='true']) .buttonPost,
+  .smoothButton:not([data-force-motion='true']) .buttonIcon,
+  .smoothButton:not([data-force-motion='true']) .buttonOverlay {
     transition-duration: 1ms;
   }
 }

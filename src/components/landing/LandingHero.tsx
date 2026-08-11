@@ -109,6 +109,7 @@ export default function LandingHero({ initialUser }: LandingHeroProps) {
               size={36}
               overlap={0.35}
               expandOnHover
+              forceMotion
               className="[&_div.rounded-full.border-2]:!border-[var(--lp-bg)] [&>div:last-child]:!bg-[var(--lp-accent)] [&>div:last-child_span]:!text-[var(--lp-bg)] [&>div:last-child_span]:!font-bold"
             />
             <div className="flex flex-col items-center sm:items-start">
@@ -128,7 +129,11 @@ export default function LandingHero({ initialUser }: LandingHeroProps) {
               show: { opacity: 1, y: 0, transition: { duration: 0.7, delay: 0.45 } },
             }}
           >
-            <Link href={initialUser ? '/feed' : '/register'} className={styles.smoothButton}>
+            <Link
+              href={initialUser ? '/feed' : '/register'}
+              className={styles.smoothButton}
+              data-force-motion="true"
+            >
               <span className={styles.buttonPre}>
                 {initialUser ? 'Go to Feed' : "Let's Get Started"}
               </span>

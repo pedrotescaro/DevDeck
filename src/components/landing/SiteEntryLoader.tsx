@@ -16,6 +16,7 @@ declare global {
 
 interface SiteEntryLoaderProps {
   onComplete?: () => void;
+  forceMotion?: boolean;
 }
 
 interface LoaderFrame {
@@ -38,7 +39,7 @@ function createWavePath(progress: number, phase: number) {
   ].join(' ');
 }
 
-export default function SiteEntryLoader({ onComplete }: SiteEntryLoaderProps) {
+export default function SiteEntryLoader({ onComplete, forceMotion = false }: SiteEntryLoaderProps) {
   const [frame, setFrame] = useState<LoaderFrame>({ progress: 0, phase: 0 });
   const [isExiting, setIsExiting] = useState(false);
   const completionScheduledRef = useRef(false);
@@ -49,7 +50,7 @@ export default function SiteEntryLoader({ onComplete }: SiteEntryLoaderProps) {
 
   useEffect(() => {
     const prefersReducedMotion =
-      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+      !forceMotion && (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false);
     const requestFrame =
       window.requestAnimationFrame?.bind(window) ??
       ((callback: FrameRequestCallback) =>
@@ -108,7 +109,7 @@ export default function SiteEntryLoader({ onComplete }: SiteEntryLoaderProps) {
       window.clearTimeout(exitTimer);
       window.clearTimeout(completionTimer);
     };
-  }, []);
+  }, [forceMotion]);
 
   const roundedProgress = Math.round(frame.progress);
   const wavePath = useMemo(
@@ -119,6 +120,7 @@ export default function SiteEntryLoader({ onComplete }: SiteEntryLoaderProps) {
   return (
     <div
       className={`${styles.loader} ${isExiting ? styles.exiting : ''}`}
+      data-force-motion={forceMotion ? 'true' : undefined}
       data-testid="site-entry-loader"
       role="status"
       aria-busy="true"

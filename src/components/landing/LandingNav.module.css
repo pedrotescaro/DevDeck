@@ -53,8 +53,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .signUpButton,
-  .loginLink {
+  .signUpButton:not([data-force-motion='true']),
+  .loginLink:not([data-force-motion='true']) {
     transition-duration: 1ms;
   }
 }

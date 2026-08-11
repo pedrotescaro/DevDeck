@@ -44,6 +44,7 @@ export default function LandingNav({ initialUser }: LandingNavProps) {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      data-force-motion="true"
       className={`fixed inset-x-0 z-50 mx-auto overflow-hidden border font-sans transition-[top,width,max-width,background-color,border-color,border-radius,box-shadow,backdrop-filter] duration-500 ease-out ${
         isScrolled
           ? 'top-4 w-[calc(100%_-_3rem)] max-w-6xl rounded-2xl border-white/10 bg-black/90 shadow-2xl backdrop-blur-2xl'
@@ -93,10 +94,10 @@ export default function LandingNav({ initialUser }: LandingNavProps) {
             </Link>
           ) : (
             <div className="flex items-center gap-3">
-              <Link href="/login" className={styles.loginLink}>
+              <Link href="/login" className={styles.loginLink} data-force-motion="true">
                 Log in
               </Link>
-              <Link href="/register" className={styles.signUpButton}>
+              <Link href="/register" className={styles.signUpButton} data-force-motion="true">
                 Sign up
               </Link>
             </div>

@@ -89,7 +89,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .loader {
+  .loader:not([data-force-motion='true']) {
     transition-duration: 80ms;
   }
 }

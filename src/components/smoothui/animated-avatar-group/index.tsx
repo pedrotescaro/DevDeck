@@ -1,7 +1,8 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { motion, useReducedMotion } from 'motion/react';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 
 export type AvatarData = {
@@ -17,6 +18,7 @@ export type AnimatedAvatarGroupProps = {
   overlap?: number;
   className?: string;
   expandOnHover?: boolean;
+  forceMotion?: boolean;
 };
 
 const AnimatedAvatarGroup = ({
@@ -26,8 +28,10 @@ const AnimatedAvatarGroup = ({
   overlap = 0.3,
   className,
   expandOnHover = true,
+  forceMotion = false,
 }: AnimatedAvatarGroupProps) => {
-  const shouldReduceMotion = useReducedMotion();
+  const prefersReducedMotion = useReducedMotion();
+  const shouldReduceMotion = !forceMotion && prefersReducedMotion;
   const [isHovered, setIsHovered] = useState(false);
   const [isHoverDevice, setIsHoverDevice] = useState(false);
 
@@ -60,6 +64,7 @@ const AnimatedAvatarGroup = ({
     <motion.div
       aria-label="Avatar group"
       className={cn('flex items-center', className)}
+      data-force-motion={forceMotion ? 'true' : undefined}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       role="group"

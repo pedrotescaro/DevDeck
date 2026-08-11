@@ -53,6 +53,7 @@ import { cn } from '@/lib/utils';
 
 interface LandingShowcaseProps {
   initialUser: unknown;
+  forceMotion?: boolean;
 }
 
 const cardClass =
@@ -983,13 +984,18 @@ function MetricCard({
   );
 }
 
-export default function LandingShowcase({ initialUser }: LandingShowcaseProps) {
+export default function LandingShowcase({
+  initialUser,
+  forceMotion = false,
+}: LandingShowcaseProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const howGridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const root = rootRef.current;
-    if (!root || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!root || (!forceMotion && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+      return;
+    }
 
     const scope = createScope({ root });
     scope.add(() => {
@@ -1019,7 +1025,7 @@ export default function LandingShowcase({ initialUser }: LandingShowcaseProps) {
     });
 
     return () => scope.revert();
-  }, []);
+  }, [forceMotion]);
 
   return (
     <div ref={rootRef} className="relative overflow-hidden bg-black text-white">
