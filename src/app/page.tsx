@@ -1,10 +1,10 @@
-import { getAuthUser } from '@/lib/auth';
+import { getAuthIdentity } from '@/lib/auth-session';
 import HomeClient from '@/components/HomeClient';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const user = await getAuthUser();
+  const user = await getAuthIdentity();
 
   return <HomeClient initialUser={user} />;
 }

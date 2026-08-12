@@ -1,6 +1,6 @@
 // @vitest-environment node
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthRetryableFetchError } from '@supabase/supabase-js';
 import { NextRequest } from 'next/server';
 
@@ -30,10 +30,37 @@ describe('Supabase session proxy', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     getClaims.mockReset();
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://example.supabase.co');
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'test-publishable-key');
     vi.mocked(createServerClient).mockImplementation((_url, _key, options: any) => {
       cookieMethods = options.cookies;
       return { auth: { getClaims } } as any;
     });
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('keeps public routes available when Supabase is not configured', async () => {
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', '');
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', '');
+
+    const response = await updateSession(new NextRequest('https://devdeck.test/'));
+
+    expect(response.status).toBe(200);
+    expect(createServerClient).not.toHaveBeenCalled();
+  });
+
+  it('keeps protected routes closed when Supabase is not configured', async () => {
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', '');
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', '');
+
+    const response = await updateSession(new NextRequest('https://devdeck.test/feed'));
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe('https://devdeck.test/login');
+    expect(createServerClient).not.toHaveBeenCalled();
   });
 
   it('always verifies Supabase claims even when the local JWT exists', async () => {

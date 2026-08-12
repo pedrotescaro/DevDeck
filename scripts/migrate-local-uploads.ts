@@ -10,12 +10,12 @@ import pg from 'pg';
 dotenv.config({ path: '.env.local' });
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 const connectionString = process.env.DATABASE_URL;
 
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error(
-    'Erro: NEXT_PUBLIC_SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY não configurados no .env.local'
+    'Erro: NEXT_PUBLIC_SUPABASE_URL ou SUPABASE_SECRET_KEY não configurados no .env.local'
   );
   process.exit(1);
 }

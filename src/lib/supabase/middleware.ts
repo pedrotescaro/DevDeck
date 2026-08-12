@@ -6,6 +6,7 @@ import { JWT_COOKIE_NAME } from '@/lib/config';
 import { isTemporaryAuthFailure } from '@/lib/supabase/auth-errors';
 import { getErrorSummary } from '@/lib/connection-errors';
 import { logger } from '@/lib/logger';
+import { getSupabasePublicConfig, isSupabasePublicConfigured } from '@/lib/supabase/env';
 
 const PROTECTED_ROUTE_PREFIXES = [
   '/async',
@@ -37,9 +38,22 @@ function copySessionState(source: NextResponse, target: NextResponse) {
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
+  const pathname = request.nextUrl.pathname;
+  const isProtectedRoute = PROTECTED_ROUTE_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
+  // Keep public pages available so login/register can show their configuration
+  // guidance. Protected routes remain closed when Auth is not configured.
+  if (!isSupabasePublicConfigured()) {
+    if (!isProtectedRoute) return supabaseResponse;
+
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = '/login';
+    return NextResponse.redirect(loginUrl);
+  }
+
+  const { url, key } = getSupabasePublicConfig();
 
   const supabase = createServerClient(url, key, {
     cookies: {
@@ -92,11 +106,6 @@ export async function updateSession(request: NextRequest) {
       usedJwtFallback: Boolean(user),
     });
   }
-
-  const pathname = request.nextUrl.pathname;
-  const isProtectedRoute = PROTECTED_ROUTE_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
-  );
 
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone();

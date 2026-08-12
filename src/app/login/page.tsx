@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { isSupabasePublicConfigured } from '@/lib/supabase/env';
 import { OAUTH_PROVIDER_LABELS, type OAuthProvider } from '@/lib/supabase/oauth';
 import { Eye, EyeOff } from 'lucide-react';
 import AuthHero from '@/components/auth/AuthHero';
@@ -42,10 +43,9 @@ export default function LoginPage() {
   }, []);
 
   const checkSupabaseConfig = () => {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    if (!supabaseUrl || supabaseUrl.includes('placeholder')) {
+    if (!isSupabasePublicConfigured()) {
       setError(
-        'Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in the Vercel dashboard to enable authentication.'
+        'Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY to enable authentication.'
       );
       return false;
     }

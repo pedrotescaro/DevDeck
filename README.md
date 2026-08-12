@@ -117,6 +117,7 @@ Abra [http://localhost:3000](http://localhost:3000) 🎉
 
 > [!TIP]
 > Para popular o banco com dados de teste (badges, quizzes, usuários), rode:
+>
 > ```bash
 > docker compose exec web sh -c "npx prisma db seed"
 > ```
@@ -141,9 +142,14 @@ Crie um arquivo chamado `.env.local` na raiz (copiando do `.env.example`) e conf
 DATABASE_URL="postgresql://..."
 DIRECT_URL="postgresql://..."
 NEXT_PUBLIC_SUPABASE_URL="https://..."
-NEXT_PUBLIC_SUPABASE_ANON_KEY="..."
-SUPABASE_SERVICE_ROLE_KEY="..."
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="sb_publishable_..."
+SUPABASE_SECRET_KEY="sb_secret_..."
 ```
+
+> A URL e a chave publishable habilitam o Supabase Auth, mas não substituem a
+> conexão PostgreSQL. Registro, feed e demais dados do app exigem
+> `DIRECT_URL` ou `DATABASE_URL`. A secret key é server-only e também é usada
+> pelo seed e pelo fallback REST.
 
 #### 3. Sincronizar o Prisma e Popular o Banco (Seed)
 

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { hasDatabaseConnection, prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
 import { registerSchema } from '@/lib/validators';
 import { rateLimit } from '@/lib/ratelimit';
@@ -22,6 +22,13 @@ export const POST = apiHandler(async (request) => {
   // Validate request body
   const parsed = registerSchema.parse(body);
   const { username, email, password } = parsed;
+
+  if (!hasDatabaseConnection()) {
+    return NextResponse.json(
+      { error: 'The application database is not configured in this environment.' },
+      { status: 503 }
+    );
+  }
 
   // Check username unique
   const existingUsername = await prisma.user.findUnique({

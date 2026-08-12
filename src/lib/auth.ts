@@ -1,12 +1,12 @@
 import { cache } from 'react';
-import { createClient } from '@/lib/supabase/server';
-import { prisma } from '@/lib/prisma';
-import { supabaseAdmin } from '@/lib/supabase/admin';
+import { getAuthUserId } from '@/lib/auth-session';
+import { hasDatabaseConnection, prisma } from '@/lib/prisma';
+import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { ConnectionError, ForbiddenError, UnauthorizedError } from '@/lib/errors';
-import { getJwtUser } from '@/lib/jwt';
 import { logger } from '@/lib/logger';
 import { getErrorSummary, isTransientConnectionError } from '@/lib/connection-errors';
-import { isTemporaryAuthFailure } from '@/lib/supabase/auth-errors';
+
+type SupabaseAdminClient = NonNullable<ReturnType<typeof getSupabaseAdminClient>>;
 
 /** Fetch a user through the direct PostgreSQL connection. */
 async function fetchUserViaPrisma(userId: string) {
@@ -23,7 +23,7 @@ async function fetchUserViaPrisma(userId: string) {
  * Fetch a user through the Supabase Data API on port 443. This is the fallback
  * for networks that temporarily cannot reach the PostgreSQL pooler.
  */
-async function fetchUserViaRest(userId: string) {
+async function fetchUserViaRest(userId: string, supabaseAdmin: SupabaseAdminClient) {
   const { data: user, error } = await supabaseAdmin
     .from('User')
     .select('*')
@@ -73,6 +73,35 @@ async function fetchUserViaRest(userId: string) {
 
 /** Try PostgreSQL first and fail over to HTTPS only for transient errors. */
 async function findUserWithFallback(userId: string) {
+  const supabaseAdmin = getSupabaseAdminClient();
+
+  if (!hasDatabaseConnection()) {
+    if (!supabaseAdmin) {
+      logger.warn('User data backends are not configured', {
+        userId,
+        databaseConfigured: false,
+        restFallbackConfigured: false,
+      });
+      throw new ConnectionError(
+        'USER_DATA_NOT_CONFIGURED',
+        'O acesso aos dados do app ainda não foi configurado neste ambiente.'
+      );
+    }
+
+    try {
+      return await fetchUserViaRest(userId, supabaseAdmin);
+    } catch (restError) {
+      logger.warn('Supabase REST user data connection failed', {
+        userId,
+        ...getErrorSummary(restError),
+      });
+      throw new ConnectionError(
+        'USER_DATA_UNAVAILABLE',
+        'Conexão temporariamente indisponível. Sua sessão continua ativa.'
+      );
+    }
+  }
+
   try {
     return await fetchUserViaPrisma(userId);
   } catch (prismaError) {
@@ -80,13 +109,21 @@ async function findUserWithFallback(userId: string) {
 
     logger.warn('Prisma connection failed, falling back to Supabase REST API', {
       userId,
+      restFallbackConfigured: Boolean(supabaseAdmin),
       ...getErrorSummary(prismaError),
     });
 
+    if (!supabaseAdmin) {
+      throw new ConnectionError(
+        'USER_DATA_UNAVAILABLE',
+        'Conexão temporariamente indisponível. Sua sessão continua ativa.'
+      );
+    }
+
     try {
-      return await fetchUserViaRest(userId);
+      return await fetchUserViaRest(userId, supabaseAdmin);
     } catch (restError) {
-      logger.error('Both user data connections failed', {
+      logger.warn('Both user data connections failed', {
         userId,
         prisma: getErrorSummary(prismaError),
         rest: getErrorSummary(restError),
@@ -108,28 +145,7 @@ async function findUserWithFallback(userId: string) {
  */
 export const getAuthUser = cache(async () => {
   try {
-    const supabase = await createClient();
-    const { data, error } = await supabase.auth.getClaims();
-    let userId = typeof data?.claims?.sub === 'string' ? data.claims.sub : null;
-
-    if (!userId && error && isTemporaryAuthFailure(error)) {
-      const jwtPayload = await getJwtUser();
-      userId = jwtPayload?.sub ?? null;
-
-      logger.warn('Temporary Supabase auth failure while resolving user', {
-        ...getErrorSummary(error),
-        usedJwtFallback: Boolean(userId),
-      });
-
-      if (!userId) {
-        throw new ConnectionError(
-          'AUTH_TEMPORARILY_UNAVAILABLE',
-          'Não foi possível renovar sua sessão agora. Tente novamente em instantes.'
-        );
-      }
-    } else if (!userId && error) {
-      logger.debug('Supabase session is invalid while resolving user', getErrorSummary(error));
-    }
+    const userId = await getAuthUserId();
 
     if (!userId) return null;
 
@@ -142,15 +158,16 @@ export const getAuthUser = cache(async () => {
     syncUserStreaks(dbUser);
     return dbUser;
   } catch (error) {
-    logger.error('Error in getAuthUser', getErrorSummary(error));
-
     if (error instanceof ConnectionError) throw error;
     if (isTransientConnectionError(error)) {
+      logger.warn('Transient connection failure in getAuthUser', getErrorSummary(error));
       throw new ConnectionError(
         'CONNECTION_ERROR',
         'Conexão temporariamente indisponível. Sua sessão continua ativa.'
       );
     }
+
+    logger.error('Error in getAuthUser', getErrorSummary(error));
     throw error;
   }
 });
@@ -186,19 +203,29 @@ function syncUserStreaks(dbUser: any) {
   }
 
   if (needsUpdate) {
-    prisma.user.update({ where: { id: dbUser.id }, data: updateData }).catch(() => {
-      supabaseAdmin
-        .from('User')
-        .update(updateData)
-        .eq('id', dbUser.id)
-        .then(({ error }) => {
-          if (error) {
-            logger.error('Failed to auto-heal user streak/activity via REST', {
-              error: String(error),
-            });
-          }
+    const updateViaRest = async () => {
+      const supabaseAdmin = getSupabaseAdminClient();
+      if (!supabaseAdmin) return;
+
+      try {
+        const { error } = await supabaseAdmin.from('User').update(updateData).eq('id', dbUser.id);
+        if (!error) return;
+
+        logger.warn('Failed to auto-heal user streak/activity via REST', {
+          ...getErrorSummary(error),
         });
-    });
+      } catch (error) {
+        logger.warn('Failed to auto-heal user streak/activity via REST', getErrorSummary(error));
+      }
+    };
+
+    if (hasDatabaseConnection()) {
+      void prisma.user
+        .update({ where: { id: dbUser.id }, data: updateData })
+        .catch(() => updateViaRest());
+    } else {
+      void updateViaRest();
+    }
   }
 }
 

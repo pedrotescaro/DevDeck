@@ -3,6 +3,19 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
 import dns from 'dns';
 
+const connectionString = process.env.DIRECT_URL?.trim() || process.env.DATABASE_URL?.trim() || '';
+
+export function hasDatabaseConnection() {
+  return Boolean(connectionString);
+}
+
+function createMissingDatabaseError() {
+  return Object.assign(
+    new Error('Set DIRECT_URL or DATABASE_URL before using the application database.'),
+    { code: 'DATABASE_NOT_CONFIGURED' }
+  );
+}
+
 function readPositiveInteger(value: string | undefined, fallback: number) {
   const parsed = Number.parseInt(value || '', 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
@@ -19,7 +32,6 @@ const prismaClientSingleton = () => {
   // Prefer DIRECT_URL (session pooler / direct connection) because
   // PrismaPg uses prepared statements which are incompatible with
   // PgBouncer transaction mode (port 6543).
-  const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL;
   const pool = new pg.Pool({
     connectionString,
     ssl: { rejectUnauthorized: false },
@@ -32,6 +44,16 @@ const prismaClientSingleton = () => {
     keepAlive: true,
     keepAliveInitialDelayMillis: 10_000,
   });
+
+  // node-postgres defaults to localhost when no connection string is present.
+  // Replace its I/O methods so a missing env never becomes a misleading
+  // ECONNREFUSED against a database the user did not configure.
+  if (!connectionString) {
+    const rejectUnconfigured = () => Promise.reject(createMissingDatabaseError());
+    pool.query = rejectUnconfigured as typeof pool.query;
+    pool.connect = rejectUnconfigured as typeof pool.connect;
+  }
+
   pool.on('error', (err) => {
     console.error('[pg.Pool] Unexpected error:', err.message);
   });

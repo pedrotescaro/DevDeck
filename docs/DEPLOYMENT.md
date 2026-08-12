@@ -17,18 +17,22 @@ This guide details steps to deploy DevDeck to Vercel (Front-end & API) and Supab
 
 Create your environment variables on Vercel. Ensure to supply:
 
-| Variable Name                   | Description                                        | Example / Recommended Value                            |
-| ------------------------------- | -------------------------------------------------- | ------------------------------------------------------ |
-| `DATABASE_URL`                  | Supabase transaction connection string             | `postgres://postgres.xxx:6543/postgres?pgbouncer=true` |
-| `DIRECT_URL`                    | Supabase direct connection string                  | `postgres://postgres.xxx:5432/postgres`                |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Supabase project URL                               | `https://xxxx.supabase.co`                             |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key                                  | `<anon_key>`                                           |
-| `SUPABASE_SERVICE_ROLE_KEY`     | Supabase service role key (secure API access)      | `<service_role_key>`                                   |
-| `UPSTASH_REDIS_REST_URL`        | Upstash Redis REST endpoint for rate limiting      | `https://xxxx.upstash.io`                              |
-| `UPSTASH_REDIS_REST_TOKEN`      | Upstash Redis authorization token                  | `<redis_token>`                                        |
-| `OPENAI_API_KEY`                | API Key for daily quiz generation                  | `sk-proj-xxxx`                                         |
-| `CRON_SECRET`                   | Authorization header token for daily cron requests | `super-secret-guid`                                    |
-| `SEED_DEFAULT_PASSWORD`         | Fallback user password for database seeding        | `ChangeMe123!`                                         |
+| Variable Name                          | Description                                        | Example / Recommended Value                            |
+| -------------------------------------- | -------------------------------------------------- | ------------------------------------------------------ |
+| `DATABASE_URL`                         | Supabase transaction connection string             | `postgres://postgres.xxx:6543/postgres?pgbouncer=true` |
+| `DIRECT_URL`                           | Supabase direct connection string                  | `postgres://postgres.xxx:5432/postgres`                |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Supabase project URL                               | `https://xxxx.supabase.co`                             |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key                           | `sb_publishable_...`                                   |
+| `SUPABASE_SECRET_KEY`                  | Supabase server-only key (secure API access)       | `sb_secret_...`                                        |
+| `UPSTASH_REDIS_REST_URL`               | Upstash Redis REST endpoint for rate limiting      | `https://xxxx.upstash.io`                              |
+| `UPSTASH_REDIS_REST_TOKEN`             | Upstash Redis authorization token                  | `<redis_token>`                                        |
+| `OPENAI_API_KEY`                       | API Key for daily quiz generation                  | `sk-proj-xxxx`                                         |
+| `CRON_SECRET`                          | Authorization header token for daily cron requests | `super-secret-guid`                                    |
+| `SEED_DEFAULT_PASSWORD`                | Fallback user password for database seeding        | `ChangeMe123!`                                         |
+
+Legacy projects can use `NEXT_PUBLIC_SUPABASE_ANON_KEY` and
+`SUPABASE_SERVICE_ROLE_KEY` instead. Never expose the secret/service-role key
+with a `NEXT_PUBLIC_` prefix.
 
 ---
 

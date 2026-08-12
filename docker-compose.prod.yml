@@ -16,11 +16,11 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres_devdeck_2024}
       POSTGRES_DB: devdeck
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d devdeck"]
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d devdeck']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -31,13 +31,14 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:-}
         NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
         NEXT_PUBLIC_AVATAR_API_URL: ${NEXT_PUBLIC_AVATAR_API_URL:-https://api.dicebear.com/9.x/pixel-art/svg}
     container_name: devdeck-web
     restart: always
     ports:
-      - "3000:3000"
+      - '3000:3000'
     env_file:
       - .env.docker
     environment:

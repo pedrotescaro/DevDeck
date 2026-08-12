@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { hasDatabaseConnection, prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
 import { AVATAR_API_URL, DEFAULT_LANGUAGE_TRAILS } from '@/lib/config';
 import { signJwt, setJwtCookie } from '@/lib/jwt';
@@ -10,6 +10,11 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
   const next = searchParams.get('next') ?? '/feed';
+
+  if (code && !hasDatabaseConnection()) {
+    const message = 'The application database is not configured in this environment.';
+    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(message)}`);
+  }
 
   if (code) {
     const supabase = await createClient();
