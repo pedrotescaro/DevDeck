@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthorAvatar } from '@/components/AuthorAvatar';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
-import { formatRelativeTime } from '@/lib/date';
+import { useHydrationSafeRelativeTime } from '@/hooks/useHydrationSafeRelativeTime';
 import { LikeButton } from '@/components/motion/LikeButton';
 import { BookmarkButton } from '@/components/motion/BookmarkButton';
 import { RepostMenu } from '@/components/motion/RepostMenu';
@@ -27,6 +27,10 @@ export function ProfileReplyThread({ reply }: ProfileReplyThreadProps) {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [reposted, setReposted] = useState(false);
   const [repostCount, setRepostCount] = useState(0);
+  const { text: parentRelativeTime } = useHydrationSafeRelativeTime(
+    reply?.parent?.created_at ?? reply?.post?.created_at ?? 0
+  );
+  const { text: replyRelativeTime } = useHydrationSafeRelativeTime(reply?.created_at ?? 0);
 
   // Defensive check to prevent crash during tab transition state lag
   if (!reply || (!reply.post && !reply.parent)) {
@@ -36,7 +40,6 @@ export function ProfileReplyThread({ reply }: ProfileReplyThreadProps) {
   // Determine parent item (can be a parent Answer, or the Post itself)
   const isNestedReply = !!reply.parent;
   const parentAuthor = isNestedReply ? reply.parent.author : reply.post.author;
-  const parentCreatedAt = isNestedReply ? reply.parent.created_at : reply.post.created_at;
   const parentBody = isNestedReply ? reply.parent.body : reply.post.body;
   const parentTitle = !isNestedReply ? reply.post.title : undefined;
   const postLanguage = !isNestedReply ? reply.post.language : undefined;
@@ -165,9 +168,7 @@ export function ProfileReplyThread({ reply }: ProfileReplyThreadProps) {
                 <span className="text-dd-muted text-[11px]">@{parentAuthor.username}</span>
               </Link>
               <span className="text-dd-muted">•</span>
-              <span className="text-dd-muted text-[11px]">
-                {formatRelativeTime(parentCreatedAt)}
-              </span>
+              <span className="text-dd-muted text-[11px]">{parentRelativeTime}</span>
             </div>
             {postLanguage && (
               <span className="px-1.5 py-0.5 text-[9px] font-bold text-blue-500 bg-blue-500/10 border border-blue-500/20 rounded">
@@ -213,9 +214,7 @@ export function ProfileReplyThread({ reply }: ProfileReplyThreadProps) {
               <span className="text-dd-muted text-[11px]">@{reply.author.username}</span>
             </Link>
             <span className="text-dd-muted">•</span>
-            <span className="text-dd-muted text-[11px]">
-              {formatRelativeTime(reply.created_at)}
-            </span>
+            <span className="text-dd-muted text-[11px]">{replyRelativeTime}</span>
           </div>
 
           <div className="text-[11px] text-dd-muted mt-0.5">

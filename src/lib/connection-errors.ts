@@ -3,6 +3,7 @@ const TRANSIENT_ERROR_CODES = new Set([
   'ECONNREFUSED',
   'ECONNRESET',
   'EHOSTUNREACH',
+  'EMAXCONNSESSION',
   'ENETDOWN',
   'ENETUNREACH',
   'EPIPE',
@@ -21,12 +22,15 @@ const TRANSIENT_MESSAGE_PARTS = [
   'connection timeout',
   'failed to fetch',
   'fetch failed',
+  'emaxconnsession',
+  'max clients reached',
   'network error',
   'network request failed',
   'server closed the connection',
   'socket hang up',
   'timed out',
   'timeout',
+  'too many connections',
 ];
 
 type ErrorLike = {

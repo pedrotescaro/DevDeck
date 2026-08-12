@@ -3,7 +3,15 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
 import dns from 'dns';
 
-const connectionString = process.env.DIRECT_URL?.trim() || process.env.DATABASE_URL?.trim() || '';
+/**
+ * Runtime traffic must use the pooled URL when one is available. DIRECT_URL is
+ * reserved for Prisma CLI workflows such as migrations and introspection.
+ */
+export function getDatabaseConnectionString() {
+  return process.env.DATABASE_URL?.trim() || process.env.DIRECT_URL?.trim() || '';
+}
+
+const connectionString = getDatabaseConnectionString();
 
 export function hasDatabaseConnection() {
   return Boolean(connectionString);
@@ -21,6 +29,11 @@ function readPositiveInteger(value: string | undefined, fallback: number) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+export function getDatabasePoolMax() {
+  const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+  return readPositiveInteger(process.env.DATABASE_POOL_MAX, isServerless ? 1 : 10);
+}
+
 // Force Node.js to prefer IPv4 over IPv6. This prevents ENETUNREACH / ETIMEDOUT errors
 // when connecting to Supabase database/API hosts that resolve to IPv6 on networks/machines
 // that do not support IPv6 routing.
@@ -29,13 +42,13 @@ if (typeof dns.setDefaultResultOrder === 'function') {
 }
 
 const prismaClientSingleton = () => {
-  // Prefer DIRECT_URL (session pooler / direct connection) because
-  // PrismaPg uses prepared statements which are incompatible with
-  // PgBouncer transaction mode (port 6543).
+  // Runtime traffic prefers the transaction pooler (DATABASE_URL). Each warm
+  // serverless instance owns its own pg.Pool, so keep the per-instance default
+  // deliberately small to avoid exhausting the provider's client limit.
   const pool = new pg.Pool({
     connectionString,
     ssl: { rejectUnauthorized: false },
-    max: readPositiveInteger(process.env.DATABASE_POOL_MAX, 10),
+    max: getDatabasePoolMax(),
     connectionTimeoutMillis: readPositiveInteger(
       process.env.DATABASE_CONNECTION_TIMEOUT_MS,
       10_000

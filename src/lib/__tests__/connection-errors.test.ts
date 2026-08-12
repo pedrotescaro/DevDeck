@@ -10,6 +10,16 @@ describe('isTransientConnectionError', () => {
     expect(isTransientConnectionError({ status: 503 })).toBe(true);
   });
 
+  it('recognizes database pool exhaustion as transient', () => {
+    expect(isTransientConnectionError({ code: 'EMAXCONNSESSION' })).toBe(true);
+    expect(
+      isTransientConnectionError(
+        new Error('(EMAXCONNSESSION) max clients reached in session mode - max clients are limited')
+      )
+    ).toBe(true);
+    expect(isTransientConnectionError(new Error('too many connections for role'))).toBe(true);
+  });
+
   it('does not confuse invalid credentials with connectivity', () => {
     expect(
       isTransientConnectionError({

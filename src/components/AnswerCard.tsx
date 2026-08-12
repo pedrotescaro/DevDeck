@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { MessageSquare, BarChart2, Share } from 'lucide-react';
-import { formatRelativeTime } from '@/lib/date';
+import { useHydrationSafeRelativeTime } from '@/hooks/useHydrationSafeRelativeTime';
 import { LikeButton } from '@/components/motion/LikeButton';
 import { BookmarkButton } from '@/components/motion/BookmarkButton';
 import { RepostMenu } from '@/components/motion/RepostMenu';
@@ -174,7 +174,7 @@ export function AnswerCard({
     }
   };
 
-  const relativeTime = formatRelativeTime(answer.created_at);
+  const { text: relativeTime } = useHydrationSafeRelativeTime(answer.created_at);
   const replies = answer.replies ?? [];
   const hasReplies = replies.length > 0;
 

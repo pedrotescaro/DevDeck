@@ -24,7 +24,7 @@ import { AuthorAvatar } from '@/components/AuthorAvatar';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { PostLocation, SensitiveContentGate } from './PostPresentation';
 import { cn } from '@/lib/cn';
-import { formatRelativeTime } from '@/lib/date';
+import { useHydrationSafeRelativeTime } from '@/hooks/useHydrationSafeRelativeTime';
 import { ComposeModal } from '@/components/motion/ComposeModal';
 import { MarkdownEditor, type NotionEditorRef } from '@/components/MarkdownEditor';
 import { CharCounter } from '@/components/motion/CharCounter';
@@ -344,6 +344,7 @@ export function PostCard({
   };
 
   const presentedPost = parsePostExtras(postBody);
+  const { text: relativeTime, isRelative } = useHydrationSafeRelativeTime(post.created_at);
 
   return (
     <div onClick={handleCardClick} className="block group cursor-pointer">
@@ -380,9 +381,9 @@ export function PostCard({
               </span>
             </div>
             <span className="text-dd-muted text-[10px] block mt-0.5 font-medium">
-              {formatRelativeTime(post.created_at) === 'agora'
+              {isRelative && relativeTime === 'agora'
                 ? 'Postado há pouco'
-                : `Postado ${formatRelativeTime(post.created_at)}`}
+                : `Postado ${relativeTime}`}
             </span>
           </div>
           <div className="flex items-center gap-1.5" onClick={(e) => e.preventDefault()}>
