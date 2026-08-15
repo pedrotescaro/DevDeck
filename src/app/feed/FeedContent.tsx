@@ -1237,7 +1237,7 @@ export function FeedContent({
         </div>
       )}
 
-      <Sidebar user={initialUser} showDivider={false} />
+      <Sidebar user={initialUser} />
 
       <div className="mx-auto flex w-full min-w-0 flex-grow items-start justify-center xl:max-w-[1320px] xl:justify-start">
         {/* ========================================================================= */}

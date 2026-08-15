@@ -1230,7 +1230,7 @@ export function TrailsContent({
 
   return (
     <div className="dd-platform-shell dd-platform-shell--fullscreen">
-      <Sidebar user={user} showDivider={false} />
+      <Sidebar user={user} />
 
       <div className="mx-auto flex w-full min-w-0 flex-grow items-start justify-center xl:max-w-[1320px] xl:justify-start">
         <main className="flex min-h-screen min-w-0 w-full max-w-[900px] flex-grow flex-col bg-dd-bg pb-24 md:pb-8">

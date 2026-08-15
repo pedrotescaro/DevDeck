@@ -76,7 +76,7 @@ if (typeof window !== 'undefined') {
   }
 }
 
-export function Sidebar({ user, showDivider = false }: SidebarProps) {
+export function Sidebar({ user, showDivider = true }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);

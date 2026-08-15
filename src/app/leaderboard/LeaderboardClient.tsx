@@ -262,7 +262,7 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
 
   return (
     <div className="dd-platform-shell dd-platform-shell--fullscreen selection:bg-blue-500/35 selection:text-white">
-      <Sidebar user={initialUser} showDivider={false} />
+      <Sidebar user={initialUser} />
 
       <div className="mx-auto flex w-full min-w-0 flex-grow items-start justify-center bg-dd-bg xl:max-w-[1320px] xl:justify-start">
         <main className="flex min-h-screen w-full min-w-0 max-w-[760px] flex-grow flex-col bg-dd-bg pb-24 md:pb-8">
