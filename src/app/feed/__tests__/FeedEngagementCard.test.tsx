@@ -23,6 +23,11 @@ describe('FeedEngagementCard', () => {
     expect(screen.getByLabelText('domingo: 1 atividade concluída')).toBeInTheDocument();
     expect(screen.getByLabelText('terça-feira: 3 atividades concluídas, hoje')).toBeInTheDocument();
     expect(screen.getByText('Ofensiva garantida por hoje. Continue assim!')).toBeInTheDocument();
+    expect(screen.getByText('Ritmo DevDeck')).toHaveClass('bg-blue-500');
+    expect(screen.getByTestId('feed-streak-flame')).toHaveClass(
+      'bg-orange-500/15',
+      'text-orange-400'
+    );
   });
 
   it('orienta o usuário quando ainda não houve atividade hoje', () => {
