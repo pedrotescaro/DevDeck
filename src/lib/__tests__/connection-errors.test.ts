@@ -20,6 +20,18 @@ describe('isTransientConnectionError', () => {
     expect(isTransientConnectionError(new Error('too many connections for role'))).toBe(true);
   });
 
+  it('recognizes temporary DNS lookup failures from the PostgreSQL pooler', () => {
+    expect(
+      isTransientConnectionError(
+        Object.assign(new Error('getaddrinfo ENOENT aws-1-sa-east-1.pooler.supabase.com'), {
+          code: 'ENOENT',
+        })
+      )
+    ).toBe(true);
+    expect(isTransientConnectionError({ code: 'EAI_AGAIN' })).toBe(true);
+    expect(isTransientConnectionError({ code: 'ENOTFOUND' })).toBe(true);
+  });
+
   it('does not confuse invalid credentials with connectivity', () => {
     expect(
       isTransientConnectionError({

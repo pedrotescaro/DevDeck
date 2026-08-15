@@ -123,4 +123,48 @@ describe('authentication connection resilience', () => {
     expect(mocks.findUnique).not.toHaveBeenCalled();
     expect(mocks.from).toHaveBeenCalledWith('User');
   });
+
+  it('uses REST without logging an error when the PostgreSQL pooler DNS lookup fails', async () => {
+    mocks.findUnique.mockRejectedValue(
+      Object.assign(new Error('getaddrinfo ENOENT aws-1-sa-east-1.pooler.supabase.com'), {
+        code: 'ENOENT',
+      })
+    );
+    mocks.from.mockImplementation((table: string) => {
+      if (table === 'User') {
+        return {
+          select: () => ({
+            eq: () => ({
+              maybeSingle: () =>
+                Promise.resolve({
+                  data: {
+                    id: 'user-1',
+                    created_at: '2026-08-11T00:00:00.000Z',
+                    last_active_at: null,
+                    birthday: null,
+                    streak_days: 0,
+                  },
+                  error: null,
+                }),
+            }),
+          }),
+        };
+      }
+
+      return {
+        select: () => ({
+          eq: () => Promise.resolve({ data: [], error: null }),
+        }),
+      };
+    });
+
+    await expect(getAuthUser()).resolves.toEqual(
+      expect.objectContaining({ id: 'user-1', badges: [], trails: [] })
+    );
+    expect(mocks.loggerError).not.toHaveBeenCalled();
+    expect(mocks.loggerWarn).toHaveBeenCalledWith(
+      'Prisma connection failed, falling back to Supabase REST API',
+      expect.objectContaining({ code: 'ENOENT', restFallbackConfigured: true })
+    );
+  });
 });

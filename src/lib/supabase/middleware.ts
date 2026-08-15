@@ -21,6 +21,7 @@ const PROTECTED_ROUTE_PREFIXES = [
   '/post',
   '/profile',
   '/quiz',
+  '/ranked',
   '/settings',
   '/trails',
 ] as const;

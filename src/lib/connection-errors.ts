@@ -1,4 +1,5 @@
 const TRANSIENT_ERROR_CODES = new Set([
+  'EAI_AGAIN',
   'ECONNABORTED',
   'ECONNREFUSED',
   'ECONNRESET',
@@ -6,6 +7,7 @@ const TRANSIENT_ERROR_CODES = new Set([
   'EMAXCONNSESSION',
   'ENETDOWN',
   'ENETUNREACH',
+  'ENOTFOUND',
   'EPIPE',
   'ETIMEDOUT',
   'P1001',
@@ -22,6 +24,9 @@ const TRANSIENT_MESSAGE_PARTS = [
   'connection timeout',
   'failed to fetch',
   'fetch failed',
+  'getaddrinfo eai_again',
+  'getaddrinfo enoent',
+  'getaddrinfo enotfound',
   'emaxconnsession',
   'max clients reached',
   'network error',

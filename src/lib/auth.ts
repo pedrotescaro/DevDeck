@@ -5,6 +5,7 @@ import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { ConnectionError, ForbiddenError, UnauthorizedError } from '@/lib/errors';
 import { logger } from '@/lib/logger';
 import { getErrorSummary, isTransientConnectionError } from '@/lib/connection-errors';
+import { getEffectiveStreak } from '@/lib/streak';
 
 type SupabaseAdminClient = NonNullable<ReturnType<typeof getSupabaseAdminClient>>;
 
@@ -174,10 +175,14 @@ export const getAuthUser = cache(async () => {
 
 /** Keep aggregate streak fields synchronized without blocking the request. */
 function syncUserStreaks(dbUser: any) {
+  const now = new Date();
+  const effectiveUserStreak = getEffectiveStreak(dbUser.streak_days, dbUser.last_active_at, now);
   const maxTrailStreak = (dbUser.trails || []).reduce(
-    (max: number, trail: any) => Math.max(max, trail.streak),
+    (max: number, trail: any) =>
+      Math.max(max, getEffectiveStreak(trail.streak, trail.last_activity_at, now)),
     0
   );
+  const synchronizedStreak = Math.max(effectiveUserStreak, maxTrailStreak);
   const latestTrailActivity = (dbUser.trails || []).reduce((latest: Date | null, trail: any) => {
     if (!trail.last_activity_at) return latest;
     if (!latest) return trail.last_activity_at;
@@ -187,9 +192,9 @@ function syncUserStreaks(dbUser: any) {
   let needsUpdate = false;
   const updateData: any = {};
 
-  if (dbUser.streak_days < maxTrailStreak) {
-    dbUser.streak_days = maxTrailStreak;
-    updateData.streak_days = maxTrailStreak;
+  if (dbUser.streak_days !== synchronizedStreak) {
+    dbUser.streak_days = synchronizedStreak;
+    updateData.streak_days = synchronizedStreak;
     needsUpdate = true;
   }
 
