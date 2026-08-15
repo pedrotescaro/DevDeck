@@ -1212,7 +1212,7 @@ export function FeedContent({
       )}
       {firstPostToastVisible && (
         <div className="fixed left-1/2 top-24 z-50 -translate-x-1/2 rounded-full bg-dd-accent px-4 py-2 text-xs font-black text-white shadow-xl shadow-blue-500/25 dd-soft-bounce">
-          +50 XP - Primeira postagem! Bem-vindo ao DevDeck.
+          +50 XP - Primeira missão concluída!
         </div>
       )}
 
@@ -1227,39 +1227,47 @@ export function FeedContent({
           className="flex min-h-screen w-full min-w-0 max-w-[660px] flex-grow flex-col bg-dd-bg pb-24 md:pb-8"
         >
           {/* Seletor de Abas Feed / Quizzes */}
-          <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md flex border-b border-dd-border/60 select-none">
+          <div className="sticky top-0 z-30 flex items-center gap-2 bg-dd-bg/95 px-4 py-3 backdrop-blur-md select-none sm:px-5">
             <div
               role="tablist"
-              aria-label="Filtros do feed"
+              aria-label="Rotas do feed"
               data-testid="feed-tabs"
-              className="relative flex min-w-0 flex-1 overflow-visible"
+              className="relative flex min-w-0 flex-1 overflow-visible rounded-[18px] border-2 border-dd-border bg-dd-sidebar-bg p-1"
             >
+              <span
+                aria-hidden="true"
+                data-testid="feed-tab-indicator"
+                className={cn(
+                  'pointer-events-none absolute inset-y-1 left-1 z-0 w-[calc(50%-0.25rem)] rounded-[14px] bg-blue-500 shadow-[0_3px_0_#0866c9] transition-transform duration-200 ease-out motion-reduce:transition-none',
+                  feedFilter === 'following' && 'translate-x-full'
+                )}
+              />
               <button
                 role="tab"
                 aria-selected={feedFilter === 'for-you'}
                 onClick={() => setFeedFilter('for-you')}
-                className={`relative flex-1 py-3 text-xs font-bold transition-colors cursor-pointer ${
+                className={`relative z-10 flex-1 rounded-[14px] px-3 py-2.5 text-xs font-black uppercase tracking-wide transition-colors cursor-pointer ${
                   feedFilter === 'for-you'
-                    ? 'text-dd-text'
-                    : 'text-dd-muted hover:text-dd-text hover:bg-dd-surface/30'
+                    ? 'text-white'
+                    : 'text-dd-muted hover:text-dd-text hover:bg-dd-surface/60'
                 }`}
               >
-                Para você
+                Sua trilha
               </button>
-              <div className="relative flex flex-1">
+              <div className="relative z-10 flex flex-1">
                 <button
                   role="tab"
                   aria-selected={feedFilter === 'following'}
                   onClick={() => setFeedFilter('following')}
-                  className={`relative flex-1 py-3 text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
+                  className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-[14px] px-3 py-2.5 text-xs font-black uppercase tracking-wide transition-colors cursor-pointer ${
                     feedFilter === 'following'
-                      ? 'text-dd-text'
-                      : 'text-dd-muted hover:text-dd-text hover:bg-dd-surface/30'
+                      ? 'text-white'
+                      : 'text-dd-muted hover:text-dd-text hover:bg-dd-surface/60'
                   }`}
                 >
-                  Seguindo
+                  Equipe
                   {feedFilter === 'following' && (
-                    <span className="text-[10px] text-dd-muted font-normal">
+                    <span className="text-[10px] font-black text-blue-100/90">
                       ({followingSort === 'recent' ? 'Recente' : 'Popular'})
                     </span>
                   )}
@@ -1271,7 +1279,7 @@ export function FeedContent({
                       setShowFollowingSortMenu(!showFollowingSortMenu);
                     }}
                     aria-label="Ordenar publicações seguidas"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full hover:bg-dd-surface/50 text-dd-muted hover:text-dd-text transition-colors z-10 cursor-pointer"
+                    className="absolute right-1 top-1/2 z-20 -translate-y-1/2 rounded-full p-1.5 text-blue-100 transition-colors hover:bg-white/15 hover:text-white cursor-pointer"
                   >
                     <ChevronDown
                       className={`w-3.5 h-3.5 transition-transform ${showFollowingSortMenu ? 'rotate-180' : ''}`}
@@ -1317,14 +1325,6 @@ export function FeedContent({
                   )}
                 </AnimatePresence>
               </div>
-              <span
-                aria-hidden="true"
-                data-testid="feed-tab-indicator"
-                className={cn(
-                  'pointer-events-none absolute bottom-0 left-0 z-20 h-0.5 w-1/2 rounded-full bg-blue-500 transition-transform duration-200 ease-out motion-reduce:transition-none',
-                  feedFilter === 'following' && 'translate-x-full'
-                )}
-              />
             </div>
             <button
               type="button"
@@ -1332,9 +1332,9 @@ export function FeedContent({
               disabled={
                 refreshingPosts || loadingSearch || activeTab !== 'feed' || !!searchQuery.trim()
               }
-              aria-label="Atualizar publicações"
-              title="Atualizar publicações"
-              className="dd-focus-ring dd-touch flex w-12 shrink-0 items-center justify-center text-dd-muted transition-colors hover:bg-dd-surface/40 hover:text-blue-500 disabled:cursor-wait disabled:opacity-60"
+              aria-label="Atualizar desafios"
+              title="Atualizar desafios"
+              className="dd-focus-ring dd-touch flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border-2 border-b-4 border-dd-border bg-dd-sidebar-bg text-dd-muted transition-colors hover:border-blue-500/45 hover:text-blue-400 disabled:cursor-wait disabled:opacity-60"
             >
               <RefreshCw className={cn('h-4 w-4', refreshingPosts && 'animate-spin')} />
             </button>
@@ -1345,8 +1345,24 @@ export function FeedContent({
             <>
               <motion.div
                 layout
-                className="relative z-20 border-b border-dd-border/60 bg-transparent p-4 sm:p-5 transition-[border-color,box-shadow] duration-200 focus-within:border-blue-500/40"
+                className="relative z-20 mx-4 mt-4 rounded-[22px] border-2 border-b-4 border-dd-border bg-dd-sidebar-bg p-4 transition-[border-color,box-shadow] duration-200 focus-within:border-blue-500/45 sm:mx-5 sm:p-5"
               >
+                <div className="mb-4 flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <span className="inline-flex rounded-lg bg-blue-500 px-3 py-2 text-[10px] font-black uppercase leading-4 tracking-wide text-white">
+                      Missão rápida
+                    </span>
+                    <h2 className="mt-4 text-[22px] font-black leading-tight text-dd-text">
+                      Compartilhe seu desafio
+                    </h2>
+                  </div>
+                  <div
+                    aria-hidden="true"
+                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-500/12 text-blue-400"
+                  >
+                    <Sparkles className="h-7 w-7" strokeWidth={2.8} />
+                  </div>
+                </div>
                 <form onSubmit={handleCreatePost} className="flex gap-4">
                   <div className="shrink-0 pt-1">
                     <AuthorAvatar
@@ -1375,7 +1391,7 @@ export function FeedContent({
                         }}
                         maxLength={POST_CHAR_LIMIT}
                         minHeight={composeFocused ? '8rem' : '2.5rem'}
-                        placeholder="Qual a sua duvida tecnica? Digite / para inserir blocos..."
+                        placeholder="Qual desafio de código você quer vencer hoje?"
                       />
                       <div className="absolute bottom-0 right-0">
                         <CharCounter text={postBody} limit={POST_CHAR_LIMIT} />
@@ -1504,6 +1520,12 @@ export function FeedContent({
                           }
                           state={publishState}
                           xpReward={xpReward}
+                          labelOverrides={{
+                            idle: 'Concluir missão',
+                            submitting: 'Enviando...',
+                            success: 'Missão concluída',
+                          }}
+                          className="rounded-2xl border-b-[3px] border-blue-700 px-5 py-2.5 text-[11px] font-black uppercase tracking-wide"
                         />
                       </div>
                     </div>
@@ -1512,19 +1534,19 @@ export function FeedContent({
               </motion.div>
 
               {feedError && (
-                <div className="rounded-xl border border-red-500/20 bg-red-500/8 px-4 py-3 text-xs font-semibold text-red-300">
+                <div className="mx-4 mt-4 rounded-[18px] border-2 border-red-500/25 bg-red-500/8 px-4 py-3 text-xs font-black text-red-300 sm:mx-5">
                   {feedError}
                 </div>
               )}
 
-              <div className="flex flex-col">
+              <div className="flex flex-col gap-4 px-4 py-4 sm:px-5">
                 {loadingSearch ? (
                   <PostSkeletonList count={3} variant="feed" />
                 ) : posts.length === 0 ? (
                   <EmptyState
                     type={searchQuery.trim() ? 'search' : 'feed'}
                     searchTerm={searchQuery}
-                    className="bg-transparent border-0 rounded-none py-12 px-6"
+                    className="rounded-[22px] border-2 border-b-4 border-dd-border bg-dd-sidebar-bg px-6 py-12"
                   />
                 ) : (
                   <AnimatePresence initial={false}>
@@ -1544,7 +1566,6 @@ export function FeedContent({
                           <PostCard
                             post={postWithBookmarks}
                             isOwner={post.author.username === initialUser.username}
-                            flat={true}
                             onBookmarkToggle={(postId, isBookmarked) => {
                               handleBookmarkToggle(postId);
                             }}
@@ -1563,7 +1584,7 @@ export function FeedContent({
                   </AnimatePresence>
                 )}
                 {loadingMore && (
-                  <PostSkeletonList count={2} variant="feed" label="Carregando mais publicações" />
+                  <PostSkeletonList count={2} variant="feed" label="Carregando mais desafios" />
                 )}
                 {!searchQuery.trim() && hasMore && (
                   <div ref={scrollSentinelRef} className="h-1" aria-hidden />

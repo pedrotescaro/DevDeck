@@ -352,10 +352,10 @@ export function PostCard({
     <div onClick={handleCardClick} className="block group cursor-pointer">
       <article
         className={cn(
-          'transition-colors relative',
+          'relative transition-all',
           flat
             ? 'bg-transparent border-b border-dd-border/50 rounded-none p-4 sm:p-5 hover:bg-dd-surface/20'
-            : 'bg-dd-card border border-dd-border rounded-xl p-5 hover:border-blue-500/30'
+            : 'rounded-[22px] border-2 border-b-4 border-dd-border bg-dd-sidebar-bg p-4 hover:-translate-y-0.5 hover:border-blue-500/45 sm:p-5'
         )}
       >
         {/* Header */}
@@ -378,13 +378,13 @@ export function PostCard({
                 onClick={(e) => e.stopPropagation()}
                 className="hover:underline truncate"
               >
-                <span className="text-dd-text text-xs font-bold truncate">
+                <span className="text-xs font-black truncate text-dd-text">
                   @{post.author.username}
                 </span>
               </Link>
               <LevelBadge totalXp={post.author.total_xp ?? 0} />
             </div>
-            <span className="text-dd-muted text-[10px] block mt-0.5 font-medium">
+            <span className="mt-0.5 block text-[10px] font-bold text-dd-muted">
               {isRelative && relativeTime === 'agora'
                 ? 'Postado há pouco'
                 : `Postado ${relativeTime}`}
@@ -464,7 +464,7 @@ export function PostCard({
 
         <SensitiveContentGate isSensitive={presentedPost.isSensitive}>
           {/* Body preview */}
-          <div className="mb-3 text-dd-muted">
+          <div className="mb-3 text-[13px] font-semibold leading-6 text-dd-muted">
             <MarkdownRenderer content={presentedPost.content} compact />
           </div>
 
@@ -539,7 +539,7 @@ export function PostCard({
 
         {/* Footer */}
         <div
-          className="flex items-center justify-between pt-3 border-t border-dd-border text-xs w-full select-none"
+          className="flex w-full select-none items-center justify-between border-t-2 border-dd-border pt-3 text-xs"
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();
