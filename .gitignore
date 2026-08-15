@@ -47,6 +47,7 @@ next-env.d.ts
 
 # agents & scratch files
 .agents/
+/.codex/
 /scratch/
 
 # uploads
