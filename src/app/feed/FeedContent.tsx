@@ -46,7 +46,6 @@ import {
   Sparkles,
   BookOpen,
   Calendar,
-  TrendingUp,
   X,
   Search,
   Flag,
@@ -1178,26 +1177,6 @@ export function FeedContent({
     }
   };
 
-  const getTrendingPosts = () => {
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-    let filtered = posts.filter((post) => new Date(post.created_at) >= sevenDaysAgo);
-    if (filtered.length === 0) {
-      filtered = posts;
-    }
-
-    return filtered
-      .map((post) => {
-        const score = post.view_count * 1 + (post._count?.answers || 0) * 5 + post.upvotes * 2;
-        return { ...post, score };
-      })
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 5);
-  };
-
-  const trendingPosts = getTrendingPosts();
-
   const activeDuels = duels.filter((d) => d.status === 'ACTIVE').slice(0, 2);
   const startedTrails = initialUser.trails.filter(hasStartedTrail);
 
@@ -2023,62 +2002,6 @@ export function FeedContent({
                     </div>
                   );
                 })}
-              </div>
-            )}
-          </section>
-
-          {/* Tópicos em Alta (Trending Widget) */}
-          <section className="space-y-5 rounded-[22px] border-2 border-b-4 border-dd-border bg-dd-sidebar-bg p-5">
-            <RailSectionHeading
-              title="Tópicos em Alta"
-              description="O que a comunidade está estudando"
-              icon={TrendingUp}
-            />
-
-            {trendingPosts.length === 0 ? (
-              <p className="rounded-2xl bg-dd-surface p-4 text-xs font-bold text-dd-muted">
-                Nenhum post em alta no momento.
-              </p>
-            ) : (
-              <div className="space-y-2.5">
-                {trendingPosts.map((post, idx) => (
-                  <button
-                    key={post.id}
-                    type="button"
-                    onClick={() => {
-                      setSearchQuery(post.body.replace(/```[\s\S]*?```/g, '').substring(0, 40));
-                      setActiveTab('feed');
-                    }}
-                    className="group flex w-full items-start gap-3 rounded-2xl border-2 border-dd-border bg-dd-surface p-3 text-left transition-all hover:border-blue-500/50 hover:bg-blue-500/[0.06]"
-                  >
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border-b-[3px] border-blue-700 bg-blue-500 font-mono text-sm font-black text-white">
-                      {idx + 1}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="flex items-center gap-1.5 text-[10px] font-bold text-dd-muted">
-                        {post.language ? (
-                          <span className="font-black text-blue-400">
-                            {formatLangName(post.language)}
-                          </span>
-                        ) : (
-                          <span>Geral</span>
-                        )}
-                      </span>
-                      <span className="mt-1 line-clamp-2 text-xs font-black leading-[1.35] text-dd-text transition-colors group-hover:text-blue-400">
-                        {post.body
-                          .replace(/```[\s\S]*?```/g, '')
-                          .replace(/[#*_`~]/g, '')
-                          .trim()
-                          .substring(0, 60) || 'Post'}
-                      </span>
-                      <span className="mt-1.5 flex items-center gap-2 text-[9px] font-bold text-dd-muted">
-                        <span>{post.view_count} visualizações</span>
-                        <span>·</span>
-                        <span>{post._count?.answers || 0} respostas</span>
-                      </span>
-                    </span>
-                  </button>
-                ))}
               </div>
             )}
           </section>
