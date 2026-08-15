@@ -54,9 +54,9 @@ const ACHIEVEMENT_VISUALS: Record<string, AchievementVisual> = {
   },
   typescript_wizard: {
     icon: WandSparkles,
-    background: '#58cc02',
-    shadow: '#46a302',
-    iconColor: '#1f8cff',
+    background: '#003875',
+    shadow: '#002a5c',
+    iconColor: '#60a5fa',
     level: 10,
   },
   python_master: {
@@ -167,6 +167,7 @@ function AchievementCard({ badge, compact }: { badge: AchievementBadge; compact:
   const visual = ACHIEVEMENT_VISUALS[badge.slug] ?? FALLBACK_VISUAL;
   const Icon = visual.icon;
   const earned = Boolean(badge.earned_at);
+  const usesDarkBackground = badge.slug === 'typescript_wizard';
 
   return (
     <div
@@ -203,16 +204,16 @@ function AchievementCard({ badge, compact }: { badge: AchievementBadge; compact:
         />
         <div className="relative w-full text-center leading-none">
           <p
-            className={`line-clamp-2 font-black leading-[1.05] text-black/85 ${
-              compact ? 'text-[9px]' : 'text-[11px]'
-            }`}
+            className={`line-clamp-2 font-black leading-[1.05] ${
+              usesDarkBackground ? 'text-white' : 'text-black/85'
+            } ${compact ? 'text-[9px]' : 'text-[11px]'}`}
           >
             {badge.label}
           </p>
           <p
-            className={`mt-1 font-black uppercase tracking-tight text-black/65 ${
-              compact ? 'text-[8px]' : 'text-[9px]'
-            }`}
+            className={`mt-1 font-black uppercase tracking-tight ${
+              usesDarkBackground ? 'text-blue-100/85' : 'text-black/65'
+            } ${compact ? 'text-[8px]' : 'text-[9px]'}`}
           >
             Nível {visual.level}
           </p>

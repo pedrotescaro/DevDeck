@@ -65,7 +65,9 @@ describe('AchievementShowcase', () => {
     expect(streakBadge).toBeInTheDocument();
     expect(streakBadge).toHaveTextContent('100-Day Code Streak');
     expect(streakBadge.firstElementChild).toHaveClass('h-[112px]');
-    expect(screen.getByRole('img', { name: /Mago do TypeScript, nível 10/ })).toBeInTheDocument();
+    const typeScriptBadge = screen.getByRole('img', { name: /Mago do TypeScript, nível 10/ });
+    expect(typeScriptBadge).toBeInTheDocument();
+    expect(typeScriptBadge.firstElementChild).toHaveStyle({ backgroundColor: '#003875' });
     expect(screen.getByRole('img', { name: /Python Master, nível 10/ })).toBeInTheDocument();
   });
 
