@@ -1988,13 +1988,13 @@ export function FeedContent({
                   return (
                     <div
                       key={trail.id}
-                      className="group space-y-2.5 rounded-2xl border-2 border-dd-border bg-dd-surface p-3 transition-colors hover:border-blue-500/45"
+                      className="group space-y-3 rounded-[20px] border-2 border-b-4 border-dd-border bg-dd-surface p-3.5 transition-all hover:-translate-y-0.5 hover:border-blue-500/45"
                     >
                       <div className="flex items-center gap-3">
                         <div
                           aria-hidden="true"
                           className={cn(
-                            'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-b-[3px] border-black/20 text-[11px] font-black text-white shadow-sm',
+                            'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border-b-[4px] border-black/20 text-xs font-black text-white shadow-sm',
                             getLangColor(trail.language)
                           )}
                         >
@@ -2002,14 +2002,14 @@ export function FeedContent({
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="truncate text-sm font-black text-dd-text transition-colors group-hover:text-blue-400">
+                            <span className="truncate text-[15px] font-black leading-tight text-dd-text transition-colors group-hover:text-blue-400">
                               {formatLangName(trail.language)}
                             </span>
-                            <span className="shrink-0 rounded-lg border border-dd-border bg-dd-bg px-2 py-1 font-mono text-[10px] font-black text-dd-text">
+                            <span className="shrink-0 rounded-xl border-b-[3px] border-blue-700 bg-blue-500 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-wide text-white">
                               Lvl {trail.level}
                             </span>
                           </div>
-                          <div className="mt-1 flex items-center justify-between font-mono text-[10px] font-bold text-dd-muted">
+                          <div className="mt-1.5 flex items-center justify-between text-[10px] font-black uppercase tracking-wide text-dd-muted">
                             <span>{trail.xp.toLocaleString()} XP</span>
                             <span>{percent}%</span>
                           </div>

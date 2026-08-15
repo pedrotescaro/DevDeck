@@ -239,14 +239,23 @@ export function AchievementShowcase({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <h3 className={`${compact ? 'text-base' : 'text-xl'} font-black text-dd-text`}>
-          Conquistas
-        </h3>
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          {compact && (
+            <span className="inline-flex rounded-lg bg-blue-500 px-3 py-2 text-[10px] font-black uppercase leading-4 tracking-wide text-white">
+              DevDeck
+            </span>
+          )}
+          <h3
+            className={`${compact ? 'mt-4 text-[22px] leading-tight' : 'text-xl'} font-black text-dd-text`}
+          >
+            Conquistas
+          </h3>
+        </div>
         {viewAllHref && (
           <Link
             href={viewAllHref}
-            className="text-xs font-black uppercase tracking-wide text-blue-400 transition-colors hover:text-blue-300"
+            className="mt-1 inline-flex shrink-0 rounded-xl px-2.5 py-2 text-[11px] font-black uppercase tracking-wide text-blue-400 transition-colors hover:bg-blue-500/10 hover:text-blue-300"
           >
             Ver todas
           </Link>
