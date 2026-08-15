@@ -102,6 +102,10 @@ function getLevelFromXp(xp: number) {
   return Math.max(1, Math.floor(xp / 1000) + 1);
 }
 
+function hasStartedTrail(trail: LanguageTrail) {
+  return trail.xp > 0 || trail.level > 1 || trail.streak > 0;
+}
+
 function isAbortedRequest(error: unknown) {
   return error instanceof DOMException && error.name === 'AbortError';
 }
@@ -1195,6 +1199,7 @@ export function FeedContent({
   const trendingPosts = getTrendingPosts();
 
   const activeDuels = duels.filter((d) => d.status === 'ACTIVE').slice(0, 2);
+  const startedTrails = initialUser.trails.filter(hasStartedTrail);
 
   const charRatio = postBody.length / POST_CHAR_LIMIT;
   const xpReward = extractPostMetadata(postBody).language ? 10 : 5;
@@ -1964,13 +1969,13 @@ export function FeedContent({
               icon={Sparkles}
             />
 
-            {initialUser.trails.length === 0 ? (
+            {startedTrails.length === 0 ? (
               <p className="rounded-2xl bg-dd-surface p-4 text-xs font-bold text-dd-muted">
                 Nenhuma trilha ativa ainda.
               </p>
             ) : (
               <div className="space-y-2.5">
-                {initialUser.trails.map((trail) => {
+                {startedTrails.map((trail) => {
                   const nextLevelXp = Math.ceil(trail.level * 1000 * 1.5);
                   const currentLvlBaseXp = Math.ceil((trail.level - 1) * 1000 * 1.5);
                   const relativeXpEarned = Math.max(0, trail.xp - currentLvlBaseXp);
