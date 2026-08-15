@@ -29,6 +29,7 @@ model User {
   username    String   @unique
   email       String   @unique
   avatar_url  String?
+  avatar_config Json?
   bio         String?
   institution String?
   github_username String?

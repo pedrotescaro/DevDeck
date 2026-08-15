@@ -3,14 +3,15 @@ import Image from 'next/image';
 interface AuthorAvatarProps {
   username: string;
   avatar_url?: string | null;
+  avatar_config?: unknown;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
 
 const sizeClasses = {
-  sm: 'w-8 h-8 text-xs',
-  md: 'w-9 h-9 text-xs',
-  lg: 'w-10 h-10 text-sm',
+  sm: 'w-8 h-8',
+  md: 'w-9 h-9',
+  lg: 'w-10 h-10',
 };
 
 export function AuthorAvatar({
@@ -19,26 +20,23 @@ export function AuthorAvatar({
   size = 'sm',
   className = '',
 }: AuthorAvatarProps) {
-  const initials = username.slice(0, 2).toUpperCase();
-  const sizeClass = sizeClasses[size];
-
-  if (avatar_url) {
-    return (
-      <Image
-        src={avatar_url}
-        alt={username}
-        width={size === 'lg' ? 40 : size === 'md' ? 36 : 32}
-        height={size === 'lg' ? 40 : size === 'md' ? 36 : 32}
-        className={`${sizeClass} rounded-full object-cover border border-dd-border shrink-0 ${className}`}
-      />
-    );
-  }
+  const initials = username.trim().slice(0, 2).toUpperCase() || 'DD';
 
   return (
     <div
-      className={`${sizeClass} rounded-full bg-dd-surface text-dd-text border border-dd-border flex items-center justify-center font-bold select-none shrink-0 ${className}`}
+      className={`${sizeClasses[size]} flex shrink-0 select-none items-center justify-center overflow-hidden rounded-full border border-dd-border bg-blue-500/10 text-[10px] font-black text-blue-400 ${className}`}
     >
-      {initials}
+      {avatar_url ? (
+        <Image
+          src={avatar_url}
+          alt={`Foto de ${username}`}
+          width={48}
+          height={48}
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        <span aria-label={`Iniciais de ${username}`}>{initials}</span>
+      )}
     </div>
   );
 }
