@@ -1921,7 +1921,7 @@ export function FeedContent({
         {/* ========================================================================= */}
         <aside
           data-testid="secondary-column"
-          className="sticky top-0 hidden h-screen w-[380px] shrink-0 space-y-6 overflow-y-auto p-5 scrollbar-none xl:block"
+          className="sticky top-0 hidden h-screen shrink-0 space-y-6 overflow-y-auto border-l border-dd-border/80 py-5 pl-6 pr-5 scrollbar-none xl:block xl:w-[410px] 2xl:w-[440px] 2xl:pl-8 2xl:pr-6"
         >
           {/* Search Bar */}
           <div className="relative w-full">
