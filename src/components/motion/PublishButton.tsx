@@ -12,7 +12,6 @@ interface PublishButtonProps {
   state: PublishState;
   xpReward?: number;
   className?: string;
-  labelOverrides?: Partial<Record<PublishState, string>>;
 }
 
 const labels: Record<PublishState, string> = {
@@ -21,16 +20,9 @@ const labels: Record<PublishState, string> = {
   success: 'Postado ✓',
 };
 
-export function PublishButton({
-  disabled,
-  state,
-  xpReward = 15,
-  className,
-  labelOverrides,
-}: PublishButtonProps) {
+export function PublishButton({ disabled, state, xpReward = 15, className }: PublishButtonProps) {
   const reduced = useReducedMotion();
   const isEmpty = disabled && state === 'idle';
-  const buttonLabels = { ...labels, ...labelOverrides };
 
   return (
     <div className="relative">
@@ -51,7 +43,7 @@ export function PublishButton({
         whileTap={!reduced && state !== 'submitting' ? { scale: 0.95 } : undefined}
         transition={{ type: 'spring', stiffness: 500, damping: 28 }}
       >
-        {buttonLabels[state]}
+        {labels[state]}
       </motion.button>
     </div>
   );
