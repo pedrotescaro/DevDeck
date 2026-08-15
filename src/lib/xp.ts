@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { Language } from '@prisma/client';
+import { calculateNextStreak } from '@/lib/streak';
 
 // Mapeamento de níveis baseado nas faixas de XP do seed do banco de dados
 export function calculateLevel(xp: number): {
@@ -44,30 +45,7 @@ export async function awardXP(
     });
 
     const now = new Date();
-    let newStreakDays = 1;
-
-    if (user?.last_active_at) {
-      const lastActive = new Date(user.last_active_at);
-      const lastDate = new Date(
-        lastActive.getFullYear(),
-        lastActive.getMonth(),
-        lastActive.getDate()
-      );
-      const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-      const diffTime = Math.abs(currentDate.getTime() - lastDate.getTime());
-      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-      if (diffDays === 0) {
-        newStreakDays = user.streak_days;
-      } else if (diffDays === 1) {
-        newStreakDays = user.streak_days + 1;
-      } else {
-        newStreakDays = 1;
-      }
-    } else {
-      newStreakDays = 1;
-    }
+    const newStreakDays = calculateNextStreak(user?.streak_days ?? 0, user?.last_active_at, now);
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
@@ -96,30 +74,7 @@ export async function awardXP(
     });
 
     const now = new Date();
-    let newStreakDays = 1;
-
-    if (user?.last_active_at) {
-      const lastActive = new Date(user.last_active_at);
-      const lastDate = new Date(
-        lastActive.getFullYear(),
-        lastActive.getMonth(),
-        lastActive.getDate()
-      );
-      const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-      const diffTime = Math.abs(currentDate.getTime() - lastDate.getTime());
-      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-      if (diffDays === 0) {
-        newStreakDays = user.streak_days;
-      } else if (diffDays === 1) {
-        newStreakDays = user.streak_days + 1;
-      } else {
-        newStreakDays = 1;
-      }
-    } else {
-      newStreakDays = 1;
-    }
+    const newStreakDays = calculateNextStreak(user?.streak_days ?? 0, user?.last_active_at, now);
 
     // 1. Atualizar o total_xp, streak_days, last_active_at do usuário
     await tx.user.update({
@@ -148,34 +103,7 @@ export async function awardXP(
       newXp = trail.xp + amount;
       newLevel = calculateLevel(newXp).level;
 
-      // Calcular Streak
-      if (trail.last_activity_at) {
-        const lastActivity = new Date(trail.last_activity_at);
-
-        // Formatar datas para comparação sem horas
-        const lastDate = new Date(
-          lastActivity.getFullYear(),
-          lastActivity.getMonth(),
-          lastActivity.getDate()
-        );
-        const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-        const diffTime = Math.abs(currentDate.getTime() - lastDate.getTime());
-        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-        if (diffDays === 0) {
-          // Já fez atividade hoje, mantém a sequência
-          newStreak = trail.streak;
-        } else if (diffDays === 1) {
-          // Atividade consecutiva no dia seguinte, incrementa
-          newStreak = trail.streak + 1;
-        } else {
-          // Sequência quebrada, reinicia em 1
-          newStreak = 1;
-        }
-      } else {
-        newStreak = 1;
-      }
+      newStreak = calculateNextStreak(trail.streak, trail.last_activity_at, now);
 
       // Atualizar trilha existente
       await tx.languageTrail.update({

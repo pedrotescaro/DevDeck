@@ -151,7 +151,7 @@ body {
 .dd-platform-shell {
   display: flex;
   width: 100%;
-  max-width: 1225px;
+  max-width: none;
   min-height: 100vh;
   margin-inline: auto;
   flex-direction: column;

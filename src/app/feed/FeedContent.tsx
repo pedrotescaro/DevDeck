@@ -11,7 +11,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { PostCard } from '@/components/PostCard';
 import { LanguageTag } from '@/components/LanguageTag';
 import { Footer } from '@/components/Footer';
-import { BadgeEmblem } from '@/components/BadgeGrid';
+import { AchievementShowcase } from '@/components/AchievementShowcase';
 import { PostComposerExtras } from '@/components/PostComposerExtras';
 import type { NotionEditorRef } from '@/components/MarkdownEditor';
 import { AuthorAvatar } from '@/components/AuthorAvatar';
@@ -22,6 +22,7 @@ import { PostSkeletonList } from '@/components/motion/PostSkeleton';
 import { NewPostsPill } from '@/components/motion/NewPostsPill';
 import { PublishButton, PublishState } from '@/components/motion/PublishButton';
 import { XPProgressBar } from '@/components/motion/XPProgressBar';
+import { FeedEngagementCard } from '@/app/feed/FeedEngagementCard';
 import { CharCounter } from '@/components/motion/CharCounter';
 import { MentionDropdown } from '@/components/motion/MentionDropdown';
 import { EmptyState } from '@/components/motion/EmptyState';
@@ -34,13 +35,10 @@ import { useSearchWithDebounce } from '@/hooks/useSearchWithDebounce';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { Language } from '@prisma/client';
 import {
-  Flame,
-  Award,
   Swords,
   MessageSquare,
   Trophy,
   ChevronRight,
-  ChevronLeft,
   ArrowBigDown,
   AlertTriangle,
   Code,
@@ -57,6 +55,7 @@ import {
   ChevronDown,
   RefreshCw,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 const MarkdownEditor = dynamic(
   () => import('@/components/MarkdownEditor').then((module) => module.MarkdownEditor),
@@ -96,6 +95,7 @@ interface Badge {
   description: string;
   icon: string;
   color: string;
+  earned_at?: string | null;
 }
 
 function getLevelFromXp(xp: number) {
@@ -135,12 +135,15 @@ function highlightMatches(text: string, query: string) {
 }
 
 interface FeedContentProps {
+  initialCurrentDate: string;
   initialUser: {
     id: string;
     username: string;
     avatar_url?: string | null;
+    avatar_config?: unknown;
     total_xp: number;
     streak?: number;
+    last_active_at?: string | null;
     trails: LanguageTrail[];
     badges: Badge[];
   };
@@ -150,7 +153,33 @@ interface FeedContentProps {
   initialBookmarks?: Record<string, boolean>;
 }
 
+function RailSectionHeading({
+  title,
+  description,
+  icon: Icon,
+}: {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-4">
+      <div className="min-w-0">
+        <h3 className="text-base font-black leading-tight text-dd-text">{title}</h3>
+        <p className="mt-1 text-[11px] font-bold leading-4 text-dd-muted">{description}</p>
+      </div>
+      <div
+        aria-hidden="true"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-500/12 text-blue-400"
+      >
+        <Icon className="h-6 w-6" strokeWidth={2.6} />
+      </div>
+    </div>
+  );
+}
+
 export function FeedContent({
+  initialCurrentDate,
   initialUser,
   initialPosts,
   initialDuels = [],
@@ -167,8 +196,8 @@ export function FeedContent({
   const [duelsLoading, setDuelsLoading] = useState(initialDuels.length === 0);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [leaderboardLanguage, setLeaderboardLanguage] = useState<string>('GLOBAL');
-  const [engagementView, setEngagementView] = useState<'streak' | 'weekly'>('streak');
   const [weeklyActivity, setWeeklyActivity] = useState<Map<number, number>>(new Map());
+  const [currentWeekDate, setCurrentWeekDate] = useState(initialCurrentDate);
 
   // Post Form state
   const [postBody, setPostBody] = useState('');
@@ -218,6 +247,9 @@ export function FeedContent({
   const [currentXp, setCurrentXp] = useState(initialUser.total_xp);
   const [currentLevel, setCurrentLevel] = useState(getLevelFromXp(initialUser.total_xp));
   const [currentStreak, setCurrentStreak] = useState(initialUser.streak ?? 0);
+  const [currentLastActiveAt, setCurrentLastActiveAt] = useState(
+    initialUser.last_active_at ?? null
+  );
   const [levelUpVisible, setLevelUpVisible] = useState(false);
   const [firstPostToastVisible, setFirstPostToastVisible] = useState(false);
   const [feedError, setFeedError] = useState<string | null>(null);
@@ -233,6 +265,9 @@ export function FeedContent({
             }
             const streakVal = data.streak_days ?? data.streak ?? 0;
             setCurrentStreak(streakVal);
+            if (typeof data.last_active_at === 'string') {
+              setCurrentLastActiveAt(data.last_active_at);
+            }
           }
         })
         .catch(() => {});
@@ -566,6 +601,7 @@ export function FeedContent({
           counts.set(d.index, d.count);
         });
         setWeeklyActivity(counts);
+        setCurrentWeekDate(typeof data.today === 'string' ? data.today : new Date().toISOString());
       }
     } catch (err) {
       console.error('Error loading weekly activity:', err);
@@ -844,6 +880,7 @@ export function FeedContent({
       author: {
         username: initialUser.username,
         avatar_url: initialUser.avatar_url,
+        avatar_config: initialUser.avatar_config,
         total_xp: initialUser.total_xp,
       },
       _count: { answers: 0 },
@@ -1161,16 +1198,10 @@ export function FeedContent({
 
   const charRatio = postBody.length / POST_CHAR_LIMIT;
   const xpReward = extractPostMetadata(postBody).language ? 10 : 5;
-  const currentLevelBaseXp = (currentLevel - 1) * 1000;
-  const currentLevelPercent = Math.min(
-    100,
-    Math.max(0, ((currentXp - currentLevelBaseXp) / 1000) * 100)
-  );
-
   return (
     <div
       data-testid="app-shell"
-      className="dd-platform-shell selection:bg-blue-500/35 selection:text-white"
+      className="dd-platform-shell dd-platform-shell--fullscreen selection:bg-blue-500/35 selection:text-white"
     >
       <LevelUpOverlay
         visible={levelUpVisible}
@@ -1201,15 +1232,15 @@ export function FeedContent({
         </div>
       )}
 
-      <Sidebar user={initialUser} />
+      <Sidebar user={initialUser} showDivider={false} />
 
-      <div className="flex min-w-0 flex-grow flex-col md:flex-row xl:max-w-[950px]">
+      <div className="mx-auto flex w-full min-w-0 flex-grow items-start justify-center xl:max-w-[1320px] xl:justify-start">
         {/* ========================================================================= */}
         {/* COLUNA CENTRAL: O Feed Principal e PostCard */}
         {/* ========================================================================= */}
         <main
           data-testid="primary-column"
-          className="flex min-h-screen w-full max-w-[600px] flex-grow flex-col border-r border-dd-border/80 bg-dd-bg pb-24 md:pb-8"
+          className="flex min-h-screen w-full min-w-0 max-w-[660px] flex-grow flex-col bg-dd-bg pb-24 md:pb-8"
         >
           {/* Seletor de Abas Feed / Quizzes */}
           <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md flex border-b border-dd-border/60 select-none">
@@ -1334,19 +1365,12 @@ export function FeedContent({
               >
                 <form onSubmit={handleCreatePost} className="flex gap-4">
                   <div className="shrink-0 pt-1">
-                    {initialUser.avatar_url ? (
-                      <Image
-                        src={initialUser.avatar_url}
-                        alt={initialUser.username}
-                        width={40}
-                        height={40}
-                        className="w-10 h-10 rounded-full object-cover border border-dd-border"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm font-bold border border-blue-500/10">
-                        {initialUser.username.slice(0, 2).toUpperCase()}
-                      </div>
-                    )}
+                    <AuthorAvatar
+                      username={initialUser.username}
+                      avatar_url={initialUser.avatar_url}
+                      avatar_config={initialUser.avatar_config}
+                      size="lg"
+                    />
                   </div>
 
                   <div className="flex-1 min-w-0 space-y-4">
@@ -1892,7 +1916,7 @@ export function FeedContent({
         {/* ========================================================================= */}
         <aside
           data-testid="secondary-column"
-          className="sticky top-0 hidden h-screen w-[350px] shrink-0 space-y-6 overflow-y-auto p-5 scrollbar-none xl:block"
+          className="sticky top-0 hidden h-screen w-[380px] shrink-0 space-y-6 overflow-y-auto p-5 scrollbar-none xl:block"
         >
           {/* Search Bar */}
           <div className="relative w-full">
@@ -1915,221 +1939,37 @@ export function FeedContent({
             </div>
           )}
 
-          {/* Streak & User Stats Card */}
-          <div className="rounded-2xl bg-dd-sidebar-bg border border-dd-border p-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider">
-                ENGAJAMENTO
-              </span>
-              <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-              </span>
-            </div>
+          <FeedEngagementCard
+            streak={currentStreak}
+            weeklyActivity={weeklyActivity}
+            lastActiveAt={currentLastActiveAt}
+            currentDate={currentWeekDate}
+          />
 
-            {engagementView === 'streak' ? (
-              /* Flame streak view */
-              <div className="space-y-4">
-                <div className="flex items-center justify-between py-2 select-none">
-                  <button
-                    onClick={() => setEngagementView('weekly')}
-                    className="p-1.5 hover:bg-dd-surface/60 rounded-full text-dd-muted hover:text-dd-text transition-colors cursor-pointer"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  <div className="flex flex-col items-center">
-                    <Flame className="w-14 h-14 text-blue-500 fill-blue-500" />
-                    <span className="mt-2.5 text-xs font-bold text-blue-500">
-                      {currentStreak} {currentStreak === 1 ? 'dia' : 'dias'} de ofensiva
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => setEngagementView('weekly')}
-                    className="p-1.5 hover:bg-dd-surface/60 rounded-full text-dd-muted hover:text-dd-text transition-colors cursor-pointer"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                </div>
-
-                {/* Timeline of milestone flames */}
-                <div className="flex items-center justify-between px-1 py-[17px] text-[9px] font-bold text-dd-muted border-t border-dd-border/40">
-                  <div className="flex flex-col items-center gap-1 shrink-0">
-                    <Flame
-                      className={`w-4 h-4 text-yellow-500 fill-yellow-500 ${currentStreak >= 5 ? 'opacity-100 filter drop-shadow-[0_0_3px_rgba(234,179,8,0.5)]' : 'opacity-40'}`}
-                    />
-                    <span>5d</span>
-                  </div>
-                  <div
-                    className={`h-[1px] flex-grow mx-1 ${currentStreak >= 10 ? 'bg-blue-500' : 'bg-dd-border/40'}`}
-                  />
-
-                  <div className="flex flex-col items-center gap-1 shrink-0">
-                    <Flame
-                      className={`w-4 h-4 text-blue-500 fill-blue-500 ${currentStreak >= 10 ? 'opacity-100 filter drop-shadow-[0_0_3px_rgba(0, 131, 254,0.5)]' : 'opacity-40'}`}
-                    />
-                    <span>10d</span>
-                  </div>
-                  <div
-                    className={`h-[1px] flex-grow mx-1 ${currentStreak >= 50 ? 'bg-pink-500' : 'bg-dd-border/40'}`}
-                  />
-
-                  <div className="flex flex-col items-center gap-1 shrink-0">
-                    <Flame
-                      className={`w-4 h-4 text-pink-500 fill-pink-500 ${currentStreak >= 50 ? 'opacity-100 filter drop-shadow-[0_0_3px_rgba(236,72,153,0.5)]' : 'opacity-40'}`}
-                    />
-                    <span>50d</span>
-                  </div>
-                  <div
-                    className={`h-[1px] flex-grow mx-1 ${currentStreak >= 100 ? 'bg-fuchsia-500' : 'bg-dd-border/40'}`}
-                  />
-
-                  <div className="flex flex-col items-center gap-1 shrink-0">
-                    <Flame
-                      className={`w-4 h-4 text-fuchsia-500 fill-fuchsia-500 ${currentStreak >= 100 ? 'opacity-100 filter drop-shadow-[0_0_3px_rgba(217,70,239,0.5)]' : 'opacity-40'}`}
-                    />
-                    <span>100d</span>
-                  </div>
-                  <div
-                    className={`h-[1px] flex-grow mx-1 ${currentStreak >= 200 ? 'bg-purple-500' : 'bg-dd-border/40'}`}
-                  />
-
-                  <div className="flex flex-col items-center gap-1 shrink-0">
-                    <Flame
-                      className={`w-4 h-4 text-purple-500 fill-purple-500 ${currentStreak >= 200 ? 'opacity-100 filter drop-shadow-[0_0_3px_rgba(168,85,247,0.5)]' : 'opacity-40'}`}
-                    />
-                    <span>200d</span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              /* Weekly activity view */
-              <div className="space-y-4">
-                <div className="flex items-center justify-between py-2 select-none">
-                  <button
-                    onClick={() => setEngagementView('streak')}
-                    className="p-1.5 hover:bg-dd-surface/60 rounded-full text-dd-muted hover:text-dd-text transition-colors cursor-pointer"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  <div className="flex flex-col items-center">
-                    <Calendar className="w-14 h-14 text-blue-500" />
-                    <span className="mt-2.5 text-xs font-bold text-blue-500">
-                      Atividade Semanal
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => setEngagementView('streak')}
-                    className="p-1.5 hover:bg-dd-surface/60 rounded-full text-dd-muted hover:text-dd-text transition-colors cursor-pointer"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                </div>
-
-                {/* 7-day activity blocks */}
-                <div className="flex items-center justify-between px-1 py-3 text-[10px] font-bold text-dd-muted border-t border-dd-border/40">
-                  {['S', 'T', 'Q', 'Q', 'S', 'S', 'D'].map((day, index) => {
-                    const count = weeklyActivity.get(index) || 0;
-                    const isActive = count > 0;
-                    const tooltipText = isActive
-                      ? `${count} ${count === 1 ? 'quiz respondido' : 'quizzes respondidos'}`
-                      : 'Nenhum quiz respondido';
-                    return (
-                      <div key={index} className="flex flex-col items-center gap-1.5 group">
-                        <span className="text-[9px] font-bold">{day}</span>
-                        <div
-                          title={tooltipText}
-                          className={`w-6 h-6 rounded-md flex items-center justify-center transition-colors ${
-                            isActive
-                              ? 'bg-blue-500 text-black shadow-[0_0_8px_rgba(0, 131, 254,0.3)]'
-                              : 'bg-dd-surface border border-dd-border text-dd-muted'
-                          }`}
-                        >
-                          {isActive ? '✓' : ''}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            <div className="flex justify-between items-center text-xs border-t border-dd-border pt-3 text-dd-muted">
-              <span>XP Acumulado</span>
-              <span className="font-bold text-dd-text font-mono">
-                {currentXp.toLocaleString()} XP
-              </span>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.16em] text-dd-muted">
-                <span>PROGRESSO DO NIVEL</span>
-                <span>LVL {currentLevel}</span>
-              </div>
-              <XPProgressBar
-                percent={currentLevelPercent}
-                colorClass="bg-dd-accent"
-                level={currentLevel}
-                onLevelUp={() => {
-                  setLevelUpVisible(true);
-                  playSound('levelup');
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Badges Grid (showing 3 latest badges) */}
-          <div className="rounded-2xl bg-dd-sidebar-bg border border-dd-border p-5 space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider block">
-                Conquistas
-              </span>
-              <Award className="w-4 h-4 text-blue-500" />
-            </div>
-
-            <div className="grid grid-cols-3 gap-2 text-center">
-              {initialUser.badges.slice(0, 3).map((badge) => (
-                <div
-                  key={badge.id}
-                  className="flex flex-col items-center justify-center p-1 group cursor-help"
-                  title={`${badge.label}: ${badge.description}`}
-                >
-                  <BadgeEmblem
-                    slug={badge.slug}
-                    icon={badge.icon}
-                    label={badge.label}
-                    size="sm"
-                    earned={true}
-                  />
-                  <span className="text-[8px] font-bold text-dd-muted block truncate w-full mt-2 text-center">
-                    {badge.label}
-                  </span>
-                </div>
-              ))}
-
-              {/* Placeholders if less than 3 badges */}
-              {Array.from({ length: Math.max(0, 3 - initialUser.badges.length) }).map((_, idx) => (
-                <div key={idx} className="flex flex-col items-center justify-center p-1">
-                  <BadgeEmblem slug="" icon="" label="" size="sm" earned={false} />
-                  <span className="text-[8px] font-bold text-dd-muted block mt-2 text-center">
-                    Bloqueado
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Achievement preview */}
+          <section className="space-y-5 rounded-[22px] border-2 border-b-4 border-dd-border bg-dd-sidebar-bg p-5">
+            <AchievementShowcase
+              badges={initialUser.badges}
+              variant="compact"
+              viewAllHref={`/profile/${initialUser.username}?tab=badges`}
+              unframed
+            />
+          </section>
 
           {/* Language Trail Progress bar */}
-          <div className="rounded-2xl bg-dd-sidebar-bg border border-dd-border p-5 space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider block">
-                Minhas Trilhas
-              </span>
-              <Sparkles className="w-3.5 h-3.5 text-blue-500/80" />
-            </div>
+          <section className="space-y-5 rounded-[22px] border-2 border-b-4 border-dd-border bg-dd-sidebar-bg p-5">
+            <RailSectionHeading
+              title="Minhas Trilhas"
+              description="Seu progresso por linguagem"
+              icon={Sparkles}
+            />
 
             {initialUser.trails.length === 0 ? (
-              <p className="text-xs text-dd-muted italic py-2">Nenhuma trilha ativa ainda.</p>
+              <p className="rounded-2xl bg-dd-surface p-4 text-xs font-bold text-dd-muted">
+                Nenhuma trilha ativa ainda.
+              </p>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-2.5">
                 {initialUser.trails.map((trail) => {
                   const nextLevelXp = Math.ceil(trail.level * 1000 * 1.5);
                   const currentLvlBaseXp = Math.ceil((trail.level - 1) * 1000 * 1.5);
@@ -2141,45 +1981,61 @@ export function FeedContent({
                   );
 
                   return (
-                    <div key={trail.id} className="space-y-1.5 group">
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="font-semibold text-dd-text group-hover:text-blue-400 transition-colors">
-                          {formatLangName(trail.language)}
-                        </span>
-                        <span className="text-[10px] bg-dd-surface border border-dd-border text-dd-text font-bold px-1.5 py-0.5 rounded font-mono">
-                          Lvl {trail.level}
-                        </span>
+                    <div
+                      key={trail.id}
+                      className="group space-y-2.5 rounded-2xl border-2 border-dd-border bg-dd-surface p-3 transition-colors hover:border-blue-500/45"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          aria-hidden="true"
+                          className={cn(
+                            'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-b-[3px] border-black/20 text-[11px] font-black text-white shadow-sm',
+                            getLangColor(trail.language)
+                          )}
+                        >
+                          {formatLangName(trail.language).slice(0, 2).toUpperCase()}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="truncate text-sm font-black text-dd-text transition-colors group-hover:text-blue-400">
+                              {formatLangName(trail.language)}
+                            </span>
+                            <span className="shrink-0 rounded-lg border border-dd-border bg-dd-bg px-2 py-1 font-mono text-[10px] font-black text-dd-text">
+                              Lvl {trail.level}
+                            </span>
+                          </div>
+                          <div className="mt-1 flex items-center justify-between font-mono text-[10px] font-bold text-dd-muted">
+                            <span>{trail.xp.toLocaleString()} XP</span>
+                            <span>{percent}%</span>
+                          </div>
+                        </div>
                       </div>
-                      {/* Horizontal thin progress bar */}
                       <XPProgressBar
                         percent={percent}
                         colorClass={getLangColor(trail.language)}
                         level={trail.level}
                       />
-                      <div className="flex justify-between items-center text-[10px] text-dd-muted font-mono">
-                        <span>{trail.xp.toLocaleString()} XP</span>
-                        <span>{percent}%</span>
-                      </div>
                     </div>
                   );
                 })}
               </div>
             )}
-          </div>
+          </section>
 
           {/* Tópicos em Alta (Trending Widget) */}
-          <div className="rounded-2xl bg-dd-sidebar-bg border border-dd-border p-5 space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider block">
-                Tópicos em Alta
-              </span>
-              <TrendingUp className="w-4 h-4 text-blue-500" />
-            </div>
+          <section className="space-y-5 rounded-[22px] border-2 border-b-4 border-dd-border bg-dd-sidebar-bg p-5">
+            <RailSectionHeading
+              title="Tópicos em Alta"
+              description="O que a comunidade está estudando"
+              icon={TrendingUp}
+            />
 
             {trendingPosts.length === 0 ? (
-              <p className="text-xs text-dd-muted italic py-1">Nenhum post em alta no momento.</p>
+              <p className="rounded-2xl bg-dd-surface p-4 text-xs font-bold text-dd-muted">
+                Nenhum post em alta no momento.
+              </p>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {trendingPosts.map((post, idx) => (
                   <button
                     key={post.id}
@@ -2188,44 +2044,47 @@ export function FeedContent({
                       setSearchQuery(post.body.replace(/```[\s\S]*?```/g, '').substring(0, 40));
                       setActiveTab('feed');
                     }}
-                    className="group relative block w-full pl-4 border-l-2 border-blue-500/20 text-left transition-colors hover:border-blue-500"
+                    className="group flex w-full items-start gap-3 rounded-2xl border-2 border-dd-border bg-dd-surface p-3 text-left transition-all hover:border-blue-500/50 hover:bg-blue-500/[0.06]"
                   >
-                    <span className="block">
-                      <div className="flex items-center gap-1.5 text-[9px] text-dd-muted">
-                        <span className="font-mono text-blue-500 font-bold"># {idx + 1}</span>
-                        <span>·</span>
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border-b-[3px] border-blue-700 bg-blue-500 font-mono text-sm font-black text-white">
+                      {idx + 1}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-1.5 text-[10px] font-bold text-dd-muted">
                         {post.language ? (
-                          <span className="font-semibold text-blue-400">
+                          <span className="font-black text-blue-400">
                             {formatLangName(post.language)}
                           </span>
                         ) : (
                           <span>Geral</span>
                         )}
-                      </div>
-                      <h5 className="text-xs font-bold text-dd-text group-hover:text-blue-400 transition-colors line-clamp-1 leading-snug mt-0.5">
+                      </span>
+                      <span className="mt-1 line-clamp-2 text-xs font-black leading-[1.35] text-dd-text transition-colors group-hover:text-blue-400">
                         {post.body
                           .replace(/```[\s\S]*?```/g, '')
                           .replace(/[#*_`~]/g, '')
                           .trim()
                           .substring(0, 60) || 'Post'}
-                      </h5>
-                      <div className="flex items-center gap-2 text-[9px] text-dd-muted mt-0.5">
+                      </span>
+                      <span className="mt-1.5 flex items-center gap-2 text-[9px] font-bold text-dd-muted">
                         <span>{post.view_count} visualizações</span>
                         <span>·</span>
                         <span>{post._count?.answers || 0} respostas</span>
-                      </div>
+                      </span>
                     </span>
                   </button>
                 ))}
               </div>
             )}
-          </div>
+          </section>
 
           {/* Featured Duels (votar em resoluções) */}
-          <div className="rounded-2xl bg-dd-sidebar-bg border border-dd-border p-5 space-y-3.5">
-            <span className="text-dd-muted text-[10px] font-bold uppercase tracking-wider block">
-              Duelos em Destaque
-            </span>
+          <section className="space-y-5 rounded-[22px] border-2 border-b-4 border-dd-border bg-dd-sidebar-bg p-5">
+            <RailSectionHeading
+              title="Duelos em Destaque"
+              description="Resolva, vote e suba no ranking"
+              icon={Swords}
+            />
 
             {duelsLoading ? (
               <div className="space-y-3" aria-label="Carregando duelos em destaque">
@@ -2233,30 +2092,32 @@ export function FeedContent({
                 <div className="dd-skeleton-post dd-skeleton h-20 rounded-lg" />
               </div>
             ) : activeDuels.length === 0 ? (
-              <p className="text-xs text-dd-muted italic py-1">Nenhum duelo ativo no momento.</p>
+              <p className="rounded-2xl bg-dd-surface p-4 text-xs font-bold text-dd-muted">
+                Nenhum duelo ativo no momento.
+              </p>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3.5">
                 {activeDuels.map((duel) => (
                   <div
                     key={duel.id}
-                    className="rounded-lg border border-dd-border/60 bg-dd-bg/40 p-3 space-y-2 hover:border-dd-border transition-colors"
+                    className="space-y-3 rounded-2xl border-2 border-blue-500/25 bg-gradient-to-br from-blue-500/[0.12] to-dd-surface p-4 transition-colors hover:border-blue-500/50"
                   >
-                    <div className="flex justify-between items-center text-[10px]">
-                      <span className="text-blue-400 font-bold tracking-tight">
+                    <div className="flex items-center justify-between gap-2 text-[10px]">
+                      <span className="rounded-lg bg-blue-500/15 px-2 py-1 font-black tracking-wide text-blue-400">
                         DUELO DE CÓDIGO
                       </span>
                       {duel.language && <LanguageTag language={duel.language} size="sm" />}
                     </div>
-                    <h5 className="text-xs font-bold text-dd-text line-clamp-1 leading-snug">
+                    <h4 className="line-clamp-2 text-sm font-black leading-snug text-dd-text">
                       {duel.problem_title}
-                    </h5>
-                    <div className="flex items-center justify-between text-[10px] text-dd-muted font-semibold pt-1 border-t border-dd-border">
-                      <span>
+                    </h4>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="min-w-0 truncate text-[10px] font-bold text-dd-muted">
                         @{duel.challenger.username} vs @{duel.opponent?.username || 'match...'}
                       </span>
                       <Link
                         href={`/duels/${duel.id}`}
-                        className="text-blue-500 hover:text-blue-400 flex items-center font-bold"
+                        className="flex shrink-0 items-center rounded-xl border-b-[3px] border-blue-700 bg-blue-500 px-3 py-2 text-[11px] font-black text-white transition-transform hover:-translate-y-0.5 hover:bg-blue-400"
                       >
                         Votar
                         <ChevronRight className="w-3 h-3 ml-0.5" />
@@ -2266,7 +2127,7 @@ export function FeedContent({
                 ))}
               </div>
             )}
-          </div>
+          </section>
         </aside>
       </div>
 

@@ -22,7 +22,6 @@ import {
   MoreHorizontal,
   Flame,
   Users,
-  Sparkles,
 } from 'lucide-react';
 import { PostComposerExtras } from '@/components/PostComposerExtras';
 import type { NotionEditorRef } from '@/components/MarkdownEditor';
@@ -35,6 +34,8 @@ import { MentionDropdown } from '@/components/motion/MentionDropdown';
 import { appendPostExtras, ReplyAudience, resetPostComposerExtras } from '@/lib/post-composer';
 import { POST_CHAR_LIMIT } from '@/lib/motion';
 import { ThemeLogo } from '@/components/ThemeLogo';
+import { AuthorAvatar } from '@/components/AuthorAvatar';
+import { StreakPopover } from '@/components/StreakPopover';
 import { getCurrentUser, invalidateCurrentUser } from '@/lib/client/current-user';
 
 const MarkdownEditor = dynamic(
@@ -49,6 +50,7 @@ interface SidebarUser {
   id: string;
   username: string;
   avatar_url?: string | null;
+  avatar_config?: unknown;
   streak?: number;
   streak_days?: number;
   total_xp?: number;
@@ -56,6 +58,7 @@ interface SidebarUser {
 
 interface SidebarProps {
   user: SidebarUser | null;
+  showDivider?: boolean;
 }
 
 // Module-level cache to persist logged-in user across page navigation transitions
@@ -73,7 +76,7 @@ if (typeof window !== 'undefined') {
   }
 }
 
-export function Sidebar({ user }: SidebarProps) {
+export function Sidebar({ user, showDivider = false }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -366,8 +369,6 @@ export function Sidebar({ user }: SidebarProps) {
     }
   };
 
-  const initials = activeUser?.username.slice(0, 2).toUpperCase() || 'DV';
-
   const navItems: Array<{
     label: string;
     href: string;
@@ -401,16 +402,16 @@ export function Sidebar({ user }: SidebarProps) {
       active: pathname.startsWith('/trails'),
     },
     {
+      label: 'Ranking',
+      href: '/ranked',
+      icon: Trophy,
+      active: pathname.startsWith('/ranked') || pathname.startsWith('/leaderboard'),
+    },
+    {
       label: 'Bate-papo',
       href: '/messages',
       icon: MessageCircle,
       active: pathname.startsWith('/messages'),
-    },
-    {
-      label: 'ASYNC',
-      href: '/async',
-      icon: Sparkles,
-      active: pathname.startsWith('/async') || pathname.startsWith('/ducky'),
     },
     {
       label: 'Itens salvos',
@@ -426,19 +427,31 @@ export function Sidebar({ user }: SidebarProps) {
     },
   ];
 
-  const moreMenuIsActive = ['/guilds', '/duels', '/leaderboard', '/settings'].some((route) =>
+  const moreMenuIsActive = ['/async', '/ducky', '/guilds', '/duels', '/settings'].some((route) =>
     pathname.startsWith(route)
   );
+  const mobileNavLabels = [
+    'Página Inicial',
+    'Explorar',
+    'Aprender com DevDeck',
+    'Notificações',
+    'Perfil',
+  ];
+  const mobileNavItems = navItems.filter((item) => mobileNavLabels.includes(item.label));
 
   return (
     <>
       {/* ========================================== */}
       {/* DESKTOP SIDEBAR (Twitter-like) */}
       {/* ========================================== */}
-      <aside className="hidden md:flex flex-col justify-between w-64 xl:w-[275px] h-screen sticky top-0 border-r border-dd-border bg-dd-bg p-5 z-40 select-none shrink-0">
+      <aside
+        className={`hidden h-screen w-64 shrink-0 select-none flex-col justify-between bg-dd-bg p-5 md:sticky md:top-0 md:flex xl:w-[275px] ${
+          showDivider ? 'border-r border-dd-border' : ''
+        } z-40`}
+      >
         <div className="space-y-5">
           {/* Logo */}
-          <Link href="/feed" className="flex items-center gap-2.5 px-3 py-0 group w-fit">
+          <Link href="/feed" className="group flex w-fit items-center gap-2.5 px-3 py-0">
             <ThemeLogo
               alt="DevDeck Logo"
               width={28}
@@ -454,10 +467,10 @@ export function Sidebar({ user }: SidebarProps) {
               const Icon = item.icon;
 
               // Standard link style (tightened padding)
-              const linkClasses = `flex items-center gap-3.5 py-2.5 px-3.5 rounded-xl text-sm font-semibold transition-all duration-200 group border w-full text-left cursor-pointer ${
+              const linkClasses = `group flex w-full cursor-pointer items-center gap-3.5 rounded-xl border px-3.5 py-2.5 text-left text-sm font-semibold transition-all duration-200 ${
                 item.active
-                  ? 'bg-transparent text-dd-text font-black border-transparent'
-                  : 'text-dd-muted border-transparent hover:bg-dd-surface/60 hover:text-dd-text'
+                  ? 'border-transparent bg-transparent font-black text-dd-text'
+                  : 'border-transparent text-dd-muted hover:bg-dd-surface/60 hover:text-dd-text'
               }`;
 
               // Icon container with relative for badges
@@ -465,14 +478,6 @@ export function Sidebar({ user }: SidebarProps) {
                 <div className="relative flex items-center justify-center w-5 h-5">
                   {item.label === 'Notificações' ? (
                     <NotificationBellIcon unreadCount={unreadCount} active={item.active} />
-                  ) : item.label === 'ASYNC' || item.label === 'ASYNC IA' ? (
-                    <Image
-                      src="/async-logo.svg"
-                      alt=""
-                      width={22}
-                      height={22}
-                      className="h-5.5 w-5.5 object-contain transition-transform duration-200 group-hover:scale-110"
-                    />
                   ) : (
                     <Icon
                       className={`w-5 h-5 transition-transform group-hover:scale-105 duration-200 ${item.active ? 'text-dd-text fill-current' : 'text-dd-muted'}`}
@@ -493,7 +498,12 @@ export function Sidebar({ user }: SidebarProps) {
               );
 
               return (
-                <Link key={item.label} href={item.href} className={linkClasses}>
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={linkClasses}
+                  aria-current={item.active ? 'page' : undefined}
+                >
                   {contentEl}
                 </Link>
               );
@@ -531,6 +541,26 @@ export function Sidebar({ user }: SidebarProps) {
                     className="absolute bottom-full left-0 z-50 mb-2 w-[290px] max-w-[calc(100vw-2rem)] origin-bottom-left overflow-hidden rounded-2xl border border-dd-border/70 bg-dd-surface p-2 font-sans shadow-[0_12px_40px_rgba(0,0,0,0.4)] animate-slide-up"
                   >
                     <Link
+                      href="/async"
+                      role="menuitem"
+                      aria-current={
+                        pathname.startsWith('/async') || pathname.startsWith('/ducky')
+                          ? 'page'
+                          : undefined
+                      }
+                      className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                      onClick={() => setMoreMenuOpen(false)}
+                    >
+                      <Image
+                        src="/async-logo.svg"
+                        alt=""
+                        width={22}
+                        height={22}
+                        className="h-5.5 w-5.5 shrink-0 object-contain"
+                      />
+                      ASYNC IA
+                    </Link>
+                    <Link
                       href="/guilds"
                       role="menuitem"
                       className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
@@ -547,15 +577,6 @@ export function Sidebar({ user }: SidebarProps) {
                     >
                       <Swords className="h-5.5 w-5.5 shrink-0" />
                       Duelos de Código
-                    </Link>
-                    <Link
-                      href="/leaderboard"
-                      role="menuitem"
-                      className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
-                      onClick={() => setMoreMenuOpen(false)}
-                    >
-                      <Trophy className="h-5.5 w-5.5 shrink-0" />
-                      Classificação Geral
                     </Link>
                     <Link
                       href="/settings"
@@ -596,30 +617,24 @@ export function Sidebar({ user }: SidebarProps) {
         {/* User profile dropdown widget */}
         {activeUser && (
           <div className="relative">
-            <button
-              type="button"
-              onClick={() => {
-                setMoreMenuOpen(false);
-                setDropdownOpen((open) => !open);
-              }}
-              aria-expanded={dropdownOpen}
-              aria-haspopup="menu"
-              className="group w-full cursor-pointer rounded-2xl border border-transparent p-3 text-left transition-all duration-200 hover:border-dd-border hover:bg-dd-surface/40"
-            >
-              <div className="flex w-full min-w-0 items-center gap-3">
-                {activeUser.avatar_url ? (
-                  <Image
-                    src={activeUser.avatar_url}
-                    alt={activeUser.username}
-                    width={44}
-                    height={44}
-                    className="h-11 w-11 shrink-0 rounded-full border border-dd-border object-cover"
-                  />
-                ) : (
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-blue-500/10 bg-blue-500/20 text-sm font-bold text-blue-400">
-                    {initials}
-                  </div>
-                )}
+            <div className="group w-full rounded-2xl border border-transparent p-3 text-left transition-all duration-200 hover:border-dd-border hover:bg-dd-surface/40">
+              <button
+                type="button"
+                onClick={() => {
+                  setMoreMenuOpen(false);
+                  setDropdownOpen((open) => !open);
+                }}
+                aria-expanded={dropdownOpen}
+                aria-haspopup="menu"
+                className="dd-focus-ring flex w-full min-w-0 cursor-pointer items-center gap-3 rounded-xl text-left"
+              >
+                <AuthorAvatar
+                  username={activeUser.username}
+                  avatar_url={activeUser.avatar_url}
+                  avatar_config={activeUser.avatar_config}
+                  size="lg"
+                  className="!h-11 !w-11"
+                />
                 <div className="min-w-0 flex-1 font-sans">
                   <div className="flex min-w-0 items-center justify-between gap-2">
                     <p className="min-w-0 truncate text-sm font-bold leading-tight text-dd-text">
@@ -627,25 +642,28 @@ export function Sidebar({ user }: SidebarProps) {
                     </p>
                     <MoreHorizontal className="h-5 w-5 shrink-0 text-dd-muted transition-colors duration-200 group-hover:text-dd-text" />
                   </div>
-                  <div className="mt-1 flex min-w-0 items-center gap-2">
-                    <p className="min-w-0 flex-1 truncate text-[11px] font-medium leading-none text-dd-muted">
+                  <div className="mt-1 min-w-0">
+                    <p className="truncate text-[11px] font-medium leading-none text-dd-muted">
                       @{activeUser.username.toLowerCase()}
                     </p>
-                    <span className="px-1.5 py-0.5 rounded bg-blue-500/10 border border-blue-500/30 text-[9.5px] font-extrabold text-blue-500 leading-none shadow-sm shrink-0">
-                      Lvl {Math.max(1, Math.floor((activeUser.total_xp ?? 0) / 1000) + 1)}
-                    </span>
                   </div>
                 </div>
-              </div>
-              <div className="ml-14 mt-2.5 flex w-fit select-none items-center gap-1.5 rounded-full bg-blue-500/10 px-2.5 py-1.5 text-blue-500">
+              </button>
+
+              <StreakPopover
+                streak={activeUser.streak_days ?? activeUser.streak ?? 0}
+                side="top"
+                align="start"
+                triggerClassName="dd-focus-ring ml-14 mt-2.5 flex w-fit items-center gap-1.5 rounded-full bg-blue-500/10 px-2.5 py-1.5 text-blue-500 transition-colors hover:bg-blue-500/20"
+              >
                 <Flame className="h-4 w-4 shrink-0 fill-blue-500" />
                 <span className="text-[10.5px] font-extrabold leading-none">
                   {activeUser.streak_days ?? activeUser.streak ?? 0}{' '}
                   {(activeUser.streak_days ?? activeUser.streak ?? 0) === 1 ? 'dia' : 'dias'} de
-                  domínio
+                  ofensiva
                 </span>
-              </div>
-            </button>
+              </StreakPopover>
+            </div>
 
             {dropdownOpen && (
               <>
@@ -731,19 +749,13 @@ export function Sidebar({ user }: SidebarProps) {
                   aria-haspopup="menu"
                   className="flex items-center focus:outline-none"
                 >
-                  {activeUser.avatar_url ? (
-                    <Image
-                      src={activeUser.avatar_url}
-                      alt={activeUser.username}
-                      width={28}
-                      height={28}
-                      className="w-7 h-7 rounded-full object-cover border border-dd-border"
-                    />
-                  ) : (
-                    <div className="w-7 h-7 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-[10px] font-bold border border-blue-500/10">
-                      {initials}
-                    </div>
-                  )}
+                  <AuthorAvatar
+                    username={activeUser.username}
+                    avatar_url={activeUser.avatar_url}
+                    avatar_config={activeUser.avatar_config}
+                    size="sm"
+                    className="!h-7 !w-7"
+                  />
                 </button>
 
                 {dropdownOpen && (
@@ -761,6 +773,15 @@ export function Sidebar({ user }: SidebarProps) {
                       >
                         <UserIcon className="h-5 w-5 shrink-0" />
                         Meu Perfil
+                      </Link>
+                      <Link
+                        href="/ranked"
+                        role="menuitem"
+                        className="flex items-center gap-3.5 rounded-xl px-3.5 py-3 text-sm font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        <Trophy className="h-5 w-5 shrink-0" />
+                        Ranking
                       </Link>
                       <Link
                         href="/settings"
@@ -792,43 +813,40 @@ export function Sidebar({ user }: SidebarProps) {
         </header>
 
         <nav className="fixed bottom-0 left-0 right-0 z-40 bg-dd-bg/90 backdrop-blur-md border-t border-dd-border px-6 py-2.5 flex items-center justify-around">
-          {navItems
-            .filter(
-              (item) =>
-                item.label === 'Página Inicial' ||
-                item.label === 'Explorar' ||
-                item.label === 'Aprender com DevDeck' ||
-                item.label === 'Notificações' ||
-                item.label === 'Perfil'
-            )
-            .map((item) => {
-              const Icon = item.icon;
+          {mobileNavItems.map((item) => {
+            const Icon = item.icon;
 
-              const iconEl = (
-                <div className="relative flex items-center justify-center">
-                  {item.label === 'Notificações' ? (
-                    <NotificationBellIcon unreadCount={unreadCount} active={item.active} />
-                  ) : (
-                    <>
-                      <Icon className={`w-5.5 h-5.5 ${item.active ? 'fill-current' : ''}`} />
-                      {item.badge === 'dot' && (
-                        <span className="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-blue-500 ring-2 ring-dd-bg" />
-                      )}
-                    </>
-                  )}
-                </div>
-              );
+            const iconEl = (
+              <div className="relative flex items-center justify-center">
+                {item.label === 'Notificações' ? (
+                  <NotificationBellIcon unreadCount={unreadCount} active={item.active} />
+                ) : (
+                  <>
+                    <Icon className={`w-5.5 h-5.5 ${item.active ? 'fill-current' : ''}`} />
+                    {item.badge === 'dot' && (
+                      <span className="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-blue-500 ring-2 ring-dd-bg" />
+                    )}
+                  </>
+                )}
+              </div>
+            );
 
-              const classes = `flex flex-col items-center justify-center p-1.5 transition-colors duration-150 ${
-                item.active ? 'text-dd-text font-black' : 'text-dd-muted hover:text-dd-text'
-              }`;
+            const classes = `flex flex-col items-center justify-center p-1.5 transition-colors duration-150 ${
+              item.active ? 'text-dd-text font-black' : 'text-dd-muted hover:text-dd-text'
+            }`;
 
-              return (
-                <Link key={item.label} href={item.href} className={classes}>
-                  {iconEl}
-                </Link>
-              );
-            })}
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={classes}
+                aria-label={item.label}
+                aria-current={item.active ? 'page' : undefined}
+              >
+                {iconEl}
+              </Link>
+            );
+          })}
 
           {/* Floating post trigger */}
           {activeUser && (
@@ -862,18 +880,13 @@ export function Sidebar({ user }: SidebarProps) {
         <form onSubmit={handleCreatePost} className="space-y-4">
           <div className="flex gap-3">
             {/* Avatar */}
-            {activeUser?.avatar_url ? (
-              <Image
-                src={activeUser.avatar_url}
-                alt={activeUser.username}
-                width={40}
-                height={40}
-                className="w-10 h-10 rounded-full object-cover border border-dd-border shrink-0"
+            {activeUser && (
+              <AuthorAvatar
+                username={activeUser.username}
+                avatar_url={activeUser.avatar_url}
+                avatar_config={activeUser.avatar_config}
+                size="lg"
               />
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold border border-blue-500/10 shrink-0">
-                {initials}
-              </div>
             )}
 
             {/* Textarea Area */}

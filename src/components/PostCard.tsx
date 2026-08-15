@@ -21,6 +21,7 @@ import { LikeButton } from './motion/LikeButton';
 import { BookmarkButton } from './motion/BookmarkButton';
 import { RepostMenu } from './motion/RepostMenu';
 import { AuthorAvatar } from '@/components/AuthorAvatar';
+import { LevelBadge } from '@/components/LevelBadge';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { PostLocation, SensitiveContentGate } from './PostPresentation';
 import { cn } from '@/lib/cn';
@@ -34,6 +35,7 @@ import { parsePostExtras } from '@/lib/post-composer';
 interface PostAuthor {
   username: string;
   avatar_url?: string | null;
+  avatar_config?: unknown;
   total_xp?: number;
 }
 
@@ -363,7 +365,11 @@ export function PostCard({
             onClick={(e) => e.stopPropagation()}
             className="hover:opacity-85 transition-opacity shrink-0"
           >
-            <AuthorAvatar username={post.author.username} avatar_url={post.author.avatar_url} />
+            <AuthorAvatar
+              username={post.author.username}
+              avatar_url={post.author.avatar_url}
+              avatar_config={post.author.avatar_config}
+            />
           </Link>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
@@ -376,9 +382,7 @@ export function PostCard({
                   @{post.author.username}
                 </span>
               </Link>
-              <span className="text-[9px] bg-dd-surface border border-dd-border px-1.5 py-0.5 rounded text-dd-muted font-mono font-semibold">
-                Lvl {Math.max(1, Math.floor((post.author.total_xp ?? 0) / 1000) + 1)}
-              </span>
+              <LevelBadge totalXp={post.author.total_xp ?? 0} />
             </div>
             <span className="text-dd-muted text-[10px] block mt-0.5 font-medium">
               {isRelative && relativeTime === 'agora'
@@ -730,7 +734,11 @@ export function PostCard({
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex gap-3">
-            <AuthorAvatar username={post.author.username} avatar_url={post.author.avatar_url} />
+            <AuthorAvatar
+              username={post.author.username}
+              avatar_url={post.author.avatar_url}
+              avatar_config={post.author.avatar_config}
+            />
 
             <div className="flex-grow min-w-0 space-y-3 relative">
               <h3 className="text-sm font-black text-dd-text">Editar Publicação</h3>

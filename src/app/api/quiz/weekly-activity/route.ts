@@ -8,17 +8,17 @@ export const GET = apiHandler(async (req) => {
   const { searchParams } = new URL(req.url);
   const targetUserId = searchParams.get('userId') || authUser.id;
 
-  // Get the current week's start (Sunday) and end (Saturday)
+  // Use UTC consistently so server region and daylight-saving changes do not shift streak days.
   const now = new Date();
-  const currentDay = now.getDay(); // 0=Sunday, 6=Saturday
+  const currentDay = now.getUTCDay(); // 0=Sunday, 6=Saturday
 
   const weekStart = new Date(now);
-  weekStart.setDate(now.getDate() - currentDay);
-  weekStart.setHours(0, 0, 0, 0);
+  weekStart.setUTCDate(now.getUTCDate() - currentDay);
+  weekStart.setUTCHours(0, 0, 0, 0);
 
   const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate() + 6);
-  weekEnd.setHours(23, 59, 59, 999);
+  weekEnd.setUTCDate(weekStart.getUTCDate() + 6);
+  weekEnd.setUTCHours(23, 59, 59, 999);
 
   // Fetch all quiz attempts by the target user in the current week
   const attempts = await prisma.quizAttempt.findMany({
@@ -37,11 +37,12 @@ export const GET = apiHandler(async (req) => {
   // Count attempts per day (0=Sunday, 6=Saturday)
   const dailyCounts = new Map<number, number>();
   for (const attempt of attempts) {
-    const dayIndex = attempt.created_at.getDay();
+    const dayIndex = attempt.created_at.getUTCDay();
     dailyCounts.set(dayIndex, (dailyCounts.get(dayIndex) || 0) + 1);
   }
 
   return NextResponse.json({
+    today: now.toISOString(),
     weekDays: Array.from({ length: 7 }, (_, i) => ({
       index: i,
       count: dailyCounts.get(i) || 0,

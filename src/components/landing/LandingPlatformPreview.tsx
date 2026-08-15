@@ -39,7 +39,7 @@ const SCREENSHOTS = [
     src: '/screenshots/leaderboard_dark.png',
     title: 'O ranking global da competência',
     description:
-      'Destaque-se na comunidade global. Suba nas ligas e mostre seu nível real de habilidade para empresas parceiras sem precisar de um currículo tradicional.',
+      'Destaque-se na comunidade global. Avance no ranking por XP e mostre seu nível real de habilidade para empresas parceiras sem precisar de um currículo tradicional.',
   },
   {
     id: 'profile',

@@ -5,8 +5,20 @@ import { ProfileContent } from './ProfileContent';
 
 export const revalidate = 0; // Desabilitar cache para dados dinâmicos do perfil
 
-export default async function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
-  const [user, { username }] = await Promise.all([getAuthUser(), params]);
+const TRAIL_ACTIVITY_ID_PATTERN = /^(js|ts|py|python|rust|go|java)-(?:l\d+-q\d+|u\d+-checkpoint)$/i;
+
+export default async function ProfilePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ username: string }>;
+  searchParams: Promise<{ tab?: string | string[] }>;
+}) {
+  const [user, { username }, resolvedSearchParams] = await Promise.all([
+    getAuthUser(),
+    params,
+    searchParams,
+  ]);
 
   if (!user) {
     redirect('/login');
@@ -37,6 +49,9 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   const profileId = profileUser.id;
 
   // Calcular estatísticas
+  const todayStart = new Date();
+  todayStart.setUTCHours(0, 0, 0, 0);
+
   const [
     allBadges,
     answersCount,
@@ -46,6 +61,9 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     follow,
     followersCount,
     followingCount,
+    usersAhead,
+    totalParticipants,
+    todayAttempts,
   ] = await Promise.all([
     prisma.badge.findMany({ orderBy: { slug: 'asc' } }),
     prisma.answer.count({ where: { author_id: profileId } }),
@@ -62,6 +80,19 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     }),
     prisma.follow.count({ where: { followingId: profileId } }),
     prisma.follow.count({ where: { followerId: profileId } }),
+    prisma.user.count({ where: { total_xp: { gt: profileUser.total_xp } } }),
+    prisma.user.count(),
+    prisma.quizAttempt.findMany({
+      where: {
+        user_id: profileId,
+        created_at: { gte: todayStart },
+      },
+      select: {
+        quiz_id: true,
+        is_correct: true,
+        xp_earned: true,
+      },
+    }),
   ]);
 
   const accuracy = totalAttempts > 0 ? Math.round((correctAttempts / totalAttempts) * 100) : 0;
@@ -71,6 +102,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     id: profileUser.id,
     username: profileUser.username,
     avatar_url: profileUser.avatar_url,
+    avatar_config: profileUser.avatar_config,
     bio: profileUser.bio,
     institution: profileUser.institution,
     github_username: profileUser.github_username,
@@ -80,6 +112,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     birthday: profileUser.birthday ? profileUser.birthday.toISOString() : null,
     created_at: profileUser.created_at.toISOString(),
     total_xp: profileUser.total_xp,
+    streak_days: profileUser.streak_days,
     badges: profileUser.badges.map((ub) => ({
       slug: ub.badge.slug,
       earned_at: ub.earned_at.toISOString(),
@@ -102,6 +135,17 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
 
   // Verificar se o usuário atual segue este perfil
   const isFollowing = follow !== null;
+  const todayTrailAttempts = todayAttempts.filter((attempt) =>
+    TRAIL_ACTIVITY_ID_PATTERN.test(attempt.quiz_id)
+  );
+  const dailyProgress = {
+    xpEarned: todayTrailAttempts.reduce(
+      (total, attempt) => total + Math.max(0, attempt.xp_earned),
+      0
+    ),
+    correctAnswers: todayTrailAttempts.filter((attempt) => attempt.is_correct).length,
+    trailActivities: todayTrailAttempts.length,
+  };
 
   return (
     <ProfileContent
@@ -109,7 +153,9 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
         id: user.id,
         username: user.username,
         avatar_url: user.avatar_url,
+        avatar_config: user.avatar_config,
         total_xp: user.total_xp,
+        streak_days: user.streak_days,
       }}
       profileUser={serializedProfileUser}
       stats={{
@@ -122,6 +168,10 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
       isFollowing={isFollowing}
       followersCount={followersCount}
       followingCount={followingCount}
+      globalRank={usersAhead + 1}
+      totalParticipants={totalParticipants}
+      dailyProgress={dailyProgress}
+      initialTab={resolvedSearchParams.tab === 'badges' ? 'badges' : 'posts'}
     />
   );
 }

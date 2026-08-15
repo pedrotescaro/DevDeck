@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/Sidebar';
 import { Footer } from '@/components/Footer';
 import { TRAILS_DATA, TrailLevel, TrailQuestion } from '@/lib/trailsData';
@@ -10,9 +11,6 @@ import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { motion, AnimatePresence } from 'framer-motion';
 import { XP_PER_LEVEL_DISPLAY } from '@/lib/config';
 import {
-  BookOpen,
-  Lock,
-  Star,
   Check,
   X,
   ChevronRight,
@@ -22,9 +20,6 @@ import {
   Info,
   Loader2,
   Play,
-  Flag,
-  Swords,
-  Send,
   Lightbulb,
   Code2,
   Search,
@@ -32,11 +27,23 @@ import {
   Bug,
   Library,
 } from 'lucide-react';
-import Link from 'next/link';
 import { CodeEditor } from '@/components/CodeEditor';
 import { codemirrorLanguageId } from '@/lib/editor/languages';
 import { runCodeInSandbox } from '@/lib/code-runner';
 import { CHECKPOINTS_DATA } from '@/lib/checkpointData';
+import { TrailCourseSelector } from '@/app/trails/TrailCourseSelector';
+import type { TrailCourseOption } from '@/app/trails/TrailCourseSelector';
+import { TRAIL_LANGUAGE_CODES } from '@/app/trails/TrailLanguageLogo';
+import type { TrailLanguageCode } from '@/app/trails/TrailLanguageLogo';
+import { TrailsProgressSidebar } from '@/app/trails/TrailsProgressSidebar';
+import type { TrailDailyProgress } from '@/app/trails/TrailsProgressSidebar';
+import { TrailMap } from '@/app/trails/TrailMap';
+import {
+  buildTrailSections,
+  getLevelsForSection,
+  getUnitNumberInSection,
+  TrailSectionNavigation,
+} from '@/app/trails/TrailSectionNavigation';
 const getLanguageFullName = (code: string) => {
   const map: Record<string, string> = {
     JS: 'JavaScript',
@@ -51,29 +58,6 @@ const getLanguageFullName = (code: string) => {
 
 function getLevelFromXp(xp: number) {
   return Math.max(1, Math.floor(xp / XP_PER_LEVEL_DISPLAY) + 1);
-}
-
-const TRAIL_MAP_WIDTH = 400;
-const TRAIL_MAP_ROW_HEIGHT = 190;
-const TRAIL_MAP_NODE_CENTER_Y = 95;
-
-function buildTrailPath(nodeCount: number) {
-  if (nodeCount < 2) return '';
-
-  const centerX = TRAIL_MAP_WIDTH / 2;
-  let path = `M ${centerX} ${TRAIL_MAP_NODE_CENTER_Y}`;
-
-  for (let index = 0; index < nodeCount - 1; index += 1) {
-    const startY = TRAIL_MAP_NODE_CENTER_Y + index * TRAIL_MAP_ROW_HEIGHT;
-    const endY = startY + TRAIL_MAP_ROW_HEIGHT;
-    const middleY = startY + TRAIL_MAP_ROW_HEIGHT / 2;
-    const bendX = index % 2 === 0 ? 306 : 94;
-
-    path += ` C ${centerX} ${startY + 48}, ${bendX} ${startY + 42}, ${bendX} ${middleY}`;
-    path += ` C ${bendX} ${endY - 42}, ${centerX} ${endY - 48}, ${centerX} ${endY}`;
-  }
-
-  return path;
 }
 
 function getLearnSlidesForLevel(level: TrailLevel) {
@@ -182,22 +166,37 @@ interface TrailsContentProps {
     username: string;
     avatar_url?: string | null;
     total_xp: number;
+    streak: number;
   };
   initialTrails: {
     language: string;
     xp: number;
     level: number;
+    started: boolean;
   }[];
+  initialActiveLanguage: TrailLanguageCode;
   initialAttempts: Record<string, boolean>;
   initialAttemptSelections: Record<string, number>;
+  initialGlobalRank: number;
+  initialTotalParticipants: number;
+  initialDailyProgress: TrailDailyProgress;
+  initialView: 'trail' | 'sections';
+  initialSectionNumber: number | null;
 }
 
 export function TrailsContent({
   user,
   initialTrails,
+  initialActiveLanguage,
   initialAttempts,
   initialAttemptSelections,
+  initialGlobalRank,
+  initialTotalParticipants,
+  initialDailyProgress,
+  initialView,
+  initialSectionNumber,
 }: TrailsContentProps) {
+  const router = useRouter();
   const reduced = useReducedMotion();
   const [soundEnabled, setSoundEnabled] = useState(true);
 
@@ -220,7 +219,7 @@ export function TrailsContent({
   const { playSound } = useSoundEffects(soundEnabled);
 
   // Estados principais
-  const [activeLang, setActiveLang] = useState<string>('JS');
+  const [activeLang, setActiveLang] = useState<TrailLanguageCode>(initialActiveLanguage);
   const [attempts, setAttempts] = useState<Record<string, boolean>>(initialAttempts);
   const [attemptSelections, setAttemptSelections] =
     useState<Record<string, number>>(initialAttemptSelections);
@@ -278,17 +277,7 @@ export function TrailsContent({
   const [aiInput, setAiInput] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
 
-  // Estados para o ASYNC IA na barra lateral
-  interface AsyncMessage {
-    role: 'user' | 'model';
-    content: string;
-  }
-  const [duckyMessages, setAsyncMessages] = useState<AsyncMessage[]>([]);
-  const [duckyInput, setAsyncInput] = useState('');
-  const [duckyLoading, setAsyncLoading] = useState(false);
-
   const aiChatEndRef = useRef<HTMLDivElement>(null);
-  const sidebarChatEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll para mensagens nos modals
   useEffect(() => {
@@ -298,99 +287,6 @@ export function TrailsContent({
       }, 80);
     }
   }, [aiMessages, aiLoading, aiChatOpen]);
-
-  // Auto-scroll para mensagens na sidebar principal
-  useEffect(() => {
-    setTimeout(() => {
-      sidebarChatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 80);
-  }, [duckyMessages, duckyLoading]);
-
-  useEffect(() => {
-    setAsyncMessages([
-      {
-        role: 'model',
-        content: `Olá! Eu sou a **ASYNC**, sua copiloto de programação. Como posso ajudar com a trilha de **${getLanguageFullName(activeLang)}** hoje? Envie um código com bug ou tire suas dúvidas.`,
-      },
-    ]);
-  }, [activeLang]);
-
-  // Enviar mensagem para o ASYNC IA
-  const handleSendAsyncMessage = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!duckyInput.trim() || duckyLoading) return;
-
-    const userMsg: AsyncMessage = { role: 'user', content: duckyInput };
-    const updatedMessages = [...duckyMessages, userMsg];
-    setAsyncMessages(updatedMessages);
-    setAsyncInput('');
-    setAsyncLoading(true);
-
-    try {
-      const response = await fetch('/api/ai/ducky/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          language: activeLang,
-          history: updatedMessages,
-        }),
-      });
-
-      const data = await response.json();
-      setAsyncLoading(false);
-
-      if (response.ok && data.text) {
-        setAsyncMessages((prev) => [...prev, { role: 'model', content: data.text }]);
-      } else {
-        setAsyncMessages((prev) => [
-          ...prev,
-          {
-            role: 'model',
-            content: 'Tive um problema ao processar sua dúvida. Pode tentar novamente?',
-          },
-        ]);
-      }
-    } catch {
-      setAsyncLoading(false);
-      setAsyncMessages((prev) => [
-        ...prev,
-        {
-          role: 'model',
-          content: 'Não consegui me conectar com os servidores de IA.',
-        },
-      ]);
-    }
-  };
-
-  // Estado para o ranking/classificação geral na barra lateral
-  interface LeaderboardUser {
-    rank: number;
-    username: string;
-    avatar_url?: string | null;
-    xp: number;
-    level: number;
-  }
-  const [topUsers, setTopUsers] = useState<LeaderboardUser[]>([]);
-  const [topUsersLoading, setTopUsersLoading] = useState(true);
-
-  useEffect(() => {
-    let active = true;
-    setTopUsersLoading(true);
-    fetch('/api/leaderboard')
-      .then((res) => res.json())
-      .then((data) => {
-        if (active && Array.isArray(data)) {
-          setTopUsers(data.slice(0, 3));
-        }
-      })
-      .catch((err) => console.error('Erro ao buscar ranking na sidebar:', err))
-      .finally(() => {
-        if (active) setTopUsersLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
 
   // Estados para Checkpoints
   const [checkpointModalOpen, setCheckpointModalOpen] = useState(false);
@@ -479,7 +375,7 @@ export function TrailsContent({
       } else if (currentStage === 'practice' || currentStage === 'challenge') {
         welcomeText = `Exercício ativo. Se precisar de uma dica sutil sem a resposta direta, basta me pedir!`;
       } else {
-        welcomeText = `Fase concluída! Quer tirar alguma dúvida final sobre o conteúdo estudado?`;
+        welcomeText = `Unidade concluída! Quer tirar alguma dúvida final sobre o conteúdo estudado?`;
       }
     }
 
@@ -611,12 +507,64 @@ export function TrailsContent({
     }
   };
 
-  // Obter nível e XP da linguagem atual
-  const activeTrail = trails.find((t) => t.language === activeLang) || {
-    language: activeLang,
-    xp: 0,
-    level: 1,
+  const courseOptions = useMemo<TrailCourseOption[]>(
+    () =>
+      TRAIL_LANGUAGE_CODES.map((language) => {
+        const trail = trails.find((candidate) => candidate.language === language);
+
+        return {
+          language,
+          xp: trail?.xp ?? 0,
+          started: trail?.started ?? false,
+        };
+      }),
+    [trails]
+  );
+
+  const handleSelectCourse = (language: TrailLanguageCode) => {
+    const startedLanguages = Array.from(
+      new Set([
+        ...courseOptions.filter((course) => course.started).map((course) => course.language),
+        language,
+      ])
+    );
+
+    setActiveLang(language);
+    setTrails((previousTrails) => {
+      const existingTrail = previousTrails.find((trail) => trail.language === language);
+
+      if (existingTrail) {
+        return previousTrails.map((trail) =>
+          trail.language === language ? { ...trail, started: true } : trail
+        );
+      }
+
+      return [...previousTrails, { language, xp: 0, level: 1, started: true }];
+    });
+
+    void fetch('/api/trails/course-preferences', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ activeLanguage: language, startedLanguages }),
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error('Não foi possível salvar a preferência de curso.');
+      })
+      .catch((error) => console.error('Erro ao salvar preferência da trilha:', error));
   };
+
+  const dailyProgress = useMemo(() => {
+    const newAttemptIds = Object.keys(attempts).filter(
+      (attemptId) => !Object.prototype.hasOwnProperty.call(initialAttempts, attemptId)
+    );
+    const newCorrectAnswers = newAttemptIds.filter((attemptId) => attempts[attemptId]).length;
+
+    return {
+      xpEarned: initialDailyProgress.xpEarned + Math.max(0, userXp - user.total_xp),
+      correctAnswers: initialDailyProgress.correctAnswers + newCorrectAnswers,
+      trailActivities: initialDailyProgress.trailActivities + newAttemptIds.length,
+    };
+  }, [attempts, initialAttempts, initialDailyProgress, user.total_xp, userXp]);
 
   const hasAnsweredQuestion = (questionId: string) =>
     Object.prototype.hasOwnProperty.call(attempts, questionId);
@@ -695,9 +643,51 @@ export function TrailsContent({
       ? recommendedLevel.unitNumber
       : 3;
 
-  const activeUnitLevel =
-    TRAILS_DATA[activeLang]?.find((level) => level.unitNumber === activeUnitNumber) ||
-    TRAILS_DATA[activeLang]?.[0];
+  const trailSections = useMemo(
+    () => buildTrailSections(TRAILS_DATA[activeLang] ?? [], attempts, activeLang),
+    [activeLang, attempts]
+  );
+  const activeSection =
+    trailSections.find((section) => section.number === activeUnitNumber) ?? trailSections[0];
+  const activeSectionUnitNumber = recommendedLevel
+    ? Math.max(
+        1,
+        (activeSection?.levels.findIndex(
+          (level) => level.levelNumber === recommendedLevel.levelNumber
+        ) ?? 0) + 1
+      )
+    : Math.max(1, activeSection?.levels.length ?? 1);
+  const activeSectionTitle =
+    recommendedCheckpoint?.data?.title ??
+    recommendedLevel?.title ??
+    activeSection?.levels[activeSection.levels.length - 1]?.title ??
+    `Trilha de ${getLanguageFullName(activeLang)}`;
+
+  const requestedSection = trailSections.find(
+    (section) => section.number === initialSectionNumber && section.unlocked
+  );
+  const displayedSection = requestedSection ?? activeSection;
+  const displayedSectionNumber = displayedSection?.number ?? activeUnitNumber;
+  const displayedUnitNumber =
+    displayedSectionNumber === activeUnitNumber
+      ? activeSectionUnitNumber
+      : Math.max(1, displayedSection?.levels.length ?? 1);
+  const displayedSectionTitle =
+    displayedSectionNumber === activeUnitNumber
+      ? activeSectionTitle
+      : (displayedSection?.levels[displayedUnitNumber - 1]?.title ?? activeSectionTitle);
+
+  const handleOpenSections = () => {
+    router.push(`/trails?view=sections&section=${displayedSectionNumber}`);
+  };
+
+  const handleBackFromSections = () => {
+    router.push(`/trails?section=${displayedSectionNumber}`);
+  };
+
+  const handleSelectSection = (sectionNumber: number) => {
+    router.push(`/trails?section=${sectionNumber}`);
+  };
 
   const handleCheckpointClick = (unitNumber: number) => {
     const checkpointId = `${activeLang.toLowerCase()}-u${unitNumber}-checkpoint`;
@@ -715,7 +705,7 @@ export function TrailsContent({
         isOpen: true,
         title: 'Checkpoint Bloqueado',
         message:
-          'Este checkpoint está bloqueado! Complete todas as fases e exercícios desta unidade para liberá-lo.',
+          'Este checkpoint está bloqueado! Complete todas as unidades desta seção para liberá-lo.',
         confirmText: 'Entendido',
         variant: 'info',
         onConfirm: () => setConfirmDialog((prev) => ({ ...prev, isOpen: false })),
@@ -899,16 +889,19 @@ export function TrailsContent({
           setUserXp(data.xpResult.newTotalXp);
 
           setTrails((prev) => {
-            return prev.map((t) => {
-              if (t.language === activeLang) {
-                return {
-                  ...t,
-                  xp: data.xpResult.newLanguageXp,
-                  level: data.xpResult.newLanguageLevel,
-                };
-              }
-              return t;
-            });
+            const exists = prev.some((trail) => trail.language === activeLang);
+            const updatedTrail = {
+              language: activeLang,
+              xp: data.xpResult.newLanguageXp,
+              level: data.xpResult.newLanguageLevel,
+              started: true,
+            };
+
+            return exists
+              ? prev.map((trail) =>
+                  trail.language === activeLang ? { ...trail, ...updatedTrail } : trail
+                )
+              : [...prev, updatedTrail];
           });
 
           const oldLevel = getLevelFromXp(userXp);
@@ -964,7 +957,7 @@ export function TrailsContent({
         setConfirmDialog({
           isOpen: true,
           title: 'Erro',
-          message: 'Erro ao resetar progresso da fase.',
+          message: 'Erro ao resetar o progresso da unidade.',
           confirmText: 'Entendido',
           variant: 'danger',
           onConfirm: () => setConfirmDialog((prev) => ({ ...prev, isOpen: false })),
@@ -975,7 +968,7 @@ export function TrailsContent({
       setConfirmDialog({
         isOpen: true,
         title: 'Erro de Conexão',
-        message: 'Erro de conexão ao tentar resetar a fase.',
+        message: 'Erro de conexão ao tentar resetar a unidade.',
         confirmText: 'Entendido',
         variant: 'danger',
         onConfirm: () => setConfirmDialog((prev) => ({ ...prev, isOpen: false })),
@@ -988,9 +981,9 @@ export function TrailsContent({
       playSound('notification');
       setConfirmDialog({
         isOpen: true,
-        title: 'Fase Bloqueada',
+        title: 'Unidade Bloqueada',
         message:
-          'Esta fase está bloqueada! Complete todos os exercícios da fase anterior para liberá-la.',
+          'Esta unidade está bloqueada! Complete todos os exercícios da unidade anterior para liberá-la.',
         confirmText: 'Entendido',
         variant: 'info',
         onConfirm: () => setConfirmDialog((prev) => ({ ...prev, isOpen: false })),
@@ -1004,7 +997,7 @@ export function TrailsContent({
       setConfirmDialog({
         isOpen: true,
         title: 'Refazer do Zero?',
-        message: `Você já respondeu ${answeredCount} de ${level.questions.length} questões desta fase e obteve ${completedCount} estrelas. Deseja refazer do zero para tentar obter todas as estrelas?`,
+        message: `Você já respondeu ${answeredCount} de ${level.questions.length} questões desta unidade e obteve ${completedCount} estrelas. Deseja refazer do zero para tentar obter todas as estrelas?`,
         confirmText: 'Refazer do Zero',
         cancelText: 'Continuar Progresso',
         variant: 'warning',
@@ -1156,6 +1149,18 @@ export function TrailsContent({
           [question.id]: data.attempt?.selected_index ?? selectedOption,
         }));
 
+        setTrails((prev) => {
+          const exists = prev.some((trail) => trail.language === activeLang);
+
+          if (!exists) {
+            return [...prev, { language: activeLang, xp: 0, level: 1, started: true }];
+          }
+
+          return prev.map((trail) =>
+            trail.language === activeLang ? { ...trail, started: true } : trail
+          );
+        });
+
         // Se ganhou XP
         if (data.xpResult) {
           setCorrectCount((prev) => prev + 1);
@@ -1172,6 +1177,7 @@ export function TrailsContent({
                     ...t,
                     xp: data.xpResult.newLanguageXp,
                     level: data.xpResult.newLanguageLevel,
+                    started: true,
                   };
                 }
                 return t;
@@ -1183,6 +1189,7 @@ export function TrailsContent({
                   language: activeLang,
                   xp: data.xpResult.newLanguageXp,
                   level: data.xpResult.newLanguageLevel,
+                  started: true,
                 },
               ];
             }
@@ -1222,620 +1229,82 @@ export function TrailsContent({
   };
 
   return (
-    <div className="dd-platform-shell">
-      <Sidebar user={user} />
+    <div className="dd-platform-shell dd-platform-shell--fullscreen">
+      <Sidebar user={user} showDivider={false} />
 
-      <div className="flex min-w-0 flex-grow flex-col md:flex-row xl:max-w-[950px]">
-        <main className="flex min-h-screen w-full max-w-[600px] flex-grow flex-col border-r border-dd-border/80 bg-dd-bg pb-24 md:pb-8">
-          {/* Header (Twitter style: Sticky + Title + Subtitle) */}
-          <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60 px-4 py-3 flex items-center justify-between shrink-0">
-            <div>
-              <h1 className="text-dd-text text-base font-black tracking-tight flex items-center gap-2">
-                Trilhas de Aprendizado
-              </h1>
-              <p className="text-dd-muted text-[10px] uppercase font-bold tracking-wider mt-0.5">
-                Complete as lições e domine as linguagens de programação
-              </p>
-            </div>
-          </div>
-
+      <div className="mx-auto flex w-full min-w-0 flex-grow items-start justify-center xl:max-w-[1320px] xl:justify-start">
+        <main className="flex min-h-screen min-w-0 w-full max-w-[900px] flex-grow flex-col bg-dd-bg pb-24 md:pb-8">
           <div className="p-4 space-y-6 flex flex-col flex-grow">
-            {/* Seletor de Linguagens */}
-            <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-              {['JS', 'TS', 'PYTHON', 'RUST', 'GO', 'JAVA'].map((lang) => {
-                const isSelected = activeLang === (lang === 'PYTHON' ? 'PYTHON' : lang);
-                const label = getLanguageFullName(lang);
-
-                return (
-                  <button
-                    key={lang}
-                    onClick={() => setActiveLang(lang === 'PYTHON' ? 'PYTHON' : lang)}
-                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer border ${
-                      isSelected
-                        ? 'bg-dd-accent border-blue-500 text-white shadow-md shadow-blue-500/10'
-                        : 'bg-dd-surface border-dd-border text-dd-muted hover:text-dd-text hover:bg-dd-border/40'
-                    }`}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
+            <div className="flex justify-end xl:hidden">
+              <TrailCourseSelector
+                activeLanguage={activeLang}
+                courses={courseOptions}
+                onSelectCourse={handleSelectCourse}
+                variant="compact"
+              />
             </div>
-
-            {/* Progress Indicator da Trilha Ativa */}
-            <div className="bg-dd-surface border border-dd-border rounded-xl p-6 backdrop-blur-sm shadow-sm flex flex-col md:flex-row items-center justify-between gap-5">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-black text-xl">
-                  {activeLang.slice(0, 2)}
-                </div>
-                <div>
-                  <h3 className="text-sm font-black text-dd-text">
-                    Trilha de {getLanguageFullName(activeLang)}
-                  </h3>
-                  <p className="text-xs text-dd-muted uppercase tracking-wider font-bold mt-0.5">
-                    Nível {activeTrail.level} • {activeTrail.xp.toLocaleString('pt-BR')} XP
-                  </p>
-                </div>
-              </div>
-
-              {/* XP progress bar */}
-              <div className="flex-1 w-full max-w-lg">
-                <div className="flex justify-between text-[10.5px] font-bold text-dd-muted mb-1.5 uppercase">
-                  <span>Progresso do Nível</span>
-                  <span>{activeTrail.xp % 500} / 500 XP</span>
-                </div>
-                <div className="h-2.5 w-full bg-dd-border/40 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-blue-500 rounded-full transition-all duration-500"
-                    style={{ width: `${((activeTrail.xp % 500) / 500) * 100}%` }}
+            {initialView === 'sections' ? (
+              <TrailSectionNavigation
+                view="sections"
+                sectionNumber={displayedSectionNumber}
+                unitNumber={displayedUnitNumber}
+                title={displayedSectionTitle}
+                sections={trailSections}
+                onOpenSections={handleOpenSections}
+                onBack={handleBackFromSections}
+                onSelectSection={handleSelectSection}
+              />
+            ) : (
+              <>
+                <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md pt-1 pb-3">
+                  <TrailSectionNavigation
+                    view="trail"
+                    sectionNumber={displayedSectionNumber}
+                    unitNumber={displayedUnitNumber}
+                    title={displayedSectionTitle}
+                    sections={trailSections}
+                    onOpenSections={handleOpenSections}
+                    onBack={handleBackFromSections}
+                    onSelectSection={handleSelectSection}
                   />
                 </div>
-              </div>
-            </div>
 
-            {/* Header Card (Active Unit Banner) */}
-            {activeUnitLevel && (
-              <div className="bg-gradient-to-r from-blue-500/10 via-blue-500/5 to-transparent border border-dd-border rounded-2xl p-7 shadow-md flex flex-col items-center text-center space-y-3">
-                <span className="px-3 py-1 bg-blue-500/15 border border-blue-500/30 text-blue-400 text-[10px] font-black uppercase tracking-wider rounded-full shadow-sm whitespace-nowrap">
-                  Unidade Atual
-                </span>
-                <div className="space-y-1.5">
-                  <h2 className="text-dd-text text-base md:text-lg lg:text-xl font-black uppercase tracking-tight">
-                    Unidade {activeUnitNumber}: {activeUnitLevel.unitTitle}
-                  </h2>
-                  <p className="text-xs md:text-sm text-dd-muted font-medium max-w-xl">
-                    Domine esta unidade completando os exercícios e checkpoints abaixo para expandir
-                    seu conhecimento em {getLanguageFullName(activeLang)}.
-                  </p>
-                </div>
-              </div>
-            )}
+                {/* Mapa da seção selecionada */}
+                <div className="relative flex min-h-[900px] flex-col items-center overflow-hidden px-1 pt-1 sm:px-3">
+                  {(() => {
+                    const allLevels = TRAILS_DATA[activeLang] || [];
+                    const levels = getLevelsForSection(allLevels, displayedSectionNumber);
 
-            {/* Mapa vertical da trilha */}
-            <div className="relative flex min-h-[550px] flex-col items-center overflow-hidden rounded-2xl border border-dashed border-dd-border/50 bg-dd-surface/5 px-2 py-5 sm:px-4">
-              {(() => {
-                const levels = TRAILS_DATA[activeLang] || [];
-                const unitsMap = new Map<number, TrailLevel[]>();
-                const trailNodes: Array<
-                  | { type: 'level'; level: TrailLevel; unitStart: boolean }
-                  | { type: 'checkpoint'; unitNumber: number; unitLevels: TrailLevel[] }
-                > = [];
-
-                levels.forEach((level) => {
-                  const unitLevels = unitsMap.get(level.unitNumber) || [];
-                  unitLevels.push(level);
-                  unitsMap.set(level.unitNumber, unitLevels);
-                });
-
-                unitsMap.forEach((unitLevels, unitNumber) => {
-                  unitLevels.forEach((level, levelIndex) => {
-                    trailNodes.push({ type: 'level', level, unitStart: levelIndex === 0 });
-                  });
-                  trailNodes.push({ type: 'checkpoint', unitNumber, unitLevels });
-                });
-
-                const mapHeight = trailNodes.length * TRAIL_MAP_ROW_HEIGHT;
-                const path = buildTrailPath(trailNodes.length);
-
-                return (
-                  <div
-                    className="relative w-full max-w-[440px]"
-                    style={{ height: `${mapHeight}px` }}
-                  >
-                    <svg
-                      aria-hidden="true"
-                      className="pointer-events-none absolute left-1/2 top-0 z-0 h-full w-[calc(100%-24px)] max-w-[400px] -translate-x-1/2 overflow-visible"
-                      viewBox={`0 0 ${TRAIL_MAP_WIDTH} ${mapHeight}`}
-                      preserveAspectRatio="none"
-                    >
-                      <path
-                        d={path}
-                        fill="none"
-                        stroke="var(--color-dd-muted)"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeDasharray="8 10"
-                        opacity="0.62"
+                    return (
+                      <TrailMap
+                        activeLanguage={activeLang}
+                        allLevels={allLevels}
+                        levels={levels}
+                        attempts={attempts}
+                        isLevelUnlocked={isLevelUnlocked}
+                        onLevelClick={handleLevelClick}
+                        onCheckpointClick={handleCheckpointClick}
                       />
-                    </svg>
-
-                    {trailNodes.slice(0, -1).map((_, index) => {
-                      const bendsRight = index % 2 === 0;
-                      const decorationTop =
-                        TRAIL_MAP_NODE_CENTER_Y +
-                        index * TRAIL_MAP_ROW_HEIGHT +
-                        TRAIL_MAP_ROW_HEIGHT / 2;
-
-                      return (
-                        <div key={`path-detail-${index}`} aria-hidden="true">
-                          <div
-                            className={`absolute z-[2] flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border border-dd-border bg-dd-bg shadow-lg ${
-                              bendsRight ? 'left-[76.5%]' : 'left-[23.5%]'
-                            }`}
-                            style={{ top: `${decorationTop}px` }}
-                          >
-                            <span className="text-[8px] font-black leading-none text-blue-400">
-                              XP
-                            </span>
-                            <span className="mt-0.5 text-[7px] font-extrabold leading-none text-yellow-500">
-                              +{index % 2 === 0 ? 150 : 200}
-                            </span>
-                          </div>
-                          <Trophy
-                            className={`absolute z-[1] h-7 w-7 -translate-x-1/2 -translate-y-1/2 text-dd-border ${
-                              bendsRight ? 'left-[23%]' : 'left-[77%]'
-                            }`}
-                            style={{ top: `${decorationTop + 12}px` }}
-                            strokeWidth={1.5}
-                          />
-                        </div>
-                      );
-                    })}
-
-                    {trailNodes.map((node, nodeIndex) => {
-                      if (node.type === 'level') {
-                        const { level } = node;
-                        const globalIdx = levels.findIndex(
-                          (item) => item.levelNumber === level.levelNumber
-                        );
-                        const unlocked = isLevelUnlocked(globalIdx);
-                        const completedCount = level.questions.filter(
-                          (question) => attempts[question.id] === true
-                        ).length;
-                        const isCompleted = completedCount === level.questions.length;
-
-                        return (
-                          <div
-                            key={`level-${level.levelNumber}`}
-                            className="relative z-10 flex flex-col items-center justify-center"
-                            style={{ height: `${TRAIL_MAP_ROW_HEIGHT}px` }}
-                          >
-                            {node.unitStart && (
-                              <span
-                                className={`absolute top-1 rounded-full border border-dd-border bg-dd-bg/95 px-3 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-dd-muted shadow-sm ${
-                                  nodeIndex % 2 === 0 ? 'left-2 sm:left-5' : 'right-2 sm:right-5'
-                                }`}
-                                title={level.unitTitle}
-                              >
-                                Unidade {level.unitNumber}
-                              </span>
-                            )}
-
-                            <div className="mb-2.5 flex h-6.5 items-end justify-center gap-1.5">
-                              {Array.from({ length: level.questions.length }).map((_, starIdx) => {
-                                const isStarEarned =
-                                  attempts[level.questions[starIdx]?.id] === true;
-                                const isMiddle = starIdx === 1;
-                                const starClass = isMiddle
-                                  ? 'h-5.5 w-5.5 -translate-y-0.5 scale-110'
-                                  : `h-5 w-5 translate-y-0.5 ${
-                                      starIdx === 0 ? 'rotate-[-12deg]' : 'rotate-[12deg]'
-                                    }`;
-
-                                return (
-                                  <Star
-                                    key={starIdx}
-                                    className={`transition-all ${starClass} ${
-                                      isStarEarned
-                                        ? 'fill-yellow-500 text-yellow-500'
-                                        : 'fill-dd-bg text-dd-border'
-                                    }`}
-                                  />
-                                );
-                              })}
-                            </div>
-
-                            <button
-                              type="button"
-                              onClick={() => handleLevelClick(level, unlocked)}
-                              aria-label={`Fase ${level.levelNumber}: ${level.title}`}
-                              className={`flex h-[72px] w-[72px] transform items-center justify-center rounded-[20px] border-x-2 border-t-2 border-b-[6px] transition-all ${
-                                unlocked
-                                  ? `cursor-pointer border-blue-600 bg-blue-500 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-400 active:translate-y-[6px] active:border-b-0 ${
-                                      isCompleted
-                                        ? 'ring-2 ring-blue-400/20 ring-offset-2 ring-offset-dd-bg'
-                                        : ''
-                                    }`
-                                  : 'cursor-not-allowed border-dd-border/50 bg-dd-surface/80 text-dd-muted/35'
-                              }`}
-                            >
-                              {unlocked ? (
-                                <BookOpen className="h-8 w-8" />
-                              ) : (
-                                <Lock className="h-7 w-7" />
-                              )}
-                            </button>
-
-                            <div className="mt-2.5 max-w-[190px] text-center">
-                              <p className="text-xs font-black uppercase leading-tight text-dd-text">
-                                Fase {level.levelNumber}
-                              </p>
-                              <p className="mt-1 truncate text-[10.5px] font-bold leading-tight text-dd-muted">
-                                {level.title}
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      }
-
-                      const checkpointId = `${activeLang.toLowerCase()}-u${node.unitNumber}-checkpoint`;
-                      const isCheckpointCompleted = attempts[checkpointId] === true;
-                      const lastLevel = node.unitLevels[node.unitLevels.length - 1];
-                      const checkpointUnlocked =
-                        lastLevel && lastLevel.questions.every((question) => attempts[question.id]);
-
-                      return (
-                        <div
-                          key={`checkpoint-${node.unitNumber}`}
-                          className="relative z-10 flex flex-col items-center justify-center"
-                          style={{ height: `${TRAIL_MAP_ROW_HEIGHT}px` }}
-                        >
-                          <div className="mb-2.5 flex h-6.5 items-end justify-center gap-1.5">
-                            {Array.from({ length: 3 }).map((_, starIdx) => {
-                              const isMiddle = starIdx === 1;
-                              return (
-                                <Star
-                                  key={starIdx}
-                                  className={`transition-all ${
-                                    isMiddle
-                                      ? 'h-5.5 w-5.5 -translate-y-0.5 scale-110'
-                                      : `h-5 w-5 translate-y-0.5 ${
-                                          starIdx === 0 ? 'rotate-[-12deg]' : 'rotate-[12deg]'
-                                        }`
-                                  } ${
-                                    isCheckpointCompleted
-                                      ? 'fill-yellow-500 text-yellow-500'
-                                      : 'fill-dd-bg text-dd-border'
-                                  }`}
-                                />
-                              );
-                            })}
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => handleCheckpointClick(node.unitNumber)}
-                            aria-label={`Checkpoint da unidade ${node.unitNumber}`}
-                            className={`relative flex h-[72px] w-[72px] transform items-center justify-center rounded-[20px] border-x-2 border-t-2 border-b-[6px] transition-all ${
-                              checkpointUnlocked
-                                ? `cursor-pointer border-blue-600 bg-blue-500 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-400 active:translate-y-[6px] active:border-b-0 ${
-                                    isCheckpointCompleted
-                                      ? 'ring-2 ring-blue-400/20 ring-offset-2 ring-offset-dd-bg'
-                                      : ''
-                                  }`
-                                : 'cursor-not-allowed border-dd-border/50 bg-dd-surface/80 text-dd-muted/35'
-                            }`}
-                          >
-                            <Flag
-                              className={`h-8 w-8 ${
-                                checkpointUnlocked && !isCheckpointCompleted ? 'animate-pulse' : ''
-                              }`}
-                            />
-                            {!checkpointUnlocked && (
-                              <span className="absolute -right-1 -top-1 rounded-full border border-dd-border bg-dd-bg p-1 shadow-sm">
-                                <Lock className="h-3.5 w-3.5 text-dd-muted" />
-                              </span>
-                            )}
-                          </button>
-
-                          <div className="mt-2.5 max-w-[190px] text-center">
-                            <p className="text-xs font-black uppercase leading-tight text-dd-text">
-                              Checkpoint
-                            </p>
-                            <p className="mt-1 truncate text-[10.5px] font-bold leading-tight text-dd-muted">
-                              Unidade {node.unitNumber}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })()}
-            </div>
-
-            {/* Floating Recommended Level Bar */}
-            <AnimatePresence>
-              {recommendedCheckpoint && (
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 30 }}
-                  transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-                  className="sticky bottom-6 left-0 right-0 z-30 flex justify-center px-4 pointer-events-none"
-                >
-                  <div className="pointer-events-auto bg-dd-surface/90 backdrop-blur-md border border-blue-500/30 rounded-2xl px-6 py-5 shadow-xl max-w-lg w-full flex items-center justify-between gap-5">
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-extrabold uppercase text-blue-400 tracking-wider">
-                        Próxima Atividade Recomendada
-                      </p>
-                      <h4 className="text-sm font-black text-dd-text truncate mt-0.5">
-                        {recommendedCheckpoint.data?.title ||
-                          `Checkpoint da Unidade ${recommendedCheckpoint.unitNumber}`}
-                      </h4>
-                      <p className="text-xs text-dd-muted truncate mt-0.5">
-                        {recommendedCheckpoint.data?.description ||
-                          'Revisão e desafio prático de código.'}
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={() => handleCheckpointClick(recommendedCheckpoint.unitNumber)}
-                      className="px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-blue-500/20 whitespace-nowrap cursor-pointer active:scale-95"
-                    >
-                      Começar
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-
-              {!recommendedCheckpoint && recommendedLevel && (
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 30 }}
-                  transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-                  className="sticky bottom-6 left-0 right-0 z-30 flex justify-center px-4 pointer-events-none"
-                >
-                  <div className="pointer-events-auto bg-dd-surface/90 backdrop-blur-md border border-blue-500/30 rounded-2xl px-6 py-5 shadow-xl max-w-lg w-full flex items-center justify-between gap-5">
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-extrabold uppercase text-blue-400 tracking-wider">
-                        Próxima Atividade Recomendada
-                      </p>
-                      <h4 className="text-sm font-black text-dd-text truncate mt-0.5">
-                        Fase {recommendedLevel.levelNumber}: {recommendedLevel.title}
-                      </h4>
-                      <p className="text-xs text-dd-muted truncate mt-0.5">
-                        {recommendedLevel.description}
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={() => handleLevelClick(recommendedLevel, true)}
-                      className="px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-blue-500/20 whitespace-nowrap cursor-pointer active:scale-95"
-                    >
-                      Começar
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                    );
+                  })()}
+                </div>
+              </>
+            )}
           </div>
-          <Footer />
         </main>
 
-        {/* Right Sidebar: Duelos, ASYNC Chat, Leaderboard */}
-        <aside className="sticky top-0 hidden h-screen w-[350px] shrink-0 flex-col gap-4 overflow-y-auto p-5 xl:flex">
-          {/* Widget 1: Duelos de Código */}
-          <div className="bg-dd-sidebar-bg border border-dd-border rounded-2xl p-4 space-y-3">
-            <div className="flex items-center gap-2 text-blue-500">
-              <Swords className="w-5 h-5" />
-              <h3 className="text-sm font-black text-dd-text">Duelos de Código</h3>
-            </div>
-            <p className="text-xs text-dd-muted leading-relaxed font-semibold">
-              Desafie outros desenvolvedores em batalhas em tempo real e teste suas habilidades sob
-              pressão!
-            </p>
-            <Link
-              href="/duels"
-              className="flex items-center justify-center w-full py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-blue-500/20 active:scale-95"
-            >
-              Buscar Duelo
-            </Link>
-          </div>
-
-          {/* Widget 2: ASYNC IA Chat Panel */}
-          <div className="relative flex h-[360px] flex-col overflow-hidden rounded-2xl border border-blue-500/20 bg-gradient-to-b from-blue-500/[0.08] via-dd-sidebar-bg to-dd-sidebar-bg p-4 shadow-[0_18px_50px_-32px_rgba(0,131,254,0.75)]">
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-blue-500/15 blur-3xl"
-            />
-            <div className="relative z-10 flex items-center gap-3 border-b border-blue-500/10 pb-3 shrink-0">
-              <div className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-blue-400/20 bg-blue-500/10 shadow-[0_0_20px_rgba(0,131,254,0.12)]">
-                <Image
-                  src="/async-logo.svg"
-                  alt="ASYNC"
-                  width={32}
-                  height={32}
-                  className="h-8 w-8 object-contain"
-                />
-                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-dd-sidebar-bg bg-emerald-400" />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-black tracking-wide text-dd-text">ASYNC</h3>
-                  <span className="rounded-full border border-blue-500/20 bg-blue-500/10 px-1.5 py-0.5 text-[7px] font-black uppercase tracking-wider text-blue-400">
-                    IA
-                  </span>
-                </div>
-                <p className="text-[9px] font-semibold text-dd-muted">
-                  Tutora da sua trilha • online
-                </p>
-              </div>
-            </div>
-
-            {/* Messages Scroll Area */}
-            <div className="relative z-10 flex-grow overflow-y-auto py-3 space-y-3 scrollbar-ducky select-text min-h-0">
-              {duckyMessages.map((msg, idx) => {
-                const isAsync = msg.role !== 'user';
-                return (
-                  <div
-                    key={idx}
-                    className="flex gap-2.5 items-start w-full border-b border-dd-border/5 pb-3 last:border-b-0 last:pb-0"
-                  >
-                    {/* Avatar */}
-                    <div className="w-6.5 h-6.5 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-[#0c0c0e] border border-dd-border/40 select-none">
-                      {isAsync ? (
-                        <Image
-                          src="/async-logo.svg"
-                          alt="ASYNC"
-                          width={22}
-                          height={22}
-                          className="object-contain"
-                        />
-                      ) : user.avatar_url ? (
-                        <Image
-                          src={user.avatar_url}
-                          alt={user.username}
-                          width={26}
-                          height={26}
-                          className="w-6.5 h-6.5 rounded-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-[9px] font-bold text-dd-muted">
-                          {user.username.slice(0, 2).toUpperCase()}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Message body */}
-                    <div className="flex-grow min-w-0">
-                      <div className="flex items-center gap-1.5 mb-0.5 select-none">
-                        <span className="text-[10px] font-bold text-dd-text">
-                          {isAsync ? 'ASYNC IA' : user.username}
-                        </span>
-                        <span className="text-[8px] text-dd-muted font-medium">
-                          {isAsync ? '@async_ia' : `@${user.username.toLowerCase()}`}
-                        </span>
-                      </div>
-
-                      <div
-                        className={`rounded-2xl px-3 py-2 text-[10px] leading-relaxed font-sans ${
-                          isAsync
-                            ? 'rounded-tl-md border border-blue-500/10 bg-blue-500/[0.07] text-dd-text'
-                            : 'rounded-tr-md bg-blue-500 text-white'
-                        }`}
-                      >
-                        {renderMessageContent(msg.content)}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-              {duckyLoading && (
-                <div className="flex gap-2.5 items-start w-full">
-                  <div className="w-6.5 h-6.5 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-[#0c0c0e] border border-dd-border/40 select-none">
-                    <Image
-                      src="/async-logo.svg"
-                      alt="ASYNC"
-                      width={22}
-                      height={22}
-                      className="object-contain"
-                    />
-                  </div>
-                  <div className="flex gap-1 mt-2.5">
-                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce delay-100" />
-                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce delay-200" />
-                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce delay-300" />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Input form */}
-            <form
-              onSubmit={handleSendAsyncMessage}
-              className="relative z-10 flex gap-1.5 border-t border-blue-500/10 pt-3 shrink-0"
-            >
-              <input
-                type="text"
-                value={duckyInput}
-                onChange={(e) => setAsyncInput(e.target.value)}
-                placeholder="Pergunte à ASYNC..."
-                disabled={duckyLoading}
-                className="flex-grow rounded-xl border border-blue-500/15 bg-dd-bg/80 px-3 py-2 text-[10.5px] text-dd-text shadow-inner placeholder-dd-muted focus:border-blue-500/50 focus:outline-none disabled:opacity-50"
-              />
-              <button
-                type="submit"
-                disabled={duckyLoading || !duckyInput.trim()}
-                className="flex h-8.5 w-8.5 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-blue-500 p-1.5 text-white shadow-lg shadow-blue-500/20 transition-all hover:-translate-y-0.5 hover:bg-blue-600 disabled:opacity-50 animate-in fade-in duration-100"
-              >
-                <Send className="w-3.5 h-3.5" />
-              </button>
-            </form>
-          </div>
-
-          {/* Widget 3: Classificação Geral (Leaderboard Top 3) */}
-          <div className="bg-dd-sidebar-bg border border-dd-border rounded-2xl p-4 space-y-3.5">
-            <div className="flex items-center gap-2 text-blue-500">
-              <Trophy className="w-5 h-5" />
-              <h3 className="text-sm font-black text-dd-text">Classificação Geral</h3>
-            </div>
-
-            <div className="space-y-3">
-              {topUsersLoading ? (
-                <div className="flex items-center gap-2 justify-center py-4 text-xs text-dd-muted">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Carregando ranking...</span>
-                </div>
-              ) : topUsers.length === 0 ? (
-                <p className="text-xs text-dd-muted text-center py-2">Nenhum competidor ainda.</p>
-              ) : (
-                topUsers.map((u) => (
-                  <div key={u.username} className="flex items-center justify-between gap-3 text-xs">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span
-                        className={`font-mono font-black ${
-                          u.rank === 1
-                            ? 'text-yellow-500'
-                            : u.rank === 2
-                              ? 'text-slate-400'
-                              : 'text-amber-600'
-                        }`}
-                      >
-                        {u.rank}º
-                      </span>
-                      <div className="w-6 h-6 rounded-full bg-dd-border flex items-center justify-center text-[10px] font-black shrink-0 text-blue-500 uppercase overflow-hidden border border-dd-border/50">
-                        {u.avatar_url ? (
-                          <Image
-                            src={u.avatar_url}
-                            alt={u.username}
-                            width={24}
-                            height={24}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          u.username[0]
-                        )}
-                      </div>
-                      <span className="font-bold text-dd-text truncate">@{u.username}</span>
-                    </div>
-                    <span className="font-mono font-black text-blue-400 shrink-0 text-[11px]">
-                      {u.xp} XP
-                    </span>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <Link
-              href="/leaderboard"
-              className="block text-center text-[10.5px] font-bold text-blue-400 hover:text-blue-300 transition-colors pt-1 border-t border-dd-border/50"
-            >
-              Ver classificação completa →
-            </Link>
-          </div>
-        </aside>
+        <TrailsProgressSidebar
+          activeLanguage={activeLang}
+          courses={courseOptions}
+          onSelectCourse={handleSelectCourse}
+          totalXp={userXp}
+          streak={user.streak}
+          globalRank={initialGlobalRank}
+          totalParticipants={initialTotalParticipants}
+          username={user.username}
+          avatarUrl={user.avatar_url}
+          dailyProgress={dailyProgress}
+        />
       </div>
 
       {/* QUIZ WIZARD MODAL */}
@@ -1881,7 +1350,7 @@ export function TrailsContent({
                       if (currentStage === 'challenge') {
                         return `Etapa 3: Desafio Final`;
                       }
-                      return `Fase Concluída!`;
+                      return `Unidade Concluída!`;
                     })()}
                   </h2>
 
@@ -2066,11 +1535,12 @@ export function TrailsContent({
 
                         <div className="space-y-2">
                           <h3 className="text-lg font-black text-dd-text uppercase">
-                            Fase Concluída!
+                            Unidade Concluída!
                           </h3>
                           <p className="text-xs text-dd-muted max-w-xs mx-auto">
-                            Você concluiu a Fase {activeLevel.levelNumber} de{' '}
-                            {getLanguageFullName(activeLang)}!
+                            Você concluiu a Unidade{' '}
+                            {getUnitNumberInSection(activeLevel, TRAILS_DATA[activeLang] ?? [])} da
+                            Seção {activeLevel.unitNumber} de {getLanguageFullName(activeLang)}!
                           </p>
                         </div>
 
@@ -2417,12 +1887,12 @@ export function TrailsContent({
                   <h2 className="text-xs font-black uppercase tracking-wider text-center flex-grow text-white">
                     {(() => {
                       if (checkpointStage === 'review') {
-                        return `Revisão da Unidade ${activeCheckpointUnit}: Parte ${checkpointReviewStep + 1} de 3`;
+                        return `Revisão da Seção ${activeCheckpointUnit}: Parte ${checkpointReviewStep + 1} de 3`;
                       }
                       if (checkpointStage === 'exercise') {
                         return `Desafio Prático de Código`;
                       }
-                      return `Unidade Concluída!`;
+                      return `Seção Concluída!`;
                     })()}
                   </h2>
 
@@ -2541,7 +2011,7 @@ export function TrailsContent({
                           <div className="space-y-5 py-2 flex flex-col flex-grow min-h-0">
                             <div>
                               <span className="px-2 py-0.5 rounded bg-blue-500/10 text-[9px] font-black text-blue-500 uppercase tracking-wider">
-                                Desafio de Código da Unidade {activeCheckpointUnit}
+                                Desafio de Código da Seção {activeCheckpointUnit}
                               </span>
                               <h3 className="text-base font-black text-dd-text mt-1">
                                 {data.challenge.title}
@@ -2611,7 +2081,7 @@ export function TrailsContent({
                           </h3>
                           <p className="text-xs text-dd-muted max-w-sm mx-auto font-medium">
                             Parabéns! Você completou a revisão e o desafio prático de código da
-                            Unidade {activeCheckpointUnit}!
+                            Seção {activeCheckpointUnit}!
                           </p>
                         </div>
 

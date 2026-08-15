@@ -74,6 +74,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
           select: {
             username: true,
             avatar_url: true,
+            avatar_config: true,
             total_xp: true,
           },
         },
@@ -111,6 +112,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
       user: {
         username: user.username,
         avatar_url: user.avatar_url,
+        avatar_config: user.avatar_config,
         bio: user.bio,
         institution: user.institution,
         github_username: user.github_username,
@@ -119,6 +121,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
         pronouns: user.pronouns,
         birthday: user.birthday,
         total_xp: user.total_xp,
+        streak_days: user.streak_days,
         created_at: user.created_at,
         badges: user.badges.map((ub) => ({
           slug: ub.badge.slug,

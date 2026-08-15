@@ -168,6 +168,7 @@ export const PostService = {
             id: true,
             username: true,
             avatar_url: true,
+            avatar_config: true,
             total_xp: true,
           },
         },

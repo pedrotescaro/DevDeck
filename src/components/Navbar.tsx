@@ -79,7 +79,7 @@ export function Navbar({ user }: NavbarProps) {
             Duelos
           </Link>
           <Link
-            href="/leaderboard"
+            href="/ranked"
             className="text-dd-muted hover:text-dd-text text-sm transition-colors"
           >
             Ranking
@@ -215,7 +215,7 @@ export function Navbar({ user }: NavbarProps) {
             Duelos
           </Link>
           <Link
-            href="/leaderboard"
+            href="/ranked"
             className="block text-dd-muted hover:text-dd-text text-sm py-2"
             onClick={() => setMobileOpen(false)}
           >

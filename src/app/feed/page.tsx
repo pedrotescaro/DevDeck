@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getAuthUser } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 import { PostService } from '@/services/post.service';
 import { FeedContent } from './FeedContent';
 
@@ -15,8 +16,17 @@ export default async function FeedPage() {
 
   // Só o conteúdo essencial bloqueia o primeiro paint. Duelos e atividade semanal
   // são carregados no cliente depois que o feed já está utilizável.
-  const feed = await PostService.getFeed(user.id, { limit: 10 });
+  const [feed, allBadges] = await Promise.all([
+    PostService.getFeed(user.id, { limit: 10 }),
+    prisma.badge.findMany({ orderBy: { slug: 'asc' } }),
+  ]);
   const bookmarksMap: Record<string, boolean> = {};
+  const earnedBadgeDates = new Map<string, string | null>(
+    user.badges.map((userBadge: any): [string, string | null] => [
+      userBadge.badge.slug,
+      userBadge.earned_at?.toISOString() ?? null,
+    ])
+  );
 
   feed.items.forEach((post) => {
     if (post.bookmarks.length > 0) bookmarksMap[post.id] = true;
@@ -29,11 +39,14 @@ export default async function FeedPage() {
 
   return (
     <FeedContent
+      initialCurrentDate={new Date().toISOString()}
       initialUser={{
         id: user.id,
         username: user.username,
         avatar_url: user.avatar_url,
+        avatar_config: user.avatar_config,
         total_xp: user.total_xp,
+        last_active_at: user.last_active_at?.toISOString() ?? null,
         streak: Math.max(
           user.streak_days,
           user.trails.reduce(
@@ -42,7 +55,10 @@ export default async function FeedPage() {
           )
         ),
         trails: [...user.trails].sort((a, b) => b.xp - a.xp),
-        badges: user.badges.map((userBadge: any) => userBadge.badge),
+        badges: allBadges.map((badge) => ({
+          ...badge,
+          earned_at: earnedBadgeDates.get(badge.slug) ?? null,
+        })),
       }}
       initialPosts={serializedPosts}
       initialNextCursor={feed.nextCursor}
