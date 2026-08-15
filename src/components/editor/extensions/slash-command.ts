@@ -67,6 +67,30 @@ export const SlashCommand = Extension.create({
         items: ({ query }: { query: string }) => buildItems(query),
         render: () => {
           let component: ReactRenderer | null = null;
+          let clientRect: (() => DOMRect | null) | null = null;
+
+          const updatePosition = () => {
+            if (!component?.element || !clientRect) return;
+            positionMenu(component.element as HTMLElement, clientRect);
+          };
+
+          const startTrackingPosition = () => {
+            window.addEventListener('resize', updatePosition);
+            document.addEventListener('scroll', updatePosition, true);
+          };
+
+          const stopTrackingPosition = () => {
+            window.removeEventListener('resize', updatePosition);
+            document.removeEventListener('scroll', updatePosition, true);
+          };
+
+          const destroyMenu = () => {
+            stopTrackingPosition();
+            (component?.element as HTMLElement | undefined)?.remove();
+            component?.destroy();
+            component = null;
+            clientRect = null;
+          };
 
           return {
             onStart: (props: SuggestionProps<SlashCommandItem>) => {
@@ -79,26 +103,29 @@ export const SlashCommand = Extension.create({
               });
 
               if (!props.clientRect) return;
+              clientRect = props.clientRect;
               const element = component.element as HTMLElement;
-              element.style.position = 'absolute';
-              element.style.zIndex = '50';
+              element.style.position = 'fixed';
+              element.style.zIndex = '110';
               document.body.appendChild(element);
-              positionMenu(element, props.clientRect());
+              startTrackingPosition();
+              updatePosition();
+              window.requestAnimationFrame(updatePosition);
             },
             onUpdate: (props: SuggestionProps<SlashCommandItem>) => {
               component?.updateProps({
                 items: props.items,
                 command: (item: SlashCommandItem) => props.command(item),
               });
-              if (props.clientRect && component?.element) {
-                positionMenu(component.element as HTMLElement, props.clientRect());
+              if (props.clientRect) {
+                clientRect = props.clientRect;
+                updatePosition();
+                window.requestAnimationFrame(updatePosition);
               }
             },
             onKeyDown: (props: { event: KeyboardEvent }) => {
               if (props.event.key === 'Escape') {
-                component?.destroy();
-                (component?.element as HTMLElement | undefined)?.remove();
-                component = null;
+                destroyMenu();
                 return true;
               }
 
@@ -108,9 +135,7 @@ export const SlashCommand = Extension.create({
               return ref?.onKeyDown?.(props.event) ?? false;
             },
             onExit: () => {
-              (component?.element as HTMLElement | undefined)?.remove();
-              component?.destroy();
-              component = null;
+              destroyMenu();
             },
           };
         },
@@ -119,10 +144,43 @@ export const SlashCommand = Extension.create({
   },
 });
 
-function positionMenu(element: HTMLElement, rect: DOMRect | (() => DOMRect | null) | null) {
+const MENU_GAP = 8;
+const VIEWPORT_MARGIN = 12;
+const MENU_HEADER_HEIGHT = 42;
+const MIN_LIST_HEIGHT = 80;
+
+export function positionMenu(element: HTMLElement, rect: DOMRect | (() => DOMRect | null) | null) {
   const resolved = typeof rect === 'function' ? rect() : rect;
   if (!resolved) return;
 
-  element.style.left = `${resolved.left + window.scrollX}px`;
-  element.style.top = `${resolved.bottom + window.scrollY + 6}px`;
+  element.style.position = 'fixed';
+  element.style.maxWidth = `calc(100vw - ${VIEWPORT_MARGIN * 2}px)`;
+
+  const initialMenuRect = element.getBoundingClientRect();
+  const menuWidth = Math.min(initialMenuRect.width || 256, window.innerWidth - VIEWPORT_MARGIN * 2);
+  const roomBelow = window.innerHeight - resolved.bottom - VIEWPORT_MARGIN - MENU_GAP;
+  const roomAbove = resolved.top - VIEWPORT_MARGIN - MENU_GAP;
+  const placeAbove = initialMenuRect.height > roomBelow && roomAbove > roomBelow;
+  const availableHeight = Math.max(
+    MIN_LIST_HEIGHT + MENU_HEADER_HEIGHT,
+    placeAbove ? roomAbove : roomBelow
+  );
+
+  element.style.setProperty(
+    '--slash-menu-list-max-height',
+    `${Math.max(MIN_LIST_HEIGHT, availableHeight - MENU_HEADER_HEIGHT)}px`
+  );
+
+  const measuredHeight = Math.min(element.getBoundingClientRect().height, availableHeight);
+  const maxLeft = Math.max(VIEWPORT_MARGIN, window.innerWidth - menuWidth - VIEWPORT_MARGIN);
+  const left = Math.min(Math.max(resolved.left, VIEWPORT_MARGIN), maxLeft);
+  const preferredTop = placeAbove
+    ? resolved.top - measuredHeight - MENU_GAP
+    : resolved.bottom + MENU_GAP;
+  const maxTop = Math.max(VIEWPORT_MARGIN, window.innerHeight - measuredHeight - VIEWPORT_MARGIN);
+  const top = Math.min(Math.max(preferredTop, VIEWPORT_MARGIN), maxTop);
+
+  element.dataset.placement = placeAbove ? 'top' : 'bottom';
+  element.style.left = `${Math.round(left)}px`;
+  element.style.top = `${Math.round(top)}px`;
 }

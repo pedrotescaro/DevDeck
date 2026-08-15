@@ -58,11 +58,11 @@ export const SlashCommandList = forwardRef<
   }
 
   return (
-    <div className="slash-menu w-64 overflow-hidden rounded-xl border border-dd-border bg-dd-surface shadow-xl">
+    <div className="slash-menu w-[min(16rem,calc(100vw-1.5rem))] overflow-hidden rounded-xl border border-dd-border bg-dd-surface shadow-xl">
       <p className="border-b border-dd-border px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-dd-muted">
         Blocos
       </p>
-      <div className="max-h-64 overflow-y-auto p-1">
+      <div className="slash-menu-list overflow-y-auto overscroll-contain p-1">
         {items.map((item, index) => {
           const Icon = item.icon;
           return (
