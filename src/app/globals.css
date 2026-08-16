@@ -197,26 +197,23 @@ body {
   scrollbar-width: none;
 }
 
-/* Styled scrollbar for Ducky chat */
+/* Styled scrollbar for Ducky chat (subtle, on-brand) */
 .scrollbar-ducky {
   scrollbar-width: thin;
-  scrollbar-color: #0083fe transparent;
+  scrollbar-color: color-mix(in srgb, var(--color-dd-accent) 45%, transparent) transparent;
 }
 .scrollbar-ducky::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 .scrollbar-ducky::-webkit-scrollbar-track {
   background: transparent;
 }
 .scrollbar-ducky::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #0083fe, #c2410c);
+  background: color-mix(in srgb, var(--color-dd-accent) 35%, transparent);
   border-radius: 9999px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
 }
 .scrollbar-ducky::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #339efe, #0070d6);
-  background-clip: padding-box;
+  background: color-mix(in srgb, var(--color-dd-accent) 60%, transparent);
 }
 
 .dd-focus-ring {
