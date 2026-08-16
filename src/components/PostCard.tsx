@@ -334,16 +334,16 @@ export function PostCard({
             />
           </Link>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+            <div className="flex items-center gap-1.5 min-w-0">
               <Link
                 href={`/profile/${post.author.username}`}
                 onClick={(e) => e.stopPropagation()}
                 className="flex items-center gap-1.5 hover:underline truncate group/author min-w-0"
               >
-                <span className="text-dd-text text-xs font-bold truncate group-hover/author:underline">
+                <span className="text-dd-text text-xs font-bold truncate min-w-0 group-hover/author:underline">
                   {post.author.name || post.author.username}
                 </span>
-                <span className="text-dd-muted text-[11px] font-medium truncate">
+                <span className="text-dd-muted text-[11px] font-medium truncate min-w-0">
                   @{post.author.username.toLowerCase()}
                 </span>
               </Link>

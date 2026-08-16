@@ -390,16 +390,16 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
       active: pathname === '/explore',
     }, */
     {
+      label: 'Trilhas',
+      href: '/trails',
+      icon: BookOpen,
+      active: pathname.startsWith('/trails'),
+    },
+    {
       label: 'Notificações',
       href: '/notifications',
       icon: Bell,
       active: pathname === '/notifications',
-    },
-    {
-      label: 'Aprender com Stacklyst',
-      href: '/trails',
-      icon: BookOpen,
-      active: pathname.startsWith('/trails'),
     },
     {
       label: 'Ranking',
@@ -433,11 +433,47 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
   const mobileNavLabels = [
     'Página Inicial',
     // 'Explorar',
-    'Aprender com Stacklyst',
+    'Trilhas',
     'Notificações',
     'Perfil',
   ];
   const mobileNavItems = navItems.filter((item) => mobileNavLabels.includes(item.label));
+
+  // Item do nav inferior mobile (reutilizado antes/depois do ASYNC IA, que fica no meio)
+  const renderMobileNavItem = (item: (typeof mobileNavItems)[number]) => {
+    const Icon = item.icon;
+
+    const iconEl = (
+      <div className="relative flex items-center justify-center">
+        {item.label === 'Notificações' ? (
+          <NotificationBellIcon unreadCount={unreadCount} active={item.active} />
+        ) : (
+          <>
+            <Icon className={`w-5.5 h-5.5 ${item.active ? 'fill-current' : ''}`} />
+            {item.badge === 'dot' && (
+              <span className="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-blue-500 ring-2 ring-dd-bg" />
+            )}
+          </>
+        )}
+      </div>
+    );
+
+    const classes = `flex flex-col items-center justify-center p-1.5 transition-colors duration-150 ${
+      item.active ? 'text-dd-text font-black' : 'text-dd-muted hover:text-dd-text'
+    }`;
+
+    return (
+      <Link
+        key={item.label}
+        href={item.href}
+        className={classes}
+        aria-label={item.label}
+        aria-current={item.active ? 'page' : undefined}
+      >
+        {iconEl}
+      </Link>
+    );
+  };
 
   return (
     <>
@@ -784,43 +820,30 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
         </header>
 
         <nav className="fixed bottom-0 left-0 right-0 z-40 bg-dd-bg/90 backdrop-blur-md border-t border-dd-border px-6 py-2.5 flex items-center justify-around">
-          {mobileNavItems.map((item) => {
-            const Icon = item.icon;
+          {mobileNavItems.slice(0, 2).map(renderMobileNavItem)}
 
-            const iconEl = (
-              <div className="relative flex items-center justify-center">
-                {item.label === 'Notificações' ? (
-                  <NotificationBellIcon unreadCount={unreadCount} active={item.active} />
-                ) : (
-                  <>
-                    <Icon className={`w-5.5 h-5.5 ${item.active ? 'fill-current' : ''}`} />
-                    {item.badge === 'dot' && (
-                      <span className="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-blue-500 ring-2 ring-dd-bg" />
-                    )}
-                  </>
-                )}
-              </div>
-            );
+          {/* ASYNC IA — no meio da barra inferior */}
+          <Link
+            href="/async"
+            className={`flex flex-col items-center justify-center p-1.5 transition-colors duration-150 ${
+              pathname.startsWith('/async') || pathname.startsWith('/ducky')
+                ? 'text-dd-text font-black'
+                : 'text-dd-muted hover:text-dd-text'
+            }`}
+            aria-label="ASYNC IA"
+            aria-current={
+              pathname.startsWith('/async') || pathname.startsWith('/ducky') ? 'page' : undefined
+            }
+          >
+            <div className="relative flex items-center justify-center">
+              <AsyncLogo width={22} height={22} className="h-5.5 w-5.5 object-contain" />
+            </div>
+          </Link>
 
-            const classes = `flex flex-col items-center justify-center p-1.5 transition-colors duration-150 ${
-              item.active ? 'text-dd-text font-black' : 'text-dd-muted hover:text-dd-text'
-            }`;
+          {mobileNavItems.slice(2).map(renderMobileNavItem)}
 
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={classes}
-                aria-label={item.label}
-                aria-current={item.active ? 'page' : undefined}
-              >
-                {iconEl}
-              </Link>
-            );
-          })}
-
-          {/* Floating post trigger */}
-          {activeUser && (
+          {/* Floating post trigger — apenas na página de feed */}
+          {activeUser && (pathname === '/feed' || pathname === '/') && (
             <button
               onClick={() => setModalOpen(true)}
               className="absolute -top-14 right-4 bg-blue-500 text-white rounded-full p-3.5 shadow-lg shadow-blue-500/25 active:scale-95 transition-all w-12 h-12 flex items-center justify-center cursor-pointer"

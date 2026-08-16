@@ -1194,10 +1194,15 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
   return (
     <div
       data-testid="async-shell"
-      className={`dd-platform-shell relative h-screen overflow-hidden transition-colors duration-200 ${isFullscreen ? 'dd-platform-shell--fullscreen' : ''}`}
+      className={`dd-platform-shell relative h-dvh overflow-hidden transition-colors duration-200 ${isFullscreen ? 'dd-platform-shell--fullscreen' : ''}`}
     >
-      {/* Sidebar with clean slide-in/out animation based on expanded mode.
-          Animates width 0 ↔ auto so the chat content reflows smoothly. */}
+      {/* Sidebar — no mobile é o header + nav inferior nativo do app; no
+          desktop usa animação de largura (0 ↔ auto) ao alternar o modo foco. */}
+      {!isFullscreen && (
+        <div className="md:hidden">
+          <Sidebar user={user} />
+        </div>
+      )}
       <AnimatePresence initial={false}>
         {!isFullscreen && (
           <motion.div
@@ -1324,15 +1329,15 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
         {messages.length === 0 ? (
           /* ── Welcome / empty state ── */
           <div className="relative z-10 flex min-h-0 flex-grow flex-col overflow-y-auto">
-            <div className="mx-auto flex w-full max-w-2xl flex-grow flex-col items-center justify-center gap-6 px-4 py-10 sm:px-6">
+            <div className="mx-auto flex w-full max-w-2xl flex-grow flex-col items-center justify-center gap-6 px-4 pb-28 pt-10 sm:px-6">
               <div className="flex flex-col items-center gap-3 text-center">
-                <div className="flex select-none items-center justify-center gap-3">
+                <div className="flex select-none flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3">
                   <AsyncLogo
                     width={40}
                     height={40}
-                    className="h-10 w-10 object-contain sm:h-11 sm:w-11"
+                    className="h-9 w-9 object-contain sm:h-11 sm:w-11"
                   />
-                  <h1 className="text-2xl font-bold tracking-tight text-dd-text sm:text-3xl">
+                  <h1 className="whitespace-nowrap text-lg font-bold tracking-tight text-dd-text sm:text-3xl">
                     O que você está desenvolvendo?
                   </h1>
                 </div>
@@ -1491,8 +1496,9 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
             </div>
 
             {/* Composer fixo — sem linha divisória nem fundo próprio, o fundo do
-                chat (com as partículas) aparece por trás em toda a área */}
-            <div className="relative z-20 shrink-0 px-4 pb-4 pt-3 sm:px-6">
+                chat (com as partículas) aparece por trás em toda a área.
+                No mobile, pb-24 afasta o input da barra de navegação inferior. */}
+            <div className="relative z-20 shrink-0 px-4 pb-24 pt-3 sm:px-6 md:pb-4">
               <div className="mx-auto w-full max-w-3xl">
                 {renderComposer()}
 
@@ -1531,7 +1537,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
       {/* History Drawer Panel */}
       <div
-        className={`fixed right-0 top-0 z-50 flex h-screen w-full max-w-[360px] flex-col border-l border-dd-border bg-dd-bg/95 shadow-2xl backdrop-blur-md transition-transform duration-300 ease-out md:max-w-[400px] ${
+        className={`fixed right-0 top-0 z-50 flex h-dvh w-full max-w-[360px] flex-col border-l border-dd-border bg-dd-bg/95 shadow-2xl backdrop-blur-md transition-transform duration-300 ease-out md:max-w-[400px] ${
           isHistoryOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >

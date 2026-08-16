@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import { AsyncLogo } from '@/components/AsyncLogo';
 import { useRouter } from 'next/navigation';
@@ -43,6 +43,7 @@ import {
   buildTrailSections,
   getUnitNumberInSection,
   TrailSectionNavigation,
+  type TrailSectionView,
 } from '@/app/trails/TrailSectionNavigation';
 const getLanguageFullName = (code: string) => {
   const map: Record<string, string> = {
@@ -668,6 +669,69 @@ export function TrailsContent({
   );
   const displayedSection = requestedSection ?? activeSection;
 
+  // Unidade/seção atualmente em vista no scroll — atualiza o banner fixo
+  const bannerRef = useRef<HTMLDivElement>(null);
+  const [visibleUnit, setVisibleUnit] = useState<{
+    sectionNumber: number;
+    unitNumber: number;
+    title: string;
+  } | null>(null);
+
+  const updateVisibleUnit = useCallback(() => {
+    if (initialView !== 'trail') return;
+
+    const refEl = bannerRef.current;
+    const refY = refEl ? refEl.getBoundingClientRect().bottom + 40 : 140;
+
+    let bestSection: TrailSectionView | null = null;
+    let bestLevel: TrailLevel | null = null;
+    let bestDist = Infinity;
+
+    for (const section of trailSections) {
+      for (const level of section.levels) {
+        const el = document.getElementById(`trail-level-${level.levelNumber}`);
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        const dist = Math.abs(rect.top + rect.height / 2 - refY);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestSection = section;
+          bestLevel = level;
+        }
+      }
+    }
+
+    if (bestSection && bestLevel) {
+      const unitIdx = bestSection.levels.findIndex((l) => l.levelNumber === bestLevel.levelNumber);
+      setVisibleUnit({
+        sectionNumber: bestSection.number,
+        unitNumber: unitIdx + 1,
+        title: bestLevel.title,
+      });
+    }
+  }, [trailSections, initialView]);
+
+  useEffect(() => {
+    updateVisibleUnit();
+
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        updateVisibleUnit();
+        ticking = false;
+      });
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, [updateVisibleUnit]);
+
   // Ao navegar para uma seção específica (?section=N), rola a página até ela
   // dentro da trilha empilhada.
   useEffect(() => {
@@ -1270,12 +1334,15 @@ export function TrailsContent({
               />
             ) : (
               <>
-                <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md pt-1 pb-3">
+                <div
+                  ref={bannerRef}
+                  className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md pt-1 pb-3"
+                >
                   <TrailSectionNavigation
                     view="trail"
-                    sectionNumber={displayedSectionNumber}
-                    unitNumber={displayedUnitNumber}
-                    title={displayedSectionTitle}
+                    sectionNumber={visibleUnit?.sectionNumber ?? displayedSectionNumber}
+                    unitNumber={visibleUnit?.unitNumber ?? displayedUnitNumber}
+                    title={visibleUnit?.title ?? displayedSectionTitle}
                     sections={trailSections}
                     onOpenSections={handleOpenSections}
                     onBack={handleBackFromSections}

@@ -291,6 +291,7 @@ export function TrailMap({
                 <Fragment key={level.levelNumber}>
                   {/* Nó de nível */}
                   <div
+                    id={`trail-level-${level.levelNumber}`}
                     className="absolute z-10 flex w-[170px] -translate-x-1/2 flex-col items-center text-center"
                     style={{ left: '48%', top }}
                   >
