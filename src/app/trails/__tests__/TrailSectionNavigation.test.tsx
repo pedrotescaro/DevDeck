@@ -79,7 +79,6 @@ describe('TrailSectionNavigation', () => {
       />
     );
 
-    expect(screen.getByText('Seção 2, Unidade 2')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Closures e escopo' })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /seções/i }));

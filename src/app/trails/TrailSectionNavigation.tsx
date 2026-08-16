@@ -1,5 +1,6 @@
 import { ArrowLeft, BookOpen, CheckCircle2, ChevronRight, Lock } from 'lucide-react';
 import type { TrailLevel } from '@/lib/trailsData';
+import { getSectionTheme } from './trailTheme';
 
 export interface TrailSectionView {
   number: number;
@@ -58,8 +59,6 @@ export function buildTrailSections(
     };
   });
 }
-
-import { getSectionTheme } from './trailTheme';
 
 interface TrailSectionNavigationProps {
   view: 'trail' | 'sections';

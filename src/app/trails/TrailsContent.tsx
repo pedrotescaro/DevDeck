@@ -41,7 +41,6 @@ import type { TrailDailyProgress } from '@/app/trails/TrailsProgressSidebar';
 import { TrailMap } from '@/app/trails/TrailMap';
 import {
   buildTrailSections,
-  getLevelsForSection,
   getUnitNumberInSection,
   TrailSectionNavigation,
 } from '@/app/trails/TrailSectionNavigation';
@@ -668,6 +667,20 @@ export function TrailsContent({
     (section) => section.number === initialSectionNumber && section.unlocked
   );
   const displayedSection = requestedSection ?? activeSection;
+
+  // Ao navegar para uma seção específica (?section=N), rola a página até ela
+  // dentro da trilha empilhada.
+  useEffect(() => {
+    if (!initialSectionNumber) return;
+    const timer = setTimeout(() => {
+      const el = document.getElementById(`trail-section-${initialSectionNumber}`);
+      if (el) {
+        const top = el.getBoundingClientRect().top + window.scrollY - 110;
+        window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+      }
+    }, 80);
+    return () => clearTimeout(timer);
+  }, [initialSectionNumber]);
   const displayedSectionNumber = displayedSection?.number ?? activeUnitNumber;
   const displayedUnitNumber =
     displayedSectionNumber === activeUnitNumber
@@ -1270,17 +1283,15 @@ export function TrailsContent({
                   />
                 </div>
 
-                {/* Mapa da seção selecionada */}
-                <div className="relative flex min-h-[900px] flex-col items-center overflow-hidden px-1 pt-1 sm:px-3">
+                {/* Mapa com todas as unidades empilhadas (estilo Duolingo) */}
+                <div className="relative flex flex-col items-center px-1 pt-1 sm:px-3">
                   {(() => {
                     const allLevels = TRAILS_DATA[activeLang] || [];
-                    const levels = getLevelsForSection(allLevels, displayedSectionNumber);
 
                     return (
                       <TrailMap
                         activeLanguage={activeLang}
                         allLevels={allLevels}
-                        levels={levels}
                         attempts={attempts}
                         isLevelUnlocked={isLevelUnlocked}
                         onLevelClick={handleLevelClick}
