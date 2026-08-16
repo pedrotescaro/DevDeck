@@ -27,6 +27,7 @@ import { CharCounter } from '@/components/motion/CharCounter';
 import { MentionDropdown } from '@/components/motion/MentionDropdown';
 import { EmptyState } from '@/components/motion/EmptyState';
 import { LevelUpOverlay } from '@/components/motion/LevelUpOverlay';
+import { FeedRightSidebar } from '@/components/FeedRightSidebar';
 import { POST_CHAR_LIMIT, crossfadeVariants, springGentle } from '@/lib/motion';
 import { cn } from '@/lib/cn';
 import { getCurrentUser } from '@/lib/client/current-user';
@@ -1898,165 +1899,18 @@ export function FeedContent({
         {/* ========================================================================= */}
         {/* COLUNA DIREITA: GamificationWidget (Engajamento e Streak) */}
         {/* ========================================================================= */}
-        <aside
-          data-testid="secondary-column"
-          className="sticky top-0 ml-5 hidden h-screen w-[380px] shrink-0 space-y-6 overflow-y-auto border-l border-dd-border/80 p-5 scrollbar-none xl:block"
-        >
-          {/* Search Bar */}
-          <div className="relative w-full">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-dd-muted" />
-            </div>
-            <input
-              type="text"
-              placeholder="Buscar"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-11 pr-4 py-2.5 bg-dd-search-bg hover:bg-dd-search-bg/80 focus:bg-dd-bg border border-dd-search-border focus:border-blue-500/50 text-sm rounded-full text-dd-text placeholder-dd-muted focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all duration-200"
-            />
-          </div>
-          {searchQuery.trim() && (
-            <div className="rounded-xl border border-dd-border bg-dd-surface/70 p-3 text-xs text-dd-muted">
-              {loadingSearch
-                ? 'Filtrando o feed em tempo real...'
-                : `Termo ativo: "${searchQuery}".`}
-            </div>
-          )}
-
-          <FeedEngagementCard
-            streak={currentStreak}
-            weeklyActivity={weeklyActivity}
-            lastActiveAt={currentLastActiveAt}
-            currentDate={currentWeekDate}
-          />
-
-          {/* Achievement preview */}
-          <section className="space-y-5 rounded-[22px] border-2 border-b-4 border-dd-border bg-dd-sidebar-bg p-5">
-            <AchievementShowcase
-              badges={initialUser.badges}
-              variant="compact"
-              viewAllHref={`/profile/${initialUser.username}?tab=badges`}
-              unframed
-            />
-          </section>
-
-          {/* Language Trail Progress bar */}
-          <section className="space-y-5 rounded-[22px] border-2 border-b-4 border-dd-border bg-dd-sidebar-bg p-5">
-            <RailSectionHeading
-              title="Minhas Trilhas"
-              description="Seu progresso por linguagem"
-              icon={Sparkles}
-            />
-
-            {startedTrails.length === 0 ? (
-              <p className="rounded-2xl bg-dd-surface p-4 text-xs font-bold text-dd-muted">
-                Nenhuma trilha ativa ainda.
-              </p>
-            ) : (
-              <div className="space-y-2.5">
-                {startedTrails.map((trail) => {
-                  const nextLevelXp = Math.ceil(trail.level * 1000 * 1.5);
-                  const currentLvlBaseXp = Math.ceil((trail.level - 1) * 1000 * 1.5);
-                  const relativeXpEarned = Math.max(0, trail.xp - currentLvlBaseXp);
-                  const relativeNextLvlXp = nextLevelXp - currentLvlBaseXp;
-                  const percent = Math.min(
-                    100,
-                    Math.floor((relativeXpEarned / relativeNextLvlXp) * 100)
-                  );
-
-                  return (
-                    <div
-                      key={trail.id}
-                      className="group space-y-3 rounded-[20px] border-2 border-b-4 border-dd-border bg-dd-surface p-3.5 transition-all hover:-translate-y-0.5 hover:border-blue-500/45"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          aria-hidden="true"
-                          className={cn(
-                            'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border-b-[4px] border-black/20 text-xs font-black text-white shadow-sm',
-                            getLangColor(trail.language)
-                          )}
-                        >
-                          {formatLangName(trail.language).slice(0, 2).toUpperCase()}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="truncate text-[15px] font-black leading-tight text-dd-text transition-colors group-hover:text-blue-400">
-                              {formatLangName(trail.language)}
-                            </span>
-                            <span className="shrink-0 rounded-xl border-b-[3px] border-blue-700 bg-blue-500 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-wide text-white">
-                              Lvl {trail.level}
-                            </span>
-                          </div>
-                          <div className="mt-1.5 flex items-center justify-between text-[10px] font-black uppercase tracking-wide text-dd-muted">
-                            <span>{trail.xp.toLocaleString()} XP</span>
-                            <span>{percent}%</span>
-                          </div>
-                        </div>
-                      </div>
-                      <XPProgressBar
-                        percent={percent}
-                        colorClass={getLangColor(trail.language)}
-                        level={trail.level}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </section>
-
-          {/* Featured Duels (votar em resoluções) */}
-          <section className="space-y-5 rounded-[22px] border-2 border-b-4 border-dd-border bg-dd-sidebar-bg p-5">
-            <RailSectionHeading
-              title="Duelos em Destaque"
-              description="Resolva, vote e suba no ranking"
-              icon={Swords}
-            />
-
-            {duelsLoading ? (
-              <div className="space-y-3" aria-label="Carregando duelos em destaque">
-                <div className="dd-skeleton-post dd-skeleton h-20 rounded-lg" />
-                <div className="dd-skeleton-post dd-skeleton h-20 rounded-lg" />
-              </div>
-            ) : activeDuels.length === 0 ? (
-              <p className="rounded-2xl bg-dd-surface p-4 text-xs font-bold text-dd-muted">
-                Nenhum duelo ativo no momento.
-              </p>
-            ) : (
-              <div className="space-y-3.5">
-                {activeDuels.map((duel) => (
-                  <div
-                    key={duel.id}
-                    className="space-y-3 rounded-2xl border-2 border-blue-500/25 bg-gradient-to-br from-blue-500/[0.12] to-dd-surface p-4 transition-colors hover:border-blue-500/50"
-                  >
-                    <div className="flex items-center justify-between gap-2 text-[10px]">
-                      <span className="rounded-lg bg-blue-500/15 px-2 py-1 font-black tracking-wide text-blue-400">
-                        DUELO DE CÓDIGO
-                      </span>
-                      {duel.language && <LanguageTag language={duel.language} size="sm" />}
-                    </div>
-                    <h4 className="line-clamp-2 text-sm font-black leading-snug text-dd-text">
-                      {duel.problem_title}
-                    </h4>
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="min-w-0 truncate text-[10px] font-bold text-dd-muted">
-                        @{duel.challenger.username} vs @{duel.opponent?.username || 'match...'}
-                      </span>
-                      <Link
-                        href={`/duels/${duel.id}`}
-                        className="flex shrink-0 items-center rounded-xl border-b-[3px] border-blue-700 bg-blue-500 px-3 py-2 text-[11px] font-black text-white transition-transform hover:-translate-y-0.5 hover:bg-blue-400"
-                      >
-                        Votar
-                        <ChevronRight className="w-3 h-3 ml-0.5" />
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-        </aside>
+        {/* COLUNA LATERAL DIREITA: FeedRightSidebar */}
+        {/* ========================================================================= */}
+        <FeedRightSidebar
+          user={initialUser}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          loadingSearch={loadingSearch}
+          duels={duels}
+          duelsLoading={duelsLoading}
+          weeklyActivity={weeklyActivity}
+          currentDate={currentWeekDate}
+        />
       </div>
 
       {reportModalOpen && (

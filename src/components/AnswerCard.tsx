@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { MessageSquare, BarChart2, Share } from 'lucide-react';
+import { MessageSquare, BarChart2, Share, Send } from 'lucide-react';
 import { useHydrationSafeRelativeTime } from '@/hooks/useHydrationSafeRelativeTime';
 import { LikeButton } from '@/components/motion/LikeButton';
 import { BookmarkButton } from '@/components/motion/BookmarkButton';
@@ -386,9 +386,10 @@ export function AnswerCard({
                     !replyText.trim() ||
                     replyText.trim() === `@${answer.author.username}`
                   }
-                  className="px-3 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-xs font-bold text-white transition-all duration-200 active:scale-[0.97] cursor-pointer disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-xs font-bold text-white transition-all duration-200 active:scale-[0.97] cursor-pointer disabled:opacity-50"
                 >
-                  {replySubmitting ? 'Enviando...' : 'Responder'}
+                  <Send className="w-3.5 h-3.5" />
+                  <span>{replySubmitting ? 'Enviando...' : 'Responder'}</span>
                 </button>
               </div>
             </div>

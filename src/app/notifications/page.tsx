@@ -12,6 +12,7 @@ import { cn } from '@/lib/cn';
 import { getCurrentUser } from '@/lib/client/current-user';
 import { Bell, MessageSquare, Sparkles, Swords, Settings, Heart, X } from 'lucide-react';
 import Link from 'next/link';
+import { FeedRightSidebar } from '@/components/FeedRightSidebar';
 
 interface UpvoterUser {
   username: string;
@@ -176,11 +177,17 @@ export default function NotificationsPage() {
   const filteredNotifs = getFilteredNotifications();
 
   return (
-    <div data-testid="notifications-shell" className="dd-platform-shell">
+    <div
+      data-testid="notifications-shell"
+      className="dd-platform-shell dd-platform-shell--fullscreen selection:bg-blue-500/35 selection:text-white"
+    >
       <Sidebar user={user} />
 
-      <div className="flex min-w-0 flex-grow flex-col md:flex-row xl:max-w-[950px]">
-        <main className="min-h-screen w-full max-w-[600px] flex-grow border-r border-dd-border/80 bg-dd-bg pb-24 md:pb-8">
+      <div className="mx-auto flex w-full min-w-0 flex-grow items-start justify-center xl:max-w-[1320px] xl:justify-start">
+        <main
+          data-testid="primary-column"
+          className="flex min-h-screen w-full min-w-0 max-w-[660px] flex-grow flex-col border-r border-dd-border/80 bg-dd-bg pb-24 md:pb-8"
+        >
           {/* Header (Matching image 3 style) */}
           <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60">
             <div className="flex items-center justify-between px-4 py-3">
@@ -362,7 +369,7 @@ export default function NotificationsPage() {
             </div>
           )}
         </main>
-        <aside aria-hidden="true" className="hidden w-[350px] shrink-0 xl:block" />
+        <FeedRightSidebar user={user} />
       </div>
     </div>
   );

@@ -11,7 +11,7 @@ import { AnswerThread } from '@/components/AnswerThread';
 import type { AnswerNode } from '@/components/answer-types';
 import { MarkdownEditor, type NotionEditorRef } from '@/components/MarkdownEditor';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
-import { Sparkles, MessageSquare, ArrowLeft, Flag, X } from 'lucide-react';
+import { Sparkles, MessageSquare, ArrowLeft, Flag, X, Send } from 'lucide-react';
 import { RepostMenu } from '@/components/motion/RepostMenu';
 import { BookmarkButton } from '@/components/motion/BookmarkButton';
 import { LikeButton } from '@/components/motion/LikeButton';
@@ -20,6 +20,7 @@ import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { AuthorAvatar } from '@/components/AuthorAvatar';
 import { PostLocation, SensitiveContentGate } from '@/components/PostPresentation';
 import { parsePostExtras, ReplyAudience } from '@/lib/post-composer';
+import { POST_CHAR_LIMIT } from '@/lib/motion';
 import { cn } from '@/lib/cn';
 
 interface PostDetailContentProps {
@@ -647,9 +648,10 @@ export function PostDetailContent({
               </div>
               <button
                 type="button"
-                className="bg-dd-surface border border-dd-border/60 hover:bg-dd-border/30 text-dd-muted text-xs font-bold px-4 py-1.5 rounded-full transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 bg-dd-surface border border-dd-border/60 hover:bg-dd-border/30 text-dd-muted hover:text-dd-text text-xs font-bold px-4 py-1.5 rounded-full transition-colors cursor-pointer"
               >
-                Responder
+                <Send className="w-3.5 h-3.5" />
+                <span>Responder</span>
               </button>
             </div>
           ) : (
@@ -672,92 +674,76 @@ export function PostDetailContent({
                 >
                   <X className="w-4 h-4" />
                 </button>
-                <button
-                  type="button"
-                  onClick={() => alert('Rascunhos salvos localmente (Mock)! ')}
-                  className="text-xs font-bold text-blue-500 hover:text-blue-400 cursor-pointer"
-                >
-                  Rascunhos
-                </button>
+                <div className="text-xs text-dd-muted font-medium">
+                  {answerBody.length}/{POST_CHAR_LIMIT}
+                </div>
               </div>
 
-              <form onSubmit={handlePostAnswer} className="flex gap-4">
-                <div className="shrink-0 pt-1">
-                  {user.avatar_url ? (
-                    <Image
-                      src={user.avatar_url}
-                      alt={user.username}
-                      width={40}
-                      height={40}
-                      className="w-10 h-10 rounded-full object-cover border border-dd-border"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm font-bold border border-blue-500/10">
-                      {user.username.slice(0, 2).toUpperCase()}
-                    </div>
-                  )}
-                </div>
+              {/* Main Composer Form */}
+              <form onSubmit={handlePostAnswer} className="space-y-4">
+                <div className="flex gap-3">
+                  <div className="shrink-0 pt-1">
+                    {user.avatar_url ? (
+                      <Image
+                        src={user.avatar_url}
+                        alt={user.username}
+                        width={40}
+                        height={40}
+                        className="w-10 h-10 rounded-full object-cover border border-dd-border shrink-0"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold border border-blue-500/10 shrink-0">
+                        {user.username.slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
 
-                <div className="flex-grow min-w-0 space-y-4">
-                  <div className="relative">
+                  <div className="flex-1 min-w-0 space-y-4">
                     <MarkdownEditor
                       ref={answerBodyEditorRef}
                       value={answerBody}
                       onChange={setAnswerBody}
-                      minHeight="6rem"
-                      placeholder="Escreva sua resposta... Digite / para inserir blocos"
+                      maxLength={POST_CHAR_LIMIT}
+                      minHeight="7rem"
+                      placeholder="Postar sua resposta técnica..."
                     />
+
+                    {/* Image Preview */}
+                    {answerImage && (
+                      <div className="relative rounded-2xl overflow-hidden border border-dd-border max-h-80 bg-black/40">
+                        <Image
+                          src={answerImage}
+                          alt="Anexo"
+                          width={600}
+                          height={400}
+                          className="w-full h-full object-contain"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setAnswerImage('')}
+                          className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white hover:bg-black/85 transition-colors cursor-pointer"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
                   </div>
+                </div>
 
-                  {answerImage && (
-                    <div className="relative rounded-xl overflow-hidden border border-dd-border max-h-40">
-                      <Image
-                        src={answerImage}
-                        alt="Preview"
-                        width={800}
-                        height={320}
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setAnswerImage('')}
-                        className="absolute top-2 right-2 p-1 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  )}
-
-                  <PostComposerExtras
-                    section="meta"
-                    postBody={answerBody}
-                    setPostBody={setAnswerBody}
-                    editorRef={answerBodyEditorRef}
-                    replyAudience={replyAudience}
-                    setReplyAudience={setReplyAudience}
-                    scheduledAt={scheduledAt}
-                    setScheduledAt={setScheduledAt}
-                    location={answerLocation}
-                    setLocation={setAnswerLocation}
-                    isSensitive={isSensitive}
-                    setIsSensitive={setIsSensitive}
-                  />
-
-                  {/* Bottom Row Divider */}
-                  <div className="border-t border-dd-border/50 pt-3 flex items-center justify-between">
-                    {/* Left tools (Icons) */}
-                    <div className="flex items-center gap-1.5 text-blue-500">
-                      {/* Image input trigger */}
+                {/* Footer Toolbar matching X composer */}
+                <div className="flex items-center justify-between border-t border-dd-border/40 pt-3">
+                  <div className="flex items-center gap-1.5 text-blue-500">
+                    <div>
                       <input
                         type="file"
                         accept="image/*"
                         onChange={handleImageUpload}
                         className="hidden"
-                        id="answer-image-upload"
+                        id="answer-file-upload"
                       />
                       <label
-                        htmlFor="answer-image-upload"
-                        className="p-2 hover:bg-blue-500/10 rounded-full transition-colors cursor-pointer"
+                        htmlFor="answer-file-upload"
+                        className="p-2 hover:bg-blue-500/10 rounded-full transition-colors cursor-pointer block"
                         title="Adicionar imagem"
                       >
                         <svg
@@ -770,38 +756,39 @@ export function PostDetailContent({
                           <polyline points="21 15 16 10 5 21"></polyline>
                         </svg>
                       </label>
-
-                      <PostComposerExtras
-                        section="tools"
-                        postBody={answerBody}
-                        setPostBody={setAnswerBody}
-                        editorRef={answerBodyEditorRef}
-                        replyAudience={replyAudience}
-                        setReplyAudience={setReplyAudience}
-                        scheduledAt={scheduledAt}
-                        setScheduledAt={setScheduledAt}
-                        location={answerLocation}
-                        setLocation={setAnswerLocation}
-                        isSensitive={isSensitive}
-                        setIsSensitive={setIsSensitive}
-                      />
                     </div>
 
-                    {/* Right submit button */}
-                    <div className="flex items-center gap-3">
-                      {uploadingImage && (
-                        <span className="text-[10px] text-dd-muted animate-pulse font-semibold">
-                          Enviando...
-                        </span>
-                      )}
-                      <button
-                        type="submit"
-                        disabled={submitting || !answerBody.trim() || uploadingImage}
-                        className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white text-xs font-bold px-5 py-2 rounded-full transition-colors cursor-pointer shadow-md shadow-blue-500/10"
-                      >
-                        {submitting ? 'Postando...' : 'Postar'}
-                      </button>
-                    </div>
+                    <PostComposerExtras
+                      section="tools"
+                      postBody={answerBody}
+                      setPostBody={setAnswerBody}
+                      editorRef={answerBodyEditorRef}
+                      replyAudience={replyAudience}
+                      setReplyAudience={setReplyAudience}
+                      scheduledAt={scheduledAt}
+                      setScheduledAt={setScheduledAt}
+                      location={answerLocation}
+                      setLocation={setAnswerLocation}
+                      isSensitive={isSensitive}
+                      setIsSensitive={setIsSensitive}
+                    />
+                  </div>
+
+                  {/* Right submit button */}
+                  <div className="flex items-center gap-3">
+                    {uploadingImage && (
+                      <span className="text-[10px] text-dd-muted animate-pulse font-semibold">
+                        Enviando...
+                      </span>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={submitting || !answerBody.trim() || uploadingImage}
+                      className="flex items-center gap-1.5 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white text-xs font-bold px-5 py-2 rounded-full transition-colors cursor-pointer shadow-md shadow-blue-500/10"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      <span>{submitting ? 'Postando...' : 'Postar'}</span>
+                    </button>
                   </div>
                 </div>
               </form>

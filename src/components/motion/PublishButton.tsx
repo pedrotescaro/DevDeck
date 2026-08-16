@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { Send } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { XPFloatToast } from './XPFloatToast';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -12,6 +13,7 @@ interface PublishButtonProps {
   state: PublishState;
   xpReward?: number;
   className?: string;
+  label?: string;
 }
 
 const labels: Record<PublishState, string> = {
@@ -20,7 +22,13 @@ const labels: Record<PublishState, string> = {
   success: 'Postado ✓',
 };
 
-export function PublishButton({ disabled, state, xpReward = 15, className }: PublishButtonProps) {
+export function PublishButton({
+  disabled,
+  state,
+  xpReward = 15,
+  className,
+  label,
+}: PublishButtonProps) {
   const reduced = useReducedMotion();
   const isEmpty = disabled && state === 'idle';
 
@@ -31,7 +39,7 @@ export function PublishButton({ disabled, state, xpReward = 15, className }: Pub
         type="submit"
         disabled={disabled || state === 'submitting'}
         className={cn(
-          'dd-focus-ring dd-gpu relative bg-dd-accent text-white text-xs font-bold px-5 py-2 rounded-full',
+          'dd-focus-ring dd-gpu relative flex items-center justify-center gap-1.5 bg-dd-accent text-white text-xs font-bold px-5 py-2 rounded-full',
           'shadow-md shadow-blue-500/10 transition-[opacity,background-color] duration-200 cursor-pointer',
           'hover:bg-blue-600',
           isEmpty && 'opacity-40 scale-95 pointer-events-none',
@@ -43,7 +51,8 @@ export function PublishButton({ disabled, state, xpReward = 15, className }: Pub
         whileTap={!reduced && state !== 'submitting' ? { scale: 0.95 } : undefined}
         transition={{ type: 'spring', stiffness: 500, damping: 28 }}
       >
-        {labels[state]}
+        <Send className="w-3.5 h-3.5 shrink-0" />
+        <span>{label ?? labels[state]}</span>
       </motion.button>
     </div>
   );
