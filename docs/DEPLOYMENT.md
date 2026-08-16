@@ -1,6 +1,6 @@
-# Deployment Guide — DevDeck
+# Deployment Guide — Stacklyst
 
-This guide details steps to deploy DevDeck to Vercel (Front-end & API) and Supabase (PostgreSQL Database).
+This guide details steps to deploy Stacklyst to Vercel (Front-end & API) and Supabase (PostgreSQL Database).
 
 ---
 

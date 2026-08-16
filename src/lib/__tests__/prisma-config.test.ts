@@ -23,8 +23,8 @@ describe('Prisma environment configuration', () => {
   });
 
   it('prefers the pooled runtime URL and keeps a conservative serverless pool', async () => {
-    vi.stubEnv('DATABASE_URL', 'postgresql://pooled.example.test:6543/devdeck');
-    vi.stubEnv('DIRECT_URL', 'postgresql://direct.example.test:5432/devdeck');
+    vi.stubEnv('DATABASE_URL', 'postgresql://pooled.example.test:6543/stacklyst');
+    vi.stubEnv('DIRECT_URL', 'postgresql://direct.example.test:5432/stacklyst');
     vi.stubEnv('VERCEL', '1');
     vi.stubEnv('DATABASE_POOL_MAX', '');
     vi.resetModules();
@@ -32,7 +32,7 @@ describe('Prisma environment configuration', () => {
     const { getDatabaseConnectionString, getDatabasePoolMax, prisma } =
       await import('@/lib/prisma');
 
-    expect(getDatabaseConnectionString()).toBe('postgresql://pooled.example.test:6543/devdeck');
+    expect(getDatabaseConnectionString()).toBe('postgresql://pooled.example.test:6543/stacklyst');
     expect(getDatabasePoolMax()).toBe(1);
 
     await prisma.$disconnect();
@@ -51,12 +51,12 @@ describe('Prisma environment configuration', () => {
   });
 
   it('prefers the direct URL for Prisma CLI workflows', async () => {
-    vi.stubEnv('DATABASE_URL', 'postgresql://pooled.example.test:6543/devdeck');
-    vi.stubEnv('DIRECT_URL', 'postgresql://direct.example.test:5432/devdeck');
+    vi.stubEnv('DATABASE_URL', 'postgresql://pooled.example.test:6543/stacklyst');
+    vi.stubEnv('DIRECT_URL', 'postgresql://direct.example.test:5432/stacklyst');
     vi.resetModules();
 
     const { default: config } = await import('../../../prisma.config');
 
-    expect(config.datasource?.url).toBe('postgresql://direct.example.test:5432/devdeck');
+    expect(config.datasource?.url).toBe('postgresql://direct.example.test:5432/stacklyst');
   }, 30_000);
 });

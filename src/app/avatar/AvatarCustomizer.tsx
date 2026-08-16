@@ -64,7 +64,7 @@ export function AvatarCustomizer({
         body: JSON.stringify(config),
       });
       if (!response.ok) throw new Error('Não foi possível salvar o personagem.');
-      sessionStorage.removeItem('devdeck_user');
+      sessionStorage.removeItem('stacklyst_user');
       invalidateCurrentUser();
       router.push(`/profile/${user.username}`);
       router.refresh();
@@ -150,7 +150,7 @@ export function AvatarCustomizer({
           </button>
 
           <p className="-mt-4 mb-6 max-w-2xl text-sm font-semibold leading-6 text-dd-muted">
-            Este personagem 2D é um item visual do DevDeck. Sua foto do Google, Discord ou outro
+            Este personagem 2D é um item visual do Stacklyst. Sua foto do Google, Discord ou outro
             provedor continua sendo a imagem principal do perfil.
           </p>
 

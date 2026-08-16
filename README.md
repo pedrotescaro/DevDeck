@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="public/logo.png" alt="DevDeck Logo" width="128" height="128" />
+  <img src="public/logo.png" alt="Stacklyst Logo" width="128" height="128" />
 </p>
 
-<h1 align="center">DevDeck</h1>
+<h1 align="center">Stacklyst</h1>
 
 <p align="center">
   <strong>A plataforma gamificada definitiva para desenvolvedores se conectarem, competirem e evoluírem.</strong>
@@ -23,7 +23,7 @@
 
 ## ⚡ Conecte-se. Codifique. Conquiste.
 
-O **DevDeck** transforma a interação social entre programadores em uma jornada interativa de aprendizado e diversão. Compartilhe suas dúvidas técnicas, ajude a comunidade, dispute duelos de código em tempo real e desbloqueie badges que provam sua senioridade (e senso de humor).
+O **Stacklyst** transforma a interação social entre programadores em uma jornada interativa de aprendizado e diversão. Compartilhe suas dúvidas técnicas, ajude a comunidade, dispute duelos de código em tempo real e desbloqueie badges que provam sua senioridade (e senso de humor).
 
 ---
 
@@ -82,13 +82,13 @@ Explore as especificações detalhadas do projeto e guias de infraestrutura:
 
 ## 🐳 Rodar com Docker (Recomendado)
 
-A forma mais simples de rodar o DevDeck em **qualquer PC**. Você só precisa de [Docker](https://docs.docker.com/get-docker/) instalado.
+A forma mais simples de rodar o Stacklyst em **qualquer PC**. Você só precisa de [Docker](https://docs.docker.com/get-docker/) instalado.
 
 #### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/pedrotescaro/DevDeck.git
-cd DevDeck
+git clone https://github.com/pedrotescaro/Stacklyst.git
+cd Stacklyst
 git checkout develop
 ```
 
@@ -215,9 +215,9 @@ O seed cria três desenvolvedores com diferentes níveis de XP e trilhas de tecn
 
 | Nome       | E-mail               | Especialidade Principal |
 | :--------- | :------------------- | :---------------------- |
-| **Pedro**  | `pedro@devdeck.dev`  | TypeScript & JavaScript |
-| **Ana**    | `ana@devdeck.dev`    | Python & Django         |
-| **Carlos** | `carlos@devdeck.dev` | Rust & C++              |
+| **Pedro**  | `pedro@stacklyst.dev`  | TypeScript & JavaScript |
+| **Ana**    | `ana@stacklyst.dev`    | Python & Django         |
+| **Carlos** | `carlos@stacklyst.dev` | Rust & C++              |
 
 Acesse `/login` e utilize qualquer uma das contas acima com a senha que você configurou.
 

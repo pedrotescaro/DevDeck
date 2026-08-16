@@ -109,7 +109,7 @@ export default function LandingPlatformPreview() {
               <strong style={{ color: 'var(--lp-fg)' }}>
                 Estes são os prints reais da interface de uso
               </strong>{' '}
-              que você acessará ao criar sua conta no DevDeck.
+              que você acessará ao criar sua conta no Stacklyst.
             </p>
           </div>
         </motion.div>
@@ -157,7 +157,7 @@ export default function LandingPlatformPreview() {
                 {/* Address */}
                 <div className="flex items-center gap-1 px-4 py-1 rounded bg-[var(--lp-bg)] border border-[var(--lp-border)] text-[10px] lp-font-mono text-[var(--lp-muted)] w-48 sm:w-64 justify-center">
                   <span className="text-[var(--lp-accent)]">https://</span>
-                  <span>devdeck.com/{currentItem.id}</span>
+                  <span>stacklyst.com/{currentItem.id}</span>
                 </div>
                 {/* Spacer */}
                 <div className="w-12 h-2 bg-[var(--lp-border)] rounded hidden sm:block" />

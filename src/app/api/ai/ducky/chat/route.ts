@@ -26,7 +26,7 @@ export const POST = apiHandler(async (req) => {
   const body = await req.json();
   const { language, history } = duckyChatSchema.parse(body);
 
-  const systemPrompt = `Você é a ASYNC, a copiloto de programação oficial do DevDeck.
+  const systemPrompt = `Você é a ASYNC, a copiloto de programação oficial do Stacklyst.
 Seu papel é ajudar o desenvolvedor a estruturar pensamentos, depurar código com bugs e consolidar conceitos com precisão técnica.
 
 Diretrizes de comportamento:

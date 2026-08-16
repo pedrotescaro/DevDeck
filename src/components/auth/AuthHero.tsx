@@ -52,7 +52,7 @@ export default function AuthHero() {
         <Link href="/" className="inline-flex items-center gap-5">
           <Image
             src="/logo.svg"
-            alt="DevDeck logo"
+            alt="Stacklyst logo"
             width={62}
             height={62}
             className={`${styles.brandLogo} h-[62px] w-[62px] object-contain`}
@@ -60,14 +60,14 @@ export default function AuthHero() {
           <span
             className={`${styles.brandText} text-[43px] font-bold tracking-[-0.055em] text-white`}
           >
-            DevDeck
+            Stacklyst
           </span>
         </Link>
 
         <h1
           className={`${styles.brandText} mt-8 max-w-[560px] text-[32px] font-semibold leading-[1.14] tracking-[-0.045em] text-white xl:text-[36px]`}
         >
-          Unlock the best of DevDeck. Access to the future community.
+          Unlock the best of Stacklyst. Access to the future community.
         </h1>
         <p
           className={`${styles.brandText} mt-7 text-[17px] font-medium tracking-[-0.025em] text-white/85`}

@@ -10,7 +10,7 @@ const EXIT_DURATION_MS = 620;
 
 declare global {
   interface Window {
-    __devDeckEntryLoaderStartedAt?: number;
+    __stacklystEntryLoaderStartedAt?: number;
   }
 }
 
@@ -59,8 +59,8 @@ export default function SiteEntryLoader({ onComplete, forceMotion = false }: Sit
       window.cancelAnimationFrame?.bind(window) ??
       ((frameId: number) => window.clearTimeout(frameId));
 
-    window.__devDeckEntryLoaderStartedAt ??= performance.now();
-    const startedAt = window.__devDeckEntryLoaderStartedAt;
+    window.__stacklystEntryLoaderStartedAt ??= performance.now();
+    const startedAt = window.__stacklystEntryLoaderStartedAt;
     let animationFrame = 0;
     let exitTimer = 0;
     let completionTimer = 0;
@@ -75,7 +75,7 @@ export default function SiteEntryLoader({ onComplete, forceMotion = false }: Sit
       );
       completionTimer = window.setTimeout(
         () => {
-          window.__devDeckEntryLoaderStartedAt = undefined;
+          window.__stacklystEntryLoaderStartedAt = undefined;
           onCompleteRef.current?.();
         },
         prefersReducedMotion ? 80 : COMPLETION_HOLD_MS + EXIT_DURATION_MS
@@ -126,7 +126,7 @@ export default function SiteEntryLoader({ onComplete, forceMotion = false }: Sit
       aria-busy="true"
       aria-live="polite"
     >
-      <span className={styles.srOnly}>Loading DevDeck: {roundedProgress}%</span>
+      <span className={styles.srOnly}>Loading Stacklyst: {roundedProgress}%</span>
 
       <div className={styles.wordmark} aria-hidden="true">
         <svg
@@ -149,7 +149,7 @@ export default function SiteEntryLoader({ onComplete, forceMotion = false }: Sit
             textLength="940"
             lengthAdjust="spacingAndGlyphs"
           >
-            DevDeck
+            Stacklyst
           </text>
           <text
             className={styles.wordFill}
@@ -161,7 +161,7 @@ export default function SiteEntryLoader({ onComplete, forceMotion = false }: Sit
             lengthAdjust="spacingAndGlyphs"
             clipPath={`url(#${clipId})`}
           >
-            DevDeck
+            Stacklyst
           </text>
         </svg>
 

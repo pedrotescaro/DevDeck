@@ -1,6 +1,6 @@
-# Como Contribuir para o DevDeck
+# Como Contribuir para o Stacklyst
 
-Obrigado por se interessar em contribuir para o DevDeck! Este documento serve para orientar o processo de contribuição, garantindo que o código permaneça limpo, seguro e funcional.
+Obrigado por se interessar em contribuir para o Stacklyst! Este documento serve para orientar o processo de contribuição, garantindo que o código permaneça limpo, seguro e funcional.
 
 ## Diretrizes e Processos
 
@@ -27,8 +27,8 @@ Para configurar o ambiente de desenvolvimento localmente, siga estes passos:
 
 1. Faça o clone do repositório:
    ```bash
-   git clone https://github.com/pedrotescaro/DevDeck.git
-   cd DevDeck
+   git clone https://github.com/pedrotescaro/Stacklyst.git
+   cd Stacklyst
    ```
 2. Instale as dependências:
    ```bash

@@ -79,17 +79,17 @@ export function PostDetailContent({
 
   useEffect(() => {
     const updateSoundState = () => {
-      setSoundEnabled(localStorage.getItem('devdeck-sound') !== 'false');
+      setSoundEnabled(localStorage.getItem('stacklyst-sound') !== 'false');
     };
 
     updateSoundState();
 
     window.addEventListener('storage', updateSoundState);
-    window.addEventListener('devdeck-sound-changed', updateSoundState);
+    window.addEventListener('stacklyst-sound-changed', updateSoundState);
 
     return () => {
       window.removeEventListener('storage', updateSoundState);
-      window.removeEventListener('devdeck-sound-changed', updateSoundState);
+      window.removeEventListener('stacklyst-sound-changed', updateSoundState);
     };
   }, []);
 
@@ -192,7 +192,7 @@ export function PostDetailContent({
 
     if (newValue === -1) {
       const justification = prompt(
-        'No DevDeck, o downvote exige uma justificativa construtiva. Escreva seu motivo para o autor melhorar:'
+        'No Stacklyst, o downvote exige uma justificativa construtiva. Escreva seu motivo para o autor melhorar:'
       );
       if (!justification || justification.trim().length <= 3) {
         alert(

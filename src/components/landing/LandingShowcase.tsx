@@ -286,7 +286,7 @@ function PlatformMockup() {
     { id: 'home', label: 'Home', icon: Home },
     { id: 'explore', label: 'Explore', icon: Search },
     { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'learn', label: 'Learn with DevDeck', icon: BookOpen },
+    { id: 'learn', label: 'Learn with Stacklyst', icon: BookOpen },
     { id: 'chat', label: 'Chat', icon: MessageCircle },
     { id: 'async', label: 'ASYNC', icon: Zap },
     { id: 'bookmarks', label: 'Bookmarks', icon: Bookmark },
@@ -321,13 +321,13 @@ function PlatformMockup() {
               <div className="flex items-center justify-center size-7 rounded-lg bg-blue-500/10 border border-blue-500/20">
                 <NextImage
                   src="/logo.svg"
-                  alt="DevDeck"
+                  alt="Stacklyst"
                   width={18}
                   height={18}
                   className="size-4 object-contain"
                 />
               </div>
-              <span className="text-base font-bold tracking-tight text-white">DevDeck</span>
+              <span className="text-base font-bold tracking-tight text-white">Stacklyst</span>
             </div>
 
             {/* Navigation Menu */}
@@ -406,7 +406,7 @@ function PlatformMockup() {
                 />
               </div>
               <div>
-                <p className="text-sm font-bold tracking-tight text-white">DevDeck</p>
+                <p className="text-sm font-bold tracking-tight text-white">Stacklyst</p>
                 <p className="font-mono text-[8px] uppercase tracking-[0.16em] text-blue-400">
                   Community feed
                 </p>
@@ -1065,7 +1065,7 @@ export default function LandingShowcase({
               Every action becomes <span className="text-blue-400">proof.</span>
             </span>
           }
-          description="DevDeck turns technical discussions into verifiable evidence: you publish, prove your understanding, and grow in public."
+          description="Stacklyst turns technical discussions into verifiable evidence: you publish, prove your understanding, and grow in public."
         />
         <div ref={howGridRef} className="bento-section">
           <BentoGrid className="auto-rows-[22rem] grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6">

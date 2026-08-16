@@ -55,13 +55,13 @@ export default function ConnectionBanner() {
     if (!navigator.onLine) handleOffline();
     window.addEventListener('offline', handleOffline);
     window.addEventListener('online', handleOnline);
-    window.addEventListener('devdeck:connection-state', handleAppConnectionState);
+    window.addEventListener('stacklyst:connection-state', handleAppConnectionState);
 
     return () => {
       clearHideTimer();
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('online', handleOnline);
-      window.removeEventListener('devdeck:connection-state', handleAppConnectionState);
+      window.removeEventListener('stacklyst:connection-state', handleAppConnectionState);
     };
   }, []);
 

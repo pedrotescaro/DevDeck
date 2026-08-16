@@ -4,6 +4,7 @@ import { Inter, Space_Grotesk, JetBrains_Mono, Bebas_Neue } from 'next/font/goog
 import './globals.css';
 import './landing.css';
 import ConnectionBanner from '@/components/ConnectionBanner';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const themeScript = `
   (function() {
@@ -15,6 +16,13 @@ const themeScript = `
       } else {
         document.documentElement.classList.remove('dark');
       }
+    } catch (e) {}
+
+    try {
+      const storedLang = localStorage.getItem('site-language');
+      const lang = storedLang === 'en' ? 'en' : 'pt';
+      document.documentElement.lang = lang === 'en' ? 'en' : 'pt-BR';
+      document.documentElement.dataset.language = lang;
     } catch (e) {}
   })();
 `;
@@ -43,7 +51,7 @@ const bebasNeue = Bebas_Neue({
 });
 
 export const metadata: Metadata = {
-  title: 'DevDeck — The Gamified Community for Developers',
+  title: 'Stacklyst — The Gamified Community for Developers',
   description:
     'Level up through real discussions, code duels, adaptive quizzes, and verifiable skills.',
   icons: {
@@ -72,8 +80,10 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-dd-bg text-dd-text min-h-screen font-sans" suppressHydrationWarning>
-        {children}
-        <ConnectionBanner />
+        <LanguageProvider>
+          {children}
+          <ConnectionBanner />
+        </LanguageProvider>
       </body>
     </html>
   );

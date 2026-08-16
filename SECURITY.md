@@ -1,11 +1,11 @@
 # Política de Segurança
 
-Esta política descreve como relatar vulnerabilidades de segurança e como gerenciamos riscos de segurança no DevDeck.
+Esta política descreve como relatar vulnerabilidades de segurança e como gerenciamos riscos de segurança no Stacklyst.
 
 ## Relatando uma Vulnerabilidade
 
-Se você descobrir uma vulnerabilidade de segurança no DevDeck, por favor **não abra uma issue pública**. Em vez disso, envie um e-mail detalhado para:
-👉 **pedro@devdeck.dev**
+Se você descobrir uma vulnerabilidade de segurança no Stacklyst, por favor **não abra uma issue pública**. Em vez disso, envie um e-mail detalhado para:
+👉 **pedro@stacklyst.dev**
 
 Por favor, inclua no e-mail:
 

@@ -1,6 +1,6 @@
-# Database Design & Indexes — DevDeck
+# Database Design & Indexes — Stacklyst
 
-DevDeck uses PostgreSQL hosted via Supabase, with schema synchronization and migrations managed by Prisma.
+Stacklyst uses PostgreSQL hosted via Supabase, with schema synchronization and migrations managed by Prisma.
 
 ---
 

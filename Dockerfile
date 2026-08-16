@@ -1,5 +1,5 @@
 # ──────────────────────────────────────────────────────
-# DevDeck — Production Dockerfile (multi-stage)
+# Stacklyst — Production Dockerfile (multi-stage)
 # Generates a minimal image (~150 MB) using Next.js
 # standalone output. For development with hot-reload,
 # use: docker compose up (see docker-compose.yml)

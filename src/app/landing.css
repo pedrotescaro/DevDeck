@@ -1,5 +1,5 @@
 /* ──────────────────────────────────────────────
-   DevDeck Landing Page — Custom Styles
+   Stacklyst Landing Page — Custom Styles
    ────────────────────────────────────────────── */
 
 /* === Landing Page Color Tokens === */
@@ -616,7 +616,7 @@ html.lp-landing-page {
   background: linear-gradient(155deg, var(--lp-bg-card) 0%, var(--lp-bg) 100%);
 }
 
-/* Custom 3D Stack Loader styling matching DevDeck branding */
+/* Custom 3D Stack Loader styling matching Stacklyst branding */
 .loader-container {
   position: fixed;
   inset: 0;

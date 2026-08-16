@@ -72,14 +72,14 @@ export default function SettingsPage() {
   const [soundEnabled, setSoundEnabled] = useState(true);
 
   useEffect(() => {
-    setSoundEnabled(localStorage.getItem('devdeck-sound') !== 'false');
+    setSoundEnabled(localStorage.getItem('stacklyst-sound') !== 'false');
   }, []);
 
   const toggleSound = () => {
     const newVal = !soundEnabled;
     setSoundEnabled(newVal);
-    localStorage.setItem('devdeck-sound', String(newVal));
-    window.dispatchEvent(new Event('devdeck-sound-changed'));
+    localStorage.setItem('stacklyst-sound', String(newVal));
+    window.dispatchEvent(new Event('stacklyst-sound-changed'));
   };
 
   useEffect(() => {
@@ -718,7 +718,7 @@ export default function SettingsPage() {
 
                 <div className="bg-dd-surface border border-dd-border rounded-xl p-6 space-y-4 backdrop-blur-sm shadow-sm">
                   <p className="text-dd-muted text-xs leading-relaxed">
-                    Para trocar de conta ou sair do DevDeck, utilize o botão abaixo.
+                    Para trocar de conta ou sair do Stacklyst, utilize o botão abaixo.
                   </p>
                   <button
                     onClick={handleSignOut}

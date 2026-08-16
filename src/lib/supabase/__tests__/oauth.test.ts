@@ -8,6 +8,6 @@ describe('OAuth provider configuration', () => {
   });
 
   it('identifica corretamente os perfis criados pelo Google', () => {
-    expect(getOAuthSignupBio('google')).toBe('Novo desenvolvedor no DevDeck via Google! 🚀');
+    expect(getOAuthSignupBio('google')).toBe('Novo desenvolvedor no Stacklyst via Google! 🚀');
   });
 });

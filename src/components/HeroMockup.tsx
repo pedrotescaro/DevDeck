@@ -75,7 +75,7 @@ export function HeroMockup() {
         {/* Address Bar */}
         <div className="flex items-center gap-1.5 px-6 py-1 rounded-md bg-dd-bg border border-dd-border/50 text-[10px] text-dd-muted font-mono w-48 md:w-64 justify-center">
           <span className="text-blue-500/80">https://</span>
-          devdeck.com/feed
+          stacklyst.com/feed
         </div>
 
         {/* Action item */}
@@ -88,9 +88,9 @@ export function HeroMockup() {
         <div className="hidden md:flex flex-col p-4 border-r border-dd-border bg-dd-surface/10 space-y-6">
           <div className="flex items-center gap-2 px-2">
             <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-500 to-blue-400 flex items-center justify-center text-white font-bold text-xs">
-              DD
+              SL
             </div>
-            <span className="font-bold text-sm tracking-tight">DevDeck</span>
+            <span className="font-bold text-sm tracking-tight">Stacklyst</span>
           </div>
 
           <div className="space-y-1">

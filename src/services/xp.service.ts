@@ -80,7 +80,7 @@ export const XpService = {
             userId,
             type: 'LEVEL_UP',
             title: `Subiu de Nível! 🎉`,
-            content: `Parabéns! Você alcançou o nível ${newUserLevel} no DevDeck!`,
+            content: `Parabéns! Você alcançou o nível ${newUserLevel} no Stacklyst!`,
             link: `/profile`,
           });
           logger.info('Level up notification triggered', {

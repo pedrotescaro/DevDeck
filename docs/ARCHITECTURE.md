@@ -1,6 +1,6 @@
-# Architecture — DevDeck
+# Architecture — Stacklyst
 
-This document details the architecture, design choices, folder structure, and data flow of the DevDeck application.
+This document details the architecture, design choices, folder structure, and data flow of the Stacklyst application.
 
 ---
 

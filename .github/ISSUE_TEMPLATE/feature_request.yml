@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Tem uma ideia incrível para o DevDeck? Conte-nos sobre ela!
+        Tem uma ideia incrível para o Stacklyst? Conte-nos sobre ela!
   - type: textarea
     id: problem
     attributes:

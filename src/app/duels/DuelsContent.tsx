@@ -385,7 +385,7 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
               <span>|</span>
               <span className="hover:underline cursor-pointer">Acessibilidade</span>
             </div>
-            <p>© {new Date().getFullYear()} DevDeck Corp.</p>
+            <p>© {new Date().getFullYear()} Stacklyst Corp.</p>
           </div>
         </aside>
       </div>

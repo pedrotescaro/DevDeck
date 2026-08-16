@@ -1,24 +1,30 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/contexts/LanguageContext';
+import LanguageToggle from '@/components/LanguageToggle';
 import styles from './LandingNav.module.css';
-
-const NAV_LINKS = [
-  { label: 'How it works', href: '#how' },
-  { label: 'Platform', href: '#platform' },
-  { label: 'Tracks', href: '#trails' },
-  { label: 'Duels', href: '#duels' },
-];
 
 interface LandingNavProps {
   initialUser: any;
 }
 
 export default function LandingNav({ initialUser }: LandingNavProps) {
+  const { t } = useLanguage();
   const [isScrolled, setIsScrolled] = useState(false);
+
+  const navLinks = useMemo(
+    () => [
+      { label: t.nav.howItWorks, href: '#how' },
+      { label: t.nav.platform, href: '#platform' },
+      { label: t.nav.tracks, href: '#trails' },
+      { label: t.nav.duels, href: '#duels' },
+    ],
+    [t.nav]
+  );
 
   useEffect(() => {
     let animationFrame = 0;
@@ -45,7 +51,7 @@ export default function LandingNav({ initialUser }: LandingNavProps) {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       data-force-motion="true"
-      className={`fixed inset-x-0 z-50 mx-auto overflow-hidden border font-sans transition-[top,width,max-width,background-color,border-color,border-radius,box-shadow,backdrop-filter] duration-500 ease-out ${
+      className={`fixed inset-x-0 z-50 mx-auto overflow-visible border font-sans transition-[top,width,max-width,background-color,border-color,border-radius,box-shadow,backdrop-filter] duration-500 ease-out ${
         isScrolled
           ? 'top-4 w-[calc(100%_-_3rem)] max-w-6xl rounded-2xl border-white/10 bg-black/90 shadow-2xl backdrop-blur-2xl'
           : 'top-3 w-[calc(100%_-_1.5rem)] max-w-[1536px] rounded-none border-transparent bg-transparent shadow-none backdrop-blur-none'
@@ -60,7 +66,7 @@ export default function LandingNav({ initialUser }: LandingNavProps) {
         <Link href="/" className="flex items-center gap-3 group">
           <Image
             src="/logo.svg"
-            alt="DevDeck Logo"
+            alt="Stacklyst Logo"
             width={366}
             height={283}
             className="h-auto w-8 object-contain"
@@ -69,13 +75,13 @@ export default function LandingNav({ initialUser }: LandingNavProps) {
             className="font-sans text-xl font-extrabold tracking-tight"
             style={{ color: 'var(--lp-fg)' }}
           >
-            DevDeck
+            Stacklyst
           </span>
         </Link>
 
         {/* ── Center links (hidden on mobile) ── */}
         <div className="hidden items-center gap-7 lg:flex">
-          {NAV_LINKS.map((link) => (
+          {navLinks.map((link) => (
             <a key={link.href} href={link.href} className="lp-nav-link">
               {link.label}
             </a>
@@ -84,21 +90,23 @@ export default function LandingNav({ initialUser }: LandingNavProps) {
 
         {/* ── Right side ── */}
         <div className="flex items-center gap-2 sm:gap-3">
+          <LanguageToggle />
+
           {/* Auth links or CTA */}
           {initialUser ? (
             <Link
               href="/feed"
               className="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-blue-100"
             >
-              Go to Feed
+              {t.nav.goToFeed}
             </Link>
           ) : (
             <div className="flex items-center gap-3">
               <Link href="/login" className={styles.loginLink} data-force-motion="true">
-                Log in
+                {t.nav.login}
               </Link>
               <Link href="/register" className={styles.signUpButton} data-force-motion="true">
-                Sign up
+                {t.nav.signUp}
               </Link>
             </div>
           )}

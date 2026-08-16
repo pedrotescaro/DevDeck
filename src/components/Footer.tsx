@@ -51,13 +51,13 @@ export function Footer() {
         <div className="flex items-center justify-center gap-2 mb-6">
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-dd-card border border-dd-border">
             <ThemeLogo
-              alt="DevDeck Logo"
+              alt="Stacklyst Logo"
               width={20}
               height={20}
               className="w-5 h-5 object-contain"
             />
           </div>
-          <span className="text-dd-text font-bold text-sm">DevDeck</span>
+          <span className="text-dd-text font-bold text-sm">Stacklyst</span>
         </div>
 
         {/* Nav links row */}
@@ -89,7 +89,7 @@ export function Footer() {
       {/* Bottom bar — copyright + socials */}
       <div className="mx-auto max-w-5xl px-4 py-5 flex flex-col-reverse sm:flex-row items-center justify-between gap-3">
         <span className="text-dd-muted text-[11px]">
-          © {new Date().getFullYear()} DevDeck. Todos os direitos reservados.
+          © {new Date().getFullYear()} Stacklyst. Todos os direitos reservados.
         </span>
 
         <div className="flex items-center gap-3">

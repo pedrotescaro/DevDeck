@@ -560,7 +560,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
   const [isPrivate, setIsPrivate] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
 
-  // Custom naming & DevDeck alignment:
+  // Custom naming & Stacklyst alignment:
   // - mode 'Rápido' maps to 'Rápido' (Instant) tab
   // - mode 'Deep Debug' maps to 'Deep Debug' (Expert) tab
   // - mode 'Repositório' maps to GitHub repo analysis
@@ -588,7 +588,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
   // Load history from localStorage
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('devdeck-ducky-history');
+      const saved = localStorage.getItem('stacklyst-ducky-history');
       if (saved) {
         setHistory(JSON.parse(saved));
       }
@@ -632,7 +632,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
         setActiveChatId(newId);
         setHistory((prev) => {
           const next = [newSession, ...prev];
-          localStorage.setItem('devdeck-ducky-history', JSON.stringify(next));
+          localStorage.setItem('stacklyst-ducky-history', JSON.stringify(next));
           return next;
         });
       } else {
@@ -662,7 +662,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
             };
             finalHistory = [newSession, ...updated];
           }
-          localStorage.setItem('devdeck-ducky-history', JSON.stringify(finalHistory));
+          localStorage.setItem('stacklyst-ducky-history', JSON.stringify(finalHistory));
           return finalHistory;
         });
       }
@@ -697,7 +697,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
         }
         return s;
       });
-      localStorage.setItem('devdeck-ducky-history', JSON.stringify(updated));
+      localStorage.setItem('stacklyst-ducky-history', JSON.stringify(updated));
       return updated;
     });
   };
@@ -707,7 +707,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
     if (confirm('Deseja apagar esta conversa do seu histórico?')) {
       setHistory((prev) => {
         const updated = prev.filter((s) => s.id !== id);
-        localStorage.setItem('devdeck-ducky-history', JSON.stringify(updated));
+        localStorage.setItem('stacklyst-ducky-history', JSON.stringify(updated));
         return updated;
       });
       if (activeChatId === id) {

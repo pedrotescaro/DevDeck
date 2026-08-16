@@ -138,7 +138,7 @@ export default function RegisterPage() {
             <Link href="/" className="mb-8 inline-flex items-center gap-3 lg:hidden">
               <Image
                 src="/logo.svg"
-                alt="DevDeck logo"
+                alt="Stacklyst logo"
                 width={38}
                 height={38}
                 className={[styles.brandLogo, 'h-[38px] w-[38px] object-contain'].join(' ')}
@@ -146,14 +146,14 @@ export default function RegisterPage() {
               <span
                 className={[styles.brandText, 'text-2xl font-bold tracking-[-0.04em]'].join(' ')}
               >
-                DevDeck
+                Stacklyst
               </span>
             </Link>
 
             {loading ? (
               <Loader
                 title="Creating your account..."
-                subtitle="We’re preparing your DevDeck profile"
+                subtitle="We’re preparing your Stacklyst profile"
                 size="md"
                 className="min-h-[520px] px-0"
               />

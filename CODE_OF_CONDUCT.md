@@ -36,7 +36,7 @@ Este Código de Conduta aplica-se a todos os espaços da comunidade e também se
 
 ## Aplicação
 
-Instâncias de comportamento abusivo, de assédio ou inaceitável podem ser relatadas aos líderes da comunidade responsáveis pela aplicação através do e-mail **pedro@devdeck.dev**. Todas as denúncias serão revisadas e investigadas de forma rápida e justa.
+Instâncias de comportamento abusivo, de assédio ou inaceitável podem ser relatadas aos líderes da comunidade responsáveis pela aplicação através do e-mail **pedro@stacklyst.dev**. Todas as denúncias serão revisadas e investigadas de forma rápida e justa.
 
 ## Atribuição
 

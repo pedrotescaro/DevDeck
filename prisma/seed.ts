@@ -6,7 +6,7 @@ import { prisma } from '../src/lib/prisma';
 import { createClient } from '@supabase/supabase-js';
 
 async function main() {
-  console.log('🌱 Seeding DevDeck database...\n');
+  console.log('🌱 Seeding Stacklyst database...\n');
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceKey =
@@ -40,7 +40,7 @@ async function main() {
     {
       slug: 'hello_world',
       label: 'Hello World!',
-      description: 'Escreveu sua primeira linha de código no DevDeck',
+      description: 'Escreveu sua primeira linha de código no Stacklyst',
       icon: '👋',
       color: '#22d48a',
     },
@@ -153,7 +153,7 @@ async function main() {
     throw new Error(`Error listing auth users: ${listError.message}`);
   }
 
-  const seedEmails = ['pedro@devdeck.dev', 'ana@devdeck.dev', 'carlos@devdeck.dev'];
+  const seedEmails = ['pedro@stacklyst.dev', 'ana@stacklyst.dev', 'carlos@stacklyst.dev'];
   for (const email of seedEmails) {
     const existing = users.find((u) => u.email === email);
     if (existing) {
@@ -177,15 +177,15 @@ async function main() {
 
   const usersToCreate = [
     {
-      email: 'pedro@devdeck.dev',
+      email: 'pedro@stacklyst.dev',
       username: 'pedrodev',
       password: seedPassword,
-      bio: 'Fullstack dev apaixonado por TypeScript e sistemas distribuídos. Criador do DevDeck.',
+      bio: 'Fullstack dev apaixonado por TypeScript e sistemas distribuídos. Criador do Stacklyst.',
       institution: 'UFMG',
       total_xp: 4250,
     },
     {
-      email: 'ana@devdeck.dev',
+      email: 'ana@stacklyst.dev',
       username: 'anak',
       password: seedPassword,
       bio: 'Pythonista e entusiasta de ML. Sempre buscando o próximo desafio.',
@@ -193,7 +193,7 @@ async function main() {
       total_xp: 3100,
     },
     {
-      email: 'carlos@devdeck.dev',
+      email: 'carlos@stacklyst.dev',
       username: 'carlosm',
       password: seedPassword,
       bio: 'Rustacean 🦀 e competidor de maratona de programação.',
@@ -880,7 +880,7 @@ func debugHandler(w http.ResponseWriter, r *http.Request) {
     },
     {
       question:
-        'Qual protocolo de rede é responsável por traduzir nomes de domínio legíveis (como devdeck.dev) para IPs?',
+        'Qual protocolo de rede é responsável por traduzir nomes de domínio legíveis (como stacklyst.dev) para IPs?',
       options: ['FTP', 'DNS', 'DHCP', 'SSH'],
       correct_index: 1,
       tags: ['network', 'dns'],

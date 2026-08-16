@@ -63,11 +63,11 @@ function getNotificationTitle(type: NotificationType, isMessage: boolean) {
   if (type === 'DUEL_CHALLENGE') return 'Duelo disponivel';
   if (type === 'DUEL_RESULT') return 'Resultado do duelo';
   if (type === 'MENTION') return 'Voce foi mencionado';
-  return 'Notificacao DevDeck';
+  return 'Notificacao Stacklyst';
 }
 
 function getNotificationContent(type: NotificationType, actorName: string, isMessage: boolean) {
-  if (type === 'FOLLOW') return `${actorName} comecou a seguir voce no DevDeck.`;
+  if (type === 'FOLLOW') return `${actorName} comecou a seguir voce no Stacklyst.`;
   if (type === 'LIKE') return `${actorName} deu um upvote no seu post.`;
   if (type === 'REACTION') return `${actorName} reagiu ao seu post.`;
   if (type === 'COMMENT') {
@@ -79,7 +79,7 @@ function getNotificationContent(type: NotificationType, actorName: string, isMes
   if (type === 'QUIZ_CORRECT') return 'Voce acertou um quiz e ganhou XP.';
   if (type === 'DUEL_CHALLENGE') return 'Ha um novo duelo disponivel para testar suas habilidades.';
   if (type === 'DUEL_RESULT') return 'O resultado de um duelo foi atualizado.';
-  if (type === 'MENTION') return `${actorName} mencionou voce no DevDeck.`;
+  if (type === 'MENTION') return `${actorName} mencionou voce no Stacklyst.`;
   return 'Voce recebeu uma notificacao.';
 }
 

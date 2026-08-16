@@ -28,7 +28,7 @@ export const COPY = {
   SUCCESS_LEAVE_COMMUNITY: 'Você saiu da comunidade.',
 
   // Special Events
-  FIRST_POST: '+50 XP — Primeira postagem! Bem-vindo ao DevDeck.',
+  FIRST_POST: '+50 XP — Primeira postagem! Bem-vindo ao Stacklyst.',
   LEVEL_UP: (level: number, title: string) =>
     `Level ${level} desbloqueado! Você agora é um ${title}.`,
   MILESTONE_XP: (amount: number) => `Milestone alcançado! +${amount} XP.`,

@@ -83,7 +83,7 @@ export const POST = apiHandler(async (req) => {
   const { repo } = input;
 
   // 2. System prompt do ASYNC atuando como analista de repositórios.
-  const systemPrompt = `Você é a ASYNC, a copiloto de programação oficial do DevDeck, agora atuando como analista de repositórios do GitHub.
+  const systemPrompt = `Você é a ASYNC, a copiloto de programação oficial do Stacklyst, agora atuando como analista de repositórios do GitHub.
 Analise o repositório fornecido pelo usuário e produza insights técnicos claros e acionáveis.
 
 Diretrizes:

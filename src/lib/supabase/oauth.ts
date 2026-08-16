@@ -9,12 +9,12 @@ export type OAuthProvider = keyof typeof OAUTH_PROVIDER_LABELS;
 export function getOAuthSignupBio(provider: string) {
   switch (provider) {
     case 'google':
-      return 'Novo desenvolvedor no DevDeck via Google! 🚀';
+      return 'Novo desenvolvedor no Stacklyst via Google! 🚀';
     case 'discord':
-      return 'Novo desenvolvedor no DevDeck via Discord! 🎮';
+      return 'Novo desenvolvedor no Stacklyst via Discord! 🎮';
     case 'github':
-      return 'Novo desenvolvedor no DevDeck via GitHub! 🚀';
+      return 'Novo desenvolvedor no Stacklyst via GitHub! 🚀';
     default:
-      return 'Novo desenvolvedor no DevDeck! 🚀';
+      return 'Novo desenvolvedor no Stacklyst! 🚀';
   }
 }

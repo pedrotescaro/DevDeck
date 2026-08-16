@@ -91,7 +91,7 @@ function hashUsername(username: string) {
 }
 
 export function getDefaultAvatarConfig(username: string): AvatarConfig {
-  const seed = hashUsername(username || 'devdeck');
+  const seed = hashUsername(username || 'stacklyst');
   return {
     skin: seed % SKIN_TONES.length,
     hair: (seed >>> 2) % 6,

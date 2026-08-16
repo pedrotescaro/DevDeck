@@ -139,7 +139,7 @@ function CommunityCard({ guild, isMember, joining, onJoin }: CommunityCardProps)
       >
         <span className="absolute -right-7 -top-10 h-28 w-28 rounded-full bg-white/15 blur-sm" />
         <span className="absolute left-4 top-3 text-[10px] font-bold uppercase tracking-[0.18em] text-white/75">
-          Comunidade DevDeck
+          Comunidade Stacklyst
         </span>
       </Link>
 
@@ -563,7 +563,7 @@ export function GuildsClient({ initialGuilds = [], initialMyGuilds = [] }: Guild
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 text-white shadow-lg shadow-blue-500/20">
                   <UsersRound className="h-5 w-5" />
                 </div>
-                <h2 className="mt-4 text-base font-black text-dd-text">Comunidades no DevDeck</h2>
+                <h2 className="mt-4 text-base font-black text-dd-text">Comunidades no Stacklyst</h2>
                 <p className="mt-1 text-xs leading-5 text-dd-muted">
                   Espaços dedicados para trocar experiências e evoluir com quem compartilha seus
                   interesses.

@@ -69,7 +69,7 @@ describe('current user request cache', () => {
       const state = (event as CustomEvent<{ state: string }>).detail.state;
       connectionStates.push(state);
     };
-    window.addEventListener('devdeck:connection-state', handleConnectionState);
+    window.addEventListener('stacklyst:connection-state', handleConnectionState);
 
     const fetchMock = vi
       .fn()
@@ -83,7 +83,7 @@ describe('current user request cache', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     const user = await getCurrentUser<{ id: string }>();
-    window.removeEventListener('devdeck:connection-state', handleConnectionState);
+    window.removeEventListener('stacklyst:connection-state', handleConnectionState);
 
     expect(user?.id).toBe('user-1');
     expect(fetchMock).toHaveBeenCalledTimes(2);

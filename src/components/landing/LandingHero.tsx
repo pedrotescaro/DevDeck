@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import RippleDistortion from '@/components/RippleDistortion';
 import AnimatedAvatarGroup, { type AvatarData } from '@/components/smoothui/animated-avatar-group';
+import { useLanguage } from '@/contexts/LanguageContext';
 import styles from './LandingHero.module.css';
 
 const container = {
@@ -40,6 +41,8 @@ interface LandingHeroProps {
 }
 
 export default function LandingHero({ initialUser, isReady = true }: LandingHeroProps) {
+  const { t } = useLanguage();
+
   return (
     <section
       className="relative min-h-screen w-full overflow-hidden bg-[var(--lp-bg)] px-0 pb-20 pt-32 sm:pt-36"
@@ -76,12 +79,12 @@ export default function LandingHero({ initialUser, isReady = true }: LandingHero
           <h1 className="mb-8 max-w-5xl px-1 font-sans text-[clamp(2.35rem,6vw,4.25rem)] font-semibold leading-[1.03] tracking-[-0.055em] text-white sm:px-0">
             <span className="overflow-hidden block pt-3 pb-1 -mt-3">
               <motion.span variants={lineReveal} className="inline-block">
-                Unlock the best of DevDeck.
+                {t.hero.titleLine1}
               </motion.span>
             </span>
             <span className="overflow-hidden block pt-3 pb-1 -mt-3">
               <motion.span variants={lineReveal} className="inline-block">
-                Access to the future community.
+                {t.hero.titleLine2}
               </motion.span>
             </span>
           </h1>
@@ -93,7 +96,7 @@ export default function LandingHero({ initialUser, isReady = true }: LandingHero
               show: { opacity: 1, y: 0, transition: { duration: 0.7, delay: 0.3 } },
             }}
           >
-            Developers creating amazing experiences.
+            {t.hero.subtitle}
           </motion.p>
 
           {/* Circular avatar social proof stack */}
@@ -114,11 +117,11 @@ export default function LandingHero({ initialUser, isReady = true }: LandingHero
               className="[&_div.rounded-full.border-2]:!border-[var(--lp-bg)] [&>div:last-child]:!bg-[var(--lp-accent)] [&>div:last-child_span]:!text-[var(--lp-bg)] [&>div:last-child_span]:!font-bold"
             />
             <div className="flex flex-col items-center sm:items-start">
-              <span className="lp-font-mono text-[9px] tracking-[0.15em] uppercase text-[var(--lp-muted)] leading-none mb-1">
-                ACTIVE MEMBERS
+              <span className="lp-font-mono text-[9px] tracking-[0.15em] uppercase text-white leading-none mb-1">
+                {t.hero.activeMembers}
               </span>
               <span className="lp-font-heading font-semibold text-xs text-[var(--lp-fg)] leading-none">
-                1,840+ developers in the arena
+                {t.hero.membersInArena}
               </span>
             </div>
           </motion.div>
@@ -136,10 +139,10 @@ export default function LandingHero({ initialUser, isReady = true }: LandingHero
               data-force-motion="true"
             >
               <span className={styles.buttonPre}>
-                {initialUser ? 'Go to Feed' : "Let's Get Started"}
+                {initialUser ? t.nav.goToFeed : t.hero.letsGetStarted}
               </span>
               <span className={styles.buttonPost} aria-hidden="true">
-                <span>{initialUser ? 'Open Your Feed' : 'Create Your Profile'}</span>
+                <span>{initialUser ? t.hero.openYourFeed : t.hero.createYourProfile}</span>
                 <span className={styles.buttonIcon}>
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M10.5 2c.45 5.18 3.32 8.05 8.5 8.5-5.18.45-8.05 3.32-8.5 8.5C10.05 13.82 7.18 10.95 2 10.5 7.18 10.05 10.05 7.18 10.5 2Z" />
@@ -153,7 +156,7 @@ export default function LandingHero({ initialUser, isReady = true }: LandingHero
               href="#platform"
               className="inline-flex items-center justify-center text-sm font-medium text-white/80 transition-colors hover:text-white"
             >
-              <span>View a real post</span>
+              <span>{t.hero.viewRealPost}</span>
             </a>
           </motion.div>
         </motion.div>

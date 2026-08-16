@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/client';
 const CURRENT_USER_TTL_MS = 60_000;
 const MAX_REQUEST_ATTEMPTS = 3;
 const RETRYABLE_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
-const CONNECTION_EVENT = 'devdeck:connection-state';
+const CONNECTION_EVENT = 'stacklyst:connection-state';
 
 let cachedUser: { value: unknown; expiresAt: number } | null = null;
 let pendingUserRequest: Promise<unknown | null> | null = null;

@@ -123,15 +123,13 @@ export default function LoginPage() {
             <Link href="/" className="mb-10 inline-flex items-center gap-3 lg:hidden">
               <Image
                 src="/logo.svg"
-                alt="DevDeck logo"
-                width={38}
-                height={38}
-                className={[styles.brandLogo, 'h-[38px] w-[38px] object-contain'].join(' ')}
+                alt="Stacklyst logo"
+                width={28}
+                height={28}
+                className="h-7 w-7 object-contain"
               />
-              <span
-                className={[styles.brandText, 'text-2xl font-bold tracking-[-0.04em]'].join(' ')}
-              >
-                DevDeck
+              <span className="font-sans text-xl font-extrabold tracking-tight text-white">
+                Stacklyst
               </span>
             </Link>
 

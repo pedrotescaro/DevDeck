@@ -87,7 +87,7 @@ export const POST = apiHandler(async (request) => {
       username,
       email,
       avatar_url: `${avatarBaseUrl}?seed=${username}`,
-      bio: 'New developer on DevDeck! 🚀',
+      bio: 'New developer on Stacklyst! 🚀',
       total_xp: 0,
     },
   });

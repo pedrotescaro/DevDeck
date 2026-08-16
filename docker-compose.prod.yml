@@ -1,5 +1,5 @@
 # ──────────────────────────────────────────────────────
-# DevDeck — Docker Compose (Production)
+# Stacklyst — Docker Compose (Production)
 #
 # Usage:
 #   docker compose -f docker-compose.prod.yml up --build -d
@@ -9,18 +9,18 @@
 services:
   db:
     image: postgres:15-alpine
-    container_name: devdeck-db
+    container_name: stacklyst-db
     restart: always
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres_devdeck_2024}
-      POSTGRES_DB: devdeck
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres_stacklyst_2024}
+      POSTGRES_DB: stacklyst
     ports:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres -d devdeck']
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d stacklyst']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -35,15 +35,15 @@ services:
         NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
         NEXT_PUBLIC_AVATAR_API_URL: ${NEXT_PUBLIC_AVATAR_API_URL:-https://api.dicebear.com/9.x/pixel-art/svg}
-    container_name: devdeck-web
+    container_name: stacklyst-web
     restart: always
     ports:
       - '3000:3000'
     env_file:
       - .env.docker
     environment:
-      DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-postgres_devdeck_2024}@db:5432/devdeck?schema=public
-      DIRECT_URL: postgresql://postgres:${DB_PASSWORD:-postgres_devdeck_2024}@db:5432/devdeck?schema=public
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-postgres_stacklyst_2024}@db:5432/stacklyst?schema=public
+      DIRECT_URL: postgresql://postgres:${DB_PASSWORD:-postgres_stacklyst_2024}@db:5432/stacklyst?schema=public
     depends_on:
       db:
         condition: service_healthy

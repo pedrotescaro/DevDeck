@@ -58,7 +58,7 @@ export default function LandingProfiles() {
               Cada nível de linguagem, cada conquista, cada ofensiva, cada histórico de duelo —
               conquistados de forma transparente.{' '}
               <span style={{ color: 'var(--lp-fg)' }}>
-                Compartilhe seu perfil do DevDeck da mesma forma que compartilha seu GitHub.
+                Compartilhe seu perfil do Stacklyst da mesma forma que compartilha seu GitHub.
               </span>
             </p>
           </div>

@@ -11,7 +11,7 @@ interface LandingCTAProps {
 
 export default function LandingCTA({ initialUser }: LandingCTAProps) {
   const [terminalText, setTerminalText] = useState('');
-  const fullText = 'devdeck login --arena --force-interactive';
+  const fullText = 'stacklyst login --arena --force-interactive';
 
   useEffect(() => {
     let index = 0;
@@ -47,7 +47,9 @@ export default function LandingCTA({ initialUser }: LandingCTAProps) {
               <span className="w-3 h-3 rounded-full bg-[#F59E0B]/30" />
               <span className="w-3 h-3 rounded-full bg-[#10B981]/30" />
             </div>
-            <span className="lp-font-mono text-[10px] text-[var(--lp-muted)]">bash — devdeck</span>
+            <span className="lp-font-mono text-[10px] text-[var(--lp-muted)]">
+              bash — stacklyst
+            </span>
           </div>
           <div className="p-5 lp-font-mono text-xs md:text-sm space-y-2.5 text-[var(--lp-fg-dim)] min-h-[140px]">
             <div className="flex items-center gap-2">

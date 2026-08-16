@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Obrigado por nos ajudar a melhorar o DevDeck! Por favor, preencha este formulário da forma mais completa possível.
+        Obrigado por nos ajudar a melhorar o Stacklyst! Por favor, preencha este formulário da forma mais completa possível.
   - type: textarea
     id: description
     attributes:

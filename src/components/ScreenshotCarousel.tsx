@@ -20,42 +20,42 @@ export function ScreenshotCarousel() {
     {
       name: 'feed',
       title: 'Feed Principal',
-      url: 'devdeck.com/feed',
+      url: 'stacklyst.com/feed',
       description:
         'Discussões técnicas em tempo real. Poste dúvidas de código e veja a comunidade debater soluções.',
     },
     {
       name: 'trails',
       title: 'Trilhas de Linguagem',
-      url: 'devdeck.com/trails',
+      url: 'stacklyst.com/trails',
       description:
         'Progresso ativo por linguagem. Acompanhe seu XP em TypeScript, Python, Rust, Go e suba de nível.',
     },
     {
       name: 'async',
       title: 'ASYNC — Copiloto de Código',
-      url: 'devdeck.com/async',
+      url: 'stacklyst.com/async',
       description:
         'Nosso assistente com IA. Debugue e comente linhas de código diretamente no editor integrado.',
     },
     {
       name: 'duels',
       title: 'Duelos de Performance',
-      url: 'devdeck.com/duels',
+      url: 'stacklyst.com/duels',
       description:
         'Batalhas de código. Desafie colegas e submeta a melhor implementação de algoritmos sob avaliação da IA.',
     },
     {
       name: 'leaderboard',
       title: 'Leaderboard Global',
-      url: 'devdeck.com/leaderboard',
+      url: 'stacklyst.com/leaderboard',
       description:
         'Rankings semanais e gerais. Garanta seu lugar no topo e compita com engenheiros do mundo todo.',
     },
     {
       name: 'profile',
       title: 'Perfil Técnico',
-      url: 'devdeck.com/profile/pedrodev',
+      url: 'stacklyst.com/profile/pedrodev',
       description:
         'Seu currículo vivo. Exiba seu histórico de contribuições, badges raras e link do GitHub integrado.',
     },

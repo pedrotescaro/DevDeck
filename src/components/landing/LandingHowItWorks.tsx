@@ -44,8 +44,8 @@ export default function LandingHowItWorks() {
               <strong style={{ color: 'var(--lp-fg)' }}>
                 Poste primeiro, depois ganhe XP, depois faça o quiz.
               </strong>{' '}
-              Todos os outros recursos no DevDeck dependem deste ciclo. Passe o mouse nos cards para
-              revelar os detalhes.
+              Todos os outros recursos no Stacklyst dependem deste ciclo. Passe o mouse nos cards
+              para revelar os detalhes.
             </p>
           </div>
         </motion.div>

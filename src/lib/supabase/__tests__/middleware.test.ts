@@ -46,7 +46,7 @@ describe('Supabase session proxy', () => {
     vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', '');
     vi.stubEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', '');
 
-    const response = await updateSession(new NextRequest('https://devdeck.test/'));
+    const response = await updateSession(new NextRequest('https://stacklyst.test/'));
 
     expect(response.status).toBe(200);
     expect(createServerClient).not.toHaveBeenCalled();
@@ -56,10 +56,10 @@ describe('Supabase session proxy', () => {
     vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', '');
     vi.stubEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', '');
 
-    const response = await updateSession(new NextRequest('https://devdeck.test/feed'));
+    const response = await updateSession(new NextRequest('https://stacklyst.test/feed'));
 
     expect(response.status).toBe(307);
-    expect(response.headers.get('location')).toBe('https://devdeck.test/login');
+    expect(response.headers.get('location')).toBe('https://stacklyst.test/login');
     expect(createServerClient).not.toHaveBeenCalled();
   });
 
@@ -67,8 +67,8 @@ describe('Supabase session proxy', () => {
     getClaims.mockResolvedValue({ data: { claims: { sub: 'user-1' } }, error: null });
     vi.mocked(verifyJwt).mockResolvedValue({ sub: 'user-1' } as any);
 
-    const request = new NextRequest('https://devdeck.test/feed', {
-      headers: { cookie: 'devdeck-jwt=valid-local-token' },
+    const request = new NextRequest('https://stacklyst.test/feed', {
+      headers: { cookie: 'stacklyst-jwt=valid-local-token' },
     });
     const response = await updateSession(request);
 
@@ -84,8 +84,8 @@ describe('Supabase session proxy', () => {
     });
     vi.mocked(verifyJwt).mockResolvedValue({ sub: 'user-1' } as any);
 
-    const request = new NextRequest('https://devdeck.test/feed', {
-      headers: { cookie: 'devdeck-jwt=valid-local-token' },
+    const request = new NextRequest('https://stacklyst.test/feed', {
+      headers: { cookie: 'stacklyst-jwt=valid-local-token' },
     });
     const response = await updateSession(request);
 
@@ -103,13 +103,13 @@ describe('Supabase session proxy', () => {
       },
     });
 
-    const request = new NextRequest('https://devdeck.test/feed', {
-      headers: { cookie: 'devdeck-jwt=valid-local-token' },
+    const request = new NextRequest('https://stacklyst.test/feed', {
+      headers: { cookie: 'stacklyst-jwt=valid-local-token' },
     });
     const response = await updateSession(request);
 
     expect(response.status).toBe(307);
-    expect(response.headers.get('location')).toBe('https://devdeck.test/login');
+    expect(response.headers.get('location')).toBe('https://stacklyst.test/login');
     expect(verifyJwt).not.toHaveBeenCalled();
   });
 
@@ -132,7 +132,7 @@ describe('Supabase session proxy', () => {
       return { data: null, error: null };
     });
 
-    const response = await updateSession(new NextRequest('https://devdeck.test/feed'));
+    const response = await updateSession(new NextRequest('https://stacklyst.test/feed'));
     const setCookie = response.headers.get('set-cookie') || '';
 
     expect(response.status).toBe(307);

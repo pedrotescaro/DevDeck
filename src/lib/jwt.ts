@@ -1,5 +1,5 @@
 /**
- * JWT utility module for DevDeck.
+ * JWT utility module for Stacklyst.
  *
  * Provides token signing, verification, and cookie management.
  * This serves as a secondary authentication layer on top of Supabase Auth.

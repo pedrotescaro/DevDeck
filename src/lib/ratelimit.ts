@@ -92,7 +92,7 @@ export async function rateLimit(
         redis: redisClient,
         limiter: Ratelimit.slidingWindow(limit, window as any),
         analytics: true,
-        prefix: '@upstash/ratelimit/devdeck',
+        prefix: '@upstash/ratelimit/stacklyst',
       });
       limiters.set(key, limiter);
     }

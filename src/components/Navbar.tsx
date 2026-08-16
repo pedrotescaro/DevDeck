@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { StreakBadge } from './StreakBadge';
 import { ThemeLogo } from './ThemeLogo';
+import { LanguageToggle } from './LanguageToggle';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface NavbarUser {
   username: string;
@@ -45,6 +47,7 @@ function UserAvatar({ user, size = 32 }: { user: NavbarUser; size?: number }) {
 
 export function Navbar({ user }: NavbarProps) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -63,27 +66,29 @@ export function Navbar({ user }: NavbarProps) {
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* Left: Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <ThemeLogo alt="DevDeck Logo" width={20} height={20} className="object-contain" />
-          <span className="text-dd-text font-semibold text-lg tracking-tight">DevDeck</span>
+          <ThemeLogo alt="Stacklyst Logo" width={20} height={20} className="object-contain" />
+          <span className="text-dd-text font-semibold text-lg tracking-tight">Stacklyst</span>
         </Link>
 
         {/* Desktop right section */}
         <div className="hidden md:flex items-center gap-4">
           <Link href="/feed" className="text-dd-muted hover:text-dd-text text-sm transition-colors">
-            Feed
+            {t.nav.feed}
           </Link>
           <Link
             href="/duels"
             className="text-dd-muted hover:text-dd-text text-sm transition-colors"
           >
-            Duelos
+            {t.nav.duels}
           </Link>
           <Link
-            href="/ranked"
+            href="/ranking"
             className="text-dd-muted hover:text-dd-text text-sm transition-colors"
           >
-            Ranking
+            {t.nav.ranking}
           </Link>
+
+          <LanguageToggle />
 
           {user ? (
             <div className="flex items-center gap-3 relative">
@@ -121,14 +126,14 @@ export function Navbar({ user }: NavbarProps) {
                         className="block px-4 py-2 text-sm text-dd-text hover:bg-dd-card transition-colors"
                         onClick={() => setDropdownOpen(false)}
                       >
-                        Meu Perfil
+                        {t.nav.myProfile}
                       </Link>
                       <Link
                         href="/settings"
                         className="block px-4 py-2 text-sm text-dd-text hover:bg-dd-card transition-colors"
                         onClick={() => setDropdownOpen(false)}
                       >
-                        Configurações
+                        {t.nav.settings}
                       </Link>
                       <hr className="border-dd-border my-1" />
                       <button
@@ -138,7 +143,7 @@ export function Navbar({ user }: NavbarProps) {
                         }}
                         className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-dd-card hover:text-red-300 transition-colors cursor-pointer font-semibold"
                       >
-                        Sair da Conta
+                        {t.nav.signOut}
                       </button>
                     </div>
                   </>
@@ -151,50 +156,53 @@ export function Navbar({ user }: NavbarProps) {
                 href="/login"
                 className="text-dd-muted hover:text-dd-text text-sm px-3 py-1.5 transition-colors"
               >
-                Login
+                {t.nav.login}
               </Link>
               <Link
                 href="/register"
                 className="bg-blue-500 text-white text-sm px-4 py-1.5 rounded-lg font-medium hover:bg-blue-600 transition-colors"
               >
-                Registrar
+                {t.nav.signUp}
               </Link>
             </div>
           )}
         </div>
 
-        {/* Mobile hamburger */}
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden text-dd-muted hover:text-dd-text p-1"
-          aria-label="Toggle menu"
-        >
-          {mobileOpen ? (
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          ) : (
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <path d="M3 12h18M3 6h18M3 18h18" />
-            </svg>
-          )}
-        </button>
+        {/* Mobile controls */}
+        <div className="flex items-center gap-2 md:hidden">
+          <LanguageToggle />
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="text-dd-muted hover:text-dd-text p-1"
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? (
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
+                <path d="M3 12h18M3 6h18M3 18h18" />
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}
@@ -205,21 +213,21 @@ export function Navbar({ user }: NavbarProps) {
             className="block text-dd-muted hover:text-dd-text text-sm py-2"
             onClick={() => setMobileOpen(false)}
           >
-            Feed
+            {t.nav.feed}
           </Link>
           <Link
             href="/duels"
             className="block text-dd-muted hover:text-dd-text text-sm py-2"
             onClick={() => setMobileOpen(false)}
           >
-            Duelos
+            {t.nav.duels}
           </Link>
           <Link
-            href="/ranked"
+            href="/ranking"
             className="block text-dd-muted hover:text-dd-text text-sm py-2"
             onClick={() => setMobileOpen(false)}
           >
-            Ranking
+            {t.nav.ranking}
           </Link>
 
           {user ? (
@@ -241,7 +249,7 @@ export function Navbar({ user }: NavbarProps) {
                   className="text-dd-muted hover:text-dd-text text-xs"
                   onClick={() => setMobileOpen(false)}
                 >
-                  Configurações
+                  {t.nav.settings}
                 </Link>
                 <button
                   onClick={() => {
@@ -250,7 +258,7 @@ export function Navbar({ user }: NavbarProps) {
                   }}
                   className="text-red-400 hover:text-red-300 text-xs font-semibold cursor-pointer"
                 >
-                  Sair
+                  {t.nav.signOut}
                 </button>
               </div>
             </div>
@@ -261,14 +269,14 @@ export function Navbar({ user }: NavbarProps) {
                 className="text-dd-muted text-sm py-2"
                 onClick={() => setMobileOpen(false)}
               >
-                Login
+                {t.nav.login}
               </Link>
               <Link
                 href="/register"
                 className="bg-blue-500 text-white text-sm px-4 py-1.5 rounded-lg font-medium hover:bg-blue-600 transition-colors"
                 onClick={() => setMobileOpen(false)}
               >
-                Registrar
+                {t.nav.signUp}
               </Link>
             </div>
           )}

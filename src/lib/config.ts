@@ -1,5 +1,5 @@
 /**
- * Centralized configuration for DevDeck.
+ * Centralized configuration for Stacklyst.
  *
  * All magic numbers, thresholds, URLs, and constants that were previously
  * hardcoded are extracted here. Values can be overridden via environment
@@ -216,7 +216,7 @@ export const HERO_AVATAR_IMAGES = [
 function resolveJwtSecret(): string {
   const secret = process.env.JWT_SECRET;
   if (secret) return secret;
-  return 'devdeck-dev-only-secret-do-not-use-in-production';
+  return 'stacklyst-dev-only-secret-do-not-use-in-production';
 }
 
 export const JWT_SECRET = resolveJwtSecret();
@@ -234,7 +234,7 @@ function jwtExpirationToSeconds(value: string): number {
 }
 
 /** JWT cookie name used for the secondary auth token. */
-export const JWT_COOKIE_NAME = 'devdeck-jwt';
+export const JWT_COOKIE_NAME = 'stacklyst-jwt';
 
 /** Cookie configuration for the JWT token. */
 export const JWT_COOKIE_OPTIONS = {
