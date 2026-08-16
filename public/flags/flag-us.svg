@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 504" width="20" height="20">
+  <clipPath id="us-flag-clip">
+    <rect width="720" height="504" rx="36"/>
+  </clipPath>
+  <g clip-path="url(#us-flag-clip)">
+    <rect width="720" height="504" fill="#b22234"/>
+    <path d="M0,38.77h720M0,116.31h720M0,193.85h720M0,271.38h720M0,348.92h720M0,426.46h720" stroke="#fff" stroke-width="38.77"/>
+    <rect width="288" height="271.38" fill="#3c3b6e"/>
+    <g fill="#fff" transform="scale(1.2) translate(10, 10)">
+      <circle cx="20" cy="18" r="7"/>
+      <circle cx="60" cy="18" r="7"/>
+      <circle cx="100" cy="18" r="7"/>
+      <circle cx="140" cy="18" r="7"/>
+      <circle cx="180" cy="18" r="7"/>
+      <circle cx="40" cy="38" r="7"/>
+      <circle cx="80" cy="38" r="7"/>
+      <circle cx="120" cy="38" r="7"/>
+      <circle cx="160" cy="38" r="7"/>
+      <circle cx="20" cy="58" r="7"/>
+      <circle cx="60" cy="58" r="7"/>
+      <circle cx="100" cy="58" r="7"/>
+      <circle cx="140" cy="58" r="7"/>
+      <circle cx="180" cy="58" r="7"/>
+      <circle cx="40" cy="78" r="7"/>
+      <circle cx="80" cy="78" r="7"/>
+      <circle cx="120" cy="78" r="7"/>
+      <circle cx="160" cy="78" r="7"/>
+      <circle cx="20" cy="98" r="7"/>
+      <circle cx="60" cy="98" r="7"/>
+      <circle cx="100" cy="98" r="7"/>
+      <circle cx="140" cy="98" r="7"/>
+      <circle cx="180" cy="98" r="7"/>
+    </g>
+  </g>
+</svg>
