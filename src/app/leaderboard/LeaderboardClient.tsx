@@ -2,18 +2,16 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Braces,
   Check,
   ChevronDown,
   Code2,
-  Flame,
   Globe2,
   LockKeyhole,
-  Medal,
   Shield,
   Trophy,
-  Zap,
 } from 'lucide-react';
 import { Sidebar } from '@/components/Sidebar';
 import { AuthorAvatar } from '@/components/AuthorAvatar';
@@ -170,8 +168,33 @@ function RankingRow({ row, isViewer }: { row: LeaderboardRow; isViewer: boolean 
               row.rank
             )}`}
           >
-            <Medal aria-hidden="true" className="h-5 w-5" strokeWidth={2.5} />
-            <span className="absolute text-[10px] font-black">{row.rank}</span>
+            {row.rank === 1 && (
+              <Image
+                src="/assets/medals/rank-1.png"
+                alt="1º lugar"
+                width={24}
+                height={24}
+                className="h-6 w-6 object-contain [image-rendering:pixelated]"
+              />
+            )}
+            {row.rank === 2 && (
+              <Image
+                src="/assets/medals/rank-2.png"
+                alt="2º lugar"
+                width={24}
+                height={24}
+                className="h-6 w-6 object-contain [image-rendering:pixelated]"
+              />
+            )}
+            {row.rank === 3 && (
+              <Image
+                src="/assets/medals/rank-3.png"
+                alt="3º lugar"
+                width={24}
+                height={24}
+                className="h-6 w-6 object-contain [image-rendering:pixelated]"
+              />
+            )}
           </span>
         ) : (
           <span className="font-mono text-sm font-black text-blue-400">{row.rank}</span>
@@ -204,11 +227,18 @@ function RankingRow({ row, isViewer }: { row: LeaderboardRow; isViewer: boolean 
       </div>
 
       <span
-        className={`text-right font-mono text-xs font-black sm:text-sm ${
+        className={`flex items-center justify-end gap-1.5 text-right font-mono text-xs font-black sm:text-sm ${
           isViewer ? 'text-blue-400' : 'text-dd-text'
         }`}
       >
-        {formatXp(row.xp)} XP
+        <Image
+          src="/assets/trails/trail-lightning.png"
+          alt=""
+          width={18}
+          height={18}
+          className="h-4 w-4 shrink-0 object-contain drop-shadow-[0_2px_6px_rgba(250,204,21,0.4)]"
+        />
+        <span>{formatXp(row.xp)} XP</span>
       </span>
     </Link>
   );
@@ -236,7 +266,10 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
         });
 
         if (!response.ok) throw new Error('Não foi possível carregar o ranking.');
-        setLeaderboard(await response.json());
+        const data = await response.json().catch(() => []);
+        if (!controller.signal.aborted) {
+          setLeaderboard(Array.isArray(data) ? data : []);
+        }
       } catch (error) {
         if (!controller.signal.aborted) {
           console.error('Error fetching leaderboard:', error);
@@ -274,12 +307,21 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
                 Ranking de XP
               </h1>
               <p className="mx-auto mt-2 max-w-[480px] text-sm font-bold leading-6 text-dd-text sm:text-base">
-                Veja os desenvolvedores com mais experiência no DevDeck.
+                Veja os desenvolvedores com mais experiência no Stacklyst.
               </p>
-              <p className="mt-1.5 text-xs font-black text-yellow-400">
-                {nextMilestone
-                  ? `Próximo marco: ${formatXp(nextMilestone)} XP`
-                  : 'Todos os marcos de XP foram alcançados!'}
+              <p className="mt-1.5 flex items-center justify-center gap-1.5 text-xs font-black text-yellow-400">
+                <Image
+                  src="/assets/trails/trail-lightning.png"
+                  alt=""
+                  width={18}
+                  height={18}
+                  className="h-4 w-4 shrink-0 object-contain drop-shadow-[0_2px_6px_rgba(250,204,21,0.4)]"
+                />
+                <span>
+                  {nextMilestone
+                    ? `Próximo marco: ${formatXp(nextMilestone)} XP`
+                    : 'Todos os marcos de XP foram alcançados!'}
+                </span>
               </p>
             </div>
 
@@ -361,7 +403,13 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
               streak={initialUser?.streak ?? 0}
               triggerClassName="dd-focus-ring flex items-center justify-center gap-1.5 rounded-lg p-1 text-dd-text transition-colors hover:bg-orange-500/10"
             >
-              <Flame aria-hidden="true" className="h-4 w-4 fill-orange-500 text-orange-500" />
+              <Image
+                src="/assets/trails/streak-flame.png"
+                alt=""
+                width={24}
+                height={24}
+                className="h-5 w-5 shrink-0 object-contain"
+              />
               <span className="font-mono text-[11px] font-black">{initialUser?.streak ?? 0}</span>
             </StreakPopover>
             <div className="flex items-center justify-center gap-1.5 text-dd-text" title="Posição">
@@ -372,7 +420,13 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
               className="flex items-center justify-center gap-1.5 text-dd-text"
               title={`${formatXp(initialUser?.total_xp ?? 0)} XP total`}
             >
-              <Zap aria-hidden="true" className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+              <Image
+                src="/assets/trails/trail-lightning.png"
+                alt=""
+                width={24}
+                height={24}
+                className="h-5 w-5 shrink-0 object-contain drop-shadow-[0_2px_6px_rgba(250,204,21,0.4)]"
+              />
               <span className="max-w-[42px] truncate font-mono text-[11px] font-black">
                 {formatXp(initialUser?.total_xp ?? 0)}
               </span>
@@ -411,9 +465,16 @@ export function LeaderboardClient({ initialUser, initialLeaderboard }: Leaderboa
                 >
                   @{initialUser.username}
                 </Link>
-                <p className="mt-1 text-[10px] font-bold text-dd-muted">
-                  {viewerRow ? `${viewerRow.rank}º lugar` : 'Fora do top 10'} ·{' '}
-                  {formatXp(viewerRow?.xp ?? initialUser.total_xp)} XP
+                <p className="mt-1 flex items-center justify-center gap-1 text-[10px] font-bold text-dd-muted">
+                  <span>{viewerRow ? `${viewerRow.rank}º lugar` : 'Fora do top 10'}</span> ·{' '}
+                  <Image
+                    src="/assets/trails/trail-lightning.png"
+                    alt=""
+                    width={16}
+                    height={16}
+                    className="h-3.5 w-3.5 shrink-0 object-contain drop-shadow-[0_2px_6px_rgba(250,204,21,0.4)]"
+                  />
+                  <span>{formatXp(viewerRow?.xp ?? initialUser.total_xp)} XP</span>
                 </p>
               </div>
             )}

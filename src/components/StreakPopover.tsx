@@ -95,7 +95,7 @@ export function StreakPopover({
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
                     <span className="inline-flex rounded-lg bg-blue-500 px-3 py-2 text-[10px] font-black uppercase leading-4 tracking-wide text-white">
-                      Ritmo DevDeck
+                      Ritmo Stacklyst
                     </span>
                     <Popover.Title className="mt-5 text-[24px] font-black leading-tight text-dd-text">
                       {normalizedStreak} {dayLabel} de ofensiva

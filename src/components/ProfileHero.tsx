@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Calendar, Edit3, Flame, GraduationCap, Sparkles, Trophy, Zap } from 'lucide-react';
+import { Calendar, Edit3, GraduationCap, Sparkles, Trophy } from 'lucide-react';
 import { FollowButton } from '@/components/motion/FollowButton';
 import { LevelBadge, getLevelFromTotalXp } from '@/components/LevelBadge';
 import { getTrailLanguageMetadata, TrailLanguageLogo } from '@/app/trails/TrailLanguageLogo';
@@ -126,7 +126,7 @@ export function ProfileHero({
       <div className="mt-5 space-y-3">
         <p className="max-w-2xl text-sm font-semibold leading-6 text-dd-text">
           {profile.bio ||
-            'Aprendendo, praticando e compartilhando código com a comunidade DevDeck.'}
+            'Aprendendo, praticando e compartilhando código com a comunidade Stacklyst.'}
         </p>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-bold text-dd-muted">
@@ -176,10 +176,12 @@ export function ProfileHero({
           align="start"
           triggerClassName="dd-focus-ring flex min-h-24 w-full items-center gap-3 rounded-[22px] border-2 border-b-4 border-dd-border bg-dd-sidebar-bg p-4 text-left transition-transform hover:-translate-y-0.5"
         >
-          <Flame
-            className="h-9 w-9 shrink-0 text-[#ff9600]"
-            fill="currentColor"
-            strokeWidth={2.5}
+          <Image
+            src="/assets/trails/streak-flame.png"
+            alt=""
+            width={36}
+            height={36}
+            className="h-9 w-9 shrink-0 object-contain"
           />
           <span className="min-w-0">
             <span className="block truncate text-xl font-black text-dd-text">
@@ -188,12 +190,21 @@ export function ProfileHero({
             <span className="block text-xs font-bold text-dd-muted">Dias de ofensiva</span>
           </span>
         </StreakPopover>
-        <StatCard
-          icon={Zap}
-          color="#ffc800"
-          value={profile.total_xp.toLocaleString('pt-BR')}
-          label="Total de XP"
-        />
+        <div className="flex min-h-24 items-center gap-3 rounded-[22px] border-2 border-b-4 border-dd-border bg-dd-sidebar-bg p-4">
+          <Image
+            src="/assets/trails/trail-lightning.png"
+            alt=""
+            width={36}
+            height={36}
+            className="h-9 w-9 shrink-0 object-contain drop-shadow-[0_2px_8px_rgba(250,204,21,0.4)]"
+          />
+          <div className="min-w-0">
+            <p className="truncate text-xl font-black text-dd-text">
+              {profile.total_xp.toLocaleString('pt-BR')}
+            </p>
+            <p className="text-xs font-bold text-dd-muted">Total de XP</p>
+          </div>
+        </div>
         <StatCard
           icon={Trophy}
           color="#58cc02"
@@ -268,7 +279,7 @@ function StatCard({
   value,
   label,
 }: {
-  icon: typeof Flame;
+  icon: typeof Trophy;
   color: string;
   value: string | number;
   label: string;

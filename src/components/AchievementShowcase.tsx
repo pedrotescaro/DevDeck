@@ -243,7 +243,7 @@ export function AchievementShowcase({
         <div className="min-w-0">
           {compact && (
             <span className="inline-flex rounded-lg bg-blue-500 px-3 py-2 text-[10px] font-black uppercase leading-4 tracking-wide text-white">
-              DevDeck
+              Stacklyst
             </span>
           )}
           <h3

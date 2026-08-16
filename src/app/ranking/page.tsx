@@ -7,8 +7,8 @@ import { LeaderboardClient } from '@/app/leaderboard/LeaderboardClient';
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: 'Ranking de XP — DevDeck',
-  description: 'Classificação dos desenvolvedores por XP no DevDeck.',
+  title: 'Ranking de XP — Stacklyst',
+  description: 'Classificação dos desenvolvedores por XP no Stacklyst.',
 };
 
 export default async function RankedPage() {
