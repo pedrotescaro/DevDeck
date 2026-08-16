@@ -229,7 +229,14 @@ export function AnswerCard({
               avatar_url={answer.author.avatar_url}
               size="sm"
             />
-            <span className="text-dd-text text-sm font-medium">@{answer.author.username}</span>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-dd-text text-sm font-bold truncate">
+                {answer.author.name || answer.author.username}
+              </span>
+              <span className="text-dd-muted text-xs font-medium truncate">
+                @{answer.author.username.toLowerCase()}
+              </span>
+            </div>
           </Link>
           <span className="text-dd-muted text-xs">{relativeTime}</span>
         </div>

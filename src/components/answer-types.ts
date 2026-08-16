@@ -8,6 +8,7 @@
  */
 
 export interface AnswerAuthor {
+  name?: string | null;
   username: string;
   avatar_url?: string | null;
   total_xp?: number;

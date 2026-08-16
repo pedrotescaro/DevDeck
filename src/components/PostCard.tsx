@@ -34,6 +34,7 @@ import { parsePostExtras } from '@/lib/post-composer';
 import { prismaLanguageToEditor } from '@/lib/editor/languages';
 
 interface PostAuthor {
+  name?: string | null;
   username: string;
   avatar_url?: string | null;
   avatar_config?: unknown;
@@ -333,14 +334,17 @@ export function PostCard({
             />
           </Link>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 flex-wrap min-w-0">
               <Link
                 href={`/profile/${post.author.username}`}
                 onClick={(e) => e.stopPropagation()}
-                className="hover:underline truncate"
+                className="flex items-center gap-1.5 hover:underline truncate group/author min-w-0"
               >
-                <span className="text-dd-text text-xs font-bold truncate">
-                  @{post.author.username}
+                <span className="text-dd-text text-xs font-bold truncate group-hover/author:underline">
+                  {post.author.name || post.author.username}
+                </span>
+                <span className="text-dd-muted text-[11px] font-medium truncate">
+                  @{post.author.username.toLowerCase()}
                 </span>
               </Link>
               <LevelBadge totalXp={post.author.total_xp ?? 0} />
@@ -512,9 +516,11 @@ export function PostCard({
             <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-500/10 transition-colors">
               <MessageCircle className="w-3.5 h-3.5 text-dd-muted group-hover/comment:text-blue-400" />
             </div>
-            <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/comment:text-blue-400">
-              {post._count?.answers ?? 0}
-            </span>
+            {(post._count?.answers ?? 0) > 0 && (
+              <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/comment:text-blue-400">
+                {post._count?.answers}
+              </span>
+            )}
           </Link>
 
           {/* 2. Repost Menu */}

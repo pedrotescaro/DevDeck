@@ -86,7 +86,9 @@ export function LikeButton({ count, isActive, onToggle, title }: LikeButtonProps
             />
           ))}
       </motion.button>
-      <AnimatedCounter value={count} className="px-1 font-semibold text-[10px] text-dd-muted" />
+      {count > 0 && (
+        <AnimatedCounter value={count} className="px-1 font-semibold text-[10px] text-dd-muted" />
+      )}
     </div>
   );
 }

@@ -463,8 +463,13 @@ export function PostDetailContent({
                   avatar_url={post.author.avatar_url}
                   size="md"
                 />
-                <div className="flex items-center gap-2">
-                  <p className="text-xs font-bold text-dd-text">@{post.author.username}</p>
+                <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                  <span className="text-xs font-bold text-dd-text">
+                    {post.author.name || post.author.username}
+                  </span>
+                  <span className="text-[11px] text-dd-muted font-medium">
+                    @{post.author.username.toLowerCase()}
+                  </span>
                   <span className="text-[9px] bg-dd-surface border border-dd-border px-2 py-0.5 rounded text-dd-muted font-mono font-semibold">
                     Lvl {Math.max(1, Math.floor(post.author.total_xp / 1000) + 1)}
                   </span>
@@ -533,9 +538,11 @@ export function PostDetailContent({
                 <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-500/10 transition-colors animate-none">
                   <MessageCircle className="w-3.5 h-3.5 text-dd-muted group-hover/comment:text-blue-400" />
                 </div>
-                <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/comment:text-blue-400">
-                  {post.answers?.length || 0}
-                </span>
+                {(post.answers?.length || 0) > 0 && (
+                  <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/comment:text-blue-400">
+                    {post.answers?.length}
+                  </span>
+                )}
               </div>
 
               {/* 2. Repost Menu */}
