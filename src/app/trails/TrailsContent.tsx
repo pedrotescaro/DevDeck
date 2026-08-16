@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import Image from 'next/image';
+import { AsyncLogo } from '@/components/AsyncLogo';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/Sidebar';
 import { Footer } from '@/components/Footer';
@@ -1362,13 +1363,7 @@ export function TrailsContent({
                         : 'bg-white/15 text-white hover:bg-white/25 animate-pulse'
                     }`}
                   >
-                    <Image
-                      src="/async-logo.svg"
-                      alt="ASYNC"
-                      width={14}
-                      height={14}
-                      className="object-contain"
-                    />
+                    <AsyncLogo width={14} height={14} className="object-contain" />
                     <span>ASYNC {aiChatOpen ? 'Aberto' : 'IA'}</span>
                   </button>
                 </div>
@@ -1656,13 +1651,7 @@ export function TrailsContent({
                     {/* Header/Title of AI */}
                     <div className="shrink-0 p-4 border-b border-dd-border flex items-center justify-between bg-dd-surface/70">
                       <div className="flex items-center gap-2">
-                        <Image
-                          src="/async-logo.svg"
-                          alt="ASYNC"
-                          width={16}
-                          height={16}
-                          className="object-contain"
-                        />
+                        <AsyncLogo width={16} height={16} className="object-contain" />
                         <span className="text-xs font-bold text-dd-text">ASYNC IA</span>
                       </div>
                       <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-[8px] font-bold text-blue-500 uppercase tracking-wide">
@@ -1689,13 +1678,7 @@ export function TrailsContent({
                             {msg.role === 'user' ? (
                               user.username[0].toUpperCase()
                             ) : (
-                              <Image
-                                src="/async-logo.svg"
-                                alt="ASYNC"
-                                width={22}
-                                height={22}
-                                className="object-contain"
-                              />
+                              <AsyncLogo width={22} height={22} className="object-contain" />
                             )}
                           </div>
                           <div
@@ -1712,13 +1695,7 @@ export function TrailsContent({
                       {aiLoading && (
                         <div className="flex gap-2.5 max-w-[80%] mr-auto items-center">
                           <div className="w-7 h-7 rounded-full bg-[#0c0c0e] border border-dd-border/40 flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden">
-                            <Image
-                              src="/async-logo.svg"
-                              alt="ASYNC"
-                              width={22}
-                              height={22}
-                              className="object-contain"
-                            />
+                            <AsyncLogo width={22} height={22} className="object-contain" />
                           </div>
                           <div className="flex gap-1">
                             <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce delay-100" />
@@ -1904,13 +1881,7 @@ export function TrailsContent({
                         : 'bg-white/15 text-white hover:bg-white/25 animate-pulse'
                     }`}
                   >
-                    <Image
-                      src="/async-logo.svg"
-                      alt="ASYNC"
-                      width={14}
-                      height={14}
-                      className="object-contain"
-                    />
+                    <AsyncLogo width={14} height={14} className="object-contain" />
                     <span>ASYNC {aiChatOpen ? 'Aberto' : 'IA'}</span>
                   </button>
                 </div>
@@ -2171,13 +2142,7 @@ export function TrailsContent({
                     {/* Header/Title of AI */}
                     <div className="shrink-0 p-4 border-b border-dd-border flex items-center justify-between bg-dd-surface/70">
                       <div className="flex items-center gap-2">
-                        <Image
-                          src="/async-logo.svg"
-                          alt="ASYNC"
-                          width={16}
-                          height={16}
-                          className="object-contain"
-                        />
+                        <AsyncLogo width={16} height={16} className="object-contain" />
                         <span className="text-xs font-bold text-dd-text">ASYNC IA</span>
                       </div>
                       <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-[8px] font-bold text-blue-500 uppercase tracking-wide">
@@ -2204,13 +2169,7 @@ export function TrailsContent({
                             {msg.role === 'user' ? (
                               user.username[0].toUpperCase()
                             ) : (
-                              <Image
-                                src="/async-logo.svg"
-                                alt="ASYNC"
-                                width={22}
-                                height={22}
-                                className="object-contain"
-                              />
+                              <AsyncLogo width={22} height={22} className="object-contain" />
                             )}
                           </div>
                           <div
@@ -2227,13 +2186,7 @@ export function TrailsContent({
                       {aiLoading && (
                         <div className="flex gap-2.5 max-w-[80%] mr-auto items-center">
                           <div className="w-7 h-7 rounded-full bg-[#0c0c0e] border border-dd-border/40 flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden">
-                            <Image
-                              src="/async-logo.svg"
-                              alt="ASYNC"
-                              width={22}
-                              height={22}
-                              className="object-contain"
-                            />
+                            <AsyncLogo width={22} height={22} className="object-contain" />
                           </div>
                           <div className="flex gap-1">
                             <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce delay-100" />

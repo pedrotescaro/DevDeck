@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
+import { AsyncLogo } from '@/components/AsyncLogo';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   BookOpen,
@@ -550,9 +551,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
                       className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
                       onClick={() => setMoreMenuOpen(false)}
                     >
-                      <Image
-                        src="/async-logo.svg"
-                        alt=""
+                      <AsyncLogo
                         width={22}
                         height={22}
                         className="h-5.5 w-5.5 shrink-0 object-contain"

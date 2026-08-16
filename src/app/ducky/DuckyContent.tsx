@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
+import { AsyncLogo } from '@/components/AsyncLogo';
 import { Sidebar } from '@/components/Sidebar';
 import {
   Paperclip,
@@ -1425,13 +1426,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
               </button>
             )}
             <div className="flex items-center gap-2.5">
-              <Image
-                src="/async-logo.svg"
-                alt="ASYNC"
-                width={24}
-                height={24}
-                className="h-6 w-6 object-contain"
-              />
+              <AsyncLogo width={24} height={24} className="h-6 w-6 object-contain" />
               <div className="hidden sm:block">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-black tracking-[0.16em] text-dd-text">ASYNC</span>
@@ -1498,13 +1493,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
           <div className="relative z-10 mx-auto flex w-full max-w-4xl flex-grow flex-col items-center justify-center overflow-y-auto px-4 py-8">
             <div className="-mt-10 flex w-full max-w-2xl flex-col items-center gap-6 text-center">
               <div className="flex items-center justify-center gap-3.5 select-none animate-in fade-in zoom-in-95 duration-500">
-                <Image
-                  src="/async-logo.svg"
-                  alt="ASYNC"
-                  width={56}
-                  height={56}
-                  className="h-14 w-14 object-contain"
-                />
+                <AsyncLogo width={56} height={56} className="h-14 w-14 object-contain" />
                 <h1 className="font-sans text-3xl font-bold tracking-tight text-dd-text sm:text-4xl">
                   Comece a conversar agora
                 </h1>
