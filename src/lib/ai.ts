@@ -498,3 +498,182 @@ export async function generateChatAI(
 
   return null;
 }
+
+/** Parses a streamed SSE chunk into the delta text. Returns null when no text. */
+function extractStreamDelta(line: string): string | null {
+  const trimmed = line.trim();
+  if (!trimmed.startsWith('data:')) return null;
+  const payload = trimmed.slice(5).trim();
+  if (!payload || payload === '[DONE]') return null;
+  try {
+    const json = JSON.parse(payload);
+    const delta = json.choices?.[0]?.delta?.content;
+    return typeof delta === 'string' && delta.length > 0 ? delta : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Streams a chat completion from the configured provider, yielding text
+ * chunks as they are generated.
+ *
+ * - Groq / OpenAI: native SSE streaming (OpenAI-compatible API).
+ * - Ollama: native streaming (`stream: true`).
+ * - Gemini: falls back to a single full-text chunk (non-streaming endpoint).
+ */
+export async function* streamChatAI(
+  systemPrompt: string,
+  messages: ChatMessage[],
+  signal?: AbortSignal
+): AsyncGenerator<string> {
+  const provider = getProvider();
+  if (!provider) {
+    logger.warn('Nenhum provedor de IA configurado ou chaves ausentes para streaming. Vazio.');
+    return;
+  }
+
+  logger.info(`Iniciando streaming de chat via IA com o provedor: ${provider}`);
+
+  if (provider === 'gemini') {
+    const text = await callGeminiChat(systemPrompt, messages);
+    if (text) yield text;
+    return;
+  }
+
+  if (provider === 'ollama') {
+    yield* streamOllamaChat(systemPrompt, messages, signal);
+    return;
+  }
+
+  yield* streamOpenAICompatibleChat(systemPrompt, messages, provider, signal);
+}
+
+/** OpenAI-compatible streaming (Groq / OpenAI) — SSE with `choices[].delta.content`. */
+async function* streamOpenAICompatibleChat(
+  systemPrompt: string,
+  messages: ChatMessage[],
+  provider: 'groq' | 'openai',
+  signal?: AbortSignal
+): AsyncGenerator<string> {
+  const apiKey = provider === 'groq' ? process.env.GROQ_API_KEY : process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error(`${provider.toUpperCase()}_API_KEY não configurada`);
+
+  const model = process.env.AI_MODEL || AI_MODEL_DEFAULTS[provider];
+  const url =
+    provider === 'groq'
+      ? 'https://api.groq.com/openai/v1/chat/completions'
+      : `${OPENAI_BASE_URL}/chat/completions`;
+
+  const hasAnyImage = messages.some((m) => contentHasImage(m.content));
+  const chatMessages = [
+    { role: 'system', content: systemPrompt },
+    ...messages.map((m) => {
+      if (typeof m.content === 'string' || !hasAnyImage) {
+        return { role: m.role, content: contentToText(m.content) };
+      }
+      const parts = m.content.map((part) =>
+        part.type === 'text'
+          ? { type: 'text', text: part.text }
+          : {
+              type: 'image_url',
+              image_url: { url: `data:${part.mimeType};base64,${part.data}` },
+            }
+      );
+      return { role: m.role, content: parts };
+    }),
+  ];
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({ model, messages: chatMessages, stream: true }),
+    signal,
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`${provider} Chat stream error: ${response.status} - ${errText}`);
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error(`${provider} não retornou corpo de stream`);
+
+  const decoder = new TextDecoder();
+  let buffer = '';
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() ?? '';
+      for (const line of lines) {
+        const delta = extractStreamDelta(line);
+        if (delta) yield delta;
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
+/** Ollama native streaming — newline-delimited JSON with `message.content` per chunk. */
+async function* streamOllamaChat(
+  systemPrompt: string,
+  messages: ChatMessage[],
+  signal?: AbortSignal
+): AsyncGenerator<string> {
+  const apiBase = OLLAMA_BASE_URL;
+  const model = process.env.OLLAMA_MODEL || process.env.AI_MODEL || AI_MODEL_DEFAULTS.ollama;
+  const url = `${apiBase}/api/chat`;
+
+  const ollamaMessages = [
+    { role: 'system', content: systemPrompt },
+    ...messages.map((m) => ({ role: m.role, content: contentToText(m.content) })),
+  ];
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model, messages: ollamaMessages, stream: true }),
+    signal,
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Ollama Chat stream error: ${response.status} - ${errText}`);
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error('Ollama não retornou corpo de stream');
+
+  const decoder = new TextDecoder();
+  let buffer = '';
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() ?? '';
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+        try {
+          const json = JSON.parse(trimmed);
+          const chunk = json.message?.content;
+          if (typeof chunk === 'string' && chunk.length > 0) yield chunk;
+          if (json.done) return;
+        } catch {
+          // ignore malformed lines
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}

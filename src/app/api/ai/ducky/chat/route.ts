@@ -1,6 +1,5 @@
-import { NextResponse } from 'next/server';
 import { apiHandler } from '@/lib/api-handler';
-import { generateChatAI, type ChatContentPart } from '@/lib/ai';
+import { streamChatAI, type ChatContentPart } from '@/lib/ai';
 import { z } from 'zod';
 
 const contentPartSchema = z.discriminatedUnion('type', [
@@ -21,6 +20,11 @@ const duckyChatSchema = z.object({
     })
   ),
 });
+
+function isAbortError(error: unknown): boolean {
+  if (error instanceof DOMException) return error.name === 'AbortError';
+  return (error as { name?: string } | null)?.name === 'AbortError';
+}
 
 export const POST = apiHandler(async (req) => {
   const body = await req.json();
@@ -46,13 +50,54 @@ Diretrizes de comportamento:
     return { role, content };
   });
 
-  const responseText = await generateChatAI(systemPrompt, mappedHistory);
+  const encoder = new TextEncoder();
+  const abortController = new AbortController();
+  req.signal?.addEventListener('abort', () => abortController.abort(), { once: true });
 
-  if (!responseText) {
-    return NextResponse.json({
-      text: 'Estou com dificuldades para me conectar agora. Pode tentar novamente em instantes?',
-    });
-  }
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      const send = (payload: Record<string, unknown>) => {
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
+      };
 
-  return NextResponse.json({ text: responseText });
+      try {
+        let hasChunk = false;
+        for await (const chunk of streamChatAI(
+          systemPrompt,
+          mappedHistory,
+          abortController.signal
+        )) {
+          hasChunk = true;
+          send({ text: chunk });
+        }
+        if (!hasChunk) {
+          send({
+            error:
+              'Estou com dificuldades para me conectar agora. Pode tentar novamente em instantes?',
+          });
+        }
+      } catch (err) {
+        if (isAbortError(err)) return; // client disconnected / stopped
+        send({ error: 'Tive um problema ao me conectar com os servidores de IA.' });
+      } finally {
+        try {
+          controller.close();
+        } catch {
+          // already closed
+        }
+      }
+    },
+    cancel() {
+      abortController.abort();
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no',
+    },
+  });
 });

@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server';
 import { apiHandler } from '@/lib/api-handler';
-import { generateChatAI } from '@/lib/ai';
+import { streamChatAI } from '@/lib/ai';
 import { gatherRepoAnalysisInput, parseRepoUrl, GitHubError, type RepoContext } from '@/lib/github';
 import { z } from 'zod';
+
+function isAbortError(error: unknown): boolean {
+  if (error instanceof DOMException) return error.name === 'AbortError';
+  return (error as { name?: string } | null)?.name === 'AbortError';
+}
 
 const repoSchema = z.object({
   url: z.string().min(1),
@@ -135,29 +140,60 @@ Seja conciso e específico. Se faltar informação (ex: sem README), diga o que 
     });
   }
 
-  const responseText = await generateChatAI(systemPrompt, messages);
+  const repoPayload = {
+    name: repo.name,
+    owner: repo.owner,
+    language: repo.language,
+    stars: repo.stars,
+    url: repo.url,
+  };
 
-  if (!responseText) {
-    return NextResponse.json({
-      text: 'Não consegui processar a análise do repositório agora. Pode tentar novamente?',
-      repo: {
-        name: repo.name,
-        owner: repo.owner,
-        language: repo.language,
-        stars: repo.stars,
-        url: repo.url,
-      },
-    });
-  }
+  const encoder = new TextEncoder();
+  const abortController = new AbortController();
+  req.signal?.addEventListener('abort', () => abortController.abort(), { once: true });
 
-  return NextResponse.json({
-    text: responseText,
-    repo: {
-      name: repo.name,
-      owner: repo.owner,
-      language: repo.language,
-      stars: repo.stars,
-      url: repo.url,
+  // SSE: primeiro evento carrega os metadados do repositório, depois os chunks de texto.
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      const send = (payload: Record<string, unknown>) => {
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
+      };
+
+      try {
+        send({ repo: repoPayload });
+
+        let hasChunk = false;
+        for await (const chunk of streamChatAI(systemPrompt, messages, abortController.signal)) {
+          hasChunk = true;
+          send({ text: chunk });
+        }
+        if (!hasChunk) {
+          send({
+            error: 'Não consegui processar a análise do repositório agora. Pode tentar novamente?',
+          });
+        }
+      } catch (err) {
+        if (isAbortError(err)) return; // client disconnected / stopped
+        send({ error: 'Tive um problema ao processar a análise do repositório.' });
+      } finally {
+        try {
+          controller.close();
+        } catch {
+          // already closed
+        }
+      }
+    },
+    cancel() {
+      abortController.abort();
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no',
     },
   });
 });
