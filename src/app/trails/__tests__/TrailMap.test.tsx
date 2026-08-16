@@ -44,8 +44,10 @@ describe('TrailMap', () => {
       />
     );
 
-    const robot = screen.getByAltText('Robô mascote do DevDeck digitando');
-    expect(robot).toHaveAttribute('src', expect.stringContaining('blue-devdeck-robot.png'));
+    const robots = screen.getAllByAltText(/Robô mascote/i);
+    expect(robots).toHaveLength(2);
+    expect(robots[0]).toHaveAttribute('src', expect.stringContaining('robot.png'));
+    expect(robots[1]).toHaveAttribute('src', expect.stringContaining('robot-gaming.png'));
 
     const completedSecondLesson = screen.getByRole('button', {
       name: 'Seção 1, unidade 2: Estruturas de Controle',

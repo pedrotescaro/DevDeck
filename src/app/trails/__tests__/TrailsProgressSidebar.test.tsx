@@ -43,14 +43,14 @@ describe('TrailsProgressSidebar', () => {
     expect(screen.getByText('Classificação')).toBeInTheDocument();
     expect(screen.getByText('Sua posição:')).toHaveTextContent('4º');
     expect(screen.getByText('4 de 12 desenvolvedores')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /ver ranking/i })).toHaveAttribute('href', '/ranked');
+    expect(screen.getByRole('link', { name: /ver ranking/i })).toHaveAttribute('href', '/ranking');
   });
 
   it('opens the streak details from the flame instead of rendering a fixed card', async () => {
     const user = userEvent.setup();
     render(<TrailsProgressSidebar {...baseProps} />);
 
-    expect(screen.queryByText('Ritmo DevDeck')).not.toBeInTheDocument();
+    expect(screen.queryByText('Ritmo Stacklyst')).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Abrir detalhes da ofensiva: 9 dias' }));
 
@@ -113,6 +113,6 @@ describe('TrailsProgressSidebar', () => {
     expect(
       screen.getByRole('button', { name: 'Abrir detalhes da ofensiva: 9 dias' })
     ).toBeInTheDocument();
-    expect(screen.queryByText('Ritmo DevDeck')).not.toBeInTheDocument();
+    expect(screen.queryByText('Ritmo Stacklyst')).not.toBeInTheDocument();
   });
 });

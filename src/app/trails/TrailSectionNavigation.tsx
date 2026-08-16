@@ -59,11 +59,7 @@ export function buildTrailSections(
   });
 }
 
-const SECTION_PALETTES = [
-  'border-b-[6px] border-blue-600 bg-blue-500',
-  'border-b-[6px] border-[#a560cc] bg-[#ce82ff]',
-  'border-b-[6px] border-[#1b9a59] bg-[#22c55e]',
-];
+import { getSectionTheme } from './trailTheme';
 
 interface TrailSectionNavigationProps {
   view: 'trail' | 'sections';
@@ -86,7 +82,7 @@ export function TrailSectionNavigation({
   onBack,
   onSelectSection,
 }: TrailSectionNavigationProps) {
-  const palette = SECTION_PALETTES[(Math.max(1, sectionNumber) - 1) % SECTION_PALETTES.length];
+  const theme = getSectionTheme(sectionNumber);
 
   if (view === 'sections') {
     return (
@@ -186,7 +182,7 @@ export function TrailSectionNavigation({
   return (
     <section
       aria-labelledby="active-trail-unit-title"
-      className={`relative overflow-hidden rounded-[22px] px-5 py-4 text-white shadow-md sm:px-6 transition-colors ${palette}`}
+      className={`relative overflow-hidden rounded-[22px] px-5 py-4 text-white shadow-md sm:px-6 transition-colors ${theme.headerClass}`}
     >
       <div className="relative flex items-center justify-between gap-4">
         <div className="min-w-0">

@@ -8,7 +8,7 @@ import { z } from 'zod';
 const checkpointSchema = z.object({
   checkpointId: z.string(),
   language: z.string(),
-  unitNumber: z.number().int().min(1).max(3),
+  unitNumber: z.number().int().min(1).max(20),
 });
 
 export const POST = apiHandler(async (req) => {

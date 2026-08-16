@@ -180,7 +180,7 @@ export function TrailsProgressSidebar({
         </div>
       </div>
 
-      {/* Classificação global – Ritmo DevDeck style */}
+      {/* Classificação global – Ritmo Stacklyst style */}
       <section
         aria-labelledby="trail-ranking-title"
         className="shrink-0 overflow-hidden rounded-[22px] border-2 border-b-4 border-dd-border bg-dd-sidebar-bg p-5"
@@ -220,7 +220,7 @@ export function TrailsProgressSidebar({
               </p>
             </div>
             <Link
-              href="/ranked"
+              href="/ranking"
               aria-label="Ver ranking"
               className="flex items-center gap-0.5 text-[10px] font-black uppercase tracking-wide text-blue-400 transition-colors hover:text-blue-300"
             >
@@ -231,7 +231,7 @@ export function TrailsProgressSidebar({
         </div>
       </section>
 
-      {/* Missões do dia – Ritmo DevDeck style */}
+      {/* Missões do dia – Ritmo Stacklyst style */}
       <section
         aria-labelledby="daily-missions-title"
         className="shrink-0 overflow-hidden rounded-[22px] border-2 border-b-4 border-dd-border bg-dd-sidebar-bg p-5"

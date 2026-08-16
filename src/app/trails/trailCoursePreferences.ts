@@ -1,7 +1,7 @@
 import { isTrailLanguage, TRAIL_LANGUAGE_CODES } from '@/app/trails/TrailLanguageLogo';
 import type { TrailLanguageCode } from '@/app/trails/TrailLanguageLogo';
 
-export const TRAIL_COURSE_PREFERENCES_COOKIE = 'devdeck-trail-courses';
+export const TRAIL_COURSE_PREFERENCES_COOKIE = 'stacklyst-trail-courses';
 
 export interface TrailCoursePreferences {
   activeLanguage: TrailLanguageCode | null;

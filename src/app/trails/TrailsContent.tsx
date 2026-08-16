@@ -134,7 +134,7 @@ function getLearnSlidesForLevel(level: TrailLevel) {
       concept =
         "A asserção de tipo informa ao compilador do TypeScript que você sabe mais sobre o tipo da variável do que ele. É uma conversão puramente em tempo de compilação. Pode ser declarada usando a sintaxe 'as Tipo' ou '<Tipo>'.";
       code =
-        "let algumaCoisa: any = 'DevDeck';\nlet tamanho1 = (algumaCoisa as string).length; // Recomendado\nlet tamanho2 = (<string>algumaCoisa).length; // Sintaxe alternativa";
+        "let algumaCoisa: any = 'Stacklyst';\nlet tamanho1 = (algumaCoisa as string).length; // Recomendado\nlet tamanho2 = (<string>algumaCoisa).length; // Sintaxe alternativa";
       tip =
         "A sintaxe '<Tipo>' pode conflitar com JSX/TSX em React, portanto, prefira usar a palavra-chave 'as'.";
     } else {
@@ -202,17 +202,17 @@ export function TrailsContent({
 
   useEffect(() => {
     const updateSoundState = () => {
-      setSoundEnabled(localStorage.getItem('devdeck-sound') !== 'false');
+      setSoundEnabled(localStorage.getItem('stacklyst-sound') !== 'false');
     };
 
     updateSoundState();
 
     window.addEventListener('storage', updateSoundState);
-    window.addEventListener('devdeck-sound-changed', updateSoundState);
+    window.addEventListener('stacklyst-sound-changed', updateSoundState);
 
     return () => {
       window.removeEventListener('storage', updateSoundState);
-      window.removeEventListener('devdeck-sound-changed', updateSoundState);
+      window.removeEventListener('stacklyst-sound-changed', updateSoundState);
     };
   }, []);
 
@@ -2366,7 +2366,7 @@ export function TrailsContent({
                 <h2 className="text-2xl font-black text-dd-text">Subiu de Nível!</h2>
                 <p className="text-xs text-dd-muted">
                   Você agora atingiu o nível{' '}
-                  <strong className="text-dd-text">{newLevelNumber}</strong> geral no DevDeck.
+                  <strong className="text-dd-text">{newLevelNumber}</strong> geral no Stacklyst.
                 </p>
               </div>
 
