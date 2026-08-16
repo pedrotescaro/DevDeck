@@ -4,6 +4,7 @@ import {
   Children,
   isValidElement,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type MouseEvent,
@@ -391,83 +392,92 @@ export function MarkdownRenderer({ content, compact = false }: MarkdownRendererP
     return () => observer.disconnect();
   }, [compact, content, expanded]);
 
-  const components: Components = {
-    h1: ({ children }) => (
-      <h1 className="mb-3 border-b border-dd-border pb-2 text-xl font-bold text-dd-text">
-        {children}
-      </h1>
-    ),
-    h2: ({ children }) => <h2 className="mb-2 text-lg font-bold text-dd-text">{children}</h2>,
-    h3: ({ children }) => <h3 className="mb-2 text-base font-semibold text-dd-text">{children}</h3>,
-    p: ({ children }) => <p className="my-2 text-sm leading-relaxed text-dd-text">{children}</p>,
-    a: ({ href, children }) => <SafeLink href={href}>{children}</SafeLink>,
-    blockquote: ({ children }) => (
-      <blockquote className="my-3 border-l-4 border-dd-accent bg-dd-accent/5 py-2 pl-4 text-sm italic text-dd-muted">
-        {children}
-      </blockquote>
-    ),
-    code: ({ children }) => (
-      <code className="rounded bg-dd-surface px-1.5 py-0.5 font-mono text-xs text-dd-accent">
-        {children}
-      </code>
-    ),
-    pre: ({ children }) => {
-      const child = Children.only(children);
+  const components = useMemo<Components>(
+    () => ({
+      h1: ({ children }) => (
+        <h1 className="mb-3 border-b border-dd-border pb-2 text-xl font-bold text-dd-text">
+          {children}
+        </h1>
+      ),
+      h2: ({ children }) => <h2 className="mb-2 text-lg font-bold text-dd-text">{children}</h2>,
+      h3: ({ children }) => (
+        <h3 className="mb-2 text-base font-semibold text-dd-text">{children}</h3>
+      ),
+      p: ({ children }) => <p className="my-2 text-sm leading-relaxed text-dd-text">{children}</p>,
+      a: ({ href, children }) => <SafeLink href={href}>{children}</SafeLink>,
+      blockquote: ({ children }) => (
+        <blockquote className="my-3 border-l-4 border-dd-accent bg-dd-accent/5 py-2 pl-4 text-sm italic text-dd-muted">
+          {children}
+        </blockquote>
+      ),
+      code: ({ children }) => (
+        <code className="rounded bg-dd-surface px-1.5 py-0.5 font-mono text-xs text-dd-accent">
+          {children}
+        </code>
+      ),
+      pre: ({ children }) => {
+        const child = Children.only(children);
 
-      if (isValidElement<{ className?: string; children?: ReactNode }>(child)) {
-        return (
-          <CodeBlock
-            className={child.props.className}
-            compact={compact}
-            onRunStart={() => setExpanded(true)}
-          >
-            {child.props.children}
-          </CodeBlock>
-        );
-      }
+        if (isValidElement<{ className?: string; children?: ReactNode }>(child)) {
+          return (
+            <CodeBlock
+              className={child.props.className}
+              compact={compact}
+              onRunStart={() => setExpanded(true)}
+            >
+              {child.props.children}
+            </CodeBlock>
+          );
+        }
 
-      return <pre className="overflow-x-auto rounded-lg bg-dd-bg p-4">{children}</pre>;
-    },
-    ul: ({ children }) => (
-      <ul className="my-2 list-inside list-disc space-y-1 text-sm text-dd-text">{children}</ul>
-    ),
-    ol: ({ children }) => (
-      <ol className="my-2 list-inside list-decimal space-y-1 text-sm text-dd-text">{children}</ol>
-    ),
-    li: ({ children }) => <li className="text-sm leading-relaxed text-dd-text">{children}</li>,
-    input: ({ type, checked }) => {
-      if (type === 'checkbox') {
-        return (
-          <input
-            type="checkbox"
-            checked={Boolean(checked)}
-            disabled
-            readOnly
-            className="accent-dd-accent cursor-default align-middle"
-          />
-        );
-      }
+        return <pre className="overflow-x-auto rounded-lg bg-dd-bg p-4">{children}</pre>;
+      },
+      ul: ({ children }) => (
+        <ul className="my-2 list-inside list-disc space-y-1 text-sm text-dd-text">{children}</ul>
+      ),
+      ol: ({ children }) => (
+        <ol className="my-2 list-inside list-decimal space-y-1 text-sm text-dd-text">{children}</ol>
+      ),
+      li: ({ children }) => <li className="text-sm leading-relaxed text-dd-text">{children}</li>,
+      input: ({ type, checked }) => {
+        if (type === 'checkbox') {
+          return (
+            <input
+              type="checkbox"
+              checked={Boolean(checked)}
+              disabled
+              readOnly
+              className="accent-dd-accent cursor-default align-middle"
+            />
+          );
+        }
 
-      return <input type={type} disabled />;
-    },
-    table: ({ children }) => (
-      <div className="my-3 overflow-x-auto">
-        <table className="w-full border-collapse text-left">{children}</table>
-      </div>
-    ),
-    thead: ({ children }) => <thead className="bg-dd-surface">{children}</thead>,
-    th: ({ children }) => (
-      <th className="border border-dd-border bg-dd-surface px-3 py-2 text-xs font-semibold text-dd-text">
-        {children}
-      </th>
-    ),
-    td: ({ children }) => (
-      <td className="border border-dd-border px-3 py-2 text-sm text-dd-text">{children}</td>
-    ),
-    tr: ({ children }) => <tr className="transition-colors hover:bg-dd-surface/50">{children}</tr>,
-    hr: () => <hr className="my-4 border-dd-border" />,
-    img: ({ src, alt }) => <SafeImage src={typeof src === 'string' ? src : undefined} alt={alt} />,
-  };
+        return <input type={type} disabled />;
+      },
+      table: ({ children }) => (
+        <div className="my-3 overflow-x-auto">
+          <table className="w-full border-collapse text-left">{children}</table>
+        </div>
+      ),
+      thead: ({ children }) => <thead className="bg-dd-surface">{children}</thead>,
+      th: ({ children }) => (
+        <th className="border border-dd-border bg-dd-surface px-3 py-2 text-xs font-semibold text-dd-text">
+          {children}
+        </th>
+      ),
+      td: ({ children }) => (
+        <td className="border border-dd-border px-3 py-2 text-sm text-dd-text">{children}</td>
+      ),
+      tr: ({ children }) => (
+        <tr className="transition-colors hover:bg-dd-surface/50">{children}</tr>
+      ),
+      hr: () => <hr className="my-4 border-dd-border" />,
+      img: ({ src, alt }) => (
+        <SafeImage src={typeof src === 'string' ? src : undefined} alt={alt} />
+      ),
+    }),
+    [compact]
+  );
 
   return (
     <div className="relative">

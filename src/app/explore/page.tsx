@@ -54,23 +54,27 @@ export default function ExplorePage() {
           return;
         }
 
-        const suggestionsData = resSuggestions.ok ? await resSuggestions.json() : [];
+        if (!active) return;
+        const suggestionsData = resSuggestions.ok
+          ? await resSuggestions.json().catch(() => [])
+          : [];
 
         if (!active) return;
         setSuggestions(suggestionsData);
-
         setUser(userData);
 
         const resFollowing = await fetch(`/api/users/${userData.id}/following`, {
           signal: controller.signal,
         });
         if (resFollowing.ok) {
-          const followingData = await resFollowing.json();
+          const followingData = await resFollowing.json().catch(() => []);
           if (!active) return;
           const fMap: Record<string, boolean> = {};
-          followingData.forEach((f: any) => {
-            fMap[f.id] = true;
-          });
+          if (Array.isArray(followingData)) {
+            followingData.forEach((f: any) => {
+              fMap[f.id] = true;
+            });
+          }
           setFollowingMap(fMap);
         }
       } catch (err) {
@@ -671,7 +675,7 @@ export default function ExplorePage() {
               <span>|</span>
               <span className="hover:underline cursor-pointer">Informações de anúncios</span>
             </div>
-            <p>© {new Date().getFullYear()} DevDeck Corp.</p>
+            <p>© {new Date().getFullYear()} Stacklyst Corp.</p>
           </div>
         </aside>
       </div>

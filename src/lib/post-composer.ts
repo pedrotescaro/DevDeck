@@ -42,7 +42,7 @@ export const QUICK_LOCATIONS = [
   'São Paulo, BR',
   'Rio de Janeiro, BR',
   'Lisboa, PT',
-  'DevDeck Community',
+  'Stacklyst Community',
 ];
 
 export function insertAtCursor(

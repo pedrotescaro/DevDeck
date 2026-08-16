@@ -56,7 +56,16 @@ export default function NotificationsPage() {
           return;
         }
 
-        const notificationData = resNotifications.ok ? await resNotifications.json() : [];
+        if (!active) return;
+
+        let notificationData: NotificationItem[] = [];
+        if (resNotifications.ok) {
+          try {
+            notificationData = await resNotifications.json();
+          } catch {
+            notificationData = [];
+          }
+        }
 
         if (!active) return;
         setUser(userData);
@@ -339,7 +348,7 @@ export default function NotificationsPage() {
               <h4 className="text-sm font-black text-dd-text">Notificações por push</h4>
               <p className="text-xs text-dd-muted leading-relaxed max-w-md">
                 Ative as notificações por push para não perder nunca o que está acontecendo no
-                DevDeck.
+                Stacklyst.
               </p>
               <button
                 onClick={() => {

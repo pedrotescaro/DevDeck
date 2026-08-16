@@ -20,9 +20,9 @@ describe('parseMentions', () => {
   });
 
   it('should not match email addresses', () => {
-    const elements = parseMentions('contact us at support@devdeck.dev for help');
+    const elements = parseMentions('contact us at support@stacklyst.dev for help');
     expect(elements).toHaveLength(1);
-    expect(elements[0]).toBe('contact us at support@devdeck.dev for help');
+    expect(elements[0]).toBe('contact us at support@stacklyst.dev for help');
   });
 
   it('should match multiple mentions', () => {

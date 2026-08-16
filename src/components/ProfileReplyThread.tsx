@@ -57,7 +57,7 @@ export function ProfileReplyThread({ reply }: ProfileReplyThreadProps) {
 
     if (newValue === -1) {
       const justification = prompt(
-        'No DevDeck, o downvote exige uma justificativa construtiva. Escreva seu motivo para o autor melhorar:'
+        'No Stacklyst, o downvote exige uma justificativa construtiva. Escreva seu motivo para o autor melhorar:'
       );
       if (!justification || justification.trim().length <= 3) {
         alert(

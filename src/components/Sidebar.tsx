@@ -35,7 +35,6 @@ import { appendPostExtras, ReplyAudience, resetPostComposerExtras } from '@/lib/
 import { POST_CHAR_LIMIT } from '@/lib/motion';
 import { ThemeLogo } from '@/components/ThemeLogo';
 import { AuthorAvatar } from '@/components/AuthorAvatar';
-import { StreakPopover } from '@/components/StreakPopover';
 import { getCurrentUser, invalidateCurrentUser } from '@/lib/client/current-user';
 
 const MarkdownEditor = dynamic(
@@ -67,7 +66,7 @@ let isInitiallyMounted = false;
 
 if (typeof window !== 'undefined') {
   try {
-    const cached = sessionStorage.getItem('devdeck_user');
+    const cached = sessionStorage.getItem('stacklyst_user');
     if (cached) {
       inMemoryUser = JSON.parse(cached);
     }
@@ -98,7 +97,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
     isInitiallyMounted = true;
     if (!activeUser) {
       try {
-        const cached = sessionStorage.getItem('devdeck_user');
+        const cached = sessionStorage.getItem('stacklyst_user');
         if (cached) {
           const parsed = JSON.parse(cached);
           setActiveUser(parsed);
@@ -125,11 +124,11 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
       });
       inMemoryUser = { ...inMemoryUser, ...user };
       if (typeof window !== 'undefined') {
-        sessionStorage.setItem('devdeck_user', JSON.stringify(inMemoryUser));
+        sessionStorage.setItem('stacklyst_user', JSON.stringify(inMemoryUser));
       }
     } else {
       if (typeof window !== 'undefined') {
-        const cached = sessionStorage.getItem('devdeck_user');
+        const cached = sessionStorage.getItem('stacklyst_user');
         if (cached) {
           try {
             const parsed = JSON.parse(cached);
@@ -149,7 +148,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
         setActiveUser(data);
         inMemoryUser = data;
         if (typeof window !== 'undefined') {
-          sessionStorage.setItem('devdeck_user', JSON.stringify(data));
+          sessionStorage.setItem('stacklyst_user', JSON.stringify(data));
         }
       })
       .catch(() => {
@@ -157,7 +156,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
           setActiveUser(null);
           inMemoryUser = null;
           if (typeof window !== 'undefined') {
-            sessionStorage.removeItem('devdeck_user');
+            sessionStorage.removeItem('stacklyst_user');
           }
         }
       });
@@ -232,7 +231,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
       inMemoryUser = null;
       invalidateCurrentUser();
       if (typeof window !== 'undefined') {
-        sessionStorage.removeItem('devdeck_user');
+        sessionStorage.removeItem('stacklyst_user');
       }
       router.push('/');
       router.refresh();
@@ -383,12 +382,12 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
       active: pathname === '/feed',
       badge: 'dot' as const,
     },
-    {
+    /* {
       label: 'Explorar',
       href: '/explore',
       icon: Search,
       active: pathname === '/explore',
-    },
+    }, */
     {
       label: 'Notificações',
       href: '/notifications',
@@ -396,16 +395,16 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
       active: pathname === '/notifications',
     },
     {
-      label: 'Aprender com DevDeck',
+      label: 'Aprender com Stacklyst',
       href: '/trails',
       icon: BookOpen,
       active: pathname.startsWith('/trails'),
     },
     {
       label: 'Ranking',
-      href: '/ranked',
+      href: '/ranking',
       icon: Trophy,
-      active: pathname.startsWith('/ranked') || pathname.startsWith('/leaderboard'),
+      active: pathname.startsWith('/ranking') || pathname.startsWith('/leaderboard'),
     },
     {
       label: 'Bate-papo',
@@ -432,8 +431,8 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
   );
   const mobileNavLabels = [
     'Página Inicial',
-    'Explorar',
-    'Aprender com DevDeck',
+    // 'Explorar',
+    'Aprender com Stacklyst',
     'Notificações',
     'Perfil',
   ];
@@ -453,12 +452,12 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
           {/* Logo */}
           <Link href="/feed" className="group flex w-fit items-center gap-2.5 px-3 py-0">
             <ThemeLogo
-              alt="DevDeck Logo"
+              alt="Stacklyst Logo"
               width={28}
               height={28}
               className="object-contain group-hover:scale-105 transition-transform duration-300"
             />
-            <span className="text-dd-text font-extrabold text-xl tracking-tight">DevDeck</span>
+            <span className="text-dd-text font-extrabold text-xl tracking-tight">Stacklyst</span>
           </Link>
 
           {/* Navigation Links */}
@@ -616,8 +615,8 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
 
         {/* User profile dropdown widget */}
         {activeUser && (
-          <div className="relative">
-            <div className="group w-full rounded-2xl border border-transparent p-3 text-left transition-all duration-200 hover:border-dd-border hover:bg-dd-surface/40">
+          <div className="relative mt-2 pt-2">
+            <div className="group w-full rounded-2xl border border-transparent p-3.5 text-left transition-all duration-200 hover:border-dd-border hover:bg-dd-surface/50">
               <button
                 type="button"
                 onClick={() => {
@@ -626,14 +625,14 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
                 }}
                 aria-expanded={dropdownOpen}
                 aria-haspopup="menu"
-                className="dd-focus-ring flex w-full min-w-0 cursor-pointer items-center gap-3 rounded-xl text-left"
+                className="dd-focus-ring flex w-full min-w-0 cursor-pointer items-center gap-3.5 rounded-xl text-left"
               >
                 <AuthorAvatar
                   username={activeUser.username}
                   avatar_url={activeUser.avatar_url}
                   avatar_config={activeUser.avatar_config}
                   size="lg"
-                  className="!h-11 !w-11"
+                  className="!h-11 !w-11 shrink-0"
                 />
                 <div className="min-w-0 flex-1 font-sans">
                   <div className="flex min-w-0 items-center justify-between gap-2">
@@ -643,26 +642,12 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
                     <MoreHorizontal className="h-5 w-5 shrink-0 text-dd-muted transition-colors duration-200 group-hover:text-dd-text" />
                   </div>
                   <div className="mt-1 min-w-0">
-                    <p className="truncate text-[11px] font-medium leading-none text-dd-muted">
+                    <p className="truncate text-xs font-medium leading-none text-dd-muted">
                       @{activeUser.username.toLowerCase()}
                     </p>
                   </div>
                 </div>
               </button>
-
-              <StreakPopover
-                streak={activeUser.streak_days ?? activeUser.streak ?? 0}
-                side="top"
-                align="start"
-                triggerClassName="dd-focus-ring ml-14 mt-2.5 flex w-fit items-center gap-1.5 rounded-full bg-blue-500/10 px-2.5 py-1.5 text-blue-500 transition-colors hover:bg-blue-500/20"
-              >
-                <Flame className="h-4 w-4 shrink-0 fill-blue-500" />
-                <span className="text-[10.5px] font-extrabold leading-none">
-                  {activeUser.streak_days ?? activeUser.streak ?? 0}{' '}
-                  {(activeUser.streak_days ?? activeUser.streak ?? 0) === 1 ? 'dia' : 'dias'} de
-                  ofensiva
-                </span>
-              </StreakPopover>
             </div>
 
             {dropdownOpen && (
@@ -719,24 +704,11 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
         {/* Top Header */}
         <header className="sticky top-0 z-40 w-full border-b border-dd-border bg-dd-bg/80 backdrop-blur-md px-4 py-3 flex items-center justify-between">
           <Link href="/feed" className="flex items-center gap-2 group">
-            <ThemeLogo alt="DevDeck Logo" width={24} height={24} className="object-contain" />
-            <span className="text-dd-text font-extrabold text-base tracking-tight">DevDeck</span>
+            <ThemeLogo alt="Stacklyst Logo" width={24} height={24} className="object-contain" />
+            <span className="text-dd-text font-extrabold text-base tracking-tight">Stacklyst</span>
           </Link>
 
           <div className="flex items-center gap-2.5">
-            <Link
-              href="/async"
-              aria-label="Abrir ASYNC IA"
-              className="flex h-8 w-8 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 transition-all hover:scale-105 hover:border-blue-500/40"
-            >
-              <Image
-                src="/async-logo.svg"
-                alt=""
-                width={22}
-                height={22}
-                className="h-5.5 w-5.5 object-contain"
-              />
-            </Link>
             {activeUser && (
               <div className="relative">
                 <button
@@ -775,7 +747,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
                         Meu Perfil
                       </Link>
                       <Link
-                        href="/ranked"
+                        href="/ranking"
                         role="menuitem"
                         className="flex items-center gap-3.5 rounded-xl px-3.5 py-3 text-sm font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
                         onClick={() => setDropdownOpen(false)}

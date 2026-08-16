@@ -285,17 +285,17 @@ export function FeedContent({
 
   useEffect(() => {
     const updateSoundState = () => {
-      setSoundEnabled(localStorage.getItem('devdeck-sound') !== 'false');
+      setSoundEnabled(localStorage.getItem('stacklyst-sound') !== 'false');
     };
 
     updateSoundState();
 
     window.addEventListener('storage', updateSoundState);
-    window.addEventListener('devdeck-sound-changed', updateSoundState);
+    window.addEventListener('stacklyst-sound-changed', updateSoundState);
 
     return () => {
       window.removeEventListener('storage', updateSoundState);
-      window.removeEventListener('devdeck-sound-changed', updateSoundState);
+      window.removeEventListener('stacklyst-sound-changed', updateSoundState);
     };
   }, []);
 
@@ -1104,7 +1104,7 @@ export function FeedContent({
 
     if (newValue === -1) {
       const justification = prompt(
-        'No DevDeck, o downvote exige uma justificativa construtiva. Escreva seu motivo para o autor melhorar:'
+        'No Stacklyst, o downvote exige uma justificativa construtiva. Escreva seu motivo para o autor melhorar:'
       );
       if (!justification || justification.trim().length <= 3) {
         alert(
@@ -1212,7 +1212,7 @@ export function FeedContent({
       )}
       {firstPostToastVisible && (
         <div className="fixed left-1/2 top-24 z-50 -translate-x-1/2 rounded-full bg-dd-accent px-4 py-2 text-xs font-black text-white shadow-xl shadow-blue-500/25 dd-soft-bounce">
-          +50 XP - Primeira postagem! Bem-vindo ao DevDeck.
+          +50 XP - Primeira postagem! Bem-vindo ao Stacklyst.
         </div>
       )}
 
@@ -1583,7 +1583,7 @@ export function FeedContent({
               <div className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm">
                 <h2 className="font-bold text-lg text-dd-text flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-blue-500" />
-                  🧩 DevDeck Quizzes
+                  🧩 Stacklyst Quizzes
                 </h2>
                 <p className="text-dd-muted text-xs mt-1">
                   Responda aos quizzes diários e da comunidade para ganhar bônus de +15 XP!
@@ -1805,7 +1805,7 @@ export function FeedContent({
                     🏆 Quadro de Líderes
                   </h2>
                   <p className="text-dd-muted text-xs mt-1">
-                    Os desenvolvedores lendários com maior XP na comunidade DevDeck.
+                    Os desenvolvedores lendários com maior XP na comunidade Stacklyst.
                   </p>
                 </div>
                 <div>

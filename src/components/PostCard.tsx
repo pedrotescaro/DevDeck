@@ -31,6 +31,7 @@ import { MarkdownEditor, type NotionEditorRef } from '@/components/MarkdownEdito
 import { CharCounter } from '@/components/motion/CharCounter';
 import { POST_CHAR_LIMIT } from '@/lib/motion';
 import { parsePostExtras } from '@/lib/post-composer';
+import { prismaLanguageToEditor } from '@/lib/editor/languages';
 
 interface PostAuthor {
   username: string;
@@ -66,6 +67,13 @@ interface PostCardProps {
   onEdit?: (postId: string, updatedPost: any) => void;
   flat?: boolean;
   onBookmarkToggle?: (postId: string, bookmarked: boolean) => void;
+}
+
+function createSnippetMarkdown(code: string, language?: string | null) {
+  const fenceLength = Math.max(3, ...[...code.matchAll(/`+/g)].map((match) => match[0].length + 1));
+  const fence = '`'.repeat(fenceLength);
+  const snippetLanguage = language ? prismaLanguageToEditor(language) : 'text-static';
+  return `${fence}${snippetLanguage}\n${code.replace(/\n?$/, '\n')}${fence}`;
 }
 
 export function PostCard({
@@ -295,57 +303,10 @@ export function PostCard({
     }
   };
 
-  const highlightCode = (code: string) => {
-    if (!code) return null;
-    const lines = code.split('\n');
-    return (
-      <pre className="font-mono text-[11px] leading-relaxed text-dd-text">
-        <code>
-          {lines.map((line, idx) => {
-            let html = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-            // Highlight keywords
-            const keywords =
-              /\b(const|let|var|function|return|fn|impl|pub|use|import|from|def|class|async|await|struct|enum|if|else|for|while|match)\b/g;
-            html = html.replace(keywords, '<span class="text-blue-400 font-semibold">$1</span>');
-
-            // Highlight types
-            const types =
-              /\b(string|number|boolean|any|void|User|Post|Language|int|float|str|char)\b/g;
-            html = html.replace(types, '<span class="text-cyan-400 font-medium">$1</span>');
-
-            // Highlight comments
-            if (html.includes('//')) {
-              const parts = html.split('//');
-              html =
-                parts[0] +
-                '<span class="text-dd-muted italic">//' +
-                parts.slice(1).join('//') +
-                '</span>';
-            } else if (html.startsWith('#') || html.includes(' #')) {
-              const parts = html.split('#');
-              html =
-                parts[0] +
-                '<span class="text-dd-muted italic">#' +
-                parts.slice(1).join('#') +
-                '</span>';
-            }
-
-            return (
-              <div key={idx} className="table-row">
-                <span className="table-cell text-right pr-4 select-none opacity-20 text-[9px] w-6">
-                  {idx + 1}
-                </span>
-                <span className="table-cell" dangerouslySetInnerHTML={{ __html: html }} />
-              </div>
-            );
-          })}
-        </code>
-      </pre>
-    );
-  };
-
   const presentedPost = parsePostExtras(postBody);
+  const snippetMarkdown = postCodeSnippet
+    ? createSnippetMarkdown(postCodeSnippet, postLanguage)
+    : null;
   const { text: relativeTime, isRelative } = useHydrationSafeRelativeTime(post.created_at);
 
   return (
@@ -485,10 +446,8 @@ export function PostCard({
           )}
 
           {/* Code snippet preview */}
-          {postCodeSnippet && !presentedPost.content.includes('```') && (
-            <div className="rounded-lg border border-dd-border bg-dd-bg p-4 mb-3 overflow-x-auto max-h-60 shadow-inner">
-              {highlightCode(postCodeSnippet)}
-            </div>
+          {snippetMarkdown && !presentedPost.content.includes('```') && (
+            <MarkdownRenderer content={snippetMarkdown} compact />
           )}
 
           {/* Quiz challenge preview (Attachment card style like Twitter/X card preview) */}

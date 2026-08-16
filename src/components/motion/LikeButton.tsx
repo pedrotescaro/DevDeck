@@ -24,17 +24,17 @@ export function LikeButton({ count, isActive, onToggle, title }: LikeButtonProps
 
   useEffect(() => {
     const updateSoundState = () => {
-      setSoundEnabled(localStorage.getItem('devdeck-sound') !== 'false');
+      setSoundEnabled(localStorage.getItem('stacklyst-sound') !== 'false');
     };
 
     updateSoundState();
 
     window.addEventListener('storage', updateSoundState);
-    window.addEventListener('devdeck-sound-changed', updateSoundState);
+    window.addEventListener('stacklyst-sound-changed', updateSoundState);
 
     return () => {
       window.removeEventListener('storage', updateSoundState);
-      window.removeEventListener('devdeck-sound-changed', updateSoundState);
+      window.removeEventListener('stacklyst-sound-changed', updateSoundState);
     };
   }, []);
 
