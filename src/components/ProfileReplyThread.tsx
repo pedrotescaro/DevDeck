@@ -9,7 +9,7 @@ import { useHydrationSafeRelativeTime } from '@/hooks/useHydrationSafeRelativeTi
 import { LikeButton } from '@/components/motion/LikeButton';
 import { BookmarkButton } from '@/components/motion/BookmarkButton';
 import { RepostMenu } from '@/components/motion/RepostMenu';
-import { MessageSquare, BarChart2, Share } from 'lucide-react';
+import { MessageCircle, BarChart2, Share } from 'lucide-react';
 
 interface ProfileReplyThreadProps {
   reply: any;
@@ -242,7 +242,7 @@ export function ProfileReplyThread({ reply }: ProfileReplyThreadProps) {
                 className="flex items-center gap-0.5 text-dd-muted hover:text-blue-400 active:scale-[0.95] transition-transform p-1 bg-transparent border-none"
               >
                 <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-500/10 transition-colors">
-                  <MessageSquare className="w-3.5 h-3.5" />
+                  <MessageCircle className="w-3.5 h-3.5" />
                 </div>
               </button>
 

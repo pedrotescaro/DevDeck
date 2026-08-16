@@ -11,7 +11,7 @@ import { AnswerThread } from '@/components/AnswerThread';
 import type { AnswerNode } from '@/components/answer-types';
 import { MarkdownEditor, type NotionEditorRef } from '@/components/MarkdownEditor';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
-import { Sparkles, MessageSquare, ArrowLeft, Flag, X, Send } from 'lucide-react';
+import { Sparkles, MessageCircle, ArrowLeft, Flag, X, Send } from 'lucide-react';
 import { RepostMenu } from '@/components/motion/RepostMenu';
 import { BookmarkButton } from '@/components/motion/BookmarkButton';
 import { LikeButton } from '@/components/motion/LikeButton';
@@ -531,7 +531,7 @@ export function PostDetailContent({
               {/* 1. Comment Bubble */}
               <div className="flex items-center gap-0.5 text-dd-muted select-none hover:text-blue-400 cursor-pointer group/comment">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-500/10 transition-colors animate-none">
-                  <MessageSquare className="w-3.5 h-3.5 text-dd-muted group-hover/comment:text-blue-400" />
+                  <MessageCircle className="w-3.5 h-3.5 text-dd-muted group-hover/comment:text-blue-400" />
                 </div>
                 <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/comment:text-blue-400">
                   {post.answers?.length || 0}

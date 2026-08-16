@@ -8,7 +8,7 @@ import {
   Flame,
   Check,
   Heart,
-  MessageSquare,
+  MessageCircle,
   Bookmark,
   Trophy,
 } from 'lucide-react';
@@ -266,7 +266,7 @@ export function HeroMockup() {
                   <Heart className="w-3.5 h-3.5" /> 24
                 </span>
                 <span className="flex items-center gap-1 hover:text-dd-text transition-colors">
-                  <MessageSquare className="w-3.5 h-3.5" /> 8 respostas
+                  <MessageCircle className="w-3.5 h-3.5" /> 8 respostas
                 </span>
               </div>
               <Bookmark className="w-3.5 h-3.5 hover:text-dd-text transition-colors" />

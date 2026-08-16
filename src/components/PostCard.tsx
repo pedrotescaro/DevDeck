@@ -9,7 +9,7 @@ import { LanguageTag } from './LanguageTag';
 import {
   Flag,
   Heart,
-  MessageSquare,
+  MessageCircle,
   BarChart2,
   Trash2,
   MoreHorizontal,
@@ -510,7 +510,7 @@ export function PostCard({
             className="flex items-center gap-0.5 text-dd-muted hover:text-blue-400 transition-colors group/comment"
           >
             <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-500/10 transition-colors">
-              <MessageSquare className="w-3.5 h-3.5 text-dd-muted group-hover/comment:text-blue-400" />
+              <MessageCircle className="w-3.5 h-3.5 text-dd-muted group-hover/comment:text-blue-400" />
             </div>
             <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/comment:text-blue-400">
               {post._count?.answers ?? 0}

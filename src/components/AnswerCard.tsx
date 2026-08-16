@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { MessageSquare, BarChart2, Share, Send } from 'lucide-react';
+import { MessageCircle, BarChart2, Share, Send } from 'lucide-react';
 import { useHydrationSafeRelativeTime } from '@/hooks/useHydrationSafeRelativeTime';
 import { LikeButton } from '@/components/motion/LikeButton';
 import { BookmarkButton } from '@/components/motion/BookmarkButton';
@@ -264,7 +264,7 @@ export function AnswerCard({
               title="Responder a este comentário"
             >
               <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-500/10 transition-colors animate-none">
-                <MessageSquare className="w-3.5 h-3.5 text-dd-muted group-hover/comment:text-blue-400" />
+                <MessageCircle className="w-3.5 h-3.5 text-dd-muted group-hover/comment:text-blue-400" />
               </div>
             </button>
 

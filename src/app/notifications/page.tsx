@@ -10,7 +10,7 @@ import { EmptyState } from '@/components/motion/EmptyState';
 import { staggerContainerVariants, staggerItemVariants } from '@/lib/motion';
 import { cn } from '@/lib/cn';
 import { getCurrentUser } from '@/lib/client/current-user';
-import { Bell, MessageSquare, Sparkles, Swords, Settings, Heart, X } from 'lucide-react';
+import { Bell, MessageCircle, Sparkles, Swords, Settings, Heart, X } from 'lucide-react';
 import Link from 'next/link';
 import { FeedRightSidebar } from '@/components/FeedRightSidebar';
 
@@ -150,7 +150,7 @@ export default function NotificationsPage() {
       case 'ANSWER':
         return (
           <div className={cn(base, 'text-dd-blue bg-dd-blue/10')}>
-            <MessageSquare className="w-4 h-4" />
+            <MessageCircle className="w-4 h-4" />
           </div>
         );
       case 'XP':
