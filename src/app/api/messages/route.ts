@@ -5,6 +5,29 @@ import { requireAuth } from '@/lib/auth';
 import { NotificationService } from '@/services/notification.service';
 import { rateLimit } from '@/lib/ratelimit';
 
+let ensuredTable = false;
+async function ensureMessageReactionTable() {
+  if (ensuredTable) return;
+  try {
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "MessageReaction" (
+        "id" TEXT NOT NULL,
+        "message_id" TEXT NOT NULL,
+        "user_id" TEXT NOT NULL,
+        "emoji" TEXT NOT NULL,
+        "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT "MessageReaction_pkey" PRIMARY KEY ("id")
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS "MessageReaction_message_id_user_id_emoji_key" ON "MessageReaction"("message_id", "user_id", "emoji");
+      CREATE INDEX IF NOT EXISTS "MessageReaction_message_id_idx" ON "MessageReaction"("message_id");
+      CREATE INDEX IF NOT EXISTS "MessageReaction_user_id_idx" ON "MessageReaction"("user_id");
+    `);
+    ensuredTable = true;
+  } catch (err) {
+    console.warn('Could not auto-create MessageReaction table:', err);
+  }
+}
+
 export const POST = apiHandler(async (req) => {
   const user = await requireAuth();
 
@@ -61,31 +84,49 @@ export const GET = apiHandler(async (req) => {
     return NextResponse.json({ error: 'receiver_id é obrigatório' }, { status: 400 });
   }
 
-  const messages = await prisma.message.findMany({
-    where: {
-      OR: [
-        { sender_id: user.id, receiver_id: receiverId },
-        { sender_id: receiverId, receiver_id: user.id },
-      ],
-    },
-    include: {
-      reactions: {
-        select: {
-          id: true,
-          emoji: true,
-          user_id: true,
-          user: {
-            select: {
-              id: true,
-              username: true,
+  await ensureMessageReactionTable();
+
+  try {
+    const messages = await prisma.message.findMany({
+      where: {
+        OR: [
+          { sender_id: user.id, receiver_id: receiverId },
+          { sender_id: receiverId, receiver_id: user.id },
+        ],
+      },
+      include: {
+        reactions: {
+          select: {
+            id: true,
+            emoji: true,
+            user_id: true,
+            user: {
+              select: {
+                id: true,
+                username: true,
+              },
             },
           },
         },
       },
-    },
-    orderBy: { created_at: 'asc' },
-    take: 100, // Safe limit for performance
-  });
+      orderBy: { created_at: 'asc' },
+      take: 100, // Safe limit for performance
+    });
 
-  return NextResponse.json(messages);
+    return NextResponse.json(messages);
+  } catch (err) {
+    console.warn('Failed to load messages with reactions, falling back:', err);
+    const messages = await prisma.message.findMany({
+      where: {
+        OR: [
+          { sender_id: user.id, receiver_id: receiverId },
+          { sender_id: receiverId, receiver_id: user.id },
+        ],
+      },
+      orderBy: { created_at: 'asc' },
+      take: 100,
+    });
+
+    return NextResponse.json(messages.map((m) => ({ ...m, reactions: [] })));
+  }
 });

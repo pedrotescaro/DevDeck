@@ -1,6 +1,30 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getAuthUser } from '@/lib/auth';
+import { randomUUID } from 'crypto';
+
+let ensuredTable = false;
+async function ensureMessageReactionTable() {
+  if (ensuredTable) return;
+  try {
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "MessageReaction" (
+        "id" TEXT NOT NULL,
+        "message_id" TEXT NOT NULL,
+        "user_id" TEXT NOT NULL,
+        "emoji" TEXT NOT NULL,
+        "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT "MessageReaction_pkey" PRIMARY KEY ("id")
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS "MessageReaction_message_id_user_id_emoji_key" ON "MessageReaction"("message_id", "user_id", "emoji");
+      CREATE INDEX IF NOT EXISTS "MessageReaction_message_id_idx" ON "MessageReaction"("message_id");
+      CREATE INDEX IF NOT EXISTS "MessageReaction_user_id_idx" ON "MessageReaction"("user_id");
+    `);
+    ensuredTable = true;
+  } catch (err) {
+    console.warn('Could not auto-create MessageReaction table:', err);
+  }
+}
 
 // POST /api/messages/[id]/react - Toggle reaction on a message
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -37,6 +61,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       );
     }
 
+    await ensureMessageReactionTable();
+
     // Check if user already reacted with this emoji on this message
     const existing = await prisma.messageReaction.findUnique({
       where: {
@@ -64,6 +90,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       // Add reaction
       const created = await prisma.messageReaction.create({
         data: {
+          id: randomUUID(),
           message_id: messageId,
           user_id: user.id,
           emoji: trimmedEmoji,
@@ -85,8 +112,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         userId: user.id,
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error reacting to message:', error);
-    return NextResponse.json({ error: 'Erro ao reagir à mensagem' }, { status: 500 });
+    return NextResponse.json(
+      { error: error?.message || 'Erro ao reagir à mensagem' },
+      { status: 500 }
+    );
   }
 }

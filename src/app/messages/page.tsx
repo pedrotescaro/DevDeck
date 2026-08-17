@@ -416,7 +416,8 @@ export default function MessagesPage() {
       });
 
       if (!res.ok) {
-        console.error('Failed to react to message');
+        const errorData = await res.json().catch(() => ({}));
+        console.error('Failed to react to message:', res.status, errorData);
       }
     } catch (err) {
       console.error('Error reacting to message:', err);
