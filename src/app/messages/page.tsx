@@ -49,6 +49,19 @@ function useClickOutside(
   }, [active, onClose, ref]);
 }
 
+const QUICK_REACTION_EMOJIS = ['❤️', '👍', '😂', '🔥', '🎉', '💡', '🚀', '👀'];
+
+export interface MessageReactionItem {
+  id?: string;
+  message_id?: string;
+  user_id: string;
+  emoji: string;
+  user?: {
+    id: string;
+    username: string;
+  };
+}
+
 interface ChatItem {
   partnerId: string;
   lastMessage: string;
@@ -70,6 +83,7 @@ interface Message {
   image_url?: string | null;
   is_edited?: boolean;
   updated_at?: string | null;
+  reactions?: MessageReactionItem[];
 }
 
 interface UserListItem {
@@ -109,6 +123,10 @@ export default function MessagesPage() {
   const [editContent, setEditContent] = useState('');
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
   const [activeMenuMessageId, setActiveMenuMessageId] = useState<string | null>(null);
+  const [activeReactionMessageId, setActiveReactionMessageId] = useState<string | null>(null);
+  const [activeReactionPickerMessageId, setActiveReactionPickerMessageId] = useState<string | null>(
+    null
+  );
   const [replyingToMessage, setReplyingToMessage] = useState<Message | null>(null);
   const [forwardingMessage, setForwardingMessage] = useState<Message | null>(null);
   const [infoMessage, setInfoMessage] = useState<Message | null>(null);
@@ -119,9 +137,21 @@ export default function MessagesPage() {
   const messageInputRef = useRef<HTMLInputElement | null>(null);
   const emojiPickerRef = useRef<HTMLDivElement | null>(null);
   const messageMenuRef = useRef<HTMLDivElement | null>(null);
+  const reactionBarRef = useRef<HTMLDivElement | null>(null);
+  const reactionPickerRef = useRef<HTMLDivElement | null>(null);
 
   useClickOutside(emojiPickerRef, () => setEmojiPanelOpen(false), emojiPanelOpen);
   useClickOutside(messageMenuRef, () => setActiveMenuMessageId(null), activeMenuMessageId !== null);
+  useClickOutside(
+    reactionBarRef,
+    () => setActiveReactionMessageId(null),
+    activeReactionMessageId !== null
+  );
+  useClickOutside(
+    reactionPickerRef,
+    () => setActiveReactionPickerMessageId(null),
+    activeReactionPickerMessageId !== null
+  );
 
   useEffect(() => {
     const updateSoundState = () => {
@@ -277,12 +307,121 @@ export default function MessagesPage() {
           setMessages((prev) => prev.filter((msg) => msg.id !== deletedId));
         }
       )
+      .on('broadcast', { event: 'message_reaction' }, (event) => {
+        const { messageId, emoji, userId, username } = event.payload || {};
+        if (!messageId || !emoji || !userId) return;
+
+        setMessages((prev) =>
+          prev.map((msg) => {
+            if (msg.id !== messageId) return msg;
+
+            const currentReactions = msg.reactions || [];
+            const hasReactedWithThis = currentReactions.some(
+              (r) => r.user_id === userId && r.emoji === emoji
+            );
+
+            let newReactions: MessageReactionItem[];
+            if (hasReactedWithThis) {
+              newReactions = currentReactions.filter(
+                (r) => !(r.user_id === userId && r.emoji === emoji)
+              );
+            } else {
+              newReactions = [
+                ...currentReactions,
+                {
+                  id: `rt-${Date.now()}`,
+                  message_id: messageId,
+                  user_id: userId,
+                  emoji,
+                  user: { id: userId, username: username || '' },
+                },
+              ];
+            }
+
+            return { ...msg, reactions: newReactions };
+          })
+        );
+      })
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
   }, [user, activeChat, playSound]);
+
+  const handleReactToMessage = async (msgId: string, emoji: string) => {
+    if (!user) return;
+
+    playSound('bookmark');
+    setActiveReactionMessageId(null);
+    setActiveReactionPickerMessageId(null);
+
+    // Optimistic UI update
+    setMessages((prev) =>
+      prev.map((msg) => {
+        if (msg.id !== msgId) return msg;
+
+        const currentReactions = msg.reactions || [];
+        const hasReactedWithThis = currentReactions.some(
+          (r) => r.user_id === user.id && r.emoji === emoji
+        );
+
+        let newReactions: MessageReactionItem[];
+        if (hasReactedWithThis) {
+          newReactions = currentReactions.filter(
+            (r) => !(r.user_id === user.id && r.emoji === emoji)
+          );
+        } else {
+          newReactions = [
+            ...currentReactions,
+            {
+              id: `temp-${Date.now()}`,
+              message_id: msgId,
+              user_id: user.id,
+              emoji,
+              user: { id: user.id, username: user.username },
+            },
+          ];
+        }
+
+        return { ...msg, reactions: newReactions };
+      })
+    );
+
+    // Broadcast to chat partner
+    if (activeChat) {
+      try {
+        const supabase = createClient();
+        const partnerChannel = supabase.channel(`chat-room:${activeChat.partnerId}`);
+        await partnerChannel.send({
+          type: 'broadcast',
+          event: 'message_reaction',
+          payload: {
+            messageId: msgId,
+            emoji,
+            userId: user.id,
+            username: user.username,
+          },
+        });
+      } catch {
+        // Broadcast is best effort
+      }
+    }
+
+    try {
+      const res = await fetch(`/api/messages/${msgId}/react`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emoji }),
+      });
+
+      if (!res.ok) {
+        console.error('Failed to react to message');
+      }
+    } catch (err) {
+      console.error('Error reacting to message:', err);
+    }
+  };
 
   const handleEditMessage = async (msgId: string, newContent: string) => {
     if (!newContent.trim()) return;
@@ -757,6 +896,127 @@ export default function MessagesPage() {
                               </div>
 
                               <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center gap-1 shrink-0 relative">
+                                {/* Reaction Button with Quick Emojis & Full Emoji Picker */}
+                                <div className="relative">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setActiveReactionMessageId((prev) =>
+                                        prev === msg.id ? null : msg.id
+                                      );
+                                      setActiveReactionPickerMessageId(null);
+                                      setActiveMenuMessageId(null);
+                                    }}
+                                    className={`p-1.5 hover:bg-dd-surface/85 text-dd-muted hover:text-yellow-400 rounded-full transition-colors cursor-pointer ${
+                                      activeReactionMessageId === msg.id ||
+                                      activeReactionPickerMessageId === msg.id
+                                        ? 'bg-dd-surface/85 text-yellow-400'
+                                        : ''
+                                    }`}
+                                    title="Reagir com emoji"
+                                  >
+                                    <Smile className="w-3.5 h-3.5" />
+                                  </button>
+
+                                  <AnimatePresence>
+                                    {activeReactionMessageId === msg.id && (
+                                      <motion.div
+                                        ref={reactionBarRef}
+                                        initial={{ opacity: 0, scale: 0.9, y: index <= 3 ? -6 : 6 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.9, y: index <= 3 ? -6 : 6 }}
+                                        transition={{ duration: 0.12 }}
+                                        className={`absolute z-[100] bg-dd-surface/95 backdrop-blur-md border border-dd-border/80 rounded-full shadow-2xl p-1 flex items-center gap-0.5 ${
+                                          index <= 3 ? 'top-0 mt-7' : 'bottom-0 mb-7'
+                                        } ${isCurrentUser ? 'right-0' : 'left-0'}`}
+                                      >
+                                        {QUICK_REACTION_EMOJIS.map((emoji) => (
+                                          <button
+                                            key={emoji}
+                                            type="button"
+                                            onClick={() => handleReactToMessage(msg.id, emoji)}
+                                            className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 hover:scale-125 transition-all text-sm cursor-pointer"
+                                          >
+                                            {emoji}
+                                          </button>
+                                        ))}
+
+                                        <div className="w-[1px] h-4 bg-dd-border/60 mx-0.5" />
+
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setActiveReactionPickerMessageId(msg.id);
+                                            setActiveReactionMessageId(null);
+                                          }}
+                                          className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 text-dd-muted hover:text-dd-text transition-colors cursor-pointer text-xs font-bold"
+                                          title="Mais emojis..."
+                                        >
+                                          <Plus className="w-3.5 h-3.5" />
+                                        </button>
+                                      </motion.div>
+                                    )}
+                                  </AnimatePresence>
+
+                                  {/* Full Emoji Picker Popover */}
+                                  <AnimatePresence>
+                                    {activeReactionPickerMessageId === msg.id && (
+                                      <motion.div
+                                        ref={reactionPickerRef}
+                                        initial={{
+                                          opacity: 0,
+                                          scale: 0.95,
+                                          y: index <= 3 ? -10 : 10,
+                                        }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95, y: index <= 3 ? -10 : 10 }}
+                                        transition={{ duration: 0.15 }}
+                                        className={`absolute z-[110] w-64 bg-dd-surface/95 backdrop-blur-md border border-dd-border/80 rounded-2xl shadow-2xl p-2.5 ${
+                                          index <= 3 ? 'top-0 mt-8' : 'bottom-0 mb-8'
+                                        } ${isCurrentUser ? 'right-0' : 'left-0'}`}
+                                      >
+                                        <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-dd-border/40">
+                                          <span className="text-[11px] font-bold text-dd-muted uppercase tracking-wider">
+                                            Reagir com emoji
+                                          </span>
+                                          <button
+                                            type="button"
+                                            onClick={() => setActiveReactionPickerMessageId(null)}
+                                            className="text-dd-muted hover:text-dd-text p-0.5 rounded cursor-pointer"
+                                          >
+                                            <X className="w-3.5 h-3.5" />
+                                          </button>
+                                        </div>
+                                        <div className="max-h-48 overflow-y-auto space-y-2 pr-1 scrollbar-thin">
+                                          {EMOJI_CATEGORIES.map((cat) => (
+                                            <div key={cat.name}>
+                                              <span className="text-[10px] font-semibold text-dd-muted/80 block mb-1">
+                                                {cat.name}
+                                              </span>
+                                              <div className="grid grid-cols-6 gap-1">
+                                                {cat.emojis.map((emoji) => (
+                                                  <button
+                                                    key={emoji}
+                                                    type="button"
+                                                    onClick={() =>
+                                                      handleReactToMessage(msg.id, emoji)
+                                                    }
+                                                    className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 hover:scale-115 transition-all text-sm cursor-pointer"
+                                                  >
+                                                    {emoji}
+                                                  </button>
+                                                ))}
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </motion.div>
+                                    )}
+                                  </AnimatePresence>
+                                </div>
+
                                 <button
                                   type="button"
                                   onClick={(e) => handleToggleMenu(e, msg.id)}
@@ -768,19 +1028,6 @@ export default function MessagesPage() {
                                   title="Mais opções"
                                 >
                                   <MoreHorizontal className="w-3.5 h-3.5" />
-                                </button>
-
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    playSound('bookmark');
-                                    setToastMessage('Reação adicionada!');
-                                    setTimeout(() => setToastMessage(null), 2000);
-                                  }}
-                                  className="p-1.5 hover:bg-dd-surface/85 text-dd-muted hover:text-red-500 rounded-full transition-colors cursor-pointer"
-                                  title="Curtir"
-                                >
-                                  <Heart className="w-3.5 h-3.5" />
                                 </button>
 
                                 <AnimatePresence>
@@ -907,6 +1154,76 @@ export default function MessagesPage() {
                                 </AnimatePresence>
                               </div>
                             </div>
+
+                            {/* Message Reactions Pills */}
+                            {(() => {
+                              const groupedReactions = (msg.reactions || []).reduce<
+                                Record<
+                                  string,
+                                  {
+                                    emoji: string;
+                                    count: number;
+                                    userNames: string[];
+                                    hasReacted: boolean;
+                                  }
+                                >
+                              >((acc, r) => {
+                                if (!acc[r.emoji]) {
+                                  acc[r.emoji] = {
+                                    emoji: r.emoji,
+                                    count: 0,
+                                    userNames: [],
+                                    hasReacted: false,
+                                  };
+                                }
+                                acc[r.emoji].count += 1;
+                                if (r.user?.username) {
+                                  acc[r.emoji].userNames.push(
+                                    r.user_id === user?.id ? 'Você' : `@${r.user.username}`
+                                  );
+                                } else if (r.user_id === user?.id) {
+                                  acc[r.emoji].userNames.push('Você');
+                                }
+                                if (r.user_id === user?.id) {
+                                  acc[r.emoji].hasReacted = true;
+                                }
+                                return acc;
+                              }, {});
+
+                              const reactionList = Object.values(groupedReactions);
+                              if (reactionList.length === 0) return null;
+
+                              return (
+                                <div
+                                  className={`flex flex-wrap gap-1 mt-0.5 px-1 max-w-full z-10 ${
+                                    isCurrentUser ? 'justify-end' : 'justify-start'
+                                  }`}
+                                >
+                                  {reactionList.map((item) => {
+                                    const tooltipText =
+                                      item.userNames.length > 0
+                                        ? item.userNames.join(', ')
+                                        : 'Reação';
+                                    return (
+                                      <button
+                                        key={item.emoji}
+                                        type="button"
+                                        onClick={() => handleReactToMessage(msg.id, item.emoji)}
+                                        title={tooltipText}
+                                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium border transition-all transform active:scale-95 cursor-pointer ${
+                                          item.hasReacted
+                                            ? 'bg-blue-500/20 border-blue-500/60 text-blue-400 font-semibold shadow-sm'
+                                            : 'bg-dd-surface/90 hover:bg-dd-surface border-dd-border/70 text-dd-text'
+                                        }`}
+                                      >
+                                        <span className="text-xs">{item.emoji}</span>
+                                        <span className="text-[10px] opacity-90">{item.count}</span>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              );
+                            })()}
 
                             <div className="flex items-center gap-1.5 text-[9px] text-dd-muted px-1.5 font-medium">
                               <span>{formatMessageTime(msg.created_at)}</span>

@@ -68,6 +68,21 @@ export const GET = apiHandler(async (req) => {
         { sender_id: receiverId, receiver_id: user.id },
       ],
     },
+    include: {
+      reactions: {
+        select: {
+          id: true,
+          emoji: true,
+          user_id: true,
+          user: {
+            select: {
+              id: true,
+              username: true,
+            },
+          },
+        },
+      },
+    },
     orderBy: { created_at: 'asc' },
     take: 100, // Safe limit for performance
   });

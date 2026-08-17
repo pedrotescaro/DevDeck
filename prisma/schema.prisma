@@ -62,6 +62,7 @@ model User {
   followers           Follow[]       @relation("Followers")
   following           Follow[]       @relation("Following")
   reactions           Reaction[]
+  message_reactions   MessageReaction[]
   guilds_owned        Guild[]         @relation("OwnedGuilds")
   guild_memberships   GuildMember[]
 
@@ -259,10 +260,26 @@ model Message {
   created_at  DateTime @default(now())
   updated_at  DateTime?
 
-  sender   User @relation("sent_messages", fields: [sender_id], references: [id], onDelete: Cascade)
-  receiver User @relation("received_messages", fields: [receiver_id], references: [id], onDelete: Cascade)
+  sender    User              @relation("sent_messages", fields: [sender_id], references: [id], onDelete: Cascade)
+  receiver  User              @relation("received_messages", fields: [receiver_id], references: [id], onDelete: Cascade)
+  reactions MessageReaction[]
 
   @@index([created_at])
+}
+
+model MessageReaction {
+  id         String   @id @default(uuid())
+  message_id String
+  user_id    String
+  emoji      String
+  created_at DateTime @default(now())
+
+  message Message @relation(fields: [message_id], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([message_id, user_id, emoji])
+  @@index([message_id])
+  @@index([user_id])
 }
 
 model Bookmark {
@@ -390,4 +407,3 @@ model QuizLibrary {
   tags          String[]
   created_at    DateTime @default(now())
 }
-
