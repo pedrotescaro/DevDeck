@@ -58,29 +58,33 @@ export default function LandingNav({ initialUser }: LandingNavProps) {
       }`}
     >
       <div
-        className={`flex w-full items-center justify-between transition-[padding] duration-500 ease-out ${
+        className={`relative flex w-full items-center justify-between transition-[padding] duration-500 ease-out ${
           isScrolled ? 'px-4 py-3 sm:px-6' : 'px-4 py-5 sm:px-10'
         }`}
       >
-        {/* ── Logo ── */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <Image
-            src="/logo.svg"
-            alt="Stacklyst Logo"
-            width={366}
-            height={283}
-            className="h-auto w-8 object-contain"
-          />
-          <span
-            className="font-sans text-xl font-extrabold tracking-tight"
-            style={{ color: 'var(--lp-fg)' }}
-          >
-            Stacklyst
-          </span>
-        </Link>
+        {/* ── Logo & Language Toggle ── */}
+        <div className="flex items-center gap-3 sm:gap-4">
+          <Link href="/" className="flex items-center gap-3 group">
+            <Image
+              src="/logo.svg"
+              alt="Stacklyst Logo"
+              width={366}
+              height={283}
+              className="h-auto w-8 object-contain"
+            />
+            <span
+              className="font-sans text-xl font-extrabold tracking-tight"
+              style={{ color: 'var(--lp-fg)' }}
+            >
+              Stacklyst
+            </span>
+          </Link>
 
-        {/* ── Center links (hidden on mobile) ── */}
-        <div className="hidden items-center gap-7 lg:flex">
+          <LanguageToggle />
+        </div>
+
+        {/* ── Center links (hidden on mobile, perfectly centered) ── */}
+        <div className="hidden items-center gap-7 lg:flex absolute left-1/2 -translate-x-1/2">
           {navLinks.map((link) => (
             <a key={link.href} href={link.href} className="lp-nav-link">
               {link.label}
@@ -90,14 +94,9 @@ export default function LandingNav({ initialUser }: LandingNavProps) {
 
         {/* ── Right side ── */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <LanguageToggle />
-
           {/* Auth links or CTA */}
           {initialUser ? (
-            <Link
-              href="/feed"
-              className="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-blue-100"
-            >
+            <Link href="/feed" className={styles.signUpButton} data-force-motion="true">
               {t.nav.goToFeed}
             </Link>
           ) : (

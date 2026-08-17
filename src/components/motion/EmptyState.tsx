@@ -1,6 +1,16 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import {
+  BellOff,
+  MessageSquare,
+  Search,
+  MessageCircle,
+  Bookmark,
+  FileText,
+  Inbox,
+  type LucideIcon,
+} from 'lucide-react';
 import { cn } from '@/lib/cn';
 
 type EmptyStateType =
@@ -18,46 +28,47 @@ interface EmptyStateProps {
   className?: string;
 }
 
-const STATES: Record<EmptyStateType, { icon: string; title: string; desc: string }> = {
+const STATES: Record<EmptyStateType, { icon: LucideIcon; title: string; desc: string }> = {
   feed: {
-    icon: '\u{1F4AC}',
+    icon: MessageSquare,
     title: 'Nenhum post ainda.',
-    desc: 'Seja o primeiro a quebrar o silencio.',
+    desc: 'Seja o primeiro a quebrar o silêncio.',
   },
   search: {
-    icon: '\u{1F50D}',
+    icon: Search,
     title: "Nenhum resultado para '{term}'.",
-    desc: 'Voce pode ser o primeiro a falar sobre isso.',
+    desc: 'Você pode ser o primeiro a falar sobre isso.',
   },
   notifications: {
-    icon: '\u2728',
+    icon: BellOff,
     title: 'Tudo lido.',
-    desc: 'Hora de fazer algo que valha uma notificacao.',
+    desc: 'Hora de fazer algo que valha uma notificação.',
   },
   dm: {
-    icon: '\u{1F44B}',
+    icon: MessageCircle,
     title: 'Nenhuma mensagem ainda.',
     desc: "Manda um 'Hello, World!'",
   },
   bookmarks: {
-    icon: '\u{1F516}',
+    icon: Bookmark,
     title: 'Nenhum bookmark ainda.',
-    desc: 'Salve posts tecnicos para revisitar sem perder o fio.',
+    desc: 'Salve posts técnicos para revisitar sem perder o fio.',
   },
   'profile-posts': {
-    icon: '\u{1F4DD}',
+    icon: FileText,
     title: 'Nenhuma postagem ainda.',
     desc: 'Quando postar algo, vai aparecer aqui.',
   },
   generic: {
-    icon: '\u{1F4E6}',
+    icon: Inbox,
     title: 'Nada por aqui.',
     desc: 'Volte mais tarde.',
   },
 };
 
 export function EmptyState({ type, searchTerm, className }: EmptyStateProps) {
-  const state = STATES[type];
+  const state = STATES[type] ?? STATES.generic;
+  const Icon = state.icon;
   const title = state.title.replace('{term}', searchTerm || '');
   const desc = state.desc;
 
@@ -71,8 +82,8 @@ export function EmptyState({ type, searchTerm, className }: EmptyStateProps) {
         className
       )}
     >
-      <div className="w-12 h-12 rounded-full bg-dd-surface border border-dd-border flex items-center justify-center text-xl">
-        {state.icon}
+      <div className="w-12 h-12 rounded-2xl bg-dd-surface border border-dd-border flex items-center justify-center text-blue-400 shadow-sm">
+        <Icon className="w-6 h-6 stroke-[1.8]" />
       </div>
       <p className="text-sm font-bold text-dd-text">{title}</p>
       <p className="text-xs text-dd-muted max-w-xs leading-relaxed">{desc}</p>

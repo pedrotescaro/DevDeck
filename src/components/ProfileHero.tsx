@@ -13,9 +13,13 @@ interface ProfileHeroProps {
   currentUserId: string;
   profile: {
     id: string;
+    name?: string | null;
     username: string;
     bio?: string | null;
     institution?: string | null;
+    github_username?: string | null;
+    discord_username?: string | null;
+    banner_url?: string | null;
     pronouns?: string | null;
     created_at: string;
     total_xp: number;
@@ -33,6 +37,21 @@ interface ProfileHeroProps {
   onShowFollowers: () => void;
   onShowFollowing: () => void;
 }
+
+const Github = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+    <path d="M9 18c-4.51 2-5-2-7-2" />
+  </svg>
+);
 
 const languageColors: Record<string, string> = {
   JAVASCRIPT: '#ffc800',
@@ -68,13 +87,28 @@ export function ProfileHero({
   const avatar = normalizeAvatarConfig(profile.avatar_config, profile.username);
   const bannerColor = AVATAR_BACKGROUNDS[avatar.background];
   const initials = profile.username.trim().slice(0, 2).toUpperCase() || 'DD';
+  const displayName =
+    profile.name ||
+    (profile.avatar_config as any)?.name ||
+    (profile.avatar_config as any)?.displayName ||
+    profile.username;
 
   return (
     <section className="w-full px-4 pb-6 pt-5 sm:px-7 sm:pt-9 lg:px-9 lg:pt-[50px]">
       <div
-        className="relative flex h-[245px] w-full items-end justify-center overflow-hidden rounded-[28px] border-2 border-b-4 border-black/20 sm:h-[280px] lg:h-[295px]"
+        className="relative flex h-[245px] w-full items-end justify-center overflow-hidden rounded-[28px] border-2 border-b-4 border-black/20 sm:h-[280px] lg:h-[295px] transition-colors duration-300"
         style={{ backgroundColor: bannerColor }}
       >
+        {profile.banner_url && (
+          <Image
+            src={profile.banner_url}
+            alt="Banner"
+            fill
+            sizes="100%"
+            className="object-cover"
+            priority
+          />
+        )}
         <div className="relative z-10 mb-7 flex h-[180px] w-[180px] items-center justify-center overflow-hidden rounded-[36px] border-[6px] border-white/25 bg-black/15 text-5xl font-black text-white shadow-[0_14px_0_rgba(0,0,0,0.18)] sm:h-[210px] sm:w-[210px]">
           {profile.avatar_url ? (
             <Image
@@ -96,7 +130,7 @@ export function ProfileHero({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2.5">
             <h1 className="truncate text-2xl font-black tracking-tight text-dd-text sm:text-3xl">
-              {profile.username}
+              {displayName}
             </h1>
             <LevelBadge totalXp={profile.total_xp} className="text-[10px]" />
           </div>
@@ -129,7 +163,19 @@ export function ProfileHero({
             'Aprendendo, praticando e compartilhando código com a comunidade Stacklyst.'}
         </p>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-bold text-dd-muted">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-bold text-dd-muted">
+            {profile.github_username && (
+              <a
+                href={`https://github.com/${profile.github_username}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 hover:text-sky-400 text-slate-300 transition-colors group"
+                title={`GitHub: @${profile.github_username}`}
+              >
+                <Github className="h-4 w-4 text-sky-400 group-hover:scale-110 transition-transform" />
+                <span>@{profile.github_username}</span>
+              </a>
+            )}
             {profile.institution && (
               <span className="flex items-center gap-2">
                 <GraduationCap className="h-4 w-4 text-sky-400" /> {profile.institution}

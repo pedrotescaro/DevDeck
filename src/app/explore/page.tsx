@@ -9,6 +9,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { PostCard } from '@/components/PostCard';
 import { FollowButton } from '@/components/motion/FollowButton';
 import { EmptyState } from '@/components/motion/EmptyState';
+import { LevelBadge } from '@/components/LevelBadge';
 import { getCurrentUser } from '@/lib/client/current-user';
 import { Search as SearchIcon, Settings, MoreHorizontal, ArrowLeft } from 'lucide-react';
 
@@ -504,9 +505,7 @@ export default function ExplorePage() {
                             <p className="text-xs font-black text-dd-text truncate group-hover:underline">
                               {sugUser.username}
                             </p>
-                            <span className="text-[9px] bg-dd-surface border border-dd-border/60 px-1.5 py-0.5 rounded text-dd-muted font-mono font-semibold">
-                              Lvl {Math.max(1, Math.floor((sugUser.total_xp ?? 0) / 1000) + 1)}
-                            </span>
+                            <LevelBadge totalXp={sugUser.total_xp ?? 0} />
                           </div>
                           <p className="text-[10px] text-dd-muted font-semibold truncate mt-0.5">
                             @{sugUser.username.toLowerCase()}

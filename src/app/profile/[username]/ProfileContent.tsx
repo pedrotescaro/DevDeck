@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/Sidebar';
 import { ProfileHero } from '@/components/ProfileHero';
 import { AchievementShowcase } from '@/components/AchievementShowcase';
@@ -24,6 +25,7 @@ interface ProfileContentProps {
   };
   profileUser: {
     id: string;
+    name?: string | null;
     username: string;
     avatar_url?: string | null;
     avatar_config?: unknown;
@@ -73,6 +75,7 @@ export function ProfileContent({
   dailyProgress,
   initialTab = 'posts',
 }: ProfileContentProps) {
+  const router = useRouter();
   const [weeklyActivity, setWeeklyActivity] = useState<Map<number, number>>(new Map());
   const [posts, setPosts] = useState<{ tab: string; items: any[] }>({ tab: 'posts', items: [] });
   const [nextCursor, setNextCursor] = useState<string | null>(null);
@@ -507,6 +510,9 @@ export function ProfileContent({
         profileUser={localProfileUser}
         onSaved={(updatedFields) => {
           setLocalProfileUser((prev) => ({ ...prev, ...updatedFields }));
+          if (updatedFields.username && updatedFields.username !== profileUser.username) {
+            router.push(`/profile/${updatedFields.username}`);
+          }
         }}
       />
     </div>

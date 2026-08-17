@@ -145,14 +145,16 @@ export function PostComposerExtras({
           <button
             type="button"
             onClick={() => togglePanel('reply')}
-            className="flex items-center gap-1.5 text-blue-500 hover:text-blue-400 font-extrabold text-[11px] cursor-pointer w-fit py-1 px-2 hover:bg-blue-500/5 rounded-full transition-colors"
+            className="flex items-center gap-2 text-blue-500 hover:text-blue-400 font-extrabold text-xs cursor-pointer w-fit py-1.5 px-3 hover:bg-blue-500/10 rounded-full transition-colors"
           >
-            <Globe className="w-3.5 h-3.5 shrink-0" />
+            {replyAudience === 'everyone' && <Globe className="w-4 h-4 shrink-0" />}
+            {replyAudience === 'followers' && <Users className="w-4 h-4 shrink-0" />}
+            {replyAudience === 'mentioned' && <AtSign className="w-4 h-4 shrink-0" />}
             <span>{replyLabel}</span>
           </button>
 
           {openPanel === 'reply' && (
-            <div className="absolute left-0 top-full mt-1 z-[100] w-72 rounded-xl border border-dd-border/80 bg-dd-surface/95 backdrop-blur-md p-1.5 shadow-2xl animate-slide-up">
+            <div className="absolute left-0 top-full mt-1.5 z-[100] w-72 rounded-2xl border border-dd-border/80 bg-dd-surface/95 backdrop-blur-md p-2 shadow-2xl animate-slide-up">
               {REPLY_AUDIENCE_OPTIONS.map((option) => (
                 <button
                   key={option.value}
@@ -161,15 +163,19 @@ export function PostComposerExtras({
                     setReplyAudience(option.value);
                     setOpenPanel(null);
                   }}
-                  className={`flex w-full items-start gap-2.5 rounded-lg px-3 py-2.5 text-left transition-colors cursor-pointer ${
+                  className={`flex w-full items-start gap-3 rounded-xl px-3.5 py-2.5 text-left transition-colors cursor-pointer ${
                     replyAudience === option.value
-                      ? 'bg-blue-500/10 text-blue-400'
+                      ? 'bg-blue-500/10 text-blue-400 font-bold'
                       : 'text-dd-text hover:bg-blue-500/5 hover:text-blue-400'
                   }`}
                 >
-                  {option.value === 'everyone' && <Globe className="w-4 h-4 mt-0.5 shrink-0" />}
-                  {option.value === 'followers' && <Users className="w-4 h-4 mt-0.5 shrink-0" />}
-                  {option.value === 'mentioned' && <AtSign className="w-4 h-4 mt-0.5 shrink-0" />}
+                  {option.value === 'everyone' && <Globe className="w-4.5 h-4.5 mt-0.5 shrink-0" />}
+                  {option.value === 'followers' && (
+                    <Users className="w-4.5 h-4.5 mt-0.5 shrink-0" />
+                  )}
+                  {option.value === 'mentioned' && (
+                    <AtSign className="w-4.5 h-4.5 mt-0.5 shrink-0" />
+                  )}
                   <span>
                     <span className="block text-xs font-bold">{option.label}</span>
                     <span className="block text-[10px] text-dd-muted font-medium">
@@ -186,19 +192,19 @@ export function PostComposerExtras({
   }
 
   return (
-    <div ref={panelRef} className="flex items-center gap-1.5">
+    <div ref={panelRef} className="flex items-center gap-2">
       <div className="relative">
         <button
           type="button"
           onClick={() => togglePanel('emoji')}
-          className={`p-2 rounded-full transition-colors cursor-pointer ${
+          className={`p-2.5 rounded-full transition-colors cursor-pointer ${
             openPanel === 'emoji'
-              ? 'bg-blue-500/15 text-blue-400'
+              ? 'bg-blue-500/20 text-blue-400'
               : 'text-blue-500 hover:bg-blue-500/10'
           }`}
           title="Emojis"
         >
-          <Smile className="w-4.5 h-4.5" />
+          <Smile className="w-5 h-5" />
         </button>
 
         {openPanel === 'emoji' && (
@@ -233,14 +239,14 @@ export function PostComposerExtras({
         <button
           type="button"
           onClick={() => togglePanel('schedule')}
-          className={`p-2 rounded-full transition-colors cursor-pointer ${
+          className={`p-2.5 rounded-full transition-colors cursor-pointer ${
             openPanel === 'schedule' || scheduledAt
-              ? 'bg-blue-500/15 text-blue-400'
+              ? 'bg-blue-500/20 text-blue-400'
               : 'text-blue-500 hover:bg-blue-500/10'
           }`}
           title="Agendar publicação"
         >
-          <Calendar className="w-4.5 h-4.5" />
+          <Calendar className="w-5 h-5" />
         </button>
 
         {openPanel === 'schedule' && (
@@ -279,14 +285,14 @@ export function PostComposerExtras({
         <button
           type="button"
           onClick={() => togglePanel('location')}
-          className={`p-2 rounded-full transition-colors cursor-pointer ${
+          className={`p-2.5 rounded-full transition-colors cursor-pointer ${
             openPanel === 'location' || location
-              ? 'bg-blue-500/15 text-blue-400'
+              ? 'bg-blue-500/20 text-blue-400'
               : 'text-blue-500 hover:bg-blue-500/10'
           }`}
           title="Adicionar localização"
         >
-          <MapPin className="w-4.5 h-4.5" />
+          <MapPin className="w-5 h-5" />
         </button>
 
         {openPanel === 'location' && (
@@ -328,12 +334,12 @@ export function PostComposerExtras({
       <button
         type="button"
         onClick={() => setIsSensitive(!isSensitive)}
-        className={`p-2 rounded-full transition-colors cursor-pointer ${
-          isSensitive ? 'bg-red-500/15 text-red-400' : 'text-blue-500 hover:bg-blue-500/10'
+        className={`p-2.5 rounded-full transition-colors cursor-pointer ${
+          isSensitive ? 'bg-red-500/20 text-red-400' : 'text-blue-500 hover:bg-blue-500/10'
         }`}
         title="Marcar como conteúdo sensível"
       >
-        <Flag className="w-4.5 h-4.5" />
+        <Flag className="w-5 h-5" />
       </button>
     </div>
   );

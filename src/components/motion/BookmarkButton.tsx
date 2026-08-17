@@ -58,14 +58,14 @@ export function BookmarkButton({ isSaved, onToggle, className, onViewAll }: Book
           'dd-touch dd-focus-ring w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer shrink-0',
           saved
             ? 'text-blue-500 hover:bg-blue-500/10'
-            : 'text-dd-muted hover:text-dd-text hover:bg-blue-500/10',
+            : 'text-dd-muted hover:text-blue-400 hover:bg-blue-500/10',
           className
         )}
         whileTap={reduced ? undefined : { scale: [1, 1.2, 1] }}
         transition={{ duration: 0.3 }}
         title={saved ? 'Remover dos salvos' : 'Salvar'}
       >
-        <Bookmark className={cn('w-4 h-4', saved && 'fill-current')} />
+        <Bookmark className={cn('w-[18px] h-[18px]', saved && 'fill-current')} />
       </motion.button>
 
       <AnimatePresence>

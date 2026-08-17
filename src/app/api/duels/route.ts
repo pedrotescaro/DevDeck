@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getAuthUser } from '@/lib/auth';
 import { createDuelSchema } from '@/lib/validators';
-import { DuelStatus } from '@prisma/client';
+import { DuelStatus, Language } from '@prisma/client';
 
 // GET /api/duels
 export async function GET(request: Request) {
@@ -36,7 +36,9 @@ export async function GET(request: Request) {
   }
 }
 
-// POST /api/duels (Cria ou entra em um duelo pendente)
+import { getRandomDuelProblem } from '@/lib/duel-problems';
+
+// POST /api/duels (Cria ou entra em um duelo pendente / Matchmaking)
 export async function POST(request: Request) {
   try {
     const user = await getAuthUser();
@@ -45,6 +47,60 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
+
+    // Matchmaking rápido sem formulário prévio
+    if (body.isQuickMatch) {
+      const language = (body.language as Language) || 'TS';
+
+      // Buscar se já existe um duelo pendente no mesmo idioma feito por OUTRO usuário
+      const pendingDuel = await prisma.duel.findFirst({
+        where: {
+          language,
+          status: DuelStatus.PENDING,
+          challenger_id: { not: user.id },
+        },
+      });
+
+      if (pendingDuel) {
+        const updatedDuel = await prisma.duel.update({
+          where: { id: pendingDuel.id },
+          data: {
+            opponent_id: user.id,
+            status: DuelStatus.ACTIVE,
+          },
+          include: {
+            challenger: { select: { username: true, avatar_url: true } },
+            opponent: { select: { username: true, avatar_url: true } },
+          },
+        });
+
+        return NextResponse.json({
+          message: 'Oponente encontrado! Duelo iniciado.',
+          duel: updatedDuel,
+        });
+      }
+
+      // Criar novo desafio randômico com problema do preset
+      const problem = getRandomDuelProblem();
+      const newDuel = await prisma.duel.create({
+        data: {
+          challenger_id: user.id,
+          problem_title: problem.title,
+          problem_body: problem.description,
+          language,
+          status: DuelStatus.PENDING,
+        },
+        include: {
+          challenger: { select: { username: true, avatar_url: true } },
+        },
+      });
+
+      return NextResponse.json({
+        message: 'Buscando oponente na arena...',
+        duel: newDuel,
+      });
+    }
+
     const result = createDuelSchema.safeParse(body);
     if (!result.success) {
       return NextResponse.json({ error: result.error.issues[0].message }, { status: 400 });
@@ -70,8 +126,8 @@ export async function POST(request: Request) {
           status: DuelStatus.ACTIVE,
         },
         include: {
-          challenger: { select: { username: true } },
-          opponent: { select: { username: true } },
+          challenger: { select: { username: true, avatar_url: true } },
+          opponent: { select: { username: true, avatar_url: true } },
         },
       });
 
@@ -91,7 +147,7 @@ export async function POST(request: Request) {
         status: DuelStatus.PENDING,
       },
       include: {
-        challenger: { select: { username: true } },
+        challenger: { select: { username: true, avatar_url: true } },
       },
     });
 

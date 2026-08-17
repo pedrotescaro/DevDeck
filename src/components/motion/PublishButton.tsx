@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Send } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { XPFloatToast } from './XPFloatToast';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -39,19 +38,18 @@ export function PublishButton({
         type="submit"
         disabled={disabled || state === 'submitting'}
         className={cn(
-          'dd-focus-ring dd-gpu relative flex items-center justify-center gap-1.5 bg-dd-accent text-white text-xs font-bold px-5 py-2 rounded-full',
-          'shadow-md shadow-blue-500/10 transition-[opacity,background-color] duration-200 cursor-pointer',
+          'dd-focus-ring dd-gpu relative flex items-center justify-center gap-1.5 bg-blue-500 text-white text-sm font-bold px-4 py-1.5 rounded-full',
+          'shadow-sm transition-[opacity,background-color] duration-200 cursor-pointer',
           'hover:bg-blue-600',
-          isEmpty && 'opacity-40 scale-95 pointer-events-none',
-          state === 'success' && 'bg-dd-green hover:bg-dd-green',
+          isEmpty && 'opacity-50 cursor-not-allowed pointer-events-none',
+          state === 'success' && 'bg-emerald-500 hover:bg-emerald-500',
           state === 'submitting' && 'opacity-80 cursor-wait',
           className
         )}
-        whileHover={!isEmpty && state === 'idle' ? { scale: 1.03 } : undefined}
-        whileTap={!reduced && state !== 'submitting' ? { scale: 0.95 } : undefined}
+        whileHover={!isEmpty && state === 'idle' ? { scale: 1.02 } : undefined}
+        whileTap={!reduced && state !== 'submitting' ? { scale: 0.96 } : undefined}
         transition={{ type: 'spring', stiffness: 500, damping: 28 }}
       >
-        <Send className="w-3.5 h-3.5 shrink-0" />
         <span>{label ?? labels[state]}</span>
       </motion.button>
     </div>

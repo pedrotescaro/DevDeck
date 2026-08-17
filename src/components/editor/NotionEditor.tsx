@@ -67,6 +67,7 @@ export const NotionEditor = forwardRef<NotionEditorRef, NotionEditorProps>(funct
       Placeholder.configure({
         placeholder,
         emptyEditorClass: 'is-editor-empty',
+        emptyNodeClass: 'is-empty',
       }),
       SlashCommand,
     ],

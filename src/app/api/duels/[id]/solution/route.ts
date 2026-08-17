@@ -47,10 +47,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       },
     });
 
-    // Conceder XP (+25 XP por enviar solução ao duelo)
-    const xpResult = await awardXP(user.id, duel.language, 25);
+    // Conceder XP de vitória (+50 XP por vitória em duelo)
+    const xpResult = await awardXP(user.id, duel.language, 50);
 
-    return NextResponse.json({ solution, xpResult });
+    return NextResponse.json({ solution, xpResult, success: true });
   } catch (error) {
     console.error('Error submitting duel solution:', error);
     return NextResponse.json({ error: 'Erro ao enviar solução' }, { status: 500 });

@@ -311,11 +311,38 @@ export function FeedContent({
   const [showMentionSuggestions, setShowMentionSuggestions] = useState(false);
   const [focusedInput, setFocusedInput] = useState<'inline' | 'modal' | null>(null);
   const postBodyEditorRef = useRef<NotionEditorRef>(null);
+  const composerContainerRef = useRef<HTMLDivElement>(null);
   const [replyAudience, setReplyAudience] = useState<ReplyAudience>('everyone');
   const [scheduledAt, setScheduledAt] = useState<string | null>(null);
   const [postLocation, setPostLocation] = useState('');
   const [isSensitive, setIsSensitive] = useState(false);
   const didMountFilterEffectRef = useRef(false);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        composerContainerRef.current &&
+        !composerContainerRef.current.contains(event.target as Node)
+      ) {
+        if (
+          !postBody.trim() &&
+          !quotePost &&
+          !postImage &&
+          !postLocation &&
+          !scheduledAt &&
+          !isSensitive &&
+          replyAudience === 'everyone'
+        ) {
+          setComposeFocused(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [postBody, quotePost, postImage, postLocation, scheduledAt, isSensitive, replyAudience]);
 
   // Report post state
   const [reportModalOpen, setReportModalOpen] = useState(false);
@@ -1219,13 +1246,13 @@ export function FeedContent({
 
       <Sidebar user={initialUser} />
 
-      <div className="mx-auto flex w-full min-w-0 flex-grow items-start justify-center xl:max-w-[1320px] xl:justify-start">
+      <div className="mx-auto flex w-full min-w-0 flex-grow items-start justify-center xl:max-w-[1480px] 2xl:max-w-[1600px] xl:justify-start">
         {/* ========================================================================= */}
         {/* COLUNA CENTRAL: O Feed Principal e PostCard */}
         {/* ========================================================================= */}
         <main
           data-testid="primary-column"
-          className="flex min-h-screen w-full min-w-0 max-w-[660px] flex-grow flex-col bg-dd-bg pb-24 md:pb-8"
+          className="flex min-h-screen w-full min-w-0 max-w-[720px] xl:max-w-[820px] 2xl:max-w-[920px] flex-grow flex-col bg-dd-bg pb-24 md:pb-8 border-r border-dd-border/60"
         >
           {/* Seletor de Abas Feed / Quizzes */}
           <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md flex border-b border-dd-border/60 select-none">
@@ -1344,43 +1371,48 @@ export function FeedContent({
           {/* Feed Tab View */}
           {activeTab === 'feed' && (
             <>
-              <motion.div
-                layout
-                className="relative z-20 border-b border-dd-border/60 bg-transparent p-4 sm:p-5 transition-[border-color,box-shadow] duration-200 focus-within:border-blue-500/40"
+              <div
+                ref={composerContainerRef}
+                onClick={() => setComposeFocused(true)}
+                className="relative z-20 border-b border-dd-border/60 bg-transparent px-4 pt-3.5 pb-2.5 transition-[border-color,box-shadow] duration-200 focus-within:border-blue-500/40"
               >
-                <form onSubmit={handleCreatePost} className="flex gap-4">
-                  <div className="shrink-0 pt-1">
+                <form onSubmit={handleCreatePost} className="flex gap-3">
+                  <div className="shrink-0 pt-0.5">
                     <AuthorAvatar
                       username={initialUser.username}
                       avatar_url={initialUser.avatar_url}
                       avatar_config={initialUser.avatar_config}
-                      size="lg"
+                      size="md"
+                      className="!h-10 !w-10"
                     />
                   </div>
 
-                  <div className="flex-1 min-w-0 space-y-4">
-                    <motion.div
-                      className="relative"
-                      animate={composeFocused ? { scale: 1 } : { scale: 1 }}
-                      transition={springGentle}
-                    >
+                  <div className="flex-1 min-w-0 flex flex-col justify-between">
+                    <div className="relative">
                       <MarkdownEditor
                         ref={postBodyEditorRef}
                         value={postBody}
                         onChange={(value) => handleBodyChange(value, 'inline')}
                         onFocus={() => setComposeFocused(true)}
-                        onBlur={() => {
-                          if (!postBody.trim() && !quotePost) {
-                            setComposeFocused(false);
-                          }
-                        }}
                         maxLength={POST_CHAR_LIMIT}
-                        minHeight={composeFocused ? '8rem' : '2.5rem'}
-                        placeholder="Qual a sua duvida tecnica? Digite / para inserir blocos..."
+                        minHeight={
+                          composeFocused ||
+                          Boolean(postBody.trim()) ||
+                          Boolean(quotePost) ||
+                          Boolean(postLocation) ||
+                          Boolean(scheduledAt) ||
+                          isSensitive ||
+                          replyAudience !== 'everyone'
+                            ? '3.5rem'
+                            : '1.75rem'
+                        }
+                        placeholder="O que você está construindo hoje?"
                       />
-                      <div className="absolute bottom-0 right-0">
-                        <CharCounter text={postBody} limit={POST_CHAR_LIMIT} />
-                      </div>
+                      {(composeFocused || postBody.trim().length > 0) && (
+                        <div className="absolute bottom-0 right-0">
+                          <CharCounter text={postBody} limit={POST_CHAR_LIMIT} />
+                        </div>
+                      )}
                       <MentionDropdown
                         query={postBody.split(/\s+/).at(-1)?.replace(/^@/, '') || ''}
                         visible={showMentionSuggestions && focusedInput === 'inline'}
@@ -1390,10 +1422,10 @@ export function FeedContent({
                           setMentionUsers([]);
                         }}
                       />
-                    </motion.div>
+                    </div>
 
                     {quotePost && (
-                      <div className="dd-quote-card rounded-2xl border border-dd-border bg-dd-bg/60 p-3">
+                      <div className="dd-quote-card my-2 rounded-2xl border border-dd-border bg-dd-bg/60 p-3">
                         <div className="mb-2 flex items-center justify-between gap-3">
                           <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-dd-muted">
                             Citando @{quotePost.author.username}
@@ -1413,11 +1445,11 @@ export function FeedContent({
                     )}
 
                     {postError && (
-                      <p className="text-[11px] font-medium text-red-400">{postError}</p>
+                      <p className="my-1 text-[11px] font-medium text-red-400">{postError}</p>
                     )}
 
                     {postImage && (
-                      <div className="relative rounded-xl overflow-hidden border border-dd-border max-h-60 bg-dd-bg">
+                      <div className="relative my-2 rounded-xl overflow-hidden border border-dd-border max-h-60 bg-dd-bg">
                         <Image
                           src={postImage}
                           alt="Preview"
@@ -1435,23 +1467,46 @@ export function FeedContent({
                       </div>
                     )}
 
-                    <PostComposerExtras
-                      section="meta"
-                      postBody={postBody}
-                      setPostBody={setPostBody}
-                      editorRef={postBodyEditorRef}
-                      replyAudience={replyAudience}
-                      setReplyAudience={setReplyAudience}
-                      scheduledAt={scheduledAt}
-                      setScheduledAt={setScheduledAt}
-                      location={postLocation}
-                      setLocation={setPostLocation}
-                      isSensitive={isSensitive}
-                      setIsSensitive={setIsSensitive}
-                    />
+                    {(composeFocused ||
+                      Boolean(postBody.trim()) ||
+                      Boolean(quotePost) ||
+                      Boolean(postLocation) ||
+                      Boolean(scheduledAt) ||
+                      isSensitive ||
+                      replyAudience !== 'everyone') && (
+                      <div className="my-2 border-b border-dd-border/40 pb-2 animate-slide-up">
+                        <PostComposerExtras
+                          section="meta"
+                          postBody={postBody}
+                          setPostBody={setPostBody}
+                          editorRef={postBodyEditorRef}
+                          replyAudience={replyAudience}
+                          setReplyAudience={setReplyAudience}
+                          scheduledAt={scheduledAt}
+                          setScheduledAt={setScheduledAt}
+                          location={postLocation}
+                          setLocation={setPostLocation}
+                          isSensitive={isSensitive}
+                          setIsSensitive={setIsSensitive}
+                        />
+                      </div>
+                    )}
 
-                    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-dd-border/50 pt-3">
-                      <div className="flex items-center gap-1.5 text-blue-500">
+                    <div
+                      className={cn(
+                        'flex flex-wrap items-center justify-between gap-2',
+                        composeFocused ||
+                          Boolean(postBody.trim()) ||
+                          Boolean(quotePost) ||
+                          Boolean(postLocation) ||
+                          Boolean(scheduledAt) ||
+                          isSensitive ||
+                          replyAudience !== 'everyone'
+                          ? 'pt-1'
+                          : 'pt-2'
+                      )}
+                    >
+                      <div className="flex items-center gap-1 text-blue-500">
                         <div>
                           <input
                             type="file"
@@ -1467,7 +1522,7 @@ export function FeedContent({
                           >
                             <svg
                               viewBox="0 0 24 24"
-                              className="w-4.5 h-4.5 fill-none stroke-current"
+                              className="w-5 h-5 fill-none stroke-current"
                               strokeWidth="2"
                             >
                               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -1510,7 +1565,7 @@ export function FeedContent({
                     </div>
                   </div>
                 </form>
-              </motion.div>
+              </div>
 
               {feedError && (
                 <div className="rounded-xl border border-red-500/20 bg-red-500/8 px-4 py-3 text-xs font-semibold text-red-300">

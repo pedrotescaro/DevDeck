@@ -100,6 +100,11 @@ export default async function ProfilePage({
   // Serializar
   const serializedProfileUser = {
     id: profileUser.id,
+    name:
+      (profileUser as any).name ||
+      (profileUser.avatar_config as any)?.name ||
+      (profileUser.avatar_config as any)?.displayName ||
+      profileUser.username,
     username: profileUser.username,
     avatar_url: profileUser.avatar_url,
     avatar_config: profileUser.avatar_config,

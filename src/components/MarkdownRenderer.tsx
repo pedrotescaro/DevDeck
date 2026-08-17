@@ -301,12 +301,12 @@ function CodeBlock({
               type="button"
               onClick={handleRun}
               disabled={running}
-              className="inline-flex shrink-0 items-center gap-1 rounded-md bg-dd-accent px-2.5 py-1 text-[10px] font-bold text-white transition-colors hover:bg-dd-accent/90 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-blue-500 hover:bg-blue-600 px-3.5 py-1.5 text-xs font-black text-white transition-all shadow-md shadow-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer active:scale-95"
             >
               {running ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
-                <Play className="h-3 w-3" />
+                <Play className="h-3.5 w-3.5 fill-current" />
               )}
               Executar
             </button>
@@ -314,7 +314,7 @@ function CodeBlock({
           <button
             type="button"
             onClick={handleCopy}
-            className="shrink-0 rounded-md border border-dd-border bg-dd-bg px-2.5 py-1 text-[10px] font-bold text-dd-muted transition-colors hover:border-dd-accent hover:text-dd-accent cursor-pointer"
+            className="shrink-0 rounded-full border border-dd-border bg-dd-surface/80 hover:bg-dd-surface px-3.5 py-1.5 text-xs font-bold text-dd-muted transition-colors hover:border-blue-500/40 hover:text-dd-text cursor-pointer"
           >
             {copied ? 'Copiado' : 'Copiar'}
           </button>

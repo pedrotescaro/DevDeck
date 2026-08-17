@@ -187,7 +187,7 @@ export function FeedRightSidebar({
     <aside
       data-testid="secondary-column"
       className={cn(
-        'sticky top-0 ml-5 hidden h-screen w-[380px] shrink-0 space-y-6 overflow-y-auto border-l border-dd-border/80 p-5 scrollbar-none xl:block',
+        'sticky top-0 hidden h-screen w-[360px] xl:w-[380px] shrink-0 space-y-6 overflow-y-auto p-5 scrollbar-none xl:block',
         className
       )}
     >
@@ -350,6 +350,25 @@ export function FeedRightSidebar({
           </div>
         )}
       </section>
+
+      {/* Sidebar Footer Info */}
+      <footer className="px-3 py-2 text-[11px] font-medium text-dd-muted/70 leading-relaxed">
+        <div className="flex flex-wrap gap-x-2.5 gap-y-1">
+          <Link href="/terms" className="hover:text-dd-text hover:underline transition-colors">
+            Termos de Serviço
+          </Link>
+          <Link href="/privacy" className="hover:text-dd-text hover:underline transition-colors">
+            Privacidade
+          </Link>
+          <Link href="/guidelines" className="hover:text-dd-text hover:underline transition-colors">
+            Diretrizes
+          </Link>
+          <Link href="/about" className="hover:text-dd-text hover:underline transition-colors">
+            Sobre
+          </Link>
+          <span>© 2026 Stacklyst</span>
+        </div>
+      </footer>
     </aside>
   );
 }

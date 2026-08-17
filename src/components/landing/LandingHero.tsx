@@ -76,14 +76,14 @@ export default function LandingHero({ initialUser, isReady = true }: LandingHero
           animate={isReady ? 'show' : 'hidden'}
           variants={container}
         >
-          <h1 className="mb-8 max-w-5xl px-1 font-sans text-[clamp(2.35rem,6vw,4.25rem)] font-semibold leading-[1.03] tracking-[-0.055em] text-white sm:px-0">
+          <h1 className="mb-8 max-w-6xl px-1 font-sans text-[clamp(1.5rem,4.2vw,3.6rem)] font-semibold leading-[1.08] tracking-[-0.045em] text-white sm:px-0">
             <span className="overflow-hidden block pt-3 pb-1 -mt-3">
-              <motion.span variants={lineReveal} className="inline-block">
+              <motion.span variants={lineReveal} className="inline-block whitespace-nowrap">
                 {t.hero.titleLine1}
               </motion.span>
             </span>
             <span className="overflow-hidden block pt-3 pb-1 -mt-3">
-              <motion.span variants={lineReveal} className="inline-block">
+              <motion.span variants={lineReveal} className="inline-block whitespace-nowrap">
                 {t.hero.titleLine2}
               </motion.span>
             </span>

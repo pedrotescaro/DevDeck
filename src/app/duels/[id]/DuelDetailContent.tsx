@@ -1,12 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { Sidebar } from '@/components/Sidebar';
 import { CodeEditor } from '@/components/CodeEditor';
-import { LanguageTag } from '@/components/LanguageTag';
+import { DuelBattleHeader } from '@/components/duels/DuelBattleHeader';
+import { DuelTestRunner, type TestResultItem } from '@/components/duels/DuelTestRunner';
+import { DuelVictoryModal } from '@/components/duels/DuelVictoryModal';
+import { useDuelRealtime } from '@/hooks/useDuelRealtime';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
-import { Swords, Code, Sparkles, ArrowLeft, Clock, Vote, HelpCircle, Send } from 'lucide-react';
+import { runCodeInSandbox } from '@/lib/code-runner';
+import {
+  DUEL_PROBLEMS,
+  buildTestHarness,
+  parseProblemFromJson,
+  type DuelProblem,
+} from '@/lib/duel-problems';
+import { Swords, ArrowLeft, Sparkles, Flame } from 'lucide-react';
 
 interface DuelDetailContentProps {
   user: {
@@ -14,47 +24,209 @@ interface DuelDetailContentProps {
     username: string;
     avatar_url?: string | null;
     total_xp: number;
+    streak?: number;
   };
   initialDuel: any;
 }
 
 export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps) {
-  const [duel] = useState<any>(initialDuel);
-  const [code, setCode] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [voting, setVoting] = useState(false);
-  const [toastXp, setToastXp] = useState<{ amount: number; language: string } | null>(null);
+  const [duel, setDuel] = useState<any>(initialDuel);
+  const [timeLeft, setTimeLeft] = useState<number>(300); // 5 minutos
   const [soundEnabled, setSoundEnabled] = useState(true);
+
+  // Match or associate a problem from presets, or parse AI-generated JSON
+  const problem: DuelProblem = useMemo(() => {
+    // 1. Try to parse AI-generated problem from problem_body JSON
+    const aiProblem = parseProblemFromJson(initialDuel.problem_body);
+    if (aiProblem) return aiProblem;
+
+    // 2. Try to match a preset problem by title
+    const found = DUEL_PROBLEMS.find(
+      (p) =>
+        p.title.toLowerCase() === initialDuel.problem_title?.toLowerCase() ||
+        initialDuel.problem_title?.toLowerCase().includes(p.title.toLowerCase())
+    );
+    if (found) return found;
+
+    // 3. Fallback: problem generated dynamically with generic test case
+    return {
+      id: 'custom-duel',
+      title: initialDuel.problem_title,
+      difficulty: 'Médio' as const,
+      description: initialDuel.problem_body,
+      functionName: 'solve',
+      starters: {
+        TS: '// Escreva a solução para o problema\nfunction solve() {\n  return true;\n}',
+        JS: '// Escreva a solução para o problema\nfunction solve() {\n  return true;\n}',
+        PYTHON: '# Escreva a solução para o problema\ndef solve():\n    return True\n',
+      },
+      testCases: [
+        {
+          id: 't1',
+          description: 'Validação da função',
+          inputDisplay: 'solve()',
+          expectedDisplay: 'true',
+          testExpression: {
+            TS: 'Boolean(solve()) === true',
+            JS: 'Boolean(solve()) === true',
+            PYTHON: 'bool(solve()) == True',
+          },
+        },
+      ],
+    };
+  }, [initialDuel]);
+
+  // Code state initialized with language starter code
+  const langKey = (initialDuel.language?.toUpperCase() as 'TS' | 'JS' | 'PYTHON') || 'TS';
+  const initialStarter =
+    initialDuel.solutions?.find((s: any) => s.user_id === user.id)?.code ||
+    problem.starters[langKey] ||
+    problem.starters.TS;
+
+  const [code, setCode] = useState(initialStarter);
+  const [testResults, setTestResults] = useState<TestResultItem[]>([]);
+  const [isRunningTests, setIsRunningTests] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [consoleOutput, setConsoleOutput] = useState('');
+  const [showVictoryModal, setShowVictoryModal] = useState(false);
+  const [isWinner, setIsWinner] = useState(false);
+  const [winnerUsername, setWinnerUsername] = useState('');
+  const [opponentCode, setOpponentCode] = useState<string | undefined>(undefined);
+  const [xpAwarded, setXpAwarded] = useState(0);
 
   useEffect(() => {
     const updateSoundState = () => {
       setSoundEnabled(localStorage.getItem('stacklyst-sound') !== 'false');
     };
-
     updateSoundState();
-
     window.addEventListener('storage', updateSoundState);
-    window.addEventListener('stacklyst-sound-changed', updateSoundState);
-
-    return () => {
-      window.removeEventListener('storage', updateSoundState);
-      window.removeEventListener('stacklyst-sound-changed', updateSoundState);
-    };
+    return () => window.removeEventListener('storage', updateSoundState);
   }, []);
 
   const { playSound } = useSoundEffects(soundEnabled);
 
-  const showXPToast = (amount: number, language: string) => {
-    setToastXp({ amount, language });
-    playSound('xpgain');
-    setTimeout(() => {
-      setToastXp(null);
-    }, 4000);
+  // Realtime hook
+  const {
+    presenceUsers,
+    opponentState,
+    duelPhase,
+    countdownNumber,
+    isSelfReady,
+    sendReady,
+    startCountdown,
+    sendTyping,
+    sendTestProgress,
+    sendVictory,
+    sendRematch,
+    setDuelPhase,
+  } = useDuelRealtime({
+    duelId: duel.id,
+    user,
+    onOpponentWon: (data) => {
+      setIsWinner(false);
+      setWinnerUsername(data.winnerUsername || 'Oponente');
+      setOpponentCode(data.code);
+      setXpAwarded(20);
+      setShowVictoryModal(true);
+      playSound('quiz_incorrect');
+    },
+    onRematchOffer: () => {
+      alert('Seu oponente pediu uma revanche!');
+      setShowVictoryModal(false);
+      setTestResults([]);
+      setCode(problem.starters[langKey] || problem.starters.TS);
+      setTimeLeft(300);
+      setDuelPhase('waiting');
+    },
+  });
+
+  // Countdown timer when battle is active
+  useEffect(() => {
+    if (duelPhase !== 'battle') return;
+
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [duelPhase]);
+
+  // Typing heartbeat to opponent
+  const handleCodeChange = (newCode: string) => {
+    setCode(newCode);
+    const lines = newCode.split('\n').length;
+    sendTyping(lines);
   };
 
+  // Run test cases
+  const handleRunTests = async () => {
+    if (isRunningTests || !code.trim()) return;
+    setIsRunningTests(true);
+    setConsoleOutput('');
+
+    try {
+      const harness = buildTestHarness(code, problem, duel.language);
+      const res = await runCodeInSandbox(harness, duel.language);
+
+      let parsedResults: TestResultItem[] = [];
+      let cleanOutput = res.output || '';
+
+      const startToken = '###TEST_RESULTS_START###';
+      const endToken = '###TEST_RESULTS_END###';
+
+      if (cleanOutput.includes(startToken) && cleanOutput.includes(endToken)) {
+        const jsonStr = cleanOutput.substring(
+          cleanOutput.indexOf(startToken) + startToken.length,
+          cleanOutput.indexOf(endToken)
+        );
+        try {
+          parsedResults = JSON.parse(jsonStr);
+          cleanOutput = cleanOutput.replace(`${startToken}${jsonStr}${endToken}`, '').trim();
+        } catch {
+          // fallback
+        }
+      } else if (res.ok) {
+        parsedResults = problem.testCases.map((tc) => ({
+          id: tc.id,
+          passed: true,
+          desc: tc.description,
+        }));
+      }
+
+      setTestResults(parsedResults);
+      setConsoleOutput(cleanOutput || (res.error ? `Erro: ${res.error}` : 'Execução concluída.'));
+
+      const passedCount = parsedResults.filter((r) => r.passed).length;
+      sendTestProgress(passedCount, problem.testCases.length);
+
+      if (passedCount === problem.testCases.length && problem.testCases.length > 0) {
+        playSound('quiz_correct');
+      } else {
+        playSound('quiz_incorrect');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setConsoleOutput(`Erro de execução: ${err.message || 'Falha ao executar os testes.'}`);
+    } finally {
+      setIsRunningTests(false);
+    }
+  };
+
+  const allPassed =
+    testResults.length > 0 &&
+    testResults.length === problem.testCases.length &&
+    testResults.every((r) => r.passed);
+
+  // Submit solution & trigger victory
   const handleSubmitSolution = async () => {
-    if (code.trim() === '') return;
-    setSubmitting(true);
+    if (!code.trim() || isSubmitting) return;
+    setIsSubmitting(true);
 
     try {
       const res = await fetch(`/api/duels/${duel.id}/solution`, {
@@ -65,378 +237,199 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
 
       if (res.ok) {
         const data = await res.json();
-        alert('Solução enviada com sucesso!');
-        setCode('');
-        window.location.reload();
+        const xpEarned = data.xpResult?.xpEarned ?? 50;
 
-        if (data.xpResult?.xpEarned) {
-          showXPToast(data.xpResult.xpEarned, data.xpResult.language);
-        }
+        setIsWinner(true);
+        setWinnerUsername(user.username);
+        setXpAwarded(xpEarned);
+        setShowVictoryModal(true);
+        playSound('levelup');
+
+        // Broadcast victory event to opponent
+        await sendVictory(code);
       } else {
         const data = await res.json();
-        alert(data.error || 'Erro ao enviar solução.');
+        alert(data.error || 'Erro ao submeter solução.');
       }
     } catch (err) {
       console.error(err);
     } finally {
-      setSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
-  const handleVote = async (solutionId: string) => {
-    setVoting(true);
-
-    try {
-      const res = await fetch(`/api/duels/${duel.id}/vote`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ solution_id: solutionId }),
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        alert('Voto registrado com sucesso!');
-        window.location.reload();
-      } else {
-        alert(data.error || 'Erro ao registrar voto.');
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setVoting(false);
-    }
-  };
-
-  // Simulated syntax highlighter for code snippets
-  const highlightCode = (code: string) => {
-    if (!code) return null;
-    const lines = code.split('\n');
-    return (
-      <pre className="font-mono text-[10px] leading-relaxed text-dd-text">
-        <code>
-          {lines.map((line, idx) => {
-            let html = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-            const keywords =
-              /\b(const|let|var|function|return|fn|impl|pub|use|import|from|def|class|async|await|struct|enum|if|else|for|while|match)\b/g;
-            html = html.replace(keywords, '<span class="text-blue-400 font-semibold">$1</span>');
-
-            const types =
-              /\b(string|number|boolean|any|void|User|Post|Language|int|float|str|char)\b/g;
-            html = html.replace(types, '<span class="text-cyan-400 font-medium">$1</span>');
-
-            if (html.includes('//')) {
-              const parts = html.split('//');
-              html =
-                parts[0] +
-                '<span class="text-dd-muted italic">//' +
-                parts.slice(1).join('//') +
-                '</span>';
-            }
-            return (
-              <div key={idx} className="table-row">
-                <span className="table-cell text-right pr-4 select-none opacity-20 text-[9px] w-6">
-                  {idx + 1}
-                </span>
-                <span className="table-cell" dangerouslySetInnerHTML={{ __html: html }} />
-              </div>
-            );
-          })}
-        </code>
-      </pre>
-    );
-  };
-
+  const isOpponentReady = opponentState.isReady;
   const isChallenger = duel.challenger_id === user.id;
-  const isOpponent = duel.opponent_id === user.id;
-  const isParticipant = isChallenger || isOpponent;
 
-  const challengerSolution = duel.solutions?.find((s: any) => s.user_id === duel.challenger_id);
-  const opponentSolution = duel.solutions?.find((s: any) => s.user_id === duel.opponent_id);
+  const me = {
+    username: user.username,
+    avatar_url: user.avatar_url,
+  };
 
-  const totalVotes = (challengerSolution?.vote_count ?? 0) + (opponentSolution?.vote_count ?? 0);
-  const challengerPercent =
-    totalVotes > 0 ? Math.round(((challengerSolution?.vote_count ?? 0) / totalVotes) * 100) : 50;
-  const opponentPercent = totalVotes > 0 ? 100 - challengerPercent : 50;
+  // Determine opponent based on whether user is the challenger or opponent
+  let opponentDisplay = null;
+  if (isChallenger) {
+    opponentDisplay =
+      duel.opponent ||
+      (opponentState.isConnected
+        ? {
+            username: opponentState.username || 'Oponente',
+            avatar_url: opponentState.avatarUrl,
+          }
+        : null);
+  } else {
+    opponentDisplay = duel.challenger;
+  }
 
   return (
     <div className="dd-platform-shell">
-      {/* XP Toast */}
-      {toastXp && (
-        <div className="fixed top-20 right-6 z-50 animate-slide-in-right rounded-xl border border-emerald-500/30 bg-dd-surface/90 backdrop-blur-xl p-4 shadow-2xl flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-extrabold text-base ring-1 ring-emerald-500/30">
-            +{toastXp.amount}
-          </div>
-          <div>
-            <p className="font-bold text-sm text-dd-text">XP Concedido!</p>
-            <p className="text-xs text-dd-muted">Você progrediu na trilha de {toastXp.language}</p>
-          </div>
-        </div>
-      )}
-
       <Sidebar user={user} />
 
-      <div className="flex min-w-0 flex-grow flex-col md:flex-row xl:max-w-[950px]">
-        {/* Coluna Central */}
-        <main className="flex min-h-screen w-full max-w-[600px] min-w-0 flex-grow flex-col border-r border-dd-border/80 bg-dd-bg pb-24 md:pb-8">
+      <div className="mx-auto flex w-full min-w-0 flex-grow items-start justify-center xl:max-w-[1480px] 2xl:max-w-[1600px] xl:justify-start">
+        <main className="flex min-h-screen w-full min-w-0 max-w-[720px] xl:max-w-[820px] 2xl:max-w-[920px] flex-grow flex-col border-r border-dd-border/80 bg-dd-bg pb-24 md:pb-8">
           {/* Header Fixo */}
-          <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60 p-3.5 flex items-center gap-3 shrink-0">
-            <Link
-              href="/duels"
-              className="p-2 hover:bg-dd-surface rounded-full transition-colors text-dd-text"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <div>
-              <h1 className="text-sm font-black text-dd-text">{duel.problem_title}</h1>
-              <p className="text-[10px] text-dd-muted font-semibold mt-0.5">
-                Duelo de {duel.language} ·{' '}
-                {duel.status === 'PENDING' ? 'Aguardando oponente' : 'Combate Ativo'}
-              </p>
-            </div>
-          </div>
-
-          <div className="p-4.5 space-y-4">
-            {/* Duel Room Header */}
-            <div className="bg-dd-sidebar-bg border border-dd-border rounded-xl p-5 space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] font-bold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
-                  <Swords className="w-3 h-3" />
-                  Duelo de Código
-                </span>
-                <LanguageTag language={duel.language} size="sm" />
-              </div>
-
+          <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60 p-4 flex items-center justify-between gap-3 shrink-0">
+            <div className="flex items-center gap-3">
+              <Link
+                href="/duels"
+                className="p-2 hover:bg-dd-surface rounded-full transition-colors text-dd-text cursor-pointer"
+                title="Voltar à Arena"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
               <div>
-                <h1 className="text-base font-extrabold tracking-tight text-dd-text">
-                  {duel.problem_title}
+                <h1 className="text-sm sm:text-base font-black text-white flex items-center gap-2 truncate">
+                  <Swords className="w-4 h-4 text-amber-400" />
+                  {problem.title}
                 </h1>
-                <p className="text-dd-muted text-[10px] mt-1 font-semibold flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5" />
-                  Status: {duel.status === 'PENDING' ? 'Aguardando oponente...' : 'Combate Ativo'}
-                </p>
-              </div>
-
-              <div className="border-t border-dd-border/60 pt-4 space-y-2">
-                <h2 className="text-[10px] font-bold text-dd-muted uppercase tracking-wider flex items-center gap-1">
-                  <HelpCircle className="w-3.5 h-3.5" />
-                  Descrição do Desafio
-                </h2>
-                <p className="text-xs text-dd-text leading-relaxed whitespace-pre-wrap">
-                  {duel.problem_body}
+                <p className="text-[10px] sm:text-[11px] text-dd-muted font-bold">
+                  Duelo 1v1 em Tempo Real
                 </p>
               </div>
             </div>
 
-            {/* Duel Sandbox editor for participants */}
-            {duel.status === 'ACTIVE' && isParticipant && (
-              <div className="bg-dd-sidebar-bg border border-dd-border rounded-xl p-5 space-y-4">
-                <div className="flex items-center gap-2 border-b border-dd-border/60 pb-3">
-                  <Code className="w-4 h-4 text-blue-500/85" />
-                  <h2 className="text-xs font-extrabold text-dd-text">Escreva seu Algoritmo</h2>
-                </div>
-
-                <p className="text-dd-muted text-[10px] leading-relaxed">
-                  Desenvolva sua resposta utilizando a linguagem {duel.language}. Lembre-se de
-                  cobrir todos os casos de teste citados na descrição para vencer o duelo.
-                </p>
-
-                <CodeEditor
-                  value={code}
-                  onChange={setCode}
-                  language={duel.language}
-                  height="280px"
-                />
-
-                <div className="flex justify-end pt-2 border-t border-dd-border/60">
+            {/* Ready / Start Action */}
+            {duelPhase === 'waiting' && (
+              <div className="flex items-center gap-2">
+                {!isSelfReady ? (
                   <button
-                    onClick={handleSubmitSolution}
-                    disabled={submitting || code.trim() === ''}
-                    className="bg-blue-500 text-white text-xs font-bold px-5 py-2 rounded-full transition-colors hover:bg-blue-600 disabled:opacity-50 cursor-pointer shadow-md shadow-blue-500/10 flex items-center gap-1.5"
+                    type="button"
+                    onClick={sendReady}
+                    className="dd-touch dd-focus-ring flex items-center gap-1.5 rounded-xl border-2 border-b-[3px] border-blue-600 border-b-blue-800 bg-blue-500 hover:bg-blue-400 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-blue-500/20 transition-all hover:-translate-y-0.5 active:translate-y-0.5 cursor-pointer"
                   >
-                    <Send className="w-3.5 h-3.5" />
-                    {submitting ? 'Enviando...' : 'Submeter Solução (+25 XP)'}
+                    <span>Estou Pronto!</span>
+                    <Swords className="w-3.5 h-3.5" />
                   </button>
-                </div>
-              </div>
-            )}
-
-            {/* Voting Arena */}
-            {duel.status === 'ACTIVE' && (
-              <div className="bg-dd-sidebar-bg border border-dd-border rounded-xl p-5 space-y-5">
-                <div className="flex items-center gap-2 border-b border-dd-border/60 pb-3">
-                  <Vote className="w-4 h-4 text-blue-500/85" />
-                  <h2 className="text-xs font-extrabold text-dd-text">
-                    Arena de Votos da Comunidade
-                  </h2>
-                </div>
-
-                <div className="space-y-4">
-                  {/* Challenger Side */}
-                  <div className="space-y-3 border border-dd-border/60 bg-dd-surface/10 rounded-xl p-4">
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-xs text-dd-text">
-                        Desafiante: @{duel.challenger.username}
-                      </span>
-                      <span className="text-[10px] text-dd-muted font-semibold">
-                        {challengerSolution ? 'Código enviado ✅' : 'Codificando... ⏳'}
-                      </span>
-                    </div>
-
-                    {challengerSolution ? (
-                      <div className="space-y-3">
-                        <div className="rounded-lg border border-dd-border bg-dd-bg p-3.5 overflow-x-auto shadow-inner max-h-64">
-                          {highlightCode(challengerSolution.code)}
-                        </div>
-                        {!isParticipant && (
-                          <button
-                            onClick={() => handleVote(challengerSolution.id)}
-                            disabled={voting}
-                            className="w-full bg-blue-500 text-white text-xs font-bold py-2 rounded-full hover:bg-blue-600 transition-colors cursor-pointer shadow-sm"
-                          >
-                            Votar nesta solução
-                          </button>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="bg-dd-bg/40 border border-dd-border rounded-lg p-8 text-center text-[10px] text-dd-muted italic">
-                        Aguardando envio do código...
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Opponent Side */}
-                  <div className="space-y-3 border border-dd-border/60 bg-dd-surface/10 rounded-xl p-4">
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-xs text-dd-text">
-                        Oponente: {duel.opponent ? `@${duel.opponent.username}` : 'Aguardando...'}
-                      </span>
-                      <span className="text-[10px] text-dd-muted font-semibold">
-                        {duel.opponent
-                          ? opponentSolution
-                            ? 'Código enviado ✅'
-                            : 'Codificando... ⏳'
-                          : 'Matchmaking...'}
-                      </span>
-                    </div>
-
-                    {opponentSolution ? (
-                      <div className="space-y-3">
-                        <div className="rounded-lg border border-dd-border bg-dd-bg p-3.5 overflow-x-auto shadow-inner max-h-64">
-                          {highlightCode(opponentSolution.code)}
-                        </div>
-                        {!isParticipant && (
-                          <button
-                            onClick={() => handleVote(opponentSolution.id)}
-                            disabled={voting}
-                            className="w-full bg-blue-500 text-white text-xs font-bold py-2 rounded-full hover:bg-blue-600 transition-colors cursor-pointer shadow-sm"
-                          >
-                            Votar nesta solução
-                          </button>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="bg-dd-bg/40 border border-dd-border rounded-lg p-8 text-center text-[10px] text-dd-muted italic">
-                        {duel.opponent
-                          ? 'Aguardando envio do código...'
-                          : 'Buscando oponente na arena...'}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Placar de Votos */}
-                {totalVotes > 0 && (
-                  <div className="border-t border-dd-border/60 pt-4 space-y-3">
-                    <h3 className="font-bold text-[10px] text-center text-dd-muted uppercase tracking-wider flex items-center justify-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-blue-500" />
-                      Resultado Parcial ({totalVotes} votos)
-                    </h3>
-
-                    <div className="flex items-center justify-between text-[10px] font-mono font-bold text-dd-muted">
-                      <span>
-                        @{duel.challenger.username} ({challengerPercent}%)
-                      </span>
-                      <span>
-                        {duel.opponent ? `@${duel.opponent.username}` : 'Oponente'} (
-                        {opponentPercent}%)
-                      </span>
-                    </div>
-
-                    <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden flex">
-                      <div
-                        className="h-full bg-blue-500 transition-all duration-350"
-                        style={{ width: `${challengerPercent}%` }}
-                      />
-                      <div
-                        className="h-full bg-emerald-500 transition-all duration-350"
-                        style={{ width: `${opponentPercent}%` }}
-                      />
-                    </div>
-                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={startCountdown}
+                    className="dd-touch dd-focus-ring flex items-center gap-1.5 rounded-xl border-2 border-b-[3px] border-amber-600 border-b-amber-800 bg-amber-500 hover:bg-amber-400 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-slate-950 shadow-md shadow-amber-500/20 transition-all hover:-translate-y-0.5 active:translate-y-0.5 cursor-pointer animate-pulse"
+                  >
+                    <span>Iniciar Duelo!</span>
+                    <Flame className="w-3.5 h-3.5 fill-current" />
+                  </button>
                 )}
               </div>
             )}
           </div>
+
+          {/* Countdown Overlay (3, 2, 1, DUELO!) */}
+          {duelPhase === 'countdown' && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md">
+              <div className="text-center space-y-4 animate-bounce">
+                <div className="text-7xl sm:text-9xl font-black text-amber-400 drop-shadow-[0_0_35px_rgba(245,158,11,0.6)]">
+                  {countdownNumber}
+                </div>
+                <p className="text-xl sm:text-2xl font-black text-white uppercase tracking-widest">
+                  Prepare-se para o Duelo!
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="p-4 sm:p-6 space-y-6">
+            {/* Live Versus Battle Header */}
+            <DuelBattleHeader
+              me={me}
+              opponent={opponentDisplay}
+              language={duel.language}
+              difficulty={problem.difficulty}
+              myTestsPassed={testResults.filter((r) => r.passed).length}
+              myTotalTests={problem.testCases.length}
+              opponentTestsPassed={opponentState.testsPassed}
+              opponentTotalTests={opponentState.totalTests}
+              opponentIsTyping={opponentState.isTyping}
+              timeLeft={timeLeft}
+              isDuelActive={duelPhase === 'battle'}
+            />
+
+            {/* Problem Description Card (Duolingo 3D) */}
+            <div className="rounded-[22px] border-2 border-b-4 border-dd-border bg-dd-surface/80 p-5 space-y-3 shadow-md">
+              <div className="flex items-center gap-2 border-b border-dd-border/60 pb-2.5">
+                <Sparkles className="w-4 h-4 text-blue-400" />
+                <h3 className="text-xs font-black uppercase tracking-wider text-white">
+                  Objetivo do Desafio
+                </h3>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-sans">
+                {problem.description}
+              </p>
+            </div>
+
+            {/* Code Editor */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-black uppercase tracking-wider text-dd-muted flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  Editor de Solução ({duel.language})
+                </label>
+                {opponentState.isTyping && (
+                  <span className="text-[11px] font-bold text-blue-400 animate-pulse">
+                    Oponente está programando...
+                  </span>
+                )}
+              </div>
+
+              <div className="rounded-2xl border-2 border-b-4 border-dd-border overflow-hidden shadow-xl">
+                <CodeEditor
+                  value={code}
+                  onChange={handleCodeChange}
+                  language={duel.language.toLowerCase()}
+                  height="280px"
+                />
+              </div>
+            </div>
+
+            {/* Interactive Test Suite & Duolingo 3D Actions */}
+            <DuelTestRunner
+              testCases={problem.testCases}
+              testResults={testResults}
+              isRunning={isRunningTests}
+              isSubmitting={isSubmitting}
+              consoleOutput={consoleOutput}
+              onRunTests={handleRunTests}
+              onSubmitSolution={handleSubmitSolution}
+              allPassed={allPassed}
+            />
+          </div>
         </main>
-
-        {/* Coluna Direita (Widgets) */}
-        <aside className="hidden min-h-screen w-[350px] shrink-0 space-y-4 border-l border-dd-border/80 bg-dd-bg p-5 xl:block">
-          {/* Widget 1: Status do Duelo */}
-          <div className="bg-dd-sidebar-bg border border-dd-border rounded-2xl p-4.5 space-y-3.5">
-            <h3 className="text-xs font-black text-dd-text uppercase tracking-wider border-b border-dd-border/50 pb-2">
-              Detalhes do Combate
-            </h3>
-            <div className="space-y-2.5 text-xs">
-              <div className="flex justify-between items-center">
-                <span className="text-dd-muted">Linguagem:</span>
-                <span className="font-semibold text-dd-text">{duel.language}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-dd-muted">Status:</span>
-                <span className="font-semibold text-blue-500">{duel.status}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-dd-muted">Votos Totais:</span>
-                <span className="font-bold text-dd-text">{totalVotes}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-dd-muted">Criado em:</span>
-                <span className="text-dd-text">
-                  {new Date(duel.created_at).toLocaleDateString('pt-BR')}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Widget 2: Regras do Duelo */}
-          <div className="bg-dd-sidebar-bg border border-dd-border rounded-2xl p-4.5 space-y-3">
-            <h3 className="text-xs font-black text-dd-text uppercase tracking-wider border-b border-dd-border/50 pb-2">
-              Regras da Votação
-            </h3>
-            <ul className="list-disc pl-4 text-[10px] text-dd-muted space-y-1.5 leading-normal">
-              <li>Qualquer membro da comunidade pode votar em uma das duas soluções.</li>
-              <li>Participantes do próprio duelo não podem votar.</li>
-              <li>
-                A solução com maior votação até o fim do combate garante a vitória e os pontos
-                extras.
-              </li>
-            </ul>
-          </div>
-
-          {/* Subtle footer */}
-          <div className="px-4 text-[10px] text-dd-muted leading-normal space-y-2 pt-2">
-            <div className="flex flex-wrap gap-x-2 gap-y-1">
-              <span className="hover:underline cursor-pointer">Termos</span>
-              <span>|</span>
-              <span className="hover:underline cursor-pointer">Privacidade</span>
-              <span>|</span>
-              <span className="hover:underline cursor-pointer">Cookies</span>
-            </div>
-            <p>© {new Date().getFullYear()} Stacklyst Corp.</p>
-          </div>
-        </aside>
       </div>
+
+      {/* Victory / Defeat Modal */}
+      <DuelVictoryModal
+        isOpen={showVictoryModal}
+        isWinner={isWinner}
+        winnerUsername={winnerUsername}
+        xpAwarded={xpAwarded}
+        streak={user.streak ?? 1}
+        myCode={code}
+        opponentCode={opponentCode}
+        onRematch={() => {
+          sendRematch();
+        }}
+        onClose={() => setShowVictoryModal(false)}
+      />
     </div>
   );
 }

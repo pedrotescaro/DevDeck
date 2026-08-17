@@ -2,9 +2,19 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Repeat2, Pencil } from 'lucide-react';
+import { Pencil } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { popoverMenuVariants } from '@/lib/motion';
+
+export function RetweetIcon({ className = 'w-[18px] h-[18px]' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" className={className}>
+      <g>
+        <path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5c-2.209 0-4-1.79-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5c2.209 0 4 1.79 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z" />
+      </g>
+    </svg>
+  );
+}
 
 interface RepostMenuProps {
   onRepost: () => void;
@@ -43,14 +53,23 @@ export function RepostMenu({
         className={cn(
           'dd-touch dd-focus-ring w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer shrink-0',
           isReposted
-            ? 'text-dd-green hover:bg-dd-green/10'
-            : 'text-dd-muted hover:text-dd-green hover:bg-dd-green/10'
+            ? 'text-emerald-400 hover:bg-emerald-500/10'
+            : 'text-dd-muted hover:text-emerald-400 hover:bg-emerald-500/10'
         )}
         title="Repostar"
       >
-        <Repeat2 className="w-4 h-4" />
+        <RetweetIcon className="w-[18px] h-[18px]" />
       </button>
-      {count > 0 && <span className="px-1 font-semibold text-[10px] text-dd-muted">{count}</span>}
+      {count > 0 && (
+        <span
+          className={cn(
+            'px-0.5 text-xs font-normal',
+            isReposted ? 'text-emerald-400 font-medium' : 'text-dd-muted'
+          )}
+        >
+          {count}
+        </span>
+      )}
 
       <AnimatePresence>
         {open && (
@@ -67,9 +86,9 @@ export function RepostMenu({
                 setOpen(false);
                 onRepost();
               }}
-              className="flex items-center gap-2.5 w-full px-4 py-3 text-xs font-bold text-dd-text hover:bg-blue-500/10 hover:text-blue-400 transition-colors cursor-pointer"
+              className="flex items-center gap-2.5 w-full px-4 py-3 text-xs font-bold text-dd-text hover:bg-emerald-500/10 hover:text-emerald-400 transition-colors cursor-pointer"
             >
-              <Repeat2 className="w-4 h-4" />
+              <RetweetIcon className="w-4 h-4" />
               Repostar
             </button>
             <button

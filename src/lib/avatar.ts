@@ -77,6 +77,8 @@ export const avatarConfigSchema = z.object({
     .int()
     .min(0)
     .max(AVATAR_BACKGROUNDS.length - 1),
+  name: z.string().max(50).optional(),
+  displayName: z.string().max(50).optional(),
 });
 
 export type AvatarConfig = z.infer<typeof avatarConfigSchema>;

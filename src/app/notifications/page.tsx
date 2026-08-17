@@ -183,10 +183,10 @@ export default function NotificationsPage() {
     >
       <Sidebar user={user} />
 
-      <div className="mx-auto flex w-full min-w-0 flex-grow items-start justify-center xl:max-w-[1320px] xl:justify-start">
+      <div className="mx-auto flex w-full min-w-0 flex-grow items-start justify-center xl:max-w-[1480px] 2xl:max-w-[1600px] xl:justify-start">
         <main
           data-testid="primary-column"
-          className="flex min-h-screen w-full min-w-0 max-w-[660px] flex-grow flex-col border-r border-dd-border/80 bg-dd-bg pb-24 md:pb-8"
+          className="flex min-h-screen w-full min-w-0 max-w-[720px] xl:max-w-[820px] 2xl:max-w-[920px] flex-grow flex-col border-r border-dd-border/80 bg-dd-bg pb-24 md:pb-8"
         >
           {/* Header (Matching image 3 style) */}
           <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md border-b border-dd-border/60">
@@ -198,12 +198,12 @@ export default function NotificationsPage() {
             </div>
 
             {/* Navigation Tabs (Tudo, Prioridade, Menções) */}
-            <div className="flex border-t border-dd-border/40">
+            <div className="relative flex border-t border-dd-border/40 select-none">
               {(['tudo', 'prioridade', 'mencoes'] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className="flex-1 py-3.5 text-xs font-bold text-center relative hover:bg-dd-surface/30 transition-colors"
+                  className="flex-1 py-3.5 text-xs font-bold text-center relative hover:bg-dd-surface/30 transition-colors cursor-pointer"
                 >
                   <span
                     className={
@@ -212,15 +212,19 @@ export default function NotificationsPage() {
                   >
                     {tab === 'tudo' ? 'Tudo' : tab === 'prioridade' ? 'Prioridade' : 'Menções'}
                   </span>
-                  {activeTab === tab && (
-                    <motion.span
-                      layoutId="notifTabIndicator"
-                      className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-1 rounded-full bg-blue-500"
-                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                    />
-                  )}
                 </button>
               ))}
+              <div
+                aria-hidden="true"
+                className={cn(
+                  'pointer-events-none absolute bottom-0 left-0 z-20 h-1 w-1/3 flex items-center justify-center transition-transform duration-200 ease-out motion-reduce:transition-none',
+                  activeTab === 'tudo' && 'translate-x-0',
+                  activeTab === 'prioridade' && 'translate-x-full',
+                  activeTab === 'mencoes' && 'translate-x-[200%]'
+                )}
+              >
+                <span className="w-16 h-1 rounded-full bg-blue-500 shadow-sm" />
+              </div>
             </div>
           </div>
 

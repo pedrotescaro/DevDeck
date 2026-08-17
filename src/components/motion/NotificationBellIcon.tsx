@@ -27,7 +27,7 @@ export function NotificationBellIcon({
       animate={shouldShake && !reduced ? { rotate: [0, -2, 2, -2, 2, 0] } : { rotate: 0 }}
       transition={{ duration: 0.4, ease: 'easeInOut' }}
     >
-      <Bell className={cn('w-5 h-5', active ? 'fill-current' : '')} />
+      <Bell className={cn('w-6 h-6', active ? 'text-white fill-current' : 'text-dd-muted')} />
       {unreadCount > 0 && (
         <span className="absolute -top-1.5 -right-1.5 flex h-2 w-2">
           {!reduced && (

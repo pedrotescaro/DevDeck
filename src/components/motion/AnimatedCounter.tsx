@@ -1,4 +1,5 @@
 'use client';
+import { useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 
@@ -7,25 +8,48 @@ interface AnimatedCounterProps {
   className?: string;
 }
 
+const counterVariants = {
+  initial: (dir: number) => ({
+    y: dir > 0 ? 14 : -14,
+    opacity: 0,
+  }),
+  animate: {
+    y: 0,
+    opacity: 1,
+  },
+  exit: (dir: number) => ({
+    y: dir > 0 ? -14 : 14,
+    opacity: 0,
+  }),
+};
+
 export function AnimatedCounter({ value, className = '' }: AnimatedCounterProps) {
   const reduced = useReducedMotion();
+  const prevValueRef = useRef(value);
+  const direction = value >= prevValueRef.current ? 1 : -1;
+
+  useEffect(() => {
+    prevValueRef.current = value;
+  }, [value]);
 
   if (reduced) {
-    return <span className={`tabular-nums font-mono ${className}`}>{value}</span>;
+    return <span className={`tabular-nums ${className}`}>{value}</span>;
   }
 
   return (
     <span
-      className={`relative inline-flex overflow-hidden h-4 items-center tabular-nums font-mono ${className}`}
+      className={`relative inline-flex overflow-hidden h-[18px] items-center tabular-nums leading-none select-none ${className}`}
     >
-      <AnimatePresence mode="popLayout" initial={false}>
+      <AnimatePresence mode="popLayout" initial={false} custom={direction}>
         <motion.span
           key={value}
-          initial={{ y: 12, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -12, opacity: 0 }}
-          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="inline-block"
+          custom={direction}
+          variants={counterVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          className="inline-block leading-none"
         >
           {value}
         </motion.span>

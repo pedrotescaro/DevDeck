@@ -3,14 +3,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { X, Camera, Loader2 } from 'lucide-react';
+import { X, Camera, Loader2, Check, Sparkles, AlertCircle } from 'lucide-react';
+import { AVATAR_BACKGROUNDS, normalizeAvatarConfig } from '@/lib/avatar';
+import { cn } from '@/lib/cn';
 
 interface EditProfileModalProps {
   open: boolean;
   onClose: () => void;
   profileUser: {
+    id?: string;
+    name?: string | null;
     username: string;
     avatar_url?: string | null;
+    avatar_config?: unknown;
     bio?: string | null;
     institution?: string | null;
     github_username?: string | null;
@@ -23,6 +28,15 @@ interface EditProfileModalProps {
 }
 
 export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditProfileModalProps) {
+  const initialName =
+    profileUser.name ||
+    (profileUser.avatar_config as any)?.name ||
+    (profileUser.avatar_config as any)?.displayName ||
+    profileUser.username ||
+    '';
+
+  const [name, setName] = useState(initialName);
+  const [username, setUsername] = useState(profileUser.username || '');
   const [bio, setBio] = useState(profileUser.bio || '');
   const [institution, setInstitution] = useState(profileUser.institution || '');
   const [githubUsername, setGithubUsername] = useState(profileUser.github_username || '');
@@ -33,14 +47,28 @@ export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditPr
     profileUser.birthday ? profileUser.birthday.split('T')[0] : ''
   );
 
+  const [selectedBg, setSelectedBg] = useState<number>(() => {
+    const avatar = normalizeAvatarConfig(profileUser.avatar_config, profileUser.username);
+    return avatar.background;
+  });
+
   const [saving, setSaving] = useState(false);
   const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
   // Sync fields when modal opens
   useEffect(() => {
     if (open) {
+      const currentName =
+        profileUser.name ||
+        (profileUser.avatar_config as any)?.name ||
+        (profileUser.avatar_config as any)?.displayName ||
+        profileUser.username ||
+        '';
+      setName(currentName);
+      setUsername(profileUser.username || '');
       setBio(profileUser.bio || '');
       setInstitution(profileUser.institution || '');
       setGithubUsername(profileUser.github_username || '');
@@ -48,6 +76,9 @@ export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditPr
       setBannerUrl(profileUser.banner_url || '');
       setPronouns(profileUser.pronouns || '');
       setBirthday(profileUser.birthday ? profileUser.birthday.split('T')[0] : '');
+      const avatar = normalizeAvatarConfig(profileUser.avatar_config, profileUser.username);
+      setSelectedBg(avatar.background);
+      setError(null);
     }
   }, [open, profileUser]);
 
@@ -84,40 +115,71 @@ export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditPr
   };
 
   const handleSave = async () => {
+    const cleanName = name.trim() || username.trim();
+    const cleanUsername = username.trim().toLowerCase();
+    if (!cleanUsername) {
+      setError('O nome de usuário não pode ficar vazio.');
+      return;
+    }
+
     setSaving(true);
+    setError(null);
+
     try {
+      const currentConfig = normalizeAvatarConfig(profileUser.avatar_config, profileUser.username);
+      const updatedConfig = {
+        ...currentConfig,
+        background: selectedBg,
+        name: cleanName,
+        displayName: cleanName,
+      };
+
       const res = await fetch('/api/profile/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          name: cleanName,
+          username: cleanUsername,
           bio,
           institution,
-          github_username: githubUsername,
-          discord_username: discordUsername,
+          github_username: githubUsername.trim(),
+          discord_username: discordUsername.trim(),
           banner_url: bannerUrl,
           pronouns,
           birthday,
+          avatar_config: updatedConfig,
         }),
       });
 
-      if (res.ok) {
-        onSaved({
-          bio,
-          institution,
-          github_username: githubUsername,
-          discord_username: discordUsername,
-          banner_url: bannerUrl,
-          pronouns,
-          birthday: birthday || null,
-        });
-        onClose();
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || 'Erro ao salvar perfil.');
+        return;
       }
+
+      onSaved({
+        name: cleanName,
+        username: data.username || cleanUsername,
+        bio,
+        institution,
+        github_username: githubUsername.trim(),
+        discord_username: discordUsername.trim(),
+        banner_url: bannerUrl,
+        pronouns,
+        birthday: birthday || null,
+        avatar_config: data.avatar_config || updatedConfig,
+      });
+      onClose();
     } catch (err) {
       console.error('Error saving profile:', err);
+      setError('Erro de conexão ao salvar perfil.');
     } finally {
       setSaving(false);
     }
   };
+
+  const currentBgColor = AVATAR_BACKGROUNDS[selectedBg] || AVATAR_BACKGROUNDS[0];
 
   return (
     <AnimatePresence>
@@ -144,6 +206,7 @@ export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditPr
             <div className="flex items-center justify-between px-4 py-3 border-b border-dd-border/60 shrink-0">
               <div className="flex items-center gap-4">
                 <button
+                  type="button"
                   onClick={onClose}
                   className="p-1.5 rounded-full hover:bg-dd-surface/80 text-dd-text transition-colors cursor-pointer"
                 >
@@ -152,6 +215,7 @@ export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditPr
                 <h2 className="text-base font-extrabold text-dd-text">Editar perfil</h2>
               </div>
               <button
+                type="button"
                 onClick={handleSave}
                 disabled={saving}
                 className="px-5 py-1.5 bg-dd-text text-dd-bg rounded-full text-sm font-extrabold hover:opacity-90 transition-all cursor-pointer disabled:opacity-50 active:scale-95"
@@ -162,21 +226,22 @@ export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditPr
 
             {/* Scrollable Content */}
             <div className="overflow-y-auto flex-grow">
-              {/* Banner Section */}
-              <div className="relative h-40 sm:h-48 bg-dd-surface/30">
+              {/* Banner Section with Live Background Color */}
+              <div
+                className="relative h-40 sm:h-48 transition-colors duration-200"
+                style={{ backgroundColor: currentBgColor }}
+              >
                 {bannerUrl ? (
                   <Image src={bannerUrl} alt="Banner" fill sizes="100%" className="object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-r from-blue-500/20 via-blue-400/10 to-transparent" />
-                )}
+                ) : null}
 
                 {/* Banner overlay with camera buttons */}
-                <div className="absolute inset-0 flex items-center justify-center gap-3 bg-black/30">
+                <div className="absolute inset-0 flex items-center justify-center gap-3 bg-black/25">
                   <button
                     type="button"
                     onClick={() => bannerInputRef.current?.click()}
-                    className="p-2.5 bg-black/60 hover:bg-black/75 rounded-full text-white transition-colors cursor-pointer"
-                    title="Alterar banner"
+                    className="p-2.5 bg-black/60 hover:bg-black/75 rounded-full text-white transition-colors cursor-pointer shadow-md hover:scale-105"
+                    title="Alterar imagem de banner"
                   >
                     {uploadingBanner ? (
                       <Loader2 className="w-5 h-5 animate-spin" />
@@ -188,8 +253,8 @@ export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditPr
                     <button
                       type="button"
                       onClick={() => setBannerUrl('')}
-                      className="p-2.5 bg-black/60 hover:bg-black/75 rounded-full text-white transition-colors cursor-pointer"
-                      title="Remover banner"
+                      className="p-2.5 bg-black/60 hover:bg-black/75 rounded-full text-white transition-colors cursor-pointer shadow-md hover:scale-105"
+                      title="Remover imagem do banner"
                     >
                       <X className="w-5 h-5" />
                     </button>
@@ -205,27 +270,112 @@ export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditPr
               </div>
 
               {/* Avatar (overlapping banner) */}
-              <div className="px-4 -mt-12 relative z-10 mb-4">
-                {profileUser.avatar_url ? (
-                  <Image
-                    src={profileUser.avatar_url}
-                    alt={profileUser.username}
-                    width={96}
-                    height={96}
-                    className="w-24 h-24 rounded-full border-4 border-dd-bg object-cover bg-dd-surface"
-                  />
-                ) : (
-                  <div className="w-24 h-24 rounded-full border-4 border-dd-bg bg-blue-500/10 text-blue-400 flex items-center justify-center text-2xl font-black">
-                    {profileUser.username.slice(0, 2).toUpperCase()}
-                  </div>
-                )}
+              <div className="px-4 -mt-12 relative z-10 mb-4 flex items-end justify-between">
+                <div>
+                  {profileUser.avatar_url ? (
+                    <Image
+                      src={profileUser.avatar_url}
+                      alt={profileUser.username}
+                      width={96}
+                      height={96}
+                      className="w-24 h-24 rounded-full border-4 border-dd-bg object-cover bg-dd-surface shadow-md"
+                    />
+                  ) : (
+                    <div className="w-24 h-24 rounded-full border-4 border-dd-bg bg-blue-500/10 text-blue-400 flex items-center justify-center text-2xl font-black shadow-md">
+                      {profileUser.username.slice(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Form Fields */}
               <div className="px-4 pb-6 space-y-5">
+                {/* Error Alert */}
+                {error && (
+                  <div className="rounded-xl border border-rose-500/40 bg-rose-500/15 p-3 flex items-center gap-2.5 text-xs text-rose-300 font-bold animate-fade-in">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                {/* Background Color Palette Selection */}
+                <div className="space-y-2 rounded-xl border border-dd-border/80 bg-dd-surface/50 p-3.5">
+                  <label className="text-[11px] font-black uppercase tracking-wider text-dd-muted flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+                    Cor do Fundo do Perfil
+                  </label>
+                  <p className="text-[11px] text-dd-muted">
+                    Escolha a cor de destaque do banner e avatar do seu perfil:
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2.5 pt-1">
+                    {AVATAR_BACKGROUNDS.map((color, idx) => {
+                      const isSelected = selectedBg === idx;
+                      return (
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => setSelectedBg(idx)}
+                          style={{ backgroundColor: color }}
+                          className={cn(
+                            'w-8 h-8 rounded-full transition-all duration-150 relative flex items-center justify-center cursor-pointer shadow-sm',
+                            isSelected
+                              ? 'ring-2 ring-white scale-110 shadow-md ring-offset-2 ring-offset-dd-bg'
+                              : 'hover:scale-105 opacity-80 hover:opacity-100'
+                          )}
+                          title={`Cor ${idx + 1}`}
+                        >
+                          {isSelected && (
+                            <Check className="w-4 h-4 text-white drop-shadow stroke-[3]" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Display Name */}
+                <div className="relative group">
+                  <label className="absolute top-2.5 left-3 text-[11px] font-bold text-dd-muted pointer-events-none z-10 uppercase tracking-wider">
+                    Nome
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    maxLength={50}
+                    required
+                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-xl bg-transparent text-sm text-dd-text font-black focus:border-blue-500 focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500/20"
+                    placeholder="ex: Pedro Tescaro"
+                  />
+                  <span className="absolute bottom-2.5 right-3 text-[10px] text-dd-muted font-mono">
+                    {name.length}/50
+                  </span>
+                </div>
+
+                {/* Username */}
+                <div className="relative group">
+                  <label className="absolute top-2.5 left-3 text-[11px] font-bold text-dd-muted pointer-events-none z-10 uppercase tracking-wider">
+                    Nome de Usuário (@username)
+                  </label>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) =>
+                      setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))
+                    }
+                    maxLength={30}
+                    required
+                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-xl bg-transparent text-sm text-dd-text font-black focus:border-blue-500 focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500/20"
+                    placeholder="ex: pedrotescaro"
+                  />
+                  <span className="absolute bottom-2.5 right-3 text-[10px] text-dd-muted font-mono">
+                    {username.length}/30
+                  </span>
+                </div>
+
                 {/* Bio */}
                 <div className="relative group">
-                  <label className="absolute top-2.5 left-3 text-[11px] font-semibold text-dd-muted pointer-events-none">
+                  <label className="absolute top-2.5 left-3 text-[11px] font-bold text-dd-muted pointer-events-none uppercase tracking-wider">
                     Bio
                   </label>
                   <textarea
@@ -233,7 +383,7 @@ export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditPr
                     onChange={(e) => setBio(e.target.value)}
                     rows={3}
                     maxLength={160}
-                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-md bg-transparent text-sm text-dd-text resize-none focus:border-blue-500 focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-xl bg-transparent text-sm text-dd-text resize-none focus:border-blue-500 focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500/20"
                     placeholder="Fale sobre você..."
                   />
                   <span className="absolute bottom-2 right-3 text-[10px] text-dd-muted font-mono">
@@ -243,22 +393,22 @@ export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditPr
 
                 {/* Institution */}
                 <div className="relative group">
-                  <label className="absolute top-2.5 left-3 text-[11px] font-semibold text-dd-muted pointer-events-none z-10">
+                  <label className="absolute top-2.5 left-3 text-[11px] font-bold text-dd-muted pointer-events-none z-10 uppercase tracking-wider">
                     Instituição / Empresa
                   </label>
                   <input
                     type="text"
                     value={institution}
                     onChange={(e) => setInstitution(e.target.value)}
-                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-md bg-transparent text-sm text-dd-text focus:border-blue-500 focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500/20"
-                    placeholder="Ex: USP, Vercel, Freelancer"
+                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-xl bg-transparent text-sm text-dd-text focus:border-blue-500 focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500/20"
+                    placeholder="Ex: Fatec Ferraz, Vercel, Freelancer"
                   />
                 </div>
 
                 {/* GitHub Username */}
                 <div className="relative group">
-                  <label className="absolute top-2.5 left-3 text-[11px] font-semibold text-dd-muted pointer-events-none z-10">
-                    GitHub
+                  <label className="absolute top-2.5 left-3 text-[11px] font-bold text-dd-muted pointer-events-none z-10 uppercase tracking-wider">
+                    Usuário do GitHub
                   </label>
                   <input
                     type="text"
@@ -266,49 +416,49 @@ export function EditProfileModal({ open, onClose, profileUser, onSaved }: EditPr
                     onChange={(e) =>
                       setGithubUsername(e.target.value.replace(/[^a-zA-Z0-9-]/g, ''))
                     }
-                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-md bg-transparent text-sm text-dd-text focus:border-blue-500 focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500/20"
-                    placeholder="seu-usuario-github"
+                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-xl bg-transparent text-sm text-dd-text focus:border-blue-500 focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500/20"
+                    placeholder="ex: pedrotescaro"
                   />
                 </div>
 
                 {/* Discord Username */}
                 <div className="relative group">
-                  <label className="absolute top-2.5 left-3 text-[11px] font-semibold text-dd-muted pointer-events-none z-10">
+                  <label className="absolute top-2.5 left-3 text-[11px] font-bold text-dd-muted pointer-events-none z-10 uppercase tracking-wider">
                     Discord
                   </label>
                   <input
                     type="text"
                     value={discordUsername}
                     onChange={(e) => setDiscordUsername(e.target.value)}
-                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-md bg-transparent text-sm text-dd-text focus:border-blue-500 focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-xl bg-transparent text-sm text-dd-text focus:border-blue-500 focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500/20"
                     placeholder="seu-usuario-discord"
                   />
                 </div>
 
                 {/* Pronouns */}
                 <div className="relative group">
-                  <label className="absolute top-2.5 left-3 text-[11px] font-semibold text-dd-muted pointer-events-none z-10">
+                  <label className="absolute top-2.5 left-3 text-[11px] font-bold text-dd-muted pointer-events-none z-10 uppercase tracking-wider">
                     Pronomes
                   </label>
                   <input
                     type="text"
                     value={pronouns}
                     onChange={(e) => setPronouns(e.target.value)}
-                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-md bg-transparent text-sm text-dd-text focus:border-blue-500 focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-xl bg-transparent text-sm text-dd-text focus:border-blue-500 focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500/20"
                     placeholder="ele/dele, ela/dela, elu/delu"
                   />
                 </div>
 
                 {/* Birthday */}
                 <div className="relative group">
-                  <label className="absolute top-2.5 left-3 text-[11px] font-semibold text-dd-muted pointer-events-none z-10">
+                  <label className="absolute top-2.5 left-3 text-[11px] font-bold text-dd-muted pointer-events-none z-10 uppercase tracking-wider">
                     Data de Nascimento
                   </label>
                   <input
                     type="date"
                     value={birthday}
                     onChange={(e) => setBirthday(e.target.value)}
-                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-md bg-transparent text-sm text-dd-text focus:border-blue-500 focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full pt-8 pb-2.5 px-3 border border-dd-border rounded-xl bg-transparent text-sm text-dd-text focus:border-blue-500 focus:outline-none transition-colors focus:ring-2 focus:ring-blue-500/20"
                   />
                 </div>
               </div>

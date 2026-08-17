@@ -28,7 +28,6 @@ import {
   MoreHorizontal,
   Pencil,
   Play,
-  Repeat2,
   RotateCw,
   Search,
   ShieldCheck,
@@ -50,6 +49,8 @@ import { BorderBeam } from '@/components/ui/border-beam';
 import { ParticleCard, GlobalSpotlight, useMobileDetection } from '@/components/ui/MagicBento';
 import { Compare } from '@/components/ui/compare';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { RetweetIcon } from '@/components/motion/RepostMenu';
 
 interface LandingShowcaseProps {
   initialUser: unknown;
@@ -71,8 +72,11 @@ function SectionHeading({
   description: string;
 }) {
   return (
-    <div data-reveal className="mb-14 flex max-w-4xl flex-col gap-6 px-1 sm:mb-16 sm:px-0 lg:mb-20">
-      <div className="flex items-center gap-3 font-mono text-[11px] font-semibold uppercase tracking-[0.24em] text-blue-400">
+    <div
+      data-reveal
+      className="mx-auto mb-14 flex max-w-4xl flex-col items-center text-center gap-6 px-1 sm:mb-16 sm:px-0 lg:mb-20"
+    >
+      <div className="flex items-center justify-center gap-3 font-mono text-[11px] font-semibold uppercase tracking-[0.24em] text-blue-400">
         <span className="flex size-7 items-center justify-center rounded-full border border-blue-400/30 bg-blue-400/10 text-[9px]">
           {index}
         </span>
@@ -87,10 +91,23 @@ function SectionHeading({
 }
 
 function FlowPreview() {
+  const { t } = useLanguage();
   const nodes = [
-    { icon: MessageSquareText, label: 'Real post', value: 'React + cache' },
-    { icon: BrainCircuit, label: 'AI quiz', value: '4 choices' },
-    { icon: Zap, label: 'Verified XP', value: '+45 XP' },
+    {
+      icon: MessageSquareText,
+      label: t.showcase.howItWorks.flowCard.node1,
+      value: t.showcase.howItWorks.flowCard.node1Val,
+    },
+    {
+      icon: BrainCircuit,
+      label: t.showcase.howItWorks.flowCard.node2,
+      value: t.showcase.howItWorks.flowCard.node2Val,
+    },
+    {
+      icon: Zap,
+      label: t.showcase.howItWorks.flowCard.node3,
+      value: t.showcase.howItWorks.flowCard.node3Val,
+    },
   ];
 
   return (
@@ -123,19 +140,24 @@ function FlowPreview() {
 }
 
 function QuizPreview() {
+  const { t } = useLanguage();
   return (
     <div className="absolute inset-x-5 top-5 rounded-2xl border border-white/10 bg-black/30 p-5">
       <div className="mb-4 flex items-center justify-between">
         <span className="rounded-full bg-violet-400/10 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-violet-300">
-          AI-generated
+          {t.showcase.howItWorks.quizCard.aiGenerated}
         </span>
         <BrainCircuit size={18} className="text-violet-300" />
       </div>
       <p className="text-sm font-medium leading-6 text-slate-200">
-        Which strategy avoids another request while the data is still valid?
+        {t.showcase.howItWorks.quizCard.question}
       </p>
       <div className="mt-4 grid gap-2">
-        {['TTL cache', 'New request', 'Remove memoization'].map((option, index) => (
+        {[
+          t.showcase.howItWorks.quizCard.optionA,
+          t.showcase.howItWorks.quizCard.optionB,
+          t.showcase.howItWorks.quizCard.optionC,
+        ].map((option, index) => (
           <div
             key={option}
             className={cn(
@@ -157,13 +179,14 @@ function QuizPreview() {
 }
 
 function MetricsPreview() {
+  const { t } = useLanguage();
   return (
     <div className="absolute inset-x-5 top-5 grid grid-cols-2 gap-3">
       {[
-        ['Contributions', '148'],
-        ['Accepted', '62'],
-        ['Badges', '18'],
-        ['Streak', '12d'],
+        [t.showcase.howItWorks.communityCard.contributions, '148'],
+        [t.showcase.howItWorks.communityCard.accepted, '62'],
+        [t.showcase.howItWorks.communityCard.badges, '18'],
+        [t.showcase.howItWorks.communityCard.streak, '12d'],
       ].map(([label, value]) => (
         <div key={label} className="rounded-2xl border border-white/10 bg-black/25 p-4">
           <p className="text-2xl font-semibold text-white">{value}</p>
@@ -177,26 +200,35 @@ function MetricsPreview() {
 }
 
 function HistoryPreview() {
+  const { t } = useLanguage();
   return (
     <div className="absolute inset-x-5 top-5 space-y-2.5">
       <div className="flex items-center justify-between rounded-xl border border-blue-400/20 bg-blue-500/10 px-3.5 py-2.5 text-xs">
         <div className="flex items-center gap-2">
           <BadgeCheck size={16} className="text-blue-400" />
-          <span className="font-semibold text-white">Duel won</span>
+          <span className="font-semibold text-white">
+            {t.showcase.howItWorks.proofCard.duelWon}
+          </span>
         </div>
         <span className="font-mono text-[9px] text-blue-300">+100 ELO</span>
       </div>
       <div className="flex items-center justify-between rounded-xl border border-emerald-400/20 bg-emerald-500/10 px-3.5 py-2.5 text-xs">
         <div className="flex items-center gap-2">
           <CheckCircle2 size={16} className="text-emerald-400" />
-          <span className="font-semibold text-white">TypeScript track 100%</span>
+          <span className="font-semibold text-white">
+            {t.showcase.howItWorks.proofCard.trackCompleted}
+          </span>
         </div>
-        <span className="font-mono text-[9px] text-emerald-300">Level 19</span>
+        <span className="font-mono text-[9px] text-emerald-300">
+          {t.showcase.howItWorks.proofCard.level19}
+        </span>
       </div>
       <div className="flex items-center justify-between rounded-xl border border-violet-400/20 bg-violet-500/10 px-3.5 py-2.5 text-xs">
         <div className="flex items-center gap-2">
           <Flame size={16} className="text-orange-400" />
-          <span className="font-semibold text-white">12-day streak</span>
+          <span className="font-semibold text-white">
+            {t.showcase.howItWorks.proofCard.streak12}
+          </span>
         </div>
         <span className="font-mono text-[9px] text-violet-300">+45 XP</span>
       </div>
@@ -268,6 +300,7 @@ function FeatureCard({
 }
 
 function PlatformMockup() {
+  const { t } = useLanguage();
   const [activeNav, setActiveNav] = useState('home');
   const [activeFeedTab, setActiveFeedTab] = useState<'foryou' | 'following'>('foryou');
   const [likesPost1, setLikesPost1] = useState(0);
@@ -283,20 +316,23 @@ function PlatformMockup() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const sidebarNavItems = [
-    { id: 'home', label: 'Home', icon: Home },
-    { id: 'explore', label: 'Explore', icon: Search },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'learn', label: 'Learn with Stacklyst', icon: BookOpen },
-    { id: 'chat', label: 'Chat', icon: MessageCircle },
-    { id: 'async', label: 'ASYNC', icon: Zap },
-    { id: 'bookmarks', label: 'Bookmarks', icon: Bookmark },
-    { id: 'profile', label: 'Profile', icon: User },
-    { id: 'more', label: 'More', icon: MoreHorizontal },
+    { id: 'home', label: t.showcase.platform.mockup.home, icon: Home },
+    { id: 'explore', label: t.showcase.platform.mockup.explore, icon: Search },
+    { id: 'notifications', label: t.showcase.platform.mockup.notifications, icon: Bell },
+    { id: 'learn', label: t.showcase.platform.mockup.learn, icon: BookOpen },
+    { id: 'chat', label: t.showcase.platform.mockup.chat, icon: MessageCircle },
+    { id: 'async', label: t.showcase.platform.mockup.async, icon: Zap },
+    { id: 'bookmarks', label: t.showcase.platform.mockup.bookmarks, icon: Bookmark },
+    { id: 'profile', label: t.showcase.platform.mockup.profile, icon: User },
+    { id: 'more', label: t.showcase.platform.mockup.more, icon: MoreHorizontal },
   ];
 
   const handlePost = () => {
     if (!composerText.trim()) return;
-    setUserPosts((prev) => [{ id: Date.now(), text: composerText, time: 'now' }, ...prev]);
+    setUserPosts((prev) => [
+      { id: Date.now(), text: composerText, time: t.showcase.platform.mockup.postedNow },
+      ...prev,
+    ]);
     setComposerText('');
   };
 
@@ -363,7 +399,7 @@ function PlatformMockup() {
               className="w-full bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white font-bold py-3 px-6 rounded-full flex items-center justify-center gap-2 shadow-md transition-colors"
             >
               <Pencil size={16} />
-              <span>Post</span>
+              <span>{t.showcase.platform.mockup.post}</span>
             </button>
           </div>
 
@@ -386,7 +422,7 @@ function PlatformMockup() {
 
             <div className="mx-2 flex items-center gap-1.5 px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full text-[10px] text-blue-400 font-medium">
               <Flame size={12} className="text-orange-400" />
-              <span>1 day of mastery</span>
+              <span>{t.showcase.platform.mockup.dayOfMastery}</span>
             </div>
           </div>
         </aside>
@@ -408,7 +444,7 @@ function PlatformMockup() {
               <div>
                 <p className="text-sm font-bold tracking-tight text-white">Stacklyst</p>
                 <p className="font-mono text-[8px] uppercase tracking-[0.16em] text-blue-400">
-                  Community feed
+                  {t.showcase.platform.mockup.communityFeed}
                 </p>
               </div>
             </div>
@@ -437,7 +473,7 @@ function PlatformMockup() {
                   activeFeedTab === 'foryou' ? 'text-white' : 'text-[#71767b] hover:text-slate-300'
                 )}
               >
-                <span>For you</span>
+                <span>{t.showcase.platform.mockup.forYou}</span>
                 {activeFeedTab === 'foryou' && (
                   <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1d9bf0]" />
                 )}
@@ -451,7 +487,7 @@ function PlatformMockup() {
                     : 'text-[#71767b] hover:text-slate-300'
                 )}
               >
-                <span>Following</span>
+                <span>{t.showcase.platform.mockup.following}</span>
                 {activeFeedTab === 'following' && (
                   <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1d9bf0]" />
                 )}
@@ -474,12 +510,12 @@ function PlatformMockup() {
                     type="text"
                     value={composerText}
                     onChange={(e) => setComposerText(e.target.value)}
-                    placeholder="What’s happening?"
+                    placeholder={t.showcase.platform.mockup.whatsHappening}
                     className="w-full bg-transparent text-xs text-white placeholder:text-[#71767b] outline-none pt-1 font-medium"
                   />
                   <div className="flex items-center gap-1.5 text-[11px] text-[#1d9bf0] font-semibold">
                     <Globe size={13} />
-                    <span>Anyone can reply</span>
+                    <span>{t.showcase.platform.mockup.anyoneCanReply}</span>
                   </div>
                 </div>
               </div>
@@ -502,7 +538,7 @@ function PlatformMockup() {
                       : 'bg-[#1d9bf0]/50 cursor-not-allowed'
                   )}
                 >
-                  Post
+                  {t.showcase.platform.mockup.post}
                 </button>
               </div>
             </div>
@@ -522,7 +558,9 @@ function PlatformMockup() {
                           Lvl 1
                         </span>
                       </div>
-                      <span className="text-slate-500 text-[10px] block">Posted {post.time}</span>
+                      <span className="text-slate-500 text-[10px] block">
+                        {t.showcase.platform.mockup.postedNow}
+                      </span>
                     </div>
                   </div>
                   <MoreHorizontal size={14} className="text-slate-500" />
@@ -545,21 +583,21 @@ function PlatformMockup() {
                         Lvl 1
                       </span>
                     </div>
-                    <span className="text-slate-500 text-[10px] block">Posted 2h ago</span>
+                    <span className="text-slate-500 text-[10px] block">
+                      {t.showcase.platform.mockup.posted2hAgo}
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-semibold">
-                    Architecture
+                    {t.showcase.platform.mockup.architecture}
                   </span>
                   <MoreHorizontal size={14} className="text-slate-500" />
                 </div>
               </div>
 
               <p className="text-xs text-slate-200 leading-5">
-                I just finished migrating our critical routes to optimistic rendering with
-                distributed caching in Next.js. Response time dropped from 380ms to 42ms in
-                production! &#128640;
+                {t.showcase.platform.mockup.post1Text}
               </p>
 
               {/* Action Bar */}
@@ -568,7 +606,7 @@ function PlatformMockup() {
                   <MessageSquareText size={14} /> <span>0</span>
                 </button>
                 <button className="flex items-center gap-1.5 hover:text-emerald-400">
-                  <Repeat2 size={14} /> <span>0</span>
+                  <RetweetIcon className="size-[14px]" /> <span>0</span>
                 </button>
                 <button
                   onClick={() => {
@@ -604,7 +642,9 @@ function PlatformMockup() {
                     <span className="px-1.5 py-0.2 bg-slate-800 text-slate-400 font-mono text-[9px] rounded">
                       Lvl 1
                     </span>
-                    <span className="text-slate-500 text-[10px]">&middot; Posted 8d ago</span>
+                    <span className="text-slate-500 text-[10px]">
+                      &middot; {t.showcase.platform.mockup.posted8dAgo}
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -627,11 +667,15 @@ function PlatformMockup() {
                       className="flex items-center gap-1.5 px-3 py-1 bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white text-[10px] font-semibold rounded-full transition-colors"
                     >
                       <Play size={11} className="fill-white" />
-                      <span>{isRunningCode ? 'Running...' : 'Run'}</span>
+                      <span>
+                        {isRunningCode
+                          ? t.showcase.platform.mockup.running
+                          : t.showcase.platform.mockup.run}
+                      </span>
                     </button>
                     <button className="flex items-center gap-1.5 px-3 py-1 bg-white/5 hover:bg-white/10 text-slate-300 text-[10px] font-medium rounded-full border border-white/10 transition-colors">
                       <Copy size={11} />
-                      <span>Copy</span>
+                      <span>{t.showcase.platform.mockup.copy}</span>
                     </button>
                   </div>
                 </div>
@@ -640,36 +684,52 @@ function PlatformMockup() {
                 </div>
                 {codeOutput && (
                   <div className="border-t border-white/10 p-3 bg-black font-mono text-[10px] text-blue-400">
-                    <span className="text-slate-500">{`// Terminal Output:`}</span>
+                    <span className="text-slate-500">
+                      {t.showcase.platform.mockup.terminalOutput}
+                    </span>
                     <p className="mt-1 text-white font-bold">{codeOutput}</p>
                   </div>
                 )}
               </div>
 
-              {/* Quiz de Aprendizado Widget */}
-              <div className="rounded-xl border border-white/10 bg-[#0a0a0a] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center size-9 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
-                    <Sparkles size={18} />
+              {/* Quiz de Aprendizado Widget (Duolingo style) */}
+              <div className="rounded-2xl border-2 border-b-4 border-emerald-500/40 bg-emerald-950/20 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="flex items-center justify-center size-11 rounded-2xl border-2 border-b-4 border-emerald-600 bg-emerald-500 text-white shrink-0 shadow-sm">
+                    <Check size={20} className="stroke-[3]" />
                   </div>
-                  <div>
-                    <h5 className="font-bold text-white text-xs">Learning Quiz</h5>
-                    <p className="text-[10px] text-slate-400">
-                      You already completed this challenge!
-                    </p>
+                  <div className="text-left min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
+                        {t.showcase.platform.mockup.learningQuiz}
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-[10px] font-black border-2 border-b-[3px] border-amber-500/40 bg-amber-500/15 text-amber-300">
+                        <Zap size={12} className="fill-amber-300 stroke-none" />
+                        +15 XP
+                      </span>
+                    </div>
+                    <h5 className="font-black text-white text-xs mt-0.5">
+                      {t.showcase.platform.mockup.quizCompleted}
+                    </h5>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowQuizResults(!showQuizResults)}
-                  className="px-3.5 py-1.5 rounded-full border border-emerald-500/40 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 font-semibold text-[10px] transition-colors self-start sm:self-auto"
+                  className="px-4 py-2 rounded-xl border-b-[4px] border-emerald-700 bg-emerald-500 hover:bg-emerald-400 active:border-b-0 active:translate-y-[4px] text-white font-black text-xs uppercase tracking-wider transition-all self-start sm:self-auto cursor-pointer shadow-md shadow-emerald-500/20 flex items-center gap-1.5"
                 >
-                  {showQuizResults ? 'Hide Results' : 'View Results'}
+                  <Check size={14} className="stroke-[3]" />
+                  <span>
+                    {showQuizResults
+                      ? t.showcase.platform.mockup.hideResults
+                      : t.showcase.platform.mockup.viewResults}
+                  </span>
                 </button>
               </div>
 
               {showQuizResults && (
-                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 text-[11px] text-emerald-300 font-mono">
-                  &#10003; Challenge completed! +45 XP added to your profile.
+                <div className="rounded-2xl border-2 border-b-4 border-emerald-600 bg-emerald-500/15 p-3.5 text-xs text-emerald-200 font-bold flex items-center gap-2 animate-slide-up">
+                  <Sparkles size={16} className="text-emerald-400 shrink-0" />
+                  <span>{t.showcase.platform.mockup.quizSuccess}</span>
                 </div>
               )}
 
@@ -679,7 +739,7 @@ function PlatformMockup() {
                   <MessageSquareText size={14} /> <span>0</span>
                 </button>
                 <button className="flex items-center gap-1.5 hover:text-emerald-400">
-                  <Repeat2 size={14} /> <span>0</span>
+                  <RetweetIcon className="size-[14px]" /> <span>0</span>
                 </button>
                 <button
                   onClick={() => {
@@ -716,10 +776,10 @@ function PlatformMockup() {
             className="grid grid-cols-4 border-t border-white/10 bg-[#050505]/95 px-1 py-1.5 backdrop-blur-md md:hidden"
           >
             {[
-              { id: 'home', label: 'Home', icon: Home },
-              { id: 'explore', label: 'Explore', icon: Search },
-              { id: 'learn', label: 'Learn', icon: BookOpen },
-              { id: 'profile', label: 'Profile', icon: User },
+              { id: 'home', label: t.showcase.platform.mockup.home, icon: Home },
+              { id: 'explore', label: t.showcase.platform.mockup.explore, icon: Search },
+              { id: 'learn', label: t.showcase.platform.mockup.learn, icon: BookOpen },
+              { id: 'profile', label: t.showcase.platform.mockup.profile, icon: User },
             ].map((item) => {
               const Icon = item.icon;
               const isActive = activeNav === item.id;
@@ -751,7 +811,7 @@ function PlatformMockup() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search"
+              placeholder={t.showcase.platform.mockup.search}
               className="w-full bg-transparent text-white placeholder:text-slate-500 outline-none text-xs"
             />
           </div>
@@ -760,7 +820,7 @@ function PlatformMockup() {
           <div className="rounded-2xl border border-white/10 bg-[#080808] p-4 space-y-4">
             <div className="flex items-center justify-between">
               <span className="font-bold text-[10px] uppercase tracking-wider text-slate-400">
-                ENGAGEMENT
+                {t.showcase.platform.mockup.engagement}
               </span>
               <span className="size-2 rounded-full bg-blue-500" />
             </div>
@@ -769,7 +829,7 @@ function PlatformMockup() {
             <div className="flex flex-col items-center justify-center py-2 text-center">
               <Flame size={44} className="text-[#1d9bf0] fill-[#1d9bf0]/20 animate-pulse" />
               <p className="mt-2 text-xs font-semibold text-blue-400 tracking-wide">
-                &lt; 1 day streak &gt;
+                {t.showcase.platform.mockup.streakLabel}
               </p>
             </div>
 
@@ -800,12 +860,12 @@ function PlatformMockup() {
             {/* XP and Level */}
             <div className="space-y-2 border-t border-white/5 pt-3">
               <div className="flex justify-between text-xs font-semibold">
-                <span className="text-slate-400">XP Earned</span>
+                <span className="text-slate-400">{t.showcase.platform.mockup.xpEarned}</span>
                 <span className="text-white">425 XP</span>
               </div>
               <div className="space-y-1">
                 <div className="flex justify-between text-[10px] font-mono text-slate-400">
-                  <span>LEVEL PROGRESS</span>
+                  <span>{t.showcase.platform.mockup.levelProgress}</span>
                   <span>LVL 1</span>
                 </div>
                 <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
@@ -819,7 +879,7 @@ function PlatformMockup() {
           <div className="rounded-2xl border border-white/10 bg-[#080808] p-4 space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-bold text-[10px] uppercase tracking-wider text-slate-400">
-                ACHIEVEMENTS
+                {t.showcase.platform.mockup.achievements}
               </span>
               <Bookmark size={14} className="text-blue-400" />
             </div>
@@ -831,7 +891,9 @@ function PlatformMockup() {
                   className="aspect-square rounded-xl border border-white/5 bg-white/[0.02] flex flex-col items-center justify-center p-2 text-center"
                 >
                   <Lock size={16} className="text-slate-600 mb-1" />
-                  <span className="text-[8px] text-slate-600 font-mono">Locked</span>
+                  <span className="text-[8px] text-slate-600 font-mono">
+                    {t.showcase.platform.mockup.locked}
+                  </span>
                 </div>
               ))}
             </div>
@@ -841,7 +903,7 @@ function PlatformMockup() {
           <div className="rounded-2xl border border-white/10 bg-[#080808] p-4 space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-bold text-[10px] uppercase tracking-wider text-slate-400">
-                MY TRACKS
+                {t.showcase.platform.mockup.myTracks}
               </span>
               <Sparkles size={14} className="text-blue-400" />
             </div>
@@ -927,12 +989,13 @@ const trails = [
 ];
 
 function TrailCard({ trail, index }: { trail: (typeof trails)[number]; index: number }) {
+  const { t } = useLanguage();
   return (
     <article data-reveal className={cn(cardClass, 'group p-6 sm:p-7')}>
       <div className="flex items-start justify-between">
         <div>
           <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-500">
-            Track 0{index + 1}
+            {t.showcase.tracks.trackPrefix} 0{index + 1}
           </p>
           <h3 className="mt-3 text-2xl font-semibold text-white">{trail.language}</h3>
         </div>
@@ -942,7 +1005,9 @@ function TrailCard({ trail, index }: { trail: (typeof trails)[number]; index: nu
       </div>
       <div className="mt-12">
         <div className="mb-3 flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.14em] text-slate-500">
-          <span>{trail.modules} modules</span>
+          <span>
+            {trail.modules} {t.showcase.tracks.modules}
+          </span>
           <span style={{ color: trail.color }}>{trail.progress}%</span>
         </div>
         <div className="h-1.5 overflow-hidden rounded-full bg-white/8">
@@ -957,7 +1022,7 @@ function TrailCard({ trail, index }: { trail: (typeof trails)[number]; index: nu
         </div>
       </div>
       <div className="mt-7 flex items-center justify-between border-t border-white/8 pt-5 text-xs">
-        <span className="text-slate-500">Next: advanced patterns</span>
+        <span className="text-slate-500">{t.showcase.tracks.nextTopic}</span>
         <ArrowRight size={15} style={{ color: trail.color }} />
       </div>
     </article>
@@ -988,6 +1053,7 @@ export default function LandingShowcase({
   initialUser,
   forceMotion = false,
 }: LandingShowcaseProps) {
+  const { t } = useLanguage();
   const rootRef = useRef<HTMLDivElement>(null);
   const howGridRef = useRef<HTMLDivElement>(null);
 
@@ -1035,10 +1101,10 @@ export default function LandingShowcase({
       >
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-8 gap-y-3 font-mono text-[9px] uppercase tracking-[0.16em] text-slate-500 sm:justify-between">
           {[
-            ['LIVE', '284 devs'],
-            ['POSTS TODAY', '+1,247'],
-            ['XP DISTRIBUTED', '84,290'],
-            ['ACTIVE DUELS', '38'],
+            [t.showcase.activity.live, t.showcase.activity.devs],
+            [t.showcase.activity.postsToday, '+1,247'],
+            [t.showcase.activity.xpDistributed, '84,290'],
+            [t.showcase.activity.activeDuels, '38'],
           ].map(([label, value], index) => (
             <div key={label} className="flex items-center gap-3">
               {index === 0 && (
@@ -1059,47 +1125,48 @@ export default function LandingShowcase({
         <GlobalSpotlight gridRef={howGridRef} glowColor="0, 131, 254" spotlightRadius={300} />
         <SectionHeading
           index="01"
-          eyebrow="How it works"
+          eyebrow={t.showcase.howItWorks.eyebrow}
           title={
             <span className="block whitespace-nowrap text-[clamp(1.75rem,4.17vw,3.75rem)]">
-              Every action becomes <span className="text-blue-400">proof.</span>
+              {t.showcase.howItWorks.titlePart1}
+              <span className="text-blue-400">{t.showcase.howItWorks.titleProof}</span>
             </span>
           }
-          description="Stacklyst turns technical discussions into verifiable evidence: you publish, prove your understanding, and grow in public."
+          description={t.showcase.howItWorks.description}
         />
         <div ref={howGridRef} className="bento-section">
           <BentoGrid className="auto-rows-[22rem] grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6">
             <FeatureCard
               className="md:col-span-2 lg:col-span-4"
               icon={GitBranch}
-              label="Complete flow"
-              title="From a real problem to verified XP"
-              description="Every post starts a clear journey — discussion, contextual quiz, and progress recorded on your profile."
+              label={t.showcase.howItWorks.flowCard.label}
+              title={t.showcase.howItWorks.flowCard.title}
+              description={t.showcase.howItWorks.flowCard.description}
               preview={<FlowPreview />}
               beam
             />
             <FeatureCard
               className="lg:col-span-2"
               icon={BrainCircuit}
-              label="Adaptive quiz"
-              title="AI that tests context"
-              description="Questions come from the published code, never generic exercises."
+              label={t.showcase.howItWorks.quizCard.label}
+              title={t.showcase.howItWorks.quizCard.title}
+              description={t.showcase.howItWorks.quizCard.description}
               preview={<QuizPreview />}
             />
             <FeatureCard
               className="lg:col-span-3"
               icon={Users2}
-              label="Community"
-              title="Feedback that builds reputation"
-              description="Helpful answers gain visibility and strengthen your public track record."
+              label={t.showcase.howItWorks.communityCard.label}
+              title={t.showcase.howItWorks.communityCard.title}
+              description={t.showcase.howItWorks.communityCard.description}
               preview={<MetricsPreview />}
             />
             <FeatureCard
               className="lg:col-span-3"
               icon={ShieldCheck}
-              label="Verifiable proof"
-              title="Let your track record speak first"
-              description="Tracks, duels, and contributions create a living picture of your growth."
+              label={t.showcase.howItWorks.proofCard.label}
+              title={t.showcase.howItWorks.proofCard.title}
+              description={t.showcase.howItWorks.proofCard.description}
               preview={<HistoryPreview />}
             />
           </BentoGrid>
@@ -1114,13 +1181,14 @@ export default function LandingShowcase({
         <div className="mx-auto max-w-7xl">
           <SectionHeading
             index="02"
-            eyebrow="The platform"
+            eyebrow={t.showcase.platform.eyebrow}
             title={
               <>
-                Everything happens in <span className="text-blue-400">one flow.</span>
+                {t.showcase.platform.titlePart1}
+                <span className="text-blue-400">{t.showcase.platform.titleOneFlow}</span>
               </>
             }
-            description="Feed, tracks, quizzes, duels, and profile work together so every action strengthens your technical identity."
+            description={t.showcase.platform.description}
           />
           <div data-reveal className="relative mx-auto w-full max-w-[380px] md:max-w-none">
             <span
@@ -1168,13 +1236,14 @@ export default function LandingShowcase({
       >
         <SectionHeading
           index="03"
-          eyebrow="Tracks and progression"
+          eyebrow={t.showcase.tracks.eyebrow}
           title={
             <>
-              Growth you can <span className="text-blue-400">see.</span>
+              {t.showcase.tracks.titlePart1}
+              <span className="text-blue-400">{t.showcase.tracks.titleSee}</span>
             </>
           }
-          description="Each technology has its own path, level, and evidence. You always know where you are and what to master next."
+          description={t.showcase.tracks.description}
         />
         <div className="grid gap-4 lg:grid-cols-3">
           {trails.map((trail, index) => (
@@ -1190,17 +1259,21 @@ export default function LandingShowcase({
           <div className="flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.2em] text-orange-300">
-                <Flame size={14} /> Progression system
+                <Flame size={14} /> {t.showcase.tracks.gamifyBadge}
               </div>
               <h3 className="mt-5 max-w-lg text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                Consistency becomes a competitive edge.
+                {t.showcase.tracks.gamifyTitle}
               </h3>
               <p className="mt-4 max-w-xl text-sm leading-7 text-slate-400">
-                Streaks, achievements, and leagues reward depth — not just activity volume.
+                {t.showcase.tracks.gamifyDesc}
               </p>
             </div>
             <div className="mt-8 flex flex-wrap gap-2 font-mono text-[9px] uppercase tracking-[0.14em] text-slate-400">
-              {['12-day streak', 'Diamond league', '18 badges'].map((item) => (
+              {[
+                t.showcase.tracks.streakBadge,
+                t.showcase.tracks.leagueBadge,
+                t.showcase.tracks.achievementsBadge,
+              ].map((item) => (
                 <span
                   key={item}
                   className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2"
@@ -1211,10 +1284,10 @@ export default function LandingShowcase({
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <MetricCard icon={Flame} value="12" label="Day streak" />
-            <MetricCard icon={Trophy} value="#24" label="Global ranking" />
-            <MetricCard icon={BadgeCheck} value="18" label="Achievements" />
-            <MetricCard icon={Zap} value="8.4k" label="Total XP" />
+            <MetricCard icon={Flame} value="12" label={t.showcase.tracks.dayStreakMetric} />
+            <MetricCard icon={Trophy} value="#24" label={t.showcase.tracks.globalRankingMetric} />
+            <MetricCard icon={BadgeCheck} value="18" label={t.showcase.tracks.achievementsMetric} />
+            <MetricCard icon={Zap} value="8.4k" label={t.showcase.tracks.totalXpMetric} />
           </div>
           <BorderBeam duration={11} size={150} colorFrom="#0083fe" colorTo="#60a5fa" />
         </div>
@@ -1228,20 +1301,21 @@ export default function LandingShowcase({
         <div className="mx-auto max-w-7xl">
           <SectionHeading
             index="04"
-            eyebrow="Code duels"
+            eyebrow={t.showcase.duels.eyebrow}
             title={
               <>
-                Real pressure. <span className="text-blue-400">Better code.</span>
+                {t.showcase.duels.titlePart1}
+                <span className="text-blue-400">{t.showcase.duels.titleBetterCode}</span>
               </>
             }
-            description="Jump into fast matches against developers at your level and prove your technical decisions while the clock is running."
+            description={t.showcase.duels.description}
           />
           <div data-reveal className={cn(cardClass, 'grid lg:grid-cols-[0.78fr_1.22fr]')}>
             <div className="flex flex-col justify-between border-b border-white/8 p-7 lg:border-b-0 lg:border-r lg:p-10">
               <div>
                 <div className="flex items-center justify-between">
                   <span className="rounded-full bg-rose-400/10 px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-rose-300">
-                    Final round
+                    {t.showcase.duels.finalRound}
                   </span>
                   <span className="font-mono text-sm text-white">02:14</span>
                 </div>
@@ -1265,10 +1339,10 @@ export default function LandingShowcase({
               </div>
               <div className="mt-10 rounded-2xl border border-blue-400/20 bg-blue-400/[0.06] p-5">
                 <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-blue-300">
-                  Challenge
+                  {t.showcase.duels.challenge}
                 </p>
                 <p className="mt-3 text-sm leading-6 text-slate-300">
-                  Reduce complexity without changing the output order.
+                  {t.showcase.duels.challengeDesc}
                 </p>
               </div>
             </div>
@@ -1276,7 +1350,7 @@ export default function LandingShowcase({
             <div className="min-w-0 bg-black p-4 sm:p-6 flex flex-col justify-between">
               <div className="w-full mb-3 flex items-center justify-end">
                 <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-400">
-                  COMPARE PROBLEM VS SOLUTION (HOVER)
+                  {t.showcase.duels.compareHover}
                 </span>
               </div>
               <div className="w-full flex justify-center overflow-hidden rounded-2xl bg-black">
@@ -1291,7 +1365,7 @@ export default function LandingShowcase({
               </div>
               <div className="mt-3 w-full flex items-center justify-between rounded-xl border border-emerald-400/15 bg-emerald-400/[0.05] px-4 py-2.5 text-xs">
                 <span className="flex items-center gap-2 text-emerald-300">
-                  <Check size={14} /> 14 tests passed
+                  <Check size={14} /> {t.showcase.duels.testsPassed}
                 </span>
                 <span className="font-mono text-[9px] text-slate-500">38ms</span>
               </div>
@@ -1321,27 +1395,28 @@ export default function LandingShowcase({
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_48%,rgba(0,0,0,0.45),rgba(0,0,0,0.94)_70%)]" />
           <div className="relative z-10 mx-auto max-w-3xl">
             <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-white/10 bg-black/20 px-4 py-2 font-mono text-[9px] uppercase tracking-[0.18em] text-blue-200">
-              <Terminal size={13} /> Your next line earns XP
+              <Terminal size={13} /> {t.showcase.cta.badge}
             </div>
             <h2 className="mt-7 font-sans text-4xl font-semibold leading-[1.05] tracking-[-0.05em] text-white sm:text-6xl lg:text-7xl">
-              Stop saying you can. <span className="text-blue-300">Show it.</span>
+              {t.showcase.cta.titlePart1}
+              <span className="text-blue-300">{t.showcase.cta.titleShowIt}</span>
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-blue-50/65">
-              Turn real experience into public technical reputation.
+              {t.showcase.cta.subtitle}
             </p>
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
                 href={initialUser ? '/feed' : '/register'}
                 className="inline-flex min-h-12 items-center justify-center gap-3 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-[#04101f] transition-transform hover:-translate-y-0.5"
               >
-                {initialUser ? 'Go to Feed' : 'Create my profile'}
+                {initialUser ? t.showcase.cta.goToFeed : t.showcase.cta.createProfile}
                 <ArrowRight size={16} />
               </Link>
               <a
                 href="#how"
                 className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/15 bg-white/[0.04] px-6 py-3 text-sm font-medium text-white hover:bg-white/[0.08]"
               >
-                Review how it works
+                {t.showcase.cta.reviewHowItWorks}
               </a>
             </div>
           </div>

@@ -16,12 +16,10 @@ import {
   LogOut,
   X,
   Home,
-  Search,
   Bell,
   MessageCircle,
   Bookmark,
   MoreHorizontal,
-  Flame,
   Users,
 } from 'lucide-react';
 import { PostComposerExtras } from '@/components/PostComposerExtras';
@@ -48,6 +46,7 @@ const MarkdownEditor = dynamic(
 
 interface SidebarUser {
   id: string;
+  name?: string | null;
   username: string;
   avatar_url?: string | null;
   avatar_config?: unknown;
@@ -449,9 +448,11 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
           <NotificationBellIcon unreadCount={unreadCount} active={item.active} />
         ) : (
           <>
-            <Icon className={`w-5.5 h-5.5 ${item.active ? 'fill-current' : ''}`} />
+            <Icon
+              className={`w-5.5 h-5.5 ${item.active ? 'text-white fill-current' : 'text-dd-muted'}`}
+            />
             {item.badge === 'dot' && (
-              <span className="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-blue-500 ring-2 ring-dd-bg" />
+              <span className="absolute -top-0.5 -right-0.5 block h-1.5 w-1.5 rounded-full bg-[#1d9bf0]" />
             )}
           </>
         )}
@@ -487,40 +488,40 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
       >
         <div className="space-y-5">
           {/* Logo */}
-          <Link href="/feed" className="group flex w-fit items-center gap-2.5 px-3 py-0">
+          <Link href="/feed" className="group flex w-fit items-center gap-3 px-3 py-1">
             <ThemeLogo
               alt="Stacklyst Logo"
-              width={28}
-              height={28}
+              width={32}
+              height={32}
               className="object-contain group-hover:scale-105 transition-transform duration-300"
             />
-            <span className="text-dd-text font-extrabold text-xl tracking-tight">Stacklyst</span>
+            <span className="text-dd-text font-black text-2xl tracking-tight">Stacklyst</span>
           </Link>
 
           {/* Navigation Links */}
-          <nav className="flex flex-col gap-0.5">
+          <nav className="flex flex-col gap-1">
             {navItems.map((item) => {
               const Icon = item.icon;
 
-              // Standard link style (tightened padding)
-              const linkClasses = `group flex w-full cursor-pointer items-center gap-3.5 rounded-xl border px-3.5 py-2.5 text-left text-sm font-semibold transition-all duration-200 ${
+              // Standard link style
+              const linkClasses = `group flex w-full cursor-pointer items-center gap-4 rounded-2xl border px-4 py-3 text-left text-[15px] font-bold transition-all duration-200 ${
                 item.active
-                  ? 'border-transparent bg-transparent font-black text-dd-text'
+                  ? 'border-transparent bg-dd-surface/40 font-black text-dd-text shadow-sm'
                   : 'border-transparent text-dd-muted hover:bg-dd-surface/60 hover:text-dd-text'
               }`;
 
               // Icon container with relative for badges
               const iconEl = (
-                <div className="relative flex items-center justify-center w-5 h-5">
+                <div className="relative flex items-center justify-center w-6 h-6 shrink-0">
                   {item.label === 'Notificações' ? (
                     <NotificationBellIcon unreadCount={unreadCount} active={item.active} />
                   ) : (
                     <Icon
-                      className={`w-5 h-5 transition-transform group-hover:scale-105 duration-200 ${item.active ? 'text-dd-text fill-current' : 'text-dd-muted'}`}
+                      className={`w-6 h-6 transition-transform group-hover:scale-105 duration-200 ${item.active ? 'text-white fill-current' : 'text-dd-muted'}`}
                     />
                   )}
                   {item.badge === 'dot' && (
-                    <span className="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-blue-500 ring-2 ring-dd-bg animate-pulse" />
+                    <span className="absolute -top-0.5 -right-0.5 block h-2 w-2 rounded-full bg-[#1d9bf0]" />
                   )}
                 </div>
               );
@@ -529,7 +530,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
               const contentEl = (
                 <>
                   {iconEl}
-                  <span>{item.label}</span>
+                  <span className="truncate">{item.label}</span>
                 </>
               );
 
@@ -554,14 +555,14 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
                 }}
                 aria-expanded={moreMenuOpen}
                 aria-haspopup="menu"
-                className={`flex w-full cursor-pointer items-center gap-3.5 rounded-xl border border-transparent px-3.5 py-2.5 text-left text-sm font-semibold transition-all duration-200 group ${
+                className={`flex w-full cursor-pointer items-center gap-4 rounded-2xl border border-transparent px-4 py-3 text-left text-[15px] font-bold transition-all duration-200 group ${
                   moreMenuIsActive
-                    ? 'bg-transparent font-black text-dd-text'
+                    ? 'bg-dd-surface/40 font-black text-dd-text shadow-sm'
                     : 'text-dd-muted hover:bg-dd-surface/60 hover:text-dd-text'
                 }`}
               >
-                <div className="flex h-5 w-5 items-center justify-center">
-                  <MoreHorizontal className="h-5 w-5 transition-transform duration-200 group-hover:scale-105" />
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center">
+                  <MoreHorizontal className="h-6 w-6 transition-transform duration-200 group-hover:scale-105" />
                 </div>
                 <span>Mais</span>
               </button>
@@ -627,22 +628,12 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
             </div>
           </nav>
 
-          {/* Post action button (tightened padding) */}
+          {/* Post action button */}
           {activeUser && (
             <button
               onClick={() => setModalOpen(true)}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-extrabold py-2.5 px-4 rounded-full text-sm transition-all duration-200 active:scale-[0.98] shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 cursor-pointer flex items-center justify-center gap-2"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-black py-3 px-5 rounded-full text-[15px] transition-all duration-200 active:scale-[0.98] shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 cursor-pointer flex items-center justify-center text-center"
             >
-              <svg
-                viewBox="0 0 24 24"
-                className="w-4.5 h-4.5 fill-none stroke-current"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                <path d="M18.375 2.625a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4Z" />
-              </svg>
               <span>Postar</span>
             </button>
           )}
@@ -651,7 +642,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
         {/* User profile dropdown widget */}
         {activeUser && (
           <div className="relative mt-2 pt-2">
-            <div className="group w-full rounded-2xl border border-transparent p-3.5 text-left transition-all duration-200 hover:border-dd-border hover:bg-dd-surface/50">
+            <div className="group w-full rounded-2xl border border-transparent p-3 text-left transition-all duration-200 hover:border-dd-border hover:bg-dd-surface/50">
               <button
                 type="button"
                 onClick={() => {
@@ -671,13 +662,16 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
                 />
                 <div className="min-w-0 flex-1 font-sans">
                   <div className="flex min-w-0 items-center justify-between gap-2">
-                    <p className="min-w-0 truncate text-sm font-bold leading-tight text-dd-text">
-                      {activeUser.username}
+                    <p className="min-w-0 truncate text-[15px] font-black leading-tight text-dd-text">
+                      {activeUser.name ||
+                        (activeUser.avatar_config as any)?.name ||
+                        (activeUser.avatar_config as any)?.displayName ||
+                        activeUser.username}
                     </p>
                     <MoreHorizontal className="h-5 w-5 shrink-0 text-dd-muted transition-colors duration-200 group-hover:text-dd-text" />
                   </div>
                   <div className="mt-1 min-w-0">
-                    <p className="truncate text-xs font-medium leading-none text-dd-muted">
+                    <p className="truncate text-xs font-semibold leading-none text-dd-muted">
                       @{activeUser.username.toLowerCase()}
                     </p>
                   </div>
@@ -891,7 +885,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
                 onChange={handleBodyChange}
                 maxLength={POST_CHAR_LIMIT}
                 minHeight="8rem"
-                placeholder="O que esta acontecendo? Digite / para inserir blocos..."
+                placeholder="O que você está construindo hoje? Digite / para inserir blocos..."
               />
               <div className="flex justify-end">
                 <CharCounter text={postBody} limit={POST_CHAR_LIMIT} />
@@ -946,7 +940,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
           {/* Divider */}
           <div className="border-t border-dd-border/50 pt-3 flex items-center justify-between">
             {/* Left tools (Icons) */}
-            <div className="flex items-center gap-1.5 text-blue-500">
+            <div className="flex items-center gap-2 text-blue-500">
               {/* Image input trigger */}
               <input
                 type="file"
@@ -957,12 +951,12 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
               />
               <label
                 htmlFor="sidebar-tweet-image-upload"
-                className="p-2 hover:bg-blue-500/10 rounded-full transition-colors cursor-pointer"
+                className="p-2.5 hover:bg-blue-500/10 rounded-full transition-colors cursor-pointer"
                 title="Adicionar imagem"
               >
                 <svg
                   viewBox="0 0 24 24"
-                  className="w-4.5 h-4.5 fill-none stroke-current"
+                  className="w-5 h-5 fill-none stroke-current"
                   strokeWidth="2"
                 >
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>

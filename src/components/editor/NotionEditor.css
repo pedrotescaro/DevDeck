@@ -4,20 +4,27 @@
 
 .notion-editor-content {
   color: var(--color-dd-text, #e8e8ea);
-  font-size: 0.875rem;
-  line-height: 1.7;
+  font-size: 1.05rem;
+  line-height: 1.5;
 }
 
-.notion-editor-content.is-editor-empty:first-child::before {
-  color: color-mix(in srgb, var(--color-dd-muted, #8b8b95) 65%, transparent);
+.notion-editor .ProseMirror p.is-editor-empty:first-child::before,
+.notion-editor .ProseMirror p.is-empty:first-child::before,
+.notion-editor .ProseMirror p[data-placeholder]::before,
+.notion-editor-content p.is-editor-empty::before,
+.notion-editor-content p.is-empty::before {
+  color: var(--color-dd-muted, #71767b);
+  opacity: 0.75;
   content: attr(data-placeholder);
   float: left;
   height: 0;
   pointer-events: none;
+  font-size: 1.05rem;
+  line-height: 1.5;
 }
 
 .notion-editor-content p {
-  margin: 0.35rem 0;
+  margin: 0.15rem 0;
 }
 
 .notion-editor-content h2 {

@@ -16,6 +16,9 @@ import {
   Pencil,
   X,
   Sparkles,
+  Share2,
+  Check,
+  Zap,
 } from 'lucide-react';
 import { LikeButton } from './motion/LikeButton';
 import { BookmarkButton } from './motion/BookmarkButton';
@@ -90,6 +93,7 @@ export function PostCard({
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
 
   const [reportReason, setReportReason] = useState('');
   const [reporting, setReporting] = useState(false);
@@ -190,7 +194,12 @@ export function PostCard({
       });
 
       if (!res.ok) {
-        throw new Error('Falha ao registrar curtida');
+        if (res.status === 401) {
+          window.location.href = '/login?reason=session_expired';
+          return;
+        }
+        const errorData = await res.json().catch(() => null);
+        throw new Error(errorData?.error || errorData?.message || 'Falha ao registrar curtida');
       }
 
       const data = await res.json();
@@ -357,73 +366,6 @@ export function PostCard({
           </div>
           <div className="flex items-center gap-1.5" onClick={(e) => e.preventDefault()}>
             {postLanguage && <LanguageTag language={postLanguage} size="sm" />}
-
-            {/* Top-Right Options Popover Menu */}
-            <div className="relative" ref={menuRef}>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  setMenuOpen(!menuOpen);
-                }}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-dd-muted hover:text-dd-text hover:bg-dd-surface transition-colors cursor-pointer"
-                title="Mais opções"
-              >
-                <MoreHorizontal className="w-4 h-4" />
-              </button>
-
-              {menuOpen && (
-                <div
-                  className="absolute right-0 mt-1 w-40 rounded-xl border border-dd-border bg-dd-card p-1 shadow-xl z-30 animate-in fade-in slide-in-from-top-2 duration-150"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                  }}
-                >
-                  {isOwner ? (
-                    <>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          setEditModalOpen(true);
-                          setMenuOpen(false);
-                        }}
-                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-dd-text hover:bg-dd-surface transition-colors cursor-pointer text-left"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                        <span>Editar</span>
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          setDeleteModalOpen(true);
-                          setMenuOpen(false);
-                        }}
-                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer text-left"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Excluir</span>
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        setReportModalOpen(true);
-                        setMenuOpen(false);
-                      }}
-                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-dd-text hover:bg-dd-surface transition-colors cursor-pointer text-left"
-                    >
-                      <Flag className="w-3.5 h-3.5" />
-                      <span>Denunciar</span>
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
@@ -454,55 +396,97 @@ export function PostCard({
             <MarkdownRenderer content={snippetMarkdown} compact />
           )}
 
-          {/* Quiz challenge preview (Attachment card style like Twitter/X card preview) */}
-          {post.quizzes && post.quizzes.length > 0 && (
-            <div
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                router.push(`/post/${post.id}`);
-              }}
-              className="mt-3 mb-3 p-3.5 rounded-xl border border-dd-border bg-dd-surface/30 backdrop-blur-sm flex items-center justify-between gap-4 hover:bg-dd-surface/50 hover:border-blue-500/20 transition-all duration-200 group/quiz cursor-pointer"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0 group-hover/quiz:scale-105 transition-transform duration-200">
-                  <Sparkles className="w-4.5 h-4.5 text-blue-400" />
-                </div>
-                <div className="text-left min-w-0">
-                  <h4 className="text-xs font-black text-dd-text truncate">Quiz de Aprendizado</h4>
-                  <p className="text-[10px] text-dd-muted font-medium mt-0.5 truncate">
-                    {Boolean(post.quizzes[0].attempts && post.quizzes[0].attempts.length > 0)
-                      ? 'Você já respondeu a este desafio!'
-                      : 'Coloque seus conhecimentos em prática e ganhe +15 XP.'}
-                  </p>
-                </div>
-              </div>
+          {/* Quiz challenge preview (Duolingo gamified style) */}
+          {post.quizzes &&
+            post.quizzes.length > 0 &&
+            (() => {
+              const hasCompleted = Boolean(
+                post.quizzes[0].attempts && post.quizzes[0].attempts.length > 0
+              );
+              return (
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    router.push(`/post/${post.id}`);
+                  }}
+                  className={cn(
+                    'mt-3.5 mb-3.5 p-4 rounded-2xl border-2 border-b-4 transition-all duration-200 group/quiz cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4',
+                    hasCompleted
+                      ? 'border-emerald-500/40 bg-emerald-950/20 hover:border-emerald-400 hover:bg-emerald-950/30'
+                      : 'border-blue-500/40 bg-blue-950/20 hover:border-blue-400 hover:bg-blue-950/30'
+                  )}
+                >
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div
+                      className={cn(
+                        'w-12 h-12 rounded-2xl border-2 border-b-4 flex items-center justify-center shrink-0 shadow-md group-hover/quiz:scale-105 transition-transform duration-200',
+                        hasCompleted
+                          ? 'border-emerald-600 bg-emerald-500 text-white'
+                          : 'border-blue-600 bg-blue-500 text-white'
+                      )}
+                    >
+                      {hasCompleted ? (
+                        <Check className="w-6 h-6 stroke-[3]" />
+                      ) : (
+                        <Sparkles className="w-6 h-6 fill-white stroke-[2.5]" />
+                      )}
+                    </div>
+                    <div className="text-left min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span
+                          className={cn(
+                            'text-[10px] font-black uppercase tracking-widest',
+                            hasCompleted ? 'text-emerald-400' : 'text-blue-400'
+                          )}
+                        >
+                          {hasCompleted ? 'Desafio Concluído' : 'Quiz de Aprendizado'}
+                        </span>
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-[11px] font-black border-2 border-b-[3px] border-amber-500/40 bg-amber-500/15 text-amber-300">
+                          <Zap className="w-3.5 h-3.5 fill-amber-300 stroke-none" />
+                          +15 XP
+                        </span>
+                      </div>
+                      <h4 className="text-sm font-black text-white tracking-tight mt-0.5">
+                        {hasCompleted
+                          ? 'Você já completou este desafio!'
+                          : 'Teste seu conhecimento e ganhe XP!'}
+                      </h4>
+                    </div>
+                  </div>
 
-              <Link
-                href={`/post/${post.id}`}
-                onClick={(e) => e.stopPropagation()}
-                className={cn(
-                  'inline-flex items-center justify-center gap-1 px-4 py-1.5 rounded-full font-bold text-[10px] leading-tight transition-all duration-200 shrink-0 shadow-sm border',
-                  Boolean(post.quizzes[0].attempts && post.quizzes[0].attempts.length > 0)
-                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20'
-                    : 'bg-blue-500 border-transparent hover:bg-blue-600 text-white'
-                )}
-              >
-                <span>
-                  {Boolean(post.quizzes[0].attempts && post.quizzes[0].attempts.length > 0)
-                    ? 'Ver Resultados'
-                    : 'Resolver Quiz'}
-                </span>
-              </Link>
-            </div>
-          )}
+                  <Link
+                    href={`/post/${post.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className={cn(
+                      'inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider text-white transition-all duration-150 shrink-0 self-start sm:self-auto cursor-pointer border-b-[4px] active:border-b-0 active:translate-y-[4px]',
+                      hasCompleted
+                        ? 'border-emerald-700 bg-emerald-500 hover:bg-emerald-400 shadow-md shadow-emerald-500/20'
+                        : 'border-blue-700 bg-blue-500 hover:bg-blue-400 shadow-md shadow-blue-500/20'
+                    )}
+                  >
+                    {hasCompleted ? (
+                      <>
+                        <Check className="w-4 h-4 stroke-[3]" />
+                        <span>Ver Resultados</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 fill-white" />
+                        <span>Resolver Quiz</span>
+                      </>
+                    )}
+                  </Link>
+                </div>
+              );
+            })()}
         </SensitiveContentGate>
 
         <PostLocation location={presentedPost.location} className="mb-3" />
 
-        {/* Footer */}
+        {/* Footer: Action bar (Twitter style) */}
         <div
-          className="flex items-center justify-between pt-3 border-t border-dd-border text-xs w-full select-none"
+          className="flex items-center justify-between pt-2.5 mt-2 border-t border-dd-border/60 text-xs w-full select-none text-dd-muted max-w-full"
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();
@@ -511,13 +495,14 @@ export function PostCard({
           {/* 1. Comment bubble */}
           <Link
             href={`/post/${post.id}`}
-            className="flex items-center gap-0.5 text-dd-muted hover:text-blue-400 transition-colors group/comment"
+            className="flex items-center gap-1 text-dd-muted hover:text-blue-400 transition-colors group/comment -ml-1 py-1 px-1"
+            title="Responder"
           >
-            <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-500/10 transition-colors">
-              <MessageCircle className="w-3.5 h-3.5 text-dd-muted group-hover/comment:text-blue-400" />
+            <div className="w-8 h-8 rounded-full flex items-center justify-center group-hover/comment:bg-blue-500/10 transition-colors shrink-0">
+              <MessageCircle className="w-[18px] h-[18px] text-dd-muted group-hover/comment:text-blue-400" />
             </div>
             {(post._count?.answers ?? 0) > 0 && (
-              <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/comment:text-blue-400">
+              <span className="px-0.5 text-xs text-dd-muted group-hover/comment:text-blue-400">
                 {post._count?.answers}
               </span>
             )}
@@ -539,20 +524,126 @@ export function PostCard({
             title="Curtir post"
           />
 
-          {/* 4. Views BarChart */}
-          <div className="flex items-center gap-0.5 text-dd-muted select-none group/views">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-500/10 hover:text-blue-400 transition-colors">
-              <BarChart2 className="w-4 h-4 text-dd-muted group-hover/views:text-blue-400" />
-            </div>
-            <span className="px-1 font-semibold text-[10px] text-dd-muted group-hover/views:text-blue-400">
-              {post.view_count >= 1000
-                ? `${(post.view_count / 1000).toFixed(0)}mil`
-                : post.view_count}
-            </span>
-          </div>
+          {/* Right cluster: Bookmark, Share, More (...) */}
+          <div className="flex items-center gap-1 -mr-1">
+            {/* 4. BookmarkButton */}
+            <BookmarkButton isSaved={bookmarked} onToggle={handleBookmarkToggle} />
 
-          {/* 5. BookmarkButton */}
-          <BookmarkButton isSaved={bookmarked} onToggle={handleBookmarkToggle} />
+            {/* 5. Share Button */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  const url =
+                    typeof window !== 'undefined'
+                      ? `${window.location.origin}/post/${post.id}`
+                      : `/post/${post.id}`;
+                  if (navigator.share && /mobile|android|iphone/i.test(navigator.userAgent)) {
+                    try {
+                      await navigator.share({
+                        title: post.title || 'Stacklyst Post',
+                        text: post.body.substring(0, 100),
+                        url,
+                      });
+                      return;
+                    } catch {
+                      // fallback to clipboard
+                    }
+                  }
+                  try {
+                    await navigator.clipboard.writeText(url);
+                    setShareCopied(true);
+                    setTimeout(() => setShareCopied(false), 2000);
+                  } catch (err) {
+                    console.error('Failed to copy share link:', err);
+                  }
+                }}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-dd-muted hover:text-blue-400 hover:bg-blue-500/10 transition-colors cursor-pointer shrink-0"
+                title="Compartilhar post"
+              >
+                {shareCopied ? (
+                  <Check className="w-[18px] h-[18px] text-emerald-400" />
+                ) : (
+                  <Share2 className="w-[18px] h-[18px]" />
+                )}
+              </button>
+              {shareCopied && (
+                <div className="absolute bottom-full right-0 mb-2 whitespace-nowrap bg-dd-surface border border-dd-border text-dd-text text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-xl animate-slide-up z-50">
+                  Link copiado!
+                </div>
+              )}
+            </div>
+
+            {/* 6. More Options (...) */}
+            <div className="relative" ref={menuRef}>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setMenuOpen(!menuOpen);
+                }}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-dd-muted hover:text-blue-400 hover:bg-blue-500/10 transition-colors cursor-pointer shrink-0"
+                title="Mais opções"
+              >
+                <MoreHorizontal className="w-[18px] h-[18px]" />
+              </button>
+
+              {menuOpen && (
+                <div
+                  className="absolute right-0 bottom-full mb-1.5 w-44 rounded-2xl border border-dd-border/80 bg-dd-surface p-1.5 shadow-2xl z-40 animate-slide-up"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
+                >
+                  {isOwner ? (
+                    <>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          setEditModalOpen(true);
+                          setMenuOpen(false);
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-dd-text hover:bg-dd-bg transition-colors cursor-pointer text-left"
+                      >
+                        <Pencil className="w-4 h-4 text-dd-muted" />
+                        <span>Editar</span>
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          setDeleteModalOpen(true);
+                          setMenuOpen(false);
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer text-left"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-400" />
+                        <span>Excluir</span>
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        setReportModalOpen(true);
+                        setMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-dd-text hover:bg-dd-bg transition-colors cursor-pointer text-left"
+                    >
+                      <Flag className="w-4 h-4 text-dd-muted" />
+                      <span>Denunciar</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </article>
 
