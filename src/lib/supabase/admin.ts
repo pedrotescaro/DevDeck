@@ -9,15 +9,29 @@ const supabaseUrl = getSupabaseUrl();
 const supabaseKey =
   process.env.SUPABASE_SECRET_KEY?.trim() || process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() || '';
 
-const supabaseAdmin =
-  supabaseUrl && supabaseKey
-    ? createClient(supabaseUrl, supabaseKey, {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-      })
-    : null;
+function isValidHttpUrl(urlString: string) {
+  try {
+    const parsed = new URL(urlString);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+let supabaseAdmin: ReturnType<typeof createClient> | null = null;
+
+if (supabaseUrl && supabaseKey && isValidHttpUrl(supabaseUrl)) {
+  try {
+    supabaseAdmin = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+  } catch {
+    supabaseAdmin = null;
+  }
+}
 
 export function getSupabaseAdminClient() {
   return supabaseAdmin;

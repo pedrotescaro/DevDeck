@@ -43,4 +43,14 @@ describe('Supabase public environment configuration', () => {
       /NEXT_PUBLIC_SUPABASE_URL.*NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY/
     );
   });
+
+  it('strips accidental quotes around environment variable values', () => {
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', '"https://example.supabase.co"');
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', '"modern-key"');
+
+    expect(getSupabasePublicConfig()).toEqual({
+      url: 'https://example.supabase.co',
+      key: 'modern-key',
+    });
+  });
 });

@@ -1,5 +1,12 @@
 function readEnv(value: string | undefined) {
-  return value?.trim() ?? '';
+  const trimmed = value?.trim() ?? '';
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1).trim();
+  }
+  return trimmed;
 }
 
 export function getSupabaseUrl() {
