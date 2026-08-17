@@ -5,7 +5,6 @@ import Link from 'next/link';
 import {
   ArrowRight,
   BadgeCheck,
-  BarChart2,
   Bell,
   Bookmark,
   BookOpen,
@@ -13,23 +12,22 @@ import {
   Calendar,
   Check,
   CheckCircle2,
-  Copy,
+  Crown,
   Flame,
   Flag,
   GitBranch,
-  Globe,
   Heart,
   Home,
   Image as ImageIcon,
-  Lock,
   MapPin,
   MessageCircle,
   MessageSquareText,
   MoreHorizontal,
-  Pencil,
   Play,
+  Plus,
   RotateCw,
   Search,
+  Share2,
   ShieldCheck,
   Smile,
   Sparkles,
@@ -38,6 +36,7 @@ import {
   Trophy,
   User,
   Users2,
+  Wand2,
   Zap,
   type LucideIcon,
 } from 'lucide-react';
@@ -51,6 +50,8 @@ import { Compare } from '@/components/ui/compare';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { RetweetIcon } from '@/components/motion/RepostMenu';
+import { LevelBadge } from '@/components/LevelBadge';
+import { LanguageTag } from '@/components/LanguageTag';
 
 interface LandingShowcaseProps {
   initialUser: unknown;
@@ -300,13 +301,13 @@ function FeatureCard({
 }
 
 function PlatformMockup() {
-  const { t } = useLanguage();
   const [activeNav, setActiveNav] = useState('home');
   const [activeFeedTab, setActiveFeedTab] = useState<'foryou' | 'following'>('foryou');
-  const [likesPost1, setLikesPost1] = useState(0);
-  const [hasLikedPost1, setHasLikedPost1] = useState(false);
-  const [likesPost2, setLikesPost2] = useState(1);
+  const [likesPost1, setLikesPost1] = useState(1);
+  const [hasLikedPost1, setHasLikedPost1] = useState(true);
+  const [likesPost2, setLikesPost2] = useState(0);
   const [hasLikedPost2, setHasLikedPost2] = useState(false);
+  const [savedPost1, setSavedPost1] = useState(false);
   const [savedPost2, setSavedPost2] = useState(false);
   const [composerText, setComposerText] = useState('');
   const [userPosts, setUserPosts] = useState<Array<{ id: number; text: string; time: string }>>([]);
@@ -316,21 +317,20 @@ function PlatformMockup() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const sidebarNavItems = [
-    { id: 'home', label: t.showcase.platform.mockup.home, icon: Home },
-    { id: 'explore', label: t.showcase.platform.mockup.explore, icon: Search },
-    { id: 'notifications', label: t.showcase.platform.mockup.notifications, icon: Bell },
-    { id: 'learn', label: t.showcase.platform.mockup.learn, icon: BookOpen },
-    { id: 'chat', label: t.showcase.platform.mockup.chat, icon: MessageCircle },
-    { id: 'async', label: t.showcase.platform.mockup.async, icon: Zap },
-    { id: 'bookmarks', label: t.showcase.platform.mockup.bookmarks, icon: Bookmark },
-    { id: 'profile', label: t.showcase.platform.mockup.profile, icon: User },
-    { id: 'more', label: t.showcase.platform.mockup.more, icon: MoreHorizontal },
+    { id: 'home', label: 'Página Inicial', icon: Home, hasDot: true },
+    { id: 'trails', label: 'Trilhas', icon: BookOpen },
+    { id: 'notifications', label: 'Notificações', icon: Bell },
+    { id: 'ranking', label: 'Ranking', icon: Trophy },
+    { id: 'chat', label: 'Bate-papo', icon: MessageCircle },
+    { id: 'bookmarks', label: 'Itens salvos', icon: Bookmark },
+    { id: 'profile', label: 'Perfil', icon: User },
+    { id: 'more', label: 'Mais', icon: MoreHorizontal },
   ];
 
   const handlePost = () => {
     if (!composerText.trim()) return;
     setUserPosts((prev) => [
-      { id: Date.now(), text: composerText, time: t.showcase.platform.mockup.postedNow },
+      { id: Date.now(), text: composerText, time: 'Postado agora' },
       ...prev,
     ]);
     setComposerText('');
@@ -342,32 +342,32 @@ function PlatformMockup() {
     setCodeOutput(null);
     setTimeout(() => {
       setIsRunningCode(false);
-      setCodeOutput('hello world!');
-    }, 600);
+      setCodeOutput('hello world');
+    }, 500);
   };
 
   return (
-    <div className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[#000000] font-sans text-xs text-white shadow-2xl shadow-black/80 md:rounded-[24px]">
-      <div className="grid grid-cols-1 md:min-h-[640px] md:grid-cols-[200px_1fr] lg:grid-cols-[220px_1fr_300px]">
+    <div className="relative overflow-hidden rounded-[32px] border-2 border-b-4 border-white/10 bg-[#000000] font-sans text-xs text-white shadow-2xl shadow-black/80 md:rounded-[24px] md:h-[620px]">
+      <div className="grid grid-cols-1 md:h-full md:grid-cols-[210px_1fr] lg:grid-cols-[230px_1fr_310px]">
         {/* ================= LEFT SIDEBAR ================= */}
-        <aside className="hidden border-r border-white/10 bg-[#000000] p-4 md:flex md:flex-col md:justify-between">
-          <div className="space-y-4">
+        <aside className="hidden border-r border-white/10 bg-[#000000] p-4 md:flex md:flex-col md:justify-between h-full">
+          <div className="space-y-3">
             {/* Logo */}
-            <div className="flex items-center gap-2 px-2 py-1">
-              <div className="flex items-center justify-center size-7 rounded-lg bg-blue-500/10 border border-blue-500/20">
+            <div className="flex items-center gap-3 px-2 py-1">
+              <div className="flex items-center justify-center size-8 rounded-xl bg-black border border-white/15 shadow-sm">
                 <NextImage
                   src="/logo.svg"
                   alt="Stacklyst"
-                  width={18}
-                  height={18}
-                  className="size-4 object-contain"
+                  width={22}
+                  height={22}
+                  className="size-5 object-contain"
                 />
               </div>
-              <span className="text-base font-bold tracking-tight text-white">Stacklyst</span>
+              <span className="text-xl font-black tracking-tight text-white">Stacklyst</span>
             </div>
 
             {/* Navigation Menu */}
-            <nav className="space-y-1">
+            <nav className="space-y-0.5">
               {sidebarNavItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeNav === item.id;
@@ -376,17 +376,22 @@ function PlatformMockup() {
                     key={item.id}
                     onClick={() => setActiveNav(item.id)}
                     className={cn(
-                      'flex items-center gap-3.5 w-full px-4 py-2.5 text-xs transition-colors text-left bg-transparent',
+                      'flex items-center gap-4 w-full px-4 py-2.5 text-[14px] transition-all text-left rounded-2xl cursor-pointer',
                       isActive
-                        ? 'text-white font-bold'
-                        : 'text-slate-400 hover:text-white font-medium'
+                        ? 'bg-[#18181b] text-white font-bold shadow-sm'
+                        : 'text-[#94a3b8] hover:text-white hover:bg-white/5 font-semibold'
                     )}
                   >
-                    <Icon
-                      size={18}
-                      className={isActive ? 'text-white fill-white' : 'text-slate-400'}
-                      strokeWidth={isActive ? 2.5 : 2}
-                    />
+                    <div className="relative flex items-center justify-center size-5 shrink-0">
+                      <Icon
+                        size={20}
+                        className={isActive ? 'text-white fill-white' : 'text-[#94a3b8]'}
+                        strokeWidth={isActive ? 2.5 : 2}
+                      />
+                      {item.hasDot && (
+                        <span className="absolute -top-1 -right-1 block size-2 rounded-full bg-[#1d9bf0]" />
+                      )}
+                    </div>
                     <span className="truncate">{item.label}</span>
                   </button>
                 );
@@ -396,113 +401,90 @@ function PlatformMockup() {
             {/* Large Blue Postar Button */}
             <button
               onClick={handlePost}
-              className="w-full bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white font-bold py-3 px-6 rounded-full flex items-center justify-center gap-2 shadow-md transition-colors"
+              className="w-full rounded-full bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white font-black py-3 px-6 text-[15px] flex items-center justify-center shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all cursor-pointer mt-1"
             >
-              <Pencil size={16} />
-              <span>{t.showcase.platform.mockup.post}</span>
+              Postar
             </button>
           </div>
 
           {/* User Profile Card (Bottom Left) */}
-          <div className="pt-4 border-t border-white/10 flex flex-col gap-2">
-            <div className="flex items-center gap-2.5 px-2">
-              <div className="size-9 rounded-full bg-slate-800 border border-white/10 overflow-hidden flex items-center justify-center font-bold text-xs text-white shrink-0">
+          <div className="pt-3 border-t border-white/10 flex items-center justify-between px-2 cursor-pointer hover:bg-white/5 rounded-2xl p-2 transition-colors">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="size-10 rounded-full bg-slate-900 border border-white/20 overflow-hidden flex items-center justify-center font-bold text-xs text-white shrink-0 shadow-sm">
                 US
               </div>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-white text-xs truncate">user</span>
-                  <span className="px-1.5 py-0.2 bg-slate-800 text-slate-400 font-mono text-[9px] rounded">
-                    Lvl 1
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-500 truncate">@user</p>
+                <p className="font-bold text-white text-[14px] truncate leading-tight">User</p>
+                <p className="text-xs font-semibold text-slate-500 truncate leading-none mt-0.5">
+                  @user
+                </p>
               </div>
             </div>
-
-            <div className="mx-2 flex items-center gap-1.5 px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full text-[10px] text-blue-400 font-medium">
-              <Flame size={12} className="text-orange-400" />
-              <span>{t.showcase.platform.mockup.dayOfMastery}</span>
-            </div>
+            <MoreHorizontal size={18} className="text-slate-500 shrink-0" />
           </div>
         </aside>
 
         {/* ================= CENTER FEED ================= */}
-        <main className="flex min-w-0 flex-col bg-[#000000] lg:border-r lg:border-white/10">
+        <main className="flex min-w-0 h-full flex-col bg-[#000000] lg:border-r lg:border-white/10 relative overflow-hidden">
           {/* Mobile app header */}
-          <div className="flex h-14 items-center justify-between border-b border-white/10 px-4 md:hidden">
+          <div className="flex h-14 items-center justify-between border-b border-white/10 px-4 md:hidden shrink-0">
             <div className="flex items-center gap-2.5">
-              <div className="flex size-8 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10">
+              <div className="flex size-7 items-center justify-center rounded-xl bg-blue-500/15 border-2 border-b-[3px] border-blue-500/40">
                 <NextImage
                   src="/logo.svg"
-                  alt=""
+                  alt="Stacklyst"
                   width={18}
                   height={18}
                   className="size-4 object-contain"
                 />
               </div>
-              <div>
-                <p className="text-sm font-bold tracking-tight text-white">Stacklyst</p>
-                <p className="font-mono text-[8px] uppercase tracking-[0.16em] text-blue-400">
-                  {t.showcase.platform.mockup.communityFeed}
-                </p>
-              </div>
+              <span className="text-base font-black tracking-tight text-white">Stacklyst</span>
             </div>
-            <button
-              type="button"
-              onClick={() => setActiveNav('profile')}
-              aria-label="Open profile"
-              className={cn(
-                'flex size-8 items-center justify-center rounded-full border text-[10px] font-bold transition-colors',
-                activeNav === 'profile'
-                  ? 'border-blue-400/50 bg-blue-400/15 text-blue-300'
-                  : 'border-white/10 bg-slate-900 text-white hover:border-blue-400/40'
-              )}
-            >
+            <div className="size-8 rounded-xl bg-slate-900 border-2 border-b-[3px] border-white/20 flex items-center justify-center text-xs font-black text-white">
               US
-            </button>
+            </div>
           </div>
 
           {/* Feed Header Tabs */}
-          <div className="relative flex items-center border-b border-white/10 h-13 bg-[#000000]/90 backdrop-blur-md sticky top-0 z-10">
+          <div className="relative flex items-center border-b border-white/10 h-13 bg-[#000000]/90 backdrop-blur-md sticky top-0 z-10 shrink-0">
             <div className="grid grid-cols-2 w-full h-full pr-12">
               <button
                 onClick={() => setActiveFeedTab('foryou')}
                 className={cn(
-                  'h-full flex items-center justify-center font-bold text-xs relative transition-colors',
+                  'h-full flex items-center justify-center font-black text-xs relative transition-colors cursor-pointer',
                   activeFeedTab === 'foryou' ? 'text-white' : 'text-[#71767b] hover:text-slate-300'
                 )}
               >
-                <span>{t.showcase.platform.mockup.forYou}</span>
+                <span>Para você</span>
                 {activeFeedTab === 'foryou' && (
-                  <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1d9bf0]" />
+                  <span className="absolute bottom-0 left-1/4 right-1/4 h-[3px] rounded-full bg-[#1d9bf0]" />
                 )}
               </button>
               <button
                 onClick={() => setActiveFeedTab('following')}
                 className={cn(
-                  'h-full flex items-center justify-center font-bold text-xs relative transition-colors',
+                  'h-full flex items-center justify-center font-black text-xs relative transition-colors cursor-pointer',
                   activeFeedTab === 'following'
                     ? 'text-white'
                     : 'text-[#71767b] hover:text-slate-300'
                 )}
               >
-                <span>{t.showcase.platform.mockup.following}</span>
+                <span>Seguindo</span>
                 {activeFeedTab === 'following' && (
-                  <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1d9bf0]" />
+                  <span className="absolute bottom-0 left-1/4 right-1/4 h-[3px] rounded-full bg-[#1d9bf0]" />
                 )}
               </button>
             </div>
-            <button className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors p-1.5 rounded-full hover:bg-white/5">
+            <button className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors p-1.5 rounded-full hover:bg-white/5 cursor-pointer">
               <RotateCw size={14} />
             </button>
           </div>
 
-          <div className="max-h-[520px] space-y-4 overflow-y-auto overscroll-contain p-3 sm:max-h-[620px] sm:p-5">
+          <div className="flex-1 space-y-4 overflow-y-auto overscroll-contain p-3 sm:p-5">
             {/* Post Composer Box */}
             <div className="border-b border-white/10 pb-4 space-y-3">
               <div className="flex gap-3">
-                <div className="size-9 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center font-bold text-xs text-white shrink-0">
+                <div className="size-10 rounded-2xl bg-slate-900 border-2 border-b-[3px] border-white/20 flex items-center justify-center font-black text-xs text-white shrink-0">
                   US
                 </div>
                 <div className="flex-1 space-y-2">
@@ -510,57 +492,62 @@ function PlatformMockup() {
                     type="text"
                     value={composerText}
                     onChange={(e) => setComposerText(e.target.value)}
-                    placeholder={t.showcase.platform.mockup.whatsHappening}
-                    className="w-full bg-transparent text-xs text-white placeholder:text-[#71767b] outline-none pt-1 font-medium"
+                    placeholder="O que você está construindo hoje?"
+                    className="w-full bg-transparent text-sm text-white placeholder:text-[#555a60] outline-none pt-1 font-medium"
                   />
-                  <div className="flex items-center gap-1.5 text-[11px] text-[#1d9bf0] font-semibold">
-                    <Globe size={13} />
-                    <span>{t.showcase.platform.mockup.anyoneCanReply}</span>
-                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                <div className="flex items-center gap-3.5 text-[#1d9bf0]">
-                  <ImageIcon size={16} className="cursor-pointer hover:opacity-80" />
-                  <Smile size={16} className="cursor-pointer hover:opacity-80" />
-                  <Calendar size={16} className="cursor-pointer hover:opacity-80" />
-                  <MapPin size={16} className="cursor-pointer hover:opacity-80" />
-                  <Flag size={16} className="cursor-pointer hover:opacity-80" />
+              <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center gap-4 text-blue-500 pl-13">
+                  <ImageIcon
+                    size={18}
+                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                  />
+                  <Smile size={18} className="cursor-pointer hover:opacity-80 transition-opacity" />
+                  <Calendar
+                    size={18}
+                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                  />
+                  <MapPin
+                    size={18}
+                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                  />
+                  <Flag size={18} className="cursor-pointer hover:opacity-80 transition-opacity" />
                 </div>
                 <button
                   onClick={handlePost}
                   disabled={!composerText.trim()}
                   className={cn(
-                    'px-4 py-1.5 rounded-full font-bold text-xs text-white transition-all',
+                    'px-5 py-2 rounded-xl font-black text-xs text-white transition-all border-2 border-b-4',
                     composerText.trim()
-                      ? 'bg-[#1d9bf0] hover:bg-[#1a8cd8]'
-                      : 'bg-[#1d9bf0]/50 cursor-not-allowed'
+                      ? 'bg-blue-500 hover:bg-blue-400 border-blue-600 border-b-blue-800 shadow-md shadow-blue-500/20 active:translate-y-0.5 active:border-b-2 cursor-pointer'
+                      : 'bg-blue-500/40 border-blue-600/40 border-b-blue-800/40 text-white/50 cursor-not-allowed'
                   )}
                 >
-                  {t.showcase.platform.mockup.post}
+                  Postar
                 </button>
               </div>
             </div>
 
             {/* Dynamic User Posted Cards */}
             {userPosts.map((post) => (
-              <div key={post.id} className="border-b border-white/10 pb-4 space-y-3">
+              <div
+                key={post.id}
+                className="border-b border-white/10 pb-4 space-y-3 animate-slide-down"
+              >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="size-9 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xs text-white shrink-0">
+                    <div className="size-9 rounded-2xl bg-slate-900 border-2 border-b-[3px] border-white/20 flex items-center justify-center font-bold text-xs text-white shrink-0">
                       US
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-white text-xs">@user</span>
-                        <span className="px-1.5 py-0.2 bg-slate-800 text-slate-400 font-mono text-[9px] rounded">
-                          Lvl 1
-                        </span>
+                        <span className="font-bold text-white text-xs">User</span>
+                        <span className="text-slate-500 text-[11px]">@user</span>
+                        <LevelBadge totalXp={0} className="text-[9px]" />
                       </div>
-                      <span className="text-slate-500 text-[10px] block">
-                        {t.showcase.platform.mockup.postedNow}
-                      </span>
+                      <span className="text-slate-500 text-[10px] block">{post.time}</span>
                     </div>
                   </div>
                   <MoreHorizontal size={14} className="text-slate-500" />
@@ -569,44 +556,106 @@ function PlatformMockup() {
               </div>
             ))}
 
-            {/* Post 1: Serious technical post */}
-            <div className="border-b border-white/10 pb-4 space-y-3">
+            {/* Post 1: Python Code + Gamified Challenge (Duolingo Style) */}
+            <div className="border-b border-white/10 pb-5 space-y-3.5">
               <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="size-9 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xs text-white shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="size-10 rounded-2xl bg-blue-500/20 border-2 border-b-[3px] border-blue-400/40 flex items-center justify-center font-black text-xs text-blue-400 shrink-0">
                     US
                   </div>
                   <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-bold text-white text-xs">@user</span>
-                      <span className="px-1.5 py-0.2 bg-slate-800 text-slate-400 font-mono text-[9px] rounded">
-                        Lvl 1
-                      </span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-black text-white text-sm">User</span>
+                      <span className="text-xs text-slate-500 font-medium">@user</span>
+                      <LevelBadge totalXp={0} className="text-[9px]" />
                     </div>
-                    <span className="text-slate-500 text-[10px] block">
-                      {t.showcase.platform.mockup.posted2hAgo}
+                    <span className="text-slate-500 text-[11px] block mt-0.5">
+                      Postado 13d atrás
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-semibold">
-                    {t.showcase.platform.mockup.architecture}
-                  </span>
-                  <MoreHorizontal size={14} className="text-slate-500" />
-                </div>
+                <LanguageTag language="PYTHON" size="sm" />
               </div>
 
-              <p className="text-xs text-slate-200 leading-5">
-                {t.showcase.platform.mockup.post1Text}
-              </p>
+              {/* Code Box */}
+              <div className="rounded-2xl border-2 border-b-4 border-white/10 bg-[#080808] overflow-hidden shadow-lg">
+                <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5 bg-[#121212]">
+                  <span className="font-mono text-[11px] font-black tracking-wider text-slate-400">
+                    PYTHON
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleRunCode}
+                      className="flex items-center gap-1.5 px-4 py-1.5 bg-blue-500 hover:bg-blue-400 border-2 border-b-[3px] border-blue-600 border-b-blue-800 text-white text-xs font-black rounded-xl transition-all shadow-md shadow-blue-500/20 cursor-pointer active:translate-y-0.5 active:border-b-2"
+                    >
+                      <Play size={12} className="fill-white" />
+                      <span>{isRunningCode ? 'Executando...' : 'Executar'}</span>
+                    </button>
+                    <button className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold rounded-xl border border-white/10 transition-colors cursor-pointer">
+                      <span>Copiar</span>
+                    </button>
+                  </div>
+                </div>
+                <div className="p-4 font-mono text-xs text-slate-200 bg-[#060606]">
+                  <code>
+                    <span className="text-blue-400">print</span>
+                    <span className="text-slate-400">(</span>
+                    <span className="text-emerald-400">&quot;hello world&quot;</span>
+                    <span className="text-slate-400">)</span>
+                  </code>
+                </div>
+                {codeOutput && (
+                  <div className="border-t border-white/10 p-3 bg-black font-mono text-[11px] text-emerald-400 animate-slide-up">
+                    <span className="text-slate-500 text-[10px]">{'// Saída do terminal:'}</span>
+                    <p className="mt-0.5 text-white font-bold">{codeOutput}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Interactive 3D Gamified Challenge Widget (Duolingo-style Green Card) */}
+              <div className="rounded-[24px] border-2 border-b-4 border-emerald-500/80 border-b-emerald-700 bg-emerald-950/20 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl shadow-emerald-500/10">
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="flex items-center justify-center size-12 rounded-2xl border-2 border-b-4 border-emerald-600 bg-emerald-500 text-white shrink-0 shadow-md">
+                    <Check size={24} className="stroke-[3.5]" />
+                  </div>
+                  <div className="text-left min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[11px] font-black uppercase tracking-wider text-emerald-400">
+                        DESAFIO CONCLUÍDO
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-[10px] font-black border-2 border-b-[3px] border-amber-500/40 bg-amber-500/20 text-amber-300">
+                        <Zap size={12} className="fill-amber-300 stroke-none" />
+                        +15 XP
+                      </span>
+                    </div>
+                    <h5 className="font-black text-white text-sm sm:text-base mt-1">
+                      Você já completou este desafio!
+                    </h5>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowQuizResults(!showQuizResults)}
+                  className="px-5 py-2.5 rounded-xl border-2 border-b-4 border-emerald-600 border-b-emerald-800 bg-emerald-500 hover:bg-emerald-400 active:border-b-2 active:translate-y-0.5 text-white font-black text-xs uppercase tracking-wider transition-all self-start sm:self-auto cursor-pointer shadow-md shadow-emerald-500/20 flex items-center gap-1.5"
+                >
+                  <Check size={16} className="stroke-[3.5]" />
+                  <span>VER RESULTADOS</span>
+                </button>
+              </div>
+
+              {showQuizResults && (
+                <div className="rounded-2xl border-2 border-b-4 border-emerald-600 bg-emerald-500/15 p-4 text-xs text-emerald-200 font-bold flex items-center gap-2.5 animate-slide-up">
+                  <Sparkles size={18} className="text-emerald-400 shrink-0" />
+                  <span>✓ 100% dos testes passaram com sucesso! Solução executada em 18ms.</span>
+                </div>
+              )}
 
               {/* Action Bar */}
-              <div className="flex items-center justify-between text-slate-500 text-[11px] pt-1 px-1">
-                <button className="flex items-center gap-1.5 hover:text-[#1d9bf0]">
-                  <MessageSquareText size={14} /> <span>0</span>
+              <div className="flex items-center justify-between text-slate-500 text-xs pt-1 px-1">
+                <button className="flex items-center gap-1.5 hover:text-[#1d9bf0] transition-colors cursor-pointer">
+                  <MessageSquareText size={16} /> <span>0</span>
                 </button>
-                <button className="flex items-center gap-1.5 hover:text-emerald-400">
-                  <RetweetIcon className="size-[14px]" /> <span>0</span>
+                <button className="flex items-center gap-1.5 hover:text-emerald-400 transition-colors cursor-pointer">
+                  <RetweetIcon className="size-4" /> <span>0</span>
                 </button>
                 <button
                   onClick={() => {
@@ -614,132 +663,61 @@ function PlatformMockup() {
                     setLikesPost1((prev) => (hasLikedPost1 ? prev - 1 : prev + 1));
                   }}
                   className={cn(
-                    'flex items-center gap-1.5 transition-colors',
+                    'flex items-center gap-1.5 transition-colors cursor-pointer',
                     hasLikedPost1 ? 'text-rose-500' : 'hover:text-rose-500'
                   )}
                 >
-                  <Heart size={14} className={hasLikedPost1 ? 'fill-rose-500' : ''} />{' '}
-                  <span>{likesPost1}</span>
+                  <Heart size={16} className={hasLikedPost1 ? 'fill-rose-500 text-rose-500' : ''} />
+                  <span className="font-bold">{likesPost1}</span>
                 </button>
-                <button className="flex items-center gap-1.5 hover:text-[#1d9bf0]">
-                  <BarChart2 size={14} /> <span>0</span>
+                <button
+                  onClick={() => setSavedPost1(!savedPost1)}
+                  className={cn(
+                    'transition-colors hover:text-[#1d9bf0] cursor-pointer',
+                    savedPost1 && 'text-[#1d9bf0]'
+                  )}
+                >
+                  <Bookmark size={16} className={savedPost1 ? 'fill-[#1d9bf0]' : ''} />
                 </button>
-                <button className="hover:text-[#1d9bf0]">
-                  <Bookmark size={14} />
+                <button className="hover:text-[#1d9bf0] transition-colors cursor-pointer">
+                  <Share2 size={16} />
+                </button>
+                <button className="hover:text-slate-300 transition-colors cursor-pointer">
+                  <MoreHorizontal size={16} />
                 </button>
               </div>
             </div>
 
-            {/* Post 2: Python Code + AI Quiz */}
-            <div className="border-b border-white/10 pb-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="size-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xs text-white">
+            {/* Post 2: Simple Discussion Post */}
+            <div className="border-b border-white/10 pb-5 space-y-3">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="size-10 rounded-2xl bg-blue-500/20 border-2 border-b-[3px] border-blue-400/40 flex items-center justify-center font-black text-xs text-blue-400 shrink-0">
                     US
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-bold text-white text-xs">@user</span>
-                    <span className="px-1.5 py-0.2 bg-slate-800 text-slate-400 font-mono text-[9px] rounded">
-                      Lvl 1
-                    </span>
-                    <span className="text-slate-500 text-[10px]">
-                      &middot; {t.showcase.platform.mockup.posted8dAgo}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-semibold">
-                    Python
-                  </span>
-                  <MoreHorizontal size={14} className="text-slate-500" />
-                </div>
-              </div>
-
-              {/* Code Box */}
-              <div className="rounded-xl border border-white/10 bg-[#080808] overflow-hidden">
-                <div className="flex items-center justify-between border-b border-white/10 px-4 py-2 bg-[#101010]">
-                  <span className="font-mono text-[10px] font-bold tracking-wider text-slate-400">
-                    PYTHON
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handleRunCode}
-                      className="flex items-center gap-1.5 px-3 py-1 bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white text-[10px] font-semibold rounded-full transition-colors"
-                    >
-                      <Play size={11} className="fill-white" />
-                      <span>
-                        {isRunningCode
-                          ? t.showcase.platform.mockup.running
-                          : t.showcase.platform.mockup.run}
-                      </span>
-                    </button>
-                    <button className="flex items-center gap-1.5 px-3 py-1 bg-white/5 hover:bg-white/10 text-slate-300 text-[10px] font-medium rounded-full border border-white/10 transition-colors">
-                      <Copy size={11} />
-                      <span>{t.showcase.platform.mockup.copy}</span>
-                    </button>
-                  </div>
-                </div>
-                <div className="p-4 font-mono text-[11px] text-emerald-400 bg-[#040404]">
-                  <code>print(&quot;hello world!&quot;)</code>
-                </div>
-                {codeOutput && (
-                  <div className="border-t border-white/10 p-3 bg-black font-mono text-[10px] text-blue-400">
-                    <span className="text-slate-500">
-                      {t.showcase.platform.mockup.terminalOutput}
-                    </span>
-                    <p className="mt-1 text-white font-bold">{codeOutput}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Quiz de Aprendizado Widget (Duolingo style) */}
-              <div className="rounded-2xl border-2 border-b-4 border-emerald-500/40 bg-emerald-950/20 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="flex items-center justify-center size-11 rounded-2xl border-2 border-b-4 border-emerald-600 bg-emerald-500 text-white shrink-0 shadow-sm">
-                    <Check size={20} className="stroke-[3]" />
-                  </div>
-                  <div className="text-left min-w-0">
+                  <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
-                        {t.showcase.platform.mockup.learningQuiz}
-                      </span>
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-[10px] font-black border-2 border-b-[3px] border-amber-500/40 bg-amber-500/15 text-amber-300">
-                        <Zap size={12} className="fill-amber-300 stroke-none" />
-                        +15 XP
-                      </span>
+                      <span className="font-black text-white text-sm">User</span>
+                      <span className="text-xs text-slate-500 font-medium">@user</span>
+                      <LevelBadge totalXp={0} className="text-[9px]" />
                     </div>
-                    <h5 className="font-black text-white text-xs mt-0.5">
-                      {t.showcase.platform.mockup.quizCompleted}
-                    </h5>
+                    <span className="text-slate-500 text-[11px] block mt-0.5">
+                      Postado 13d atrás
+                    </span>
                   </div>
                 </div>
-                <button
-                  onClick={() => setShowQuizResults(!showQuizResults)}
-                  className="px-4 py-2 rounded-xl border-b-[4px] border-emerald-700 bg-emerald-500 hover:bg-emerald-400 active:border-b-0 active:translate-y-[4px] text-white font-black text-xs uppercase tracking-wider transition-all self-start sm:self-auto cursor-pointer shadow-md shadow-emerald-500/20 flex items-center gap-1.5"
-                >
-                  <Check size={14} className="stroke-[3]" />
-                  <span>
-                    {showQuizResults
-                      ? t.showcase.platform.mockup.hideResults
-                      : t.showcase.platform.mockup.viewResults}
-                  </span>
-                </button>
+                <MoreHorizontal size={16} className="text-slate-500" />
               </div>
 
-              {showQuizResults && (
-                <div className="rounded-2xl border-2 border-b-4 border-emerald-600 bg-emerald-500/15 p-3.5 text-xs text-emerald-200 font-bold flex items-center gap-2 animate-slide-up">
-                  <Sparkles size={16} className="text-emerald-400 shrink-0" />
-                  <span>{t.showcase.platform.mockup.quizSuccess}</span>
-                </div>
-              )}
+              <p className="text-sm text-slate-200 font-medium pt-1">Oi sou novo na plataforma</p>
 
               {/* Action Bar */}
-              <div className="flex items-center justify-between text-slate-500 text-[11px] pt-1 px-1">
-                <button className="flex items-center gap-1.5 hover:text-[#1d9bf0]">
-                  <MessageSquareText size={14} /> <span>0</span>
+              <div className="flex items-center justify-between text-slate-500 text-xs pt-1 px-1">
+                <button className="flex items-center gap-1.5 hover:text-[#1d9bf0] transition-colors cursor-pointer">
+                  <MessageSquareText size={16} /> <span>0</span>
                 </button>
-                <button className="flex items-center gap-1.5 hover:text-emerald-400">
-                  <RetweetIcon className="size-[14px]" /> <span>0</span>
+                <button className="flex items-center gap-1.5 hover:text-emerald-400 transition-colors cursor-pointer">
+                  <RetweetIcon className="size-4" /> <span>0</span>
                 </button>
                 <button
                   onClick={() => {
@@ -747,55 +725,66 @@ function PlatformMockup() {
                     setLikesPost2((prev) => (hasLikedPost2 ? prev - 1 : prev + 1));
                   }}
                   className={cn(
-                    'flex items-center gap-1.5 transition-colors',
+                    'flex items-center gap-1.5 transition-colors cursor-pointer',
                     hasLikedPost2 ? 'text-rose-500' : 'hover:text-rose-500'
                   )}
                 >
-                  <Heart size={14} className={hasLikedPost2 ? 'fill-rose-500' : ''} />{' '}
-                  <span>{likesPost2}</span>
-                </button>
-                <button className="flex items-center gap-1.5 hover:text-[#1d9bf0]">
-                  <BarChart2 size={14} /> <span>0</span>
+                  <Heart size={16} className={hasLikedPost2 ? 'fill-rose-500 text-rose-500' : ''} />
+                  <span className="font-bold">{likesPost2}</span>
                 </button>
                 <button
                   onClick={() => setSavedPost2(!savedPost2)}
                   className={cn(
-                    'transition-colors',
-                    savedPost2 ? 'text-[#1d9bf0]' : 'hover:text-[#1d9bf0]'
+                    'transition-colors hover:text-[#1d9bf0] cursor-pointer',
+                    savedPost2 && 'text-[#1d9bf0]'
                   )}
                 >
-                  <Bookmark size={14} className={savedPost2 ? 'fill-[#1d9bf0]' : ''} />
+                  <Bookmark size={16} className={savedPost2 ? 'fill-[#1d9bf0]' : ''} />
+                </button>
+                <button className="hover:text-[#1d9bf0] transition-colors cursor-pointer">
+                  <Share2 size={16} />
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Mobile app navigation */}
+          {/* Floating Action Button for Mobile */}
+          <div className="md:hidden absolute bottom-16 right-4 z-20">
+            <button
+              onClick={() => {
+                const el = document.querySelector(
+                  'input[placeholder*="construindo"]'
+                ) as HTMLInputElement;
+                el?.focus();
+              }}
+              className="size-12 rounded-2xl border-2 border-b-4 border-blue-600 border-b-blue-800 bg-blue-500 text-white shadow-xl shadow-blue-500/40 flex items-center justify-center font-black text-2xl active:translate-y-0.5 active:border-b-2 transition-transform cursor-pointer"
+            >
+              <Plus size={24} className="stroke-[3]" />
+            </button>
+          </div>
+
+          {/* Mobile app bottom navigation */}
           <nav
             aria-label="App navigation"
-            className="grid grid-cols-4 border-t border-white/10 bg-[#050505]/95 px-1 py-1.5 backdrop-blur-md md:hidden"
+            className="grid grid-cols-5 border-t border-white/10 bg-[#050505]/95 px-2 py-2 backdrop-blur-md md:hidden"
           >
             {[
-              { id: 'home', label: t.showcase.platform.mockup.home, icon: Home },
-              { id: 'explore', label: t.showcase.platform.mockup.explore, icon: Search },
-              { id: 'learn', label: t.showcase.platform.mockup.learn, icon: BookOpen },
-              { id: 'profile', label: t.showcase.platform.mockup.profile, icon: User },
+              { id: 'home', icon: Home, active: activeNav === 'home' },
+              { id: 'trails', icon: BookOpen, active: activeNav === 'trails' },
+              { id: 'duels', icon: Wand2, active: activeNav === 'duels' },
+              { id: 'notifications', icon: Bell, active: activeNav === 'notifications' },
+              { id: 'profile', icon: User, active: activeNav === 'profile' },
             ].map((item) => {
               const Icon = item.icon;
-              const isActive = activeNav === item.id;
-
               return (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => setActiveNav(item.id)}
-                  className={cn(
-                    'flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-2 font-medium transition-colors',
-                    isActive ? 'bg-blue-400/10 text-blue-400' : 'text-slate-500 hover:text-white'
-                  )}
+                  className="flex flex-col items-center justify-center py-1 relative text-slate-400 hover:text-white transition-colors cursor-pointer"
                 >
-                  <Icon size={16} strokeWidth={isActive ? 2.5 : 2} />
-                  <span className="truncate text-[8px]">{item.label}</span>
+                  <Icon size={20} className={item.active ? 'text-white' : 'text-slate-400'} />
+                  {item.active && <span className="size-1.5 rounded-full bg-blue-500 mt-1" />}
                 </button>
               );
             })}
@@ -803,173 +792,213 @@ function PlatformMockup() {
         </main>
 
         {/* ================= RIGHT SIDEBAR ================= */}
-        <aside className="hidden lg:block border-l border-white/10 p-4 space-y-4 bg-[#000000]">
-          {/* Search Box */}
-          <div className="relative flex items-center rounded-full bg-[#161616] border border-white/10 px-3.5 py-2 text-xs">
-            <Search size={14} className="text-slate-400 mr-2" />
+        <aside className="hidden lg:flex lg:flex-col h-full border-l border-white/10 p-4 space-y-3.5 bg-[#000000] overflow-hidden relative">
+          {/* Search Box (3D Style) */}
+          <div className="relative flex items-center rounded-2xl bg-[#0d0d0d] border-2 border-b-4 border-white/10 px-4 py-2 text-xs text-slate-400 focus-within:border-blue-500 focus-within:border-b-blue-700 transition-all shadow-md shrink-0">
+            <Search size={15} className="mr-2.5 text-slate-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t.showcase.platform.mockup.search}
-              className="w-full bg-transparent text-white placeholder:text-slate-500 outline-none text-xs"
+              placeholder="Buscar"
+              className="w-full bg-transparent text-white placeholder:text-slate-500 outline-none text-xs font-medium"
             />
           </div>
 
-          {/* CARD 1: ENGAJAMENTO */}
-          <div className="rounded-2xl border border-white/10 bg-[#080808] p-4 space-y-4">
+          {/* CARD 1: RITMO STACKLYST (Duolingo 3D Style) */}
+          <div className="rounded-[24px] border-2 border-b-4 border-white/10 bg-[#0d0d0d] p-4 space-y-3 shadow-xl shrink-0">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-[10px] uppercase tracking-wider text-slate-400">
-                {t.showcase.platform.mockup.engagement}
+              <span className="px-3 py-1 rounded-xl border-2 border-b-[3px] border-blue-600 bg-blue-500 text-white text-[10px] font-black uppercase tracking-wider shadow-sm">
+                RITMO STACKLYST
               </span>
-              <span className="size-2 rounded-full bg-blue-500" />
+              <div className="size-10 rounded-2xl border-2 border-b-4 border-orange-500/30 bg-orange-500/10 flex items-center justify-center text-orange-400 shadow-sm">
+                <Flame size={20} className="text-orange-400 fill-orange-400/30" />
+              </div>
             </div>
 
-            {/* Flame Streak Indicator */}
-            <div className="flex flex-col items-center justify-center py-2 text-center">
-              <Flame size={44} className="text-[#1d9bf0] fill-[#1d9bf0]/20 animate-pulse" />
-              <p className="mt-2 text-xs font-semibold text-blue-400 tracking-wide">
-                {t.showcase.platform.mockup.streakLabel}
+            <div>
+              <h4 className="text-lg font-black text-white tracking-tight">1 dia de ofensiva</h4>
+              <p className="text-xs text-slate-400 font-bold mt-0.5">
+                Faça uma atividade hoje pra aumentar a sua ofensiva!
               </p>
             </div>
 
-            {/* Streak Milestones Row */}
-            <div className="flex items-center justify-between text-[9px] font-mono text-slate-500 px-1 border-t border-white/5 pt-3">
-              <div className="flex flex-col items-center gap-1">
-                <Flame size={12} className="text-amber-500" />
-                <span>5d</span>
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <Flame size={12} className="text-blue-400" />
-                <span>10d</span>
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <Flame size={12} className="text-purple-400" />
-                <span>50d</span>
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <Flame size={12} className="text-pink-400" />
-                <span>100d</span>
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <Flame size={12} className="text-rose-500" />
-                <span>200d</span>
-              </div>
-            </div>
-
-            {/* XP and Level */}
-            <div className="space-y-2 border-t border-white/5 pt-3">
-              <div className="flex justify-between text-xs font-semibold">
-                <span className="text-slate-400">{t.showcase.platform.mockup.xpEarned}</span>
-                <span className="text-white">425 XP</span>
-              </div>
-              <div className="space-y-1">
-                <div className="flex justify-between text-[10px] font-mono text-slate-400">
-                  <span>{t.showcase.platform.mockup.levelProgress}</span>
-                  <span>LVL 1</span>
-                </div>
-                <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
-                  <div className="h-full bg-[#1d9bf0] rounded-full w-[35%]" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* CARD 2: CONQUISTAS */}
-          <div className="rounded-2xl border border-white/10 bg-[#080808] p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-[10px] uppercase tracking-wider text-slate-400">
-                {t.showcase.platform.mockup.achievements}
-              </span>
-              <Bookmark size={14} className="text-blue-400" />
-            </div>
-
-            <div className="grid grid-cols-3 gap-2 pt-1">
-              {[1, 2, 3].map((item) => (
-                <div
-                  key={item}
-                  className="aspect-square rounded-xl border border-white/5 bg-white/[0.02] flex flex-col items-center justify-center p-2 text-center"
-                >
-                  <Lock size={16} className="text-slate-600 mb-1" />
-                  <span className="text-[8px] text-slate-600 font-mono">
-                    {t.showcase.platform.mockup.locked}
-                  </span>
+            {/* Weekday indicator row (3D Bubbles) */}
+            <div className="flex items-center justify-between pt-1">
+              {[
+                { day: 'D', checked: true, current: false },
+                { day: 'S', checked: false, current: true },
+                { day: 'T', checked: false, current: false },
+                { day: 'Q', checked: false, current: false },
+                { day: 'Q', checked: false, current: false },
+                { day: 'S', checked: false, current: false },
+                { day: 'S', checked: false, current: false },
+              ].map((item, idx) => (
+                <div key={idx} className="flex flex-col items-center gap-1">
+                  <span className="text-[11px] font-black text-slate-500">{item.day}</span>
+                  <div
+                    className={cn(
+                      'size-8 rounded-xl flex items-center justify-center text-xs font-black transition-all border-2 border-b-4',
+                      item.checked
+                        ? 'bg-blue-500 border-blue-600 border-b-blue-800 text-white shadow-md shadow-blue-500/20'
+                        : item.current
+                          ? 'border-blue-500/60 border-b-blue-600/80 bg-blue-500/15 text-blue-400'
+                          : 'bg-white/5 border-white/10 text-slate-600'
+                    )}
+                  >
+                    {item.checked ? <Check size={14} className="stroke-[3.5]" /> : ''}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* CARD 3: MINHAS TRILHAS */}
-          <div className="rounded-2xl border border-white/10 bg-[#080808] p-4 space-y-3">
+          {/* CARD 2: CONQUISTAS (Duolingo 3D Style - Compact) */}
+          <div className="rounded-[24px] border-2 border-b-4 border-white/10 bg-[#0d0d0d] p-4 space-y-3 shadow-xl shrink-0">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-[10px] uppercase tracking-wider text-slate-400">
-                {t.showcase.platform.mockup.myTracks}
+              <span className="px-3 py-0.5 rounded-xl border-2 border-b-[3px] border-blue-600 bg-blue-500 text-white text-[10px] font-black uppercase tracking-wider shadow-sm">
+                STACKLYST
               </span>
-              <Sparkles size={14} className="text-blue-400" />
+              <span className="text-sky-400 hover:text-sky-300 font-black text-[11px] tracking-wider uppercase cursor-pointer transition-colors">
+                VER TODAS
+              </span>
             </div>
 
-            <div className="space-y-3 pt-1">
-              {/* JavaScript */}
-              <div className="space-y-1">
-                <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-white">JavaScript</span>
-                  <span className="text-[10px] font-mono text-slate-400">Lvl 1</span>
-                </div>
-                <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
-                  <div className="h-full bg-amber-500 rounded-full w-[25%]" />
-                </div>
-                <div className="flex justify-between text-[9px] font-mono text-slate-500">
-                  <span>380 XP</span>
-                  <span>25%</span>
+            <h4 className="text-lg font-black text-white tracking-tight">Conquistas</h4>
+
+            <div className="grid grid-cols-3 gap-2 pt-0.5">
+              {/* Badge 1: 100-Day Code Streak (3D Card) */}
+              <div className="h-[105px] rounded-[18px] border-2 border-b-4 border-rose-400/40 border-b-rose-700 bg-gradient-to-b from-rose-500 via-rose-600 to-amber-500 p-2 text-center flex flex-col items-center justify-between shadow-lg shadow-rose-500/15 hover:-translate-y-0.5 active:translate-y-0 active:border-b-2 transition-transform cursor-pointer">
+                <Flame size={22} className="text-white drop-shadow-md mt-0.5 fill-white/20" />
+                <div className="w-full">
+                  <p className="text-[9px] font-black text-white leading-tight line-clamp-2">
+                    100-Day Code Streak
+                  </p>
+                  <p className="text-[8px] font-black text-white uppercase tracking-wider mt-0.5 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded-md border border-white/15">
+                    NÍVEL 9
+                  </p>
                 </div>
               </div>
 
-              {/* Python */}
-              <div className="space-y-1">
-                <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-white">Python</span>
-                  <span className="text-[10px] font-mono text-slate-400">Lvl 1</span>
-                </div>
-                <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
-                  <div className="h-full bg-emerald-500 rounded-full w-[5%]" />
-                </div>
-                <div className="flex justify-between text-[9px] font-mono text-slate-500">
-                  <span>35 XP</span>
-                  <span>2%</span>
+              {/* Badge 2: Mago do TypeScript (3D Card) */}
+              <div className="h-[105px] rounded-[18px] border-2 border-b-4 border-blue-400/40 border-b-blue-900 bg-gradient-to-b from-blue-600 via-blue-700 to-sky-500 p-2 text-center flex flex-col items-center justify-between shadow-lg shadow-blue-500/15 hover:-translate-y-0.5 active:translate-y-0 active:border-b-2 transition-transform cursor-pointer">
+                <Wand2 size={22} className="text-white drop-shadow-md mt-0.5" />
+                <div className="w-full">
+                  <p className="text-[9px] font-black text-white leading-tight line-clamp-2">
+                    Mago do TypeScript
+                  </p>
+                  <p className="text-[8px] font-black text-white uppercase tracking-wider mt-0.5 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded-md border border-white/15">
+                    NÍVEL 10
+                  </p>
                 </div>
               </div>
 
-              {/* TypeScript */}
-              <div className="space-y-1">
-                <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-white">TypeScript</span>
-                  <span className="text-[10px] font-mono text-slate-400">Lvl 1</span>
-                </div>
-                <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
-                  <div className="h-full bg-blue-500 rounded-full w-[0%]" />
-                </div>
-                <div className="flex justify-between text-[9px] font-mono text-slate-500">
-                  <span>0 XP</span>
-                  <span>0%</span>
-                </div>
-              </div>
-
-              {/* Rust */}
-              <div className="space-y-1">
-                <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-white">Rust</span>
-                  <span className="text-[10px] font-mono text-slate-400">Lvl 1</span>
-                </div>
-                <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
-                  <div className="h-full bg-rose-500 rounded-full w-[0%]" />
-                </div>
-                <div className="flex justify-between text-[9px] font-mono text-slate-500">
-                  <span>0 XP</span>
-                  <span>0%</span>
+              {/* Badge 3: Python Master (3D Card) */}
+              <div className="h-[105px] rounded-[18px] border-2 border-b-4 border-amber-300/40 border-b-amber-800 bg-gradient-to-b from-amber-400 via-yellow-500 to-amber-600 p-2 text-center flex flex-col items-center justify-between shadow-lg shadow-amber-500/15 hover:-translate-y-0.5 active:translate-y-0 active:border-b-2 transition-transform cursor-pointer">
+                <Crown size={22} className="text-white drop-shadow-md mt-0.5 fill-white/20" />
+                <div className="w-full">
+                  <p className="text-[9px] font-black text-white leading-tight line-clamp-2">
+                    Python Master
+                  </p>
+                  <p className="text-[8px] font-black text-white uppercase tracking-wider mt-0.5 bg-black/30 backdrop-blur-sm px-1.5 py-0.5 rounded-md border border-white/15">
+                    NÍVEL 10
+                  </p>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* CARD 3: MINHAS TRILHAS (Duolingo 3D Style - Cut off at bottom) */}
+          <div className="rounded-[24px] border-2 border-b-4 border-white/10 bg-[#0d0d0d] p-4 space-y-3 shadow-xl shrink-0">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-lg font-black text-white tracking-tight">Minhas Trilhas</h4>
+                <p className="text-xs text-slate-400 font-bold mt-0.5">
+                  Seu progresso por linguagem
+                </p>
+              </div>
+              <div className="size-9 rounded-xl border-2 border-b-[3px] border-blue-500/30 bg-blue-500/10 flex items-center justify-center text-blue-400 shadow-sm">
+                <Sparkles size={18} className="text-blue-400" />
+              </div>
+            </div>
+
+            <div className="space-y-2.5 pt-1">
+              {/* JavaScript */}
+              <div className="group space-y-2 rounded-[18px] border-2 border-b-4 border-white/10 bg-[#141414] p-3 transition-all hover:border-amber-500/40">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border-b-[3px] border-amber-700 bg-amber-500 text-xs font-black text-white shadow-sm">
+                    JS
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate text-xs font-black text-white">JavaScript</span>
+                      <span className="shrink-0 rounded-lg border-b-[2px] border-amber-700 bg-amber-500 px-2 py-0.5 text-[9px] font-black uppercase text-white">
+                        Lvl 1
+                      </span>
+                    </div>
+                    <div className="mt-1 flex items-center justify-between text-[9px] font-black uppercase text-slate-400">
+                      <span>380 XP</span>
+                      <span>25%</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                  <div className="h-full rounded-full bg-amber-500 w-[25%]" />
+                </div>
+              </div>
+
+              {/* Python */}
+              <div className="group space-y-2 rounded-[18px] border-2 border-b-4 border-white/10 bg-[#141414] p-3 transition-all hover:border-emerald-500/40">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border-b-[3px] border-emerald-700 bg-emerald-500 text-xs font-black text-white shadow-sm">
+                    PY
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate text-xs font-black text-white">Python</span>
+                      <span className="shrink-0 rounded-lg border-b-[2px] border-emerald-700 bg-emerald-500 px-2 py-0.5 text-[9px] font-black uppercase text-white">
+                        Lvl 1
+                      </span>
+                    </div>
+                    <div className="mt-1 flex items-center justify-between text-[9px] font-black uppercase text-slate-400">
+                      <span>35 XP</span>
+                      <span>2%</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                  <div className="h-full rounded-full bg-emerald-500 w-[2%]" />
+                </div>
+              </div>
+
+              {/* TypeScript */}
+              <div className="group space-y-2 rounded-[18px] border-2 border-b-4 border-white/10 bg-[#141414] p-3 transition-all hover:border-blue-500/40">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border-b-[3px] border-blue-700 bg-blue-500 text-xs font-black text-white shadow-sm">
+                    TS
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate text-xs font-black text-white">TypeScript</span>
+                      <span className="shrink-0 rounded-lg border-b-[2px] border-blue-700 bg-blue-500 px-2 py-0.5 text-[9px] font-black uppercase text-white">
+                        Lvl 1
+                      </span>
+                    </div>
+                    <div className="mt-1 flex items-center justify-between text-[9px] font-black uppercase text-slate-400">
+                      <span>0 XP</span>
+                      <span>0%</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                  <div className="h-full rounded-full bg-blue-500 w-[0%]" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Fade gradient overlay at the bottom to create seamless half-cut effect */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black via-black/80 to-transparent" />
         </aside>
       </div>
       <div
