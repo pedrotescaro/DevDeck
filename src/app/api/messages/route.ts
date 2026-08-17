@@ -17,11 +17,29 @@ async function ensureMessageReactionTable() {
         "emoji" TEXT NOT NULL,
         "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT "MessageReaction_pkey" PRIMARY KEY ("id")
-      );
-      CREATE UNIQUE INDEX IF NOT EXISTS "MessageReaction_message_id_user_id_emoji_key" ON "MessageReaction"("message_id", "user_id", "emoji");
-      CREATE INDEX IF NOT EXISTS "MessageReaction_message_id_idx" ON "MessageReaction"("message_id");
-      CREATE INDEX IF NOT EXISTS "MessageReaction_user_id_idx" ON "MessageReaction"("user_id");
+      )
     `);
+    await prisma
+      .$executeRawUnsafe(
+        `
+      CREATE UNIQUE INDEX IF NOT EXISTS "MessageReaction_message_id_user_id_emoji_key" ON "MessageReaction"("message_id", "user_id", "emoji")
+    `
+      )
+      .catch(() => null);
+    await prisma
+      .$executeRawUnsafe(
+        `
+      CREATE INDEX IF NOT EXISTS "MessageReaction_message_id_idx" ON "MessageReaction"("message_id")
+    `
+      )
+      .catch(() => null);
+    await prisma
+      .$executeRawUnsafe(
+        `
+      CREATE INDEX IF NOT EXISTS "MessageReaction_user_id_idx" ON "MessageReaction"("user_id")
+    `
+      )
+      .catch(() => null);
     ensuredTable = true;
   } catch (err) {
     console.warn('Could not auto-create MessageReaction table:', err);
