@@ -25,7 +25,8 @@ async function fetchUserViaPrisma(userId: string) {
  * for networks that temporarily cannot reach the PostgreSQL pooler.
  */
 async function fetchUserViaRest(userId: string, supabaseAdmin: SupabaseAdminClient) {
-  const { data: user, error } = await supabaseAdmin
+  const client = supabaseAdmin as any;
+  const { data: user, error } = await client
     .from('User')
     .select('*')
     .eq('id', userId)
@@ -35,8 +36,8 @@ async function fetchUserViaRest(userId: string, supabaseAdmin: SupabaseAdminClie
   if (!user) return null;
 
   const [badgesRes, trailsRes] = await Promise.all([
-    supabaseAdmin.from('UserBadge').select('*, badge:Badge(*)').eq('user_id', userId),
-    supabaseAdmin.from('LanguageTrail').select('*').eq('user_id', userId),
+    client.from('UserBadge').select('*, badge:Badge(*)').eq('user_id', userId),
+    client.from('LanguageTrail').select('*').eq('user_id', userId),
   ]);
 
   // The core user record is enough to keep the session alive. Related data can
@@ -213,7 +214,10 @@ function syncUserStreaks(dbUser: any) {
       if (!supabaseAdmin) return;
 
       try {
-        const { error } = await supabaseAdmin.from('User').update(updateData).eq('id', dbUser.id);
+        const { error } = await (supabaseAdmin as any)
+          .from('User')
+          .update(updateData)
+          .eq('id', dbUser.id);
         if (!error) return;
 
         logger.warn('Failed to auto-heal user streak/activity via REST', {
