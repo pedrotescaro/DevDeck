@@ -1,5 +1,6 @@
 import { apiHandler } from '@/lib/api-handler';
 import { streamChatAI, type ChatContentPart } from '@/lib/ai';
+import { logger } from '@/lib/logger';
 import { z } from 'zod';
 
 const contentPartSchema = z.discriminatedUnion('type', [
@@ -78,7 +79,12 @@ Diretrizes de comportamento:
         }
       } catch (err) {
         if (isAbortError(err)) return; // client disconnected / stopped
-        send({ error: 'Tive um problema ao me conectar com os servidores de IA.' });
+        logger.error('Ducky chat stream error:', {
+          error: String(err),
+          stack: (err as Error)?.stack,
+        });
+        const errMsg = err instanceof Error ? err.message : String(err);
+        send({ error: `Tive um problema ao me conectar com os servidores de IA: ${errMsg}` });
       } finally {
         try {
           controller.close();

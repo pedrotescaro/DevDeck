@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { apiHandler } from '@/lib/api-handler';
 import { streamChatAI } from '@/lib/ai';
+import { logger } from '@/lib/logger';
 import { gatherRepoAnalysisInput, parseRepoUrl, GitHubError, type RepoContext } from '@/lib/github';
 import { z } from 'zod';
 
@@ -174,7 +175,12 @@ Seja conciso e específico. Se faltar informação (ex: sem README), diga o que 
         }
       } catch (err) {
         if (isAbortError(err)) return; // client disconnected / stopped
-        send({ error: 'Tive um problema ao processar a análise do repositório.' });
+        logger.error('Repo analysis stream error:', {
+          error: String(err),
+          stack: (err as Error)?.stack,
+        });
+        const errMsg = err instanceof Error ? err.message : String(err);
+        send({ error: `Tive um problema ao processar a análise do repositório: ${errMsg}` });
       } finally {
         try {
           controller.close();
