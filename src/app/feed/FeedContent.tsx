@@ -480,7 +480,8 @@ export function FeedContent({
         setHasMore(!!data.nextCursor);
       }
     } catch (err) {
-      console.error('Load more posts error:', err);
+      if (err instanceof Error && err.name === 'AbortError') return;
+      console.warn('Load more posts network issue:', err);
     } finally {
       setLoadingMore(false);
     }

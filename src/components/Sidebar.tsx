@@ -20,7 +20,10 @@ import {
   MessageCircle,
   Bookmark,
   MoreHorizontal,
-  Users,
+  Briefcase,
+  Calendar,
+  Code2,
+  ShieldAlert,
 } from 'lucide-react';
 import { PostComposerExtras } from '@/components/PostComposerExtras';
 import type { NotionEditorRef } from '@/components/MarkdownEditor';
@@ -382,12 +385,6 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
       active: pathname === '/feed',
       badge: 'dot' as const,
     },
-    /* {
-      label: 'Explorar',
-      href: '/explore',
-      icon: Search,
-      active: pathname === '/explore',
-    }, */
     {
       label: 'Trilhas',
       href: '/trails',
@@ -405,6 +402,12 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
       href: '/ranking',
       icon: Trophy,
       active: pathname.startsWith('/ranking') || pathname.startsWith('/leaderboard'),
+    },
+    {
+      label: 'Duelos',
+      href: '/duels',
+      icon: Swords,
+      active: pathname.startsWith('/duels'),
     },
     {
       label: 'Bate-papo',
@@ -426,17 +429,46 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
     },
   ];
 
-  const moreMenuIsActive = ['/async', '/ducky', '/guilds', '/duels', '/settings'].some((route) =>
-    pathname.startsWith(route)
-  );
-  const mobileNavLabels = [
-    'Página Inicial',
-    // 'Explorar',
-    'Trilhas',
-    'Notificações',
-    'Perfil',
+  const moreMenuIsActive = [
+    '/jobs',
+    '/recruiter',
+    '/async',
+    '/ducky',
+    // '/guilds',
+    '/events',
+    '/evaluations',
+    '/evaluators',
+    '/admin',
+    '/settings',
+  ].some((route) => pathname.startsWith(route));
+
+  const mobileNavItems = [
+    {
+      label: 'Página Inicial',
+      href: '/feed',
+      icon: Home,
+      active: pathname === '/feed',
+      badge: 'dot' as const,
+    },
+    {
+      label: 'Trilhas',
+      href: '/trails',
+      icon: BookOpen,
+      active: pathname.startsWith('/trails'),
+    },
+    {
+      label: 'Notificações',
+      href: '/notifications',
+      icon: Bell,
+      active: pathname === '/notifications',
+    },
+    {
+      label: 'Perfil',
+      href: activeUser ? `/profile/${activeUser.username}` : '#',
+      icon: UserIcon,
+      active: activeUser ? pathname === `/profile/${activeUser.username}` : false,
+    },
   ];
-  const mobileNavItems = navItems.filter((item) => mobileNavLabels.includes(item.label));
 
   // Item do nav inferior mobile (reutilizado antes/depois do ASYNC IA, que fica no meio)
   const renderMobileNavItem = (item: (typeof mobileNavItems)[number]) => {
@@ -449,7 +481,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
         ) : (
           <>
             <Icon
-              className={`w-5.5 h-5.5 ${item.active ? 'text-white fill-current' : 'text-dd-muted'}`}
+              className={`w-5.5 h-5.5 text-dd-text dark:text-white ${item.active ? 'fill-current' : ''}`}
             />
             {item.badge === 'dot' && (
               <span className="absolute -top-0.5 -right-0.5 block h-1.5 w-1.5 rounded-full bg-[#1d9bf0]" />
@@ -460,7 +492,9 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
     );
 
     const classes = `flex flex-col items-center justify-center p-1.5 transition-colors duration-150 ${
-      item.active ? 'text-dd-text font-black' : 'text-dd-muted hover:text-dd-text'
+      item.active
+        ? 'text-dd-text dark:text-white font-black'
+        : 'text-dd-text/80 dark:text-white/80 hover:text-dd-text dark:hover:text-white'
     }`;
 
     return (
@@ -482,42 +516,42 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
       {/* DESKTOP SIDEBAR (Twitter-like) */}
       {/* ========================================== */}
       <aside
-        className={`hidden h-screen w-64 shrink-0 select-none flex-col justify-between bg-dd-bg p-5 md:sticky md:top-0 md:flex xl:w-[275px] ${
+        className={`hidden h-screen w-60 shrink-0 select-none flex-col justify-between bg-dd-bg p-3 xl:p-4 md:sticky md:top-0 md:flex xl:w-[250px] 2xl:w-[265px] z-40 overflow-visible ${
           showDivider ? 'border-r border-dd-border' : ''
-        } z-40`}
+        }`}
       >
-        <div className="space-y-5">
+        <div className="space-y-2 xl:space-y-3">
           {/* Logo */}
-          <Link href="/feed" className="group flex w-fit items-center gap-3 px-3 py-1">
+          <Link href="/feed" className="group flex w-fit items-center gap-2.5 px-3 py-1">
             <ThemeLogo
               alt="Stacklyst Logo"
-              width={32}
-              height={32}
+              width={28}
+              height={28}
               className="object-contain group-hover:scale-105 transition-transform duration-300"
             />
-            <span className="text-dd-text font-black text-2xl tracking-tight">Stacklyst</span>
+            <span className="text-dd-text dark:text-white font-black text-xl tracking-tight">
+              Stacklyst
+            </span>
           </Link>
 
           {/* Navigation Links */}
-          <nav className="flex flex-col gap-1">
+          <nav className="flex flex-col gap-0.5">
             {navItems.map((item) => {
               const Icon = item.icon;
 
-              // Standard link style
-              const linkClasses = `group flex w-full cursor-pointer items-center gap-4 rounded-2xl border px-4 py-3 text-left text-[15px] font-bold transition-all duration-200 ${
+              const linkClasses = `group flex w-full cursor-pointer items-center gap-4 rounded-full px-4 py-2.5 text-left text-[15px] ${
                 item.active
-                  ? 'border-transparent bg-dd-surface/40 font-black text-dd-text shadow-sm'
-                  : 'border-transparent text-dd-muted hover:bg-dd-surface/60 hover:text-dd-text'
-              }`;
+                  ? 'font-black text-dd-text dark:text-white'
+                  : 'font-bold text-dd-text dark:text-white'
+              } transition-colors duration-150 hover:bg-black/[0.06] dark:hover:bg-white/10`;
 
-              // Icon container with relative for badges
               const iconEl = (
                 <div className="relative flex items-center justify-center w-6 h-6 shrink-0">
                   {item.label === 'Notificações' ? (
                     <NotificationBellIcon unreadCount={unreadCount} active={item.active} />
                   ) : (
                     <Icon
-                      className={`w-6 h-6 transition-transform group-hover:scale-105 duration-200 ${item.active ? 'text-white fill-current' : 'text-dd-muted'}`}
+                      className={`w-6 h-6 text-dd-text dark:text-white stroke-[2.2] transition-transform group-hover:scale-105 duration-150 ${item.active ? 'fill-current' : ''}`}
                     />
                   )}
                   {item.badge === 'dot' && (
@@ -526,11 +560,10 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
                 </div>
               );
 
-              // Content of the link/button
               const contentEl = (
                 <>
                   {iconEl}
-                  <span className="truncate">{item.label}</span>
+                  <span className="truncate text-dd-text dark:text-white">{item.label}</span>
                 </>
               );
 
@@ -546,6 +579,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
               );
             })}
 
+            {/* "Mais" dropdown button */}
             <div className="relative">
               <button
                 type="button"
@@ -555,16 +589,16 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
                 }}
                 aria-expanded={moreMenuOpen}
                 aria-haspopup="menu"
-                className={`flex w-full cursor-pointer items-center gap-4 rounded-2xl border border-transparent px-4 py-3 text-left text-[15px] font-bold transition-all duration-200 group ${
+                className={`flex w-full cursor-pointer items-center gap-4 rounded-full px-4 py-2.5 text-left text-[15px] ${
                   moreMenuIsActive
-                    ? 'bg-dd-surface/40 font-black text-dd-text shadow-sm'
-                    : 'text-dd-muted hover:bg-dd-surface/60 hover:text-dd-text'
-                }`}
+                    ? 'font-black text-dd-text dark:text-white'
+                    : 'font-bold text-dd-text dark:text-white'
+                } transition-colors duration-150 hover:bg-black/[0.06] dark:hover:bg-white/10 group`}
               >
                 <div className="flex h-6 w-6 shrink-0 items-center justify-center">
-                  <MoreHorizontal className="h-6 w-6 transition-transform duration-200 group-hover:scale-105" />
+                  <MoreHorizontal className="h-6 w-6 text-dd-text dark:text-white stroke-[2.2] transition-transform duration-150 group-hover:scale-105" />
                 </div>
-                <span>Mais</span>
+                <span className="text-dd-text dark:text-white">Mais</span>
               </button>
 
               {moreMenuOpen && (
@@ -575,8 +609,44 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
                   />
                   <div
                     role="menu"
-                    className="absolute bottom-full left-0 z-50 mb-2 w-[290px] max-w-[calc(100vw-2rem)] origin-bottom-left overflow-hidden rounded-2xl border border-dd-border/70 bg-dd-surface p-2 font-sans shadow-[0_12px_40px_rgba(0,0,0,0.4)] animate-slide-up"
+                    className="absolute bottom-full left-0 z-50 mb-2 w-[290px] max-w-[calc(100vw-2rem)] origin-bottom-left overflow-y-auto max-h-[75vh] rounded-2xl border border-dd-border/70 bg-dd-surface p-2 font-sans shadow-[0_12px_40px_rgba(0,0,0,0.5)] animate-slide-up"
                   >
+                    <Link
+                      href="/jobs"
+                      role="menuitem"
+                      className="flex items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                      onClick={() => setMoreMenuOpen(false)}
+                    >
+                      <Briefcase className="h-5.5 w-5.5 shrink-0 text-white" />
+                      <span>Vagas & Recrutamento</span>
+                    </Link>
+                    <Link
+                      href="/events"
+                      role="menuitem"
+                      className="flex items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                      onClick={() => setMoreMenuOpen(false)}
+                    >
+                      <Calendar className="h-5.5 w-5.5 shrink-0 text-white" />
+                      <span>Eventos & Hackathons</span>
+                    </Link>
+                    <Link
+                      href="/evaluations"
+                      role="menuitem"
+                      className="flex items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                      onClick={() => setMoreMenuOpen(false)}
+                    >
+                      <Code2 className="h-5.5 w-5.5 shrink-0 text-white" />
+                      <span>Avaliação de Código</span>
+                    </Link>
+                    <Link
+                      href="/admin"
+                      role="menuitem"
+                      className="flex items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                      onClick={() => setMoreMenuOpen(false)}
+                    >
+                      <ShieldAlert className="h-5.5 w-5.5 shrink-0 text-white" />
+                      <span>Painel Administrativo</span>
+                    </Link>
                     <Link
                       href="/async"
                       role="menuitem"
@@ -585,7 +655,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
                           ? 'page'
                           : undefined
                       }
-                      className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                      className="flex items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
                       onClick={() => setMoreMenuOpen(false)}
                     >
                       <AsyncLogo
@@ -593,34 +663,25 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
                         height={22}
                         className="h-5.5 w-5.5 shrink-0 object-contain"
                       />
-                      ASYNC IA
+                      <span>ASYNC IA</span>
                     </Link>
-                    <Link
+                    {/* <Link
                       href="/guilds"
                       role="menuitem"
-                      className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                      className="flex items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
                       onClick={() => setMoreMenuOpen(false)}
                     >
-                      <Users className="h-5.5 w-5.5 shrink-0" />
-                      Comunidades
-                    </Link>
-                    <Link
-                      href="/duels"
-                      role="menuitem"
-                      className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
-                      onClick={() => setMoreMenuOpen(false)}
-                    >
-                      <Swords className="h-5.5 w-5.5 shrink-0" />
-                      Duelos de Código
-                    </Link>
+                      <Users className="h-5.5 w-5.5 shrink-0 text-white" />
+                      <span>Comunidades</span>
+                    </Link> */}
                     <Link
                       href="/settings"
                       role="menuitem"
-                      className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                      className="flex items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
                       onClick={() => setMoreMenuOpen(false)}
                     >
-                      <SettingsIcon className="h-5.5 w-5.5 shrink-0" />
-                      Configurações
+                      <SettingsIcon className="h-5.5 w-5.5 shrink-0 text-white" />
+                      <span>Configurações</span>
                     </Link>
                   </div>
                 </>
@@ -632,7 +693,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
           {activeUser && (
             <button
               onClick={() => setModalOpen(true)}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-black py-3 px-5 rounded-full text-[15px] transition-all duration-200 active:scale-[0.98] shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 cursor-pointer flex items-center justify-center text-center"
+              className="mt-3 flex w-full cursor-pointer items-center justify-center rounded-full bg-[#0f1419] py-3 px-5 text-center text-[16px] font-bold text-white shadow-md transition-all duration-150 hover:bg-[#0f1419]/90 active:scale-[0.98] dark:bg-white dark:text-black dark:hover:bg-white/90"
             >
               <span>Postar</span>
             </button>
@@ -641,43 +702,41 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
 
         {/* User profile dropdown widget */}
         {activeUser && (
-          <div className="relative mt-2 pt-2">
-            <div className="group w-full rounded-2xl border border-transparent p-3 text-left transition-all duration-200 hover:border-dd-border hover:bg-dd-surface/50">
-              <button
-                type="button"
-                onClick={() => {
-                  setMoreMenuOpen(false);
-                  setDropdownOpen((open) => !open);
-                }}
-                aria-expanded={dropdownOpen}
-                aria-haspopup="menu"
-                className="dd-focus-ring flex w-full min-w-0 cursor-pointer items-center gap-3.5 rounded-xl text-left"
-              >
-                <AuthorAvatar
-                  username={activeUser.username}
-                  avatar_url={activeUser.avatar_url}
-                  avatar_config={activeUser.avatar_config}
-                  size="lg"
-                  className="!h-11 !w-11 shrink-0"
-                />
-                <div className="min-w-0 flex-1 font-sans">
-                  <div className="flex min-w-0 items-center justify-between gap-2">
-                    <p className="min-w-0 truncate text-[15px] font-black leading-tight text-dd-text">
-                      {activeUser.name ||
-                        (activeUser.avatar_config as any)?.name ||
-                        (activeUser.avatar_config as any)?.displayName ||
-                        activeUser.username}
-                    </p>
-                    <MoreHorizontal className="h-5 w-5 shrink-0 text-dd-muted transition-colors duration-200 group-hover:text-dd-text" />
-                  </div>
-                  <div className="mt-1 min-w-0">
-                    <p className="truncate text-xs font-semibold leading-none text-dd-muted">
-                      @{activeUser.username.toLowerCase()}
-                    </p>
-                  </div>
+          <div className="relative mt-auto pt-3">
+            <button
+              type="button"
+              onClick={() => {
+                setMoreMenuOpen(false);
+                setDropdownOpen((open) => !open);
+              }}
+              aria-expanded={dropdownOpen}
+              aria-haspopup="menu"
+              className="group flex w-full min-w-0 cursor-pointer items-center gap-3 rounded-full p-2.5 text-left transition-colors duration-150 hover:bg-black/[0.06] focus-visible:bg-black/[0.06] focus-visible:outline-none dark:hover:bg-white/10 dark:focus-visible:bg-white/10"
+            >
+              <AuthorAvatar
+                username={activeUser.username}
+                avatar_url={activeUser.avatar_url}
+                avatar_config={activeUser.avatar_config}
+                size="md"
+                className="!h-10 !w-10 shrink-0"
+              />
+              <div className="min-w-0 flex-1 font-sans">
+                <div className="flex min-w-0 items-center justify-between gap-1.5">
+                  <p className="min-w-0 truncate text-[15px] font-bold leading-tight text-dd-text dark:text-white">
+                    {activeUser.name ||
+                      (activeUser.avatar_config as any)?.name ||
+                      (activeUser.avatar_config as any)?.displayName ||
+                      activeUser.username}
+                  </p>
                 </div>
-              </button>
-            </div>
+                <div className="mt-0.5 min-w-0">
+                  <p className="truncate text-[14px] font-normal leading-tight text-dd-muted dark:text-neutral-500">
+                    @{activeUser.username.toLowerCase()}
+                  </p>
+                </div>
+              </div>
+              <MoreHorizontal className="h-5 w-5 shrink-0 text-dd-text dark:text-white" />
+            </button>
 
             {dropdownOpen && (
               <>
@@ -692,20 +751,20 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
                   <Link
                     href={`/profile/${activeUser.username}`}
                     role="menuitem"
-                    className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                    className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
                     onClick={() => setDropdownOpen(false)}
                   >
-                    <UserIcon className="h-5.5 w-5.5 shrink-0" />
-                    Meu Perfil
+                    <UserIcon className="h-5.5 w-5.5 shrink-0 text-white" />
+                    <span>Meu Perfil</span>
                   </Link>
                   <Link
                     href="/settings"
                     role="menuitem"
-                    className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                    className="flex items-center gap-4 rounded-xl px-4 py-3.5 text-[15px] font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
                     onClick={() => setDropdownOpen(false)}
                   >
-                    <SettingsIcon className="h-5.5 w-5.5 shrink-0" />
-                    Configurações
+                    <SettingsIcon className="h-5.5 w-5.5 shrink-0 text-white" />
+                    <span>Configurações</span>
                   </Link>
                   <button
                     type="button"
@@ -717,7 +776,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
                     className="flex w-full cursor-pointer items-center gap-4 rounded-xl px-4 py-3.5 text-left text-[15px] font-extrabold leading-none text-red-500 transition-colors hover:bg-red-500/10 focus-visible:bg-red-500/10 focus-visible:outline-none"
                   >
                     <LogOut className="h-5.5 w-5.5 shrink-0" />
-                    Sair da Conta
+                    <span>Sair da Conta</span>
                   </button>
                 </div>
               </>
@@ -769,29 +828,74 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
                       <Link
                         href={`/profile/${activeUser.username}`}
                         role="menuitem"
-                        className="flex items-center gap-3.5 rounded-xl px-3.5 py-3 text-sm font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                        className="flex items-center gap-3.5 rounded-xl px-3.5 py-3 text-sm font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
                         onClick={() => setDropdownOpen(false)}
                       >
-                        <UserIcon className="h-5 w-5 shrink-0" />
-                        Meu Perfil
+                        <UserIcon className="h-5 w-5 shrink-0 text-white" />
+                        <span>Meu Perfil</span>
                       </Link>
                       <Link
                         href="/ranking"
                         role="menuitem"
-                        className="flex items-center gap-3.5 rounded-xl px-3.5 py-3 text-sm font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                        className="flex items-center gap-3.5 rounded-xl px-3.5 py-3 text-sm font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
                         onClick={() => setDropdownOpen(false)}
                       >
-                        <Trophy className="h-5 w-5 shrink-0" />
-                        Ranking
+                        <Trophy className="h-5 w-5 shrink-0 text-white" />
+                        <span>Ranking</span>
+                      </Link>
+                      <Link
+                        href="/jobs"
+                        role="menuitem"
+                        className="flex items-center gap-3.5 rounded-xl px-3.5 py-3 text-sm font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        <Briefcase className="h-5 w-5 shrink-0 text-white" />
+                        <span>Vagas</span>
+                      </Link>
+                      <Link
+                        href="/events"
+                        role="menuitem"
+                        className="flex items-center gap-3.5 rounded-xl px-3.5 py-3 text-sm font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        <Calendar className="h-5 w-5 shrink-0 text-white" />
+                        <span>Eventos</span>
+                      </Link>
+                      <Link
+                        href="/duels"
+                        role="menuitem"
+                        className="flex items-center gap-3.5 rounded-xl px-3.5 py-3 text-sm font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        <Swords className="h-5 w-5 shrink-0 text-white" />
+                        <span>Duelos</span>
+                      </Link>
+                      <Link
+                        href="/evaluations"
+                        role="menuitem"
+                        className="flex items-center gap-3.5 rounded-xl px-3.5 py-3 text-sm font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        <Code2 className="h-5 w-5 shrink-0 text-white" />
+                        <span>Avaliação de Código</span>
+                      </Link>
+                      <Link
+                        href="/admin"
+                        role="menuitem"
+                        className="flex items-center gap-3.5 rounded-xl px-3.5 py-3 text-sm font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        <ShieldAlert className="h-5 w-5 shrink-0 text-white" />
+                        <span>Painel Admin</span>
                       </Link>
                       <Link
                         href="/settings"
                         role="menuitem"
-                        className="flex items-center gap-3.5 rounded-xl px-3.5 py-3 text-sm font-extrabold leading-none text-dd-text transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                        className="flex items-center gap-3.5 rounded-xl px-3.5 py-3 text-sm font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
                         onClick={() => setDropdownOpen(false)}
                       >
-                        <SettingsIcon className="h-5 w-5 shrink-0" />
-                        Configurações
+                        <SettingsIcon className="h-5 w-5 shrink-0 text-white" />
+                        <span>Configurações</span>
                       </Link>
                       <button
                         type="button"
@@ -803,7 +907,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
                         className="flex w-full cursor-pointer items-center gap-3.5 rounded-xl px-3.5 py-3 text-left text-sm font-extrabold leading-none text-red-500 transition-colors hover:bg-red-500/10 focus-visible:bg-red-500/10 focus-visible:outline-none"
                       >
                         <LogOut className="h-5 w-5 shrink-0" />
-                        Sair
+                        <span>Sair</span>
                       </button>
                     </div>
                   </>
