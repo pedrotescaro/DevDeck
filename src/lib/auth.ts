@@ -251,3 +251,24 @@ export async function requireOwnership(userId: string, resourceUserId: string): 
     throw new ForbiddenError('FORBIDDEN', 'Você não tem permissão para esta ação');
   }
 }
+
+export async function requireRole(allowedRoles: ('USER' | 'EVALUATOR' | 'ADMIN' | 'RECRUITER')[]) {
+  const user = await requireAuth();
+  const role = (user.role as 'USER' | 'EVALUATOR' | 'ADMIN' | 'RECRUITER') || 'USER';
+  if (!allowedRoles.includes(role)) {
+    throw new ForbiddenError('FORBIDDEN', 'Permissão insuficiente para acessar este recurso');
+  }
+  return user;
+}
+
+export async function requireAdmin() {
+  return requireRole(['ADMIN']);
+}
+
+export async function requireEvaluator() {
+  return requireRole(['EVALUATOR', 'ADMIN']);
+}
+
+export async function requireRecruiter() {
+  return requireRole(['RECRUITER', 'ADMIN']);
+}
