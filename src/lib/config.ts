@@ -20,7 +20,7 @@ export const GITHUB_API_URL = process.env.GITHUB_API_URL || 'https://api.github.
 
 export const AI_MODEL_DEFAULTS: Record<string, string> = {
   gemini: 'gemini-1.5-flash',
-  groq: 'llama-3.1-8b-instant',
+  groq: 'llama-3.3-70b-versatile',
   openai: 'gpt-4o-mini',
   ollama: 'qwen2.5-coder',
 };
@@ -77,7 +77,7 @@ export const DEFAULT_LANGUAGE_TRAILS = [
   'SWIFT',
 ] as const;
 
-/* ── Wandbox Code Runner ──────────────────────────────────────── */
+/* ── Wandbox & Judge0 Code Runner ───────────────────────────── */
 
 export interface WandboxLanguageConfig {
   compiler: string;
@@ -89,8 +89,25 @@ export const WANDBOX_LANGUAGES: Record<string, WandboxLanguageConfig> = {
   go: { compiler: 'go-1.23.2' },
   cpp: { compiler: 'gcc-13.2.0' },
   java: { compiler: 'openjdk-jdk-22+36' },
-  kotlin: { compiler: 'openjdk-jdk-22+36' }, // Kotlin não tem compilador nativo no Wandbox, usa fallback
+  kotlin: { compiler: 'openjdk-jdk-22+36' },
   swift: { compiler: 'swift-6.0.1' },
+};
+
+export const JUDGE0_API_URL =
+  process.env.JUDGE0_API_URL || 'https://ce.judge0.com/submissions?base64_encoded=false&wait=true';
+
+export const JUDGE0_LANGUAGES: Record<string, number> = {
+  python: 71,
+  kotlin: 78,
+  swift: 83,
+  java: 62,
+  rust: 73,
+  go: 60,
+  cpp: 54,
+  c: 50,
+  ruby: 72,
+  csharp: 51,
+  php: 68,
 };
 
 export const WANDBOX_RUN_TIMEOUT_MS = 10000;
