@@ -36,7 +36,8 @@ export default async function TrailsPage({ searchParams }: TrailsPageProps) {
     ? resolvedSearchParams.section[0]
     : resolvedSearchParams.section;
   const parsedSectionNumber = Number.parseInt(sectionParam ?? '', 10);
-  const initialSectionNumber = [1, 2, 3].includes(parsedSectionNumber) ? parsedSectionNumber : null;
+  const initialSectionNumber =
+    Number.isInteger(parsedSectionNumber) && parsedSectionNumber > 0 ? parsedSectionNumber : null;
   const user = await getAuthUser();
 
   if (!user) {

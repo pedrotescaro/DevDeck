@@ -39,6 +39,7 @@ import type { TrailLanguageCode } from '@/app/trails/TrailLanguageLogo';
 import { TrailsProgressSidebar } from '@/app/trails/TrailsProgressSidebar';
 import type { TrailDailyProgress } from '@/app/trails/TrailsProgressSidebar';
 import { TrailMap } from '@/app/trails/TrailMap';
+import { StreakPopover } from '@/components/StreakPopover';
 import {
   buildTrailSections,
   getUnitNumberInSection,
@@ -588,38 +589,53 @@ export function TrailsContent({
 
   // Verificar se o nível está desbloqueado (progressão linear com checkpoints)
   const isLevelUnlocked = (levelIndex: number) => {
-    if (levelIndex === 0) return true;
+    if (levelIndex <= 0) return true;
+    const levels = TRAILS_DATA[activeLang] || [];
+    if (levelIndex >= levels.length) return false;
 
-    const currentLevel = TRAILS_DATA[activeLang]?.[levelIndex];
-    const prevLevel = TRAILS_DATA[activeLang]?.[levelIndex - 1];
+    for (let idx = 0; idx < levelIndex; idx++) {
+      const level = levels[idx];
+      const nextLevel = levels[idx + 1];
+      const levelCompleted = level.questions.every((q) => attempts[q.id] === true);
+      if (!levelCompleted) return false;
 
-    if (currentLevel && prevLevel && currentLevel.unitNumber !== prevLevel.unitNumber) {
-      const prevUnitNumber = prevLevel.unitNumber;
-      const checkpointId = `${activeLang.toLowerCase()}-u${prevUnitNumber}-checkpoint`;
-      return attempts[checkpointId] === true;
+      if (nextLevel && nextLevel.unitNumber !== level.unitNumber) {
+        const cpId = `${activeLang.toLowerCase()}-u${level.unitNumber}-checkpoint`;
+        if (attempts[cpId] !== true) return false;
+      }
     }
-
-    return prevLevel.questions.every((q) => attempts[q.id] === true);
+    return true;
   };
 
-  // Checkpoints da linguagem ativa
-  const activeLangCheckpoints = [1, 2, 3].map((unitNum) => {
-    const checkpointId = `${activeLang.toLowerCase()}-u${unitNum}-checkpoint`;
-    const isCompleted = attempts[checkpointId] === true;
+  const allUnitNumbers = useMemo(() => {
+    const levels = TRAILS_DATA[activeLang] || [];
+    const unitsSet = new Set<number>();
+    levels.forEach((l) => unitsSet.add(l.unitNumber));
+    return Array.from(unitsSet).sort((a, b) => a - b);
+  }, [activeLang]);
 
-    // Achar o último nível dessa unidade
-    const unitLevels = TRAILS_DATA[activeLang]?.filter((l) => l.unitNumber === unitNum) || [];
-    const lastLevel = unitLevels[unitLevels.length - 1];
-    const isUnlocked = lastLevel && lastLevel.questions.every((q) => attempts[q.id] === true);
+  // Checkpoints da linguagem ativa (calculado para todas as unidades dinamicamente)
+  const activeLangCheckpoints = useMemo(() => {
+    return allUnitNumbers.map((unitNum) => {
+      const checkpointId = `${activeLang.toLowerCase()}-u${unitNum}-checkpoint`;
+      const isCompleted = attempts[checkpointId] === true;
 
-    return {
-      unitNumber: unitNum,
-      checkpointId,
-      isCompleted,
-      isUnlocked,
-      data: CHECKPOINTS_DATA[activeLang]?.[unitNum],
-    };
-  });
+      // Achar o último nível dessa unidade
+      const unitLevels = TRAILS_DATA[activeLang]?.filter((l) => l.unitNumber === unitNum) || [];
+      const lastLevel = unitLevels[unitLevels.length - 1];
+      const isUnlocked = lastLevel
+        ? lastLevel.questions.every((q) => attempts[q.id] === true)
+        : false;
+
+      return {
+        unitNumber: unitNum,
+        checkpointId,
+        isCompleted,
+        isUnlocked,
+        data: CHECKPOINTS_DATA[activeLang]?.[unitNum],
+      };
+    });
+  }, [allUnitNumbers, activeLang, attempts]);
 
   const recommendedCheckpoint = activeLangCheckpoints.find(
     (cp) => cp.isUnlocked && !cp.isCompleted
@@ -642,7 +658,7 @@ export function TrailsContent({
     ? recommendedCheckpoint.unitNumber
     : recommendedLevel
       ? recommendedLevel.unitNumber
-      : 3;
+      : (allUnitNumbers[0] ?? 1);
 
   const trailSections = useMemo(
     () => buildTrailSections(TRAILS_DATA[activeLang] ?? [], attempts, activeLang),
@@ -1069,29 +1085,28 @@ export function TrailsContent({
       return;
     }
 
+    const lessonId = `${activeLang.toLowerCase()}-l${level.levelNumber}`;
     const answeredCount = level.questions.filter((q) => hasAnsweredQuestion(q.id)).length;
     const completedCount = level.questions.filter((q) => attempts[q.id] === true).length;
+
     if (answeredCount > 0) {
       setConfirmDialog({
         isOpen: true,
-        title: 'Refazer do Zero?',
-        message: `Você já respondeu ${answeredCount} de ${level.questions.length} questões desta unidade e obteve ${completedCount} estrelas. Deseja refazer do zero para tentar obter todas as estrelas?`,
-        confirmText: 'Refazer do Zero',
-        cancelText: 'Continuar Progresso',
+        title: 'Refazer Lição?',
+        message: `Você já completou exercícios desta unidade com ${completedCount} estrelas. Deseja praticar novamente?`,
+        confirmText: 'Iniciar Lição',
+        cancelText: 'Cancelar',
         variant: 'warning',
-        onConfirm: async () => {
+        onConfirm: () => {
           setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
-          await handleResetLevelAttempts(level);
+          router.push(`/lesson/${lessonId}`);
         },
-        onCancel: () => {
-          setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
-          openLevelAtSavedProgress(level);
-        },
+        onCancel: () => setConfirmDialog((prev) => ({ ...prev, isOpen: false })),
       });
       return;
     }
 
-    openLevelFromStart(level);
+    router.push(`/lesson/${lessonId}`);
   };
 
   const handleCloseQuizRequest = () => {
@@ -1311,15 +1326,53 @@ export function TrailsContent({
       <Sidebar user={user} />
 
       <div className="mx-auto flex w-full min-w-0 flex-grow items-start justify-center xl:max-w-[1320px] xl:justify-start">
-        <main className="flex min-h-screen min-w-0 w-full max-w-[900px] flex-grow flex-col bg-dd-bg pb-24 md:pb-8">
+        <main className="flex min-h-screen min-w-0 w-full max-w-[900px] flex-grow flex-col bg-dd-bg pb-32 md:pb-8">
           <div className="p-4 space-y-6 flex flex-col flex-grow">
-            <div className="flex justify-end xl:hidden">
+            {/* Barra superior no mobile / tablet: Seletor de curso + Foguinho de Ofensiva + XP / Energia */}
+            <div className="flex items-center justify-between gap-3 px-1 py-1 xl:hidden">
               <TrailCourseSelector
                 activeLanguage={activeLang}
                 courses={courseOptions}
                 onSelectCourse={handleSelectCourse}
                 variant="compact"
               />
+
+              <div className="flex items-center gap-3 sm:gap-4">
+                {/* Foguinho (Streak / Ofensiva) com popover interativo */}
+                <StreakPopover
+                  streak={user.streak}
+                  triggerClassName="dd-focus-ring flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 transition-colors hover:bg-orange-500/10 active:scale-95"
+                >
+                  <Image
+                    data-testid="glossy-streak-flame"
+                    src="/assets/trails/streak-flame.png"
+                    alt="Ofensiva"
+                    width={26}
+                    height={26}
+                    className="h-6 w-6 shrink-0 object-contain drop-shadow-[0_2px_4px_rgba(249,115,22,0.35)]"
+                  />
+                  <span className="text-xs font-black text-dd-text">
+                    {user.streak.toLocaleString('pt-BR')}
+                  </span>
+                </StreakPopover>
+
+                {/* Raio / Energia (XP Total) */}
+                <div
+                  title={`${userXp.toLocaleString('pt-BR')} XP total`}
+                  className="flex items-center gap-1.5 rounded-xl px-2.5 py-1.5"
+                >
+                  <Image
+                    src="/assets/trails/trail-lightning.png"
+                    alt="XP / Energia"
+                    width={22}
+                    height={22}
+                    className="h-5 w-5 shrink-0 object-contain drop-shadow-[0_2px_6px_rgba(250,204,21,0.4)]"
+                  />
+                  <span className="text-xs font-black text-dd-text">
+                    {userXp.toLocaleString('pt-BR')}
+                  </span>
+                </div>
+              </div>
             </div>
             {initialView === 'sections' ? (
               <TrailSectionNavigation

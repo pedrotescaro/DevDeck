@@ -214,7 +214,7 @@ export function TrailMap({
   const firstUnitNumber = units[0]?.unitNumber;
 
   return (
-    <div data-testid="trail-map" className="relative mx-auto w-full max-w-[680px]">
+    <div data-testid="trail-map" className="relative mx-auto w-full max-w-[680px] px-2 sm:px-4">
       {units.map((unit) => {
         const { unitNumber, theme, levels, height, checkpointTop } = unit;
         const levelCount = levels.length;
@@ -227,7 +227,6 @@ export function TrailMap({
         const chestUnlocked = Boolean(
           secondLevel && secondLevel.questions.every((q) => attempts[q.id] === true)
         );
-        // Baú com espaço próprio à direita do caminho (sem sobrepor nenhum nó)
         const chestTop = Math.min(FIRST_LEVEL_TOP + LEVEL_SPACING + 60, checkpointTop - 140);
 
         return (
@@ -278,6 +277,7 @@ export function TrailMap({
             {/* Nós de nível + passos */}
             {levels.map((level, i) => {
               const top = FIRST_LEVEL_TOP + i * LEVEL_SPACING;
+              const isFirstTrailLevel = unitNumber === firstUnitNumber && i === 0;
               const accessible = isLevelAccessible(level);
               const completed = level.questions.every((q) => attempts[q.id] === true);
               const started = level.questions.some((q) =>
@@ -292,10 +292,10 @@ export function TrailMap({
                   {/* Nó de nível */}
                   <div
                     id={`trail-level-${level.levelNumber}`}
-                    className="absolute z-10 flex w-[170px] -translate-x-1/2 flex-col items-center text-center"
-                    style={{ left: '48%', top }}
+                    className="absolute z-10 flex -translate-x-1/2 flex-col items-center text-center"
+                    style={{ left: '50%', top }}
                   >
-                    {/* Popup "Pular pra cá" no primeiro nó ainda não iniciado */}
+                    {/* Popup "PULAR PRA CÁ" no primeiro nó ainda não iniciado */}
                     {i === 0 && !started && (
                       <div
                         className="pointer-events-none absolute -top-9 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-lg border border-dd-border bg-dd-surface px-2.5 py-1.5 text-[10px] font-bold leading-none shadow-md"
@@ -311,16 +311,16 @@ export function TrailMap({
                     <LessonStars level={level} attempts={attempts} />
                     <button
                       type="button"
-                      disabled={i > 0 && !accessible}
+                      disabled={!accessible}
                       onClick={() => onLevelClick(level, accessible)}
                       aria-label={`Seção ${unitNumber}, unidade ${i + 1}: ${level.title}`}
                       className={`group dd-focus-ring relative flex h-[76px] w-[76px] items-center justify-center rounded-[22px] shadow-md transition-all duration-150 enabled:cursor-pointer enabled:hover:-translate-y-0.5 enabled:active:translate-y-[4px] ${
-                        i === 0 || accessible
+                        accessible
                           ? theme.nodeButtonClass
                           : 'border-b-[6px] border-[#202b33] bg-[#37464f] text-[#77858d]'
                       }`}
                     >
-                      {i === 0 ? (
+                      {i === 0 && isFirstTrailLevel ? (
                         started ? (
                           <Check className="h-7 w-7" strokeWidth={3.2} />
                         ) : (
@@ -328,12 +328,12 @@ export function TrailMap({
                         )
                       ) : completed ? (
                         <Check className="h-7 w-7" strokeWidth={3.2} />
-                      ) : accessible ? (
+                      ) : !accessible ? (
+                        <Lock className="h-6 w-6" strokeWidth={2.6} />
+                      ) : (
                         <span className="font-mono text-base font-black tracking-tight text-white">
                           {`{${i + 1}}`}
                         </span>
-                      ) : (
-                        <Lock className="h-6 w-6" strokeWidth={2.6} />
                       )}
                     </button>
                   </div>
@@ -345,13 +345,13 @@ export function TrailMap({
                       {levelCount >= 3 && i === 1 ? (
                         <div
                           className="absolute z-10 flex -translate-x-1/2 items-center justify-center"
-                          style={{ left: `${leftSide ? 35 : 65}%`, top: top + 80 }}
+                          style={{ left: leftSide ? '28%' : '72%', top: top + 95 }}
                         >
                           <button
                             type="button"
                             onClick={() => handleOpenChestReward(150, chestUnlocked, theme)}
                             aria-label="Baú da trilha"
-                            className="dd-focus-ring group relative flex h-[84px] w-[84px] cursor-pointer items-center justify-center transition-transform duration-150 hover:-translate-y-1 active:scale-95"
+                            className="dd-focus-ring group relative flex h-[80px] w-[80px] cursor-pointer items-center justify-center transition-transform duration-150 hover:-translate-y-1 active:scale-95"
                           >
                             <Image
                               src={
@@ -360,9 +360,9 @@ export function TrailMap({
                                   : '/assets/trails/trail-chest.png'
                               }
                               alt="Baú da trilha"
-                              width={82}
-                              height={82}
-                              className="relative z-10 h-[82px] w-[82px] object-contain transition-transform group-hover:scale-105"
+                              width={78}
+                              height={78}
+                              className="relative z-10 h-[78px] w-[78px] object-contain transition-transform group-hover:scale-105"
                               style={{ filter: chestTintFilter(theme.primaryHex) }}
                             />
                           </button>
@@ -370,21 +370,21 @@ export function TrailMap({
                       ) : (
                         <div
                           className="absolute z-10 flex -translate-x-1/2 items-center justify-center"
-                          style={{ left: `${leftSide ? 35 : 65}%`, top: top + 80 }}
+                          style={{ left: leftSide ? '28%' : '72%', top: top + 95 }}
                         >
                           <button
                             type="button"
                             disabled={!nextAccessible}
                             onClick={() => onLevelClick(nextLevel, nextAccessible)}
                             aria-label={`Passo ${i + 1} de ${nextLevel.title}`}
-                            className={`flex h-[58px] w-[58px] items-center justify-center rounded-full shadow-md transition-all ${
+                            className={`flex h-[56px] w-[56px] items-center justify-center rounded-full shadow-md transition-all ${
                               nextAccessible
                                 ? `cursor-pointer hover:-translate-y-0.5 active:translate-y-[3px] ${theme.stepButtonClass}`
                                 : 'border-b-[5px] border-[#202b33] bg-[#37464f] text-[#77858d]'
                             }`}
                           >
                             {nextAccessible ? (
-                              <Check className="h-7 w-7" strokeWidth={3.5} />
+                              <Check className="h-6.5 w-6.5" strokeWidth={3.5} />
                             ) : (
                               <Lock className="h-5 w-5" strokeWidth={2.6} />
                             )}
@@ -393,21 +393,21 @@ export function TrailMap({
                       )}
                       <div
                         className="absolute z-10 flex -translate-x-1/2 items-center justify-center"
-                        style={{ left: `${leftSide ? 65 : 35}%`, top: top + 160 }}
+                        style={{ left: leftSide ? '72%' : '28%', top: top + 165 }}
                       >
                         <button
                           type="button"
                           disabled={!nextAccessible}
                           onClick={() => onLevelClick(nextLevel, nextAccessible)}
                           aria-label={`Passo ${i + 2} de ${nextLevel.title}`}
-                          className={`flex h-[58px] w-[58px] items-center justify-center rounded-full shadow-md transition-all ${
+                          className={`flex h-[56px] w-[56px] items-center justify-center rounded-full shadow-md transition-all ${
                             nextAccessible
                               ? `cursor-pointer hover:-translate-y-0.5 active:translate-y-[3px] ${theme.stepButtonClass}`
                               : 'border-b-[5px] border-[#202b33] bg-[#37464f] text-[#77858d]'
                           }`}
                         >
                           {nextAccessible ? (
-                            <Check className="h-7 w-7" strokeWidth={3.5} />
+                            <Check className="h-6.5 w-6.5" strokeWidth={3.5} />
                           ) : (
                             <Lock className="h-5 w-5" strokeWidth={2.6} />
                           )}
@@ -419,17 +419,17 @@ export function TrailMap({
               );
             })}
 
-            {/* Baú (fallback para unidades com menos de 3 níveis — sem slot de passo) */}
+            {/* Baú (fallback para unidades com menos de 3 níveis — sem sobrepor nenhum nó) */}
             {levelCount < 3 && (
               <div
                 className="absolute z-10 flex -translate-x-1/2 items-center justify-center"
-                style={{ left: '68%', top: chestTop }}
+                style={{ left: '74%', top: chestTop }}
               >
                 <button
                   type="button"
                   onClick={() => handleOpenChestReward(150, chestUnlocked, theme)}
                   aria-label="Baú da trilha"
-                  className="dd-focus-ring group relative flex h-[84px] w-[84px] cursor-pointer items-center justify-center transition-transform duration-150 hover:-translate-y-1 active:scale-95"
+                  className="dd-focus-ring group relative flex h-[80px] w-[80px] cursor-pointer items-center justify-center transition-transform duration-150 hover:-translate-y-1 active:scale-95"
                 >
                   <Image
                     src={
@@ -438,9 +438,9 @@ export function TrailMap({
                         : '/assets/trails/trail-chest.png'
                     }
                     alt="Baú da trilha"
-                    width={82}
-                    height={82}
-                    className="relative z-10 h-[82px] w-[82px] object-contain transition-transform group-hover:scale-105"
+                    width={78}
+                    height={78}
+                    className="relative z-10 h-[78px] w-[78px] object-contain transition-transform group-hover:scale-105"
                     style={{ filter: chestTintFilter(theme.primaryHex) }}
                   />
                 </button>
@@ -451,21 +451,21 @@ export function TrailMap({
             {levelCount > 1 && lastLevel && (
               <div
                 className="absolute z-10 flex -translate-x-1/2 items-center justify-center"
-                style={{ left: '65%', top: lastLevelTop + 80 }}
+                style={{ left: (levelCount - 1) % 2 === 0 ? '28%' : '72%', top: lastLevelTop + 95 }}
               >
                 <button
                   type="button"
                   disabled={!lastLevelAccessible}
                   onClick={() => onLevelClick(lastLevel, lastLevelAccessible)}
                   aria-label={`Passo final de ${lastLevel.title}`}
-                  className={`flex h-[58px] w-[58px] items-center justify-center rounded-full shadow-md transition-all ${
+                  className={`flex h-[56px] w-[56px] items-center justify-center rounded-full shadow-md transition-all ${
                     lastLevelAccessible
                       ? `cursor-pointer hover:-translate-y-0.5 active:translate-y-[3px] ${theme.stepButtonClass}`
                       : 'border-b-[5px] border-[#202b33] bg-[#37464f] text-[#77858d]'
                   }`}
                 >
                   {lastLevelAccessible ? (
-                    <Check className="h-7 w-7" strokeWidth={3.5} />
+                    <Check className="h-6.5 w-6.5" strokeWidth={3.5} />
                   ) : (
                     <Lock className="h-5 w-5" strokeWidth={2.6} />
                   )}
@@ -475,8 +475,8 @@ export function TrailMap({
 
             {/* Checkpoint da unidade */}
             <div
-              className="absolute z-10 flex w-[200px] -translate-x-1/2 flex-col items-center text-center"
-              style={{ left: '48%', top: checkpointTop }}
+              className="absolute z-10 flex -translate-x-1/2 flex-col items-center text-center"
+              style={{ left: '50%', top: checkpointTop }}
             >
               <LessonStars level={lastLevel} attempts={attempts} />
               <button
