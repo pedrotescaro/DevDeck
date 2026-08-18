@@ -157,6 +157,14 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
     return () => clearInterval(interval);
   }, [duelPhase]);
 
+  // Auto-submit when time expires
+  useEffect(() => {
+    if (duelPhase === 'battle' && timeLeft === 0 && !isSubmitting && !showVictoryModal) {
+      handleSubmitSolution();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeLeft, duelPhase]);
+
   // Typing heartbeat to opponent
   const handleCodeChange = (newCode: string) => {
     setCode(newCode);

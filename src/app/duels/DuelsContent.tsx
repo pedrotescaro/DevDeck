@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/Sidebar';
 import { Language } from '@prisma/client';
@@ -55,6 +55,12 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
   const [duelLanguage, setDuelLanguage] = useState<Language>('TS');
   const [creating, setCreating] = useState(false);
 
+  // Incoming duel challenge state
+  const [incomingRequest, setIncomingRequest] = useState<any | null>(null);
+  const [requestTimeLeft, setRequestTimeLeft] = useState<number>(30);
+  const [respondingToRequest, setRespondingToRequest] = useState(false);
+  const [cooldownAlert, setCooldownAlert] = useState<string | null>(null);
+
   // AI generation state
   const [showAIConfig, setShowAIConfig] = useState(false);
   const [aiDifficulty, setAIDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
@@ -62,6 +68,85 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedProblem, setGeneratedProblem] = useState<DuelProblem | null>(null);
   const [aiError, setAIError] = useState<string | null>(null);
+
+  // Poll for incoming duel requests
+  useEffect(() => {
+    const checkRequests = async () => {
+      try {
+        const res = await fetch('/api/duels/pending-requests');
+        if (res.ok) {
+          const list = await res.json();
+          if (list && list.length > 0) {
+            const req = list[0];
+            setIncomingRequest(req);
+            const remaining = Math.max(
+              0,
+              Math.floor((new Date(req.expires_at).getTime() - Date.now()) / 1000)
+            );
+            setRequestTimeLeft(remaining);
+          } else {
+            setIncomingRequest(null);
+          }
+        }
+      } catch (err) {
+        // ignore
+      }
+    };
+
+    checkRequests();
+    const interval = setInterval(checkRequests, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Countdown timer for incoming request
+  useEffect(() => {
+    if (!incomingRequest) return;
+    const timer = setInterval(() => {
+      setRequestTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setIncomingRequest(null);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [incomingRequest]);
+
+  const handleRespondRequest = async (action: 'ACCEPT' | 'REJECT') => {
+    if (!incomingRequest || respondingToRequest) return;
+    setRespondingToRequest(true);
+
+    try {
+      const res = await fetch('/api/duels/respond', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          request_id: incomingRequest.id,
+          action,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setIncomingRequest(null);
+        if (action === 'ACCEPT' && data.duel?.id) {
+          router.push(`/duels/${data.duel.id}`);
+        } else if (action === 'REJECT') {
+          if (data.cooldownApplied) {
+            setCooldownAlert(
+              'Você atingiu 3 rejeições consecutivas. Cooldown de 5 minutos ativado.'
+            );
+          }
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setRespondingToRequest(false);
+    }
+  };
 
   const refreshDuels = async () => {
     try {
@@ -77,26 +162,28 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
 
   const handleQuickMatch = async () => {
     setIsMatchmaking(true);
+    setCooldownAlert(null);
 
     try {
-      const res = await fetch('/api/duels', {
+      const res = await fetch('/api/duels/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          isQuickMatch: true,
+          auto_match: true,
           language: selectedLang,
         }),
       });
 
+      const data = await res.json();
       if (res.ok) {
-        const data = await res.json();
-        if (data.duel?.id) {
-          router.push(`/duels/${data.duel.id}`);
-          return;
+        if (data.request?.id) {
+          alert('Desafio enviado! Aguardando oponente aceitar...');
         }
+      } else {
+        setCooldownAlert(data.error || 'Erro ao iniciar matchmaking.');
       }
-    } catch (err) {
-      console.error('Error during quick match:', err);
+    } catch (err: any) {
+      setCooldownAlert(err.message || 'Erro durante o matchmaking.');
     } finally {
       setIsMatchmaking(false);
     }
@@ -218,6 +305,65 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
               {showDuelForm ? 'Fechar' : 'Criar Duelo'}
             </button>
           </div>
+
+          {/* Cooldown Alert Banner */}
+          {cooldownAlert && (
+            <div className="mx-4 sm:mx-6 mt-4 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 font-bold text-xs flex items-center gap-2">
+              <Sparkles className="w-4 h-4 shrink-0" />
+              <span>{cooldownAlert}</span>
+            </div>
+          )}
+
+          {/* 30-Second Challenge Popup Modal */}
+          {incomingRequest && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+              <div className="w-full max-w-md p-6 rounded-3xl bg-dd-surface border-2 border-amber-500/50 shadow-2xl space-y-5 text-center">
+                <div className="w-16 h-16 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40 mx-auto flex items-center justify-center animate-pulse">
+                  <Swords className="w-8 h-8" />
+                </div>
+
+                <div>
+                  <span className="text-[10px] font-black uppercase text-amber-400 bg-amber-500/15 px-3 py-1 rounded-full border border-amber-500/30">
+                    Desafio Recebido!
+                  </span>
+                  <h3 className="text-xl font-black text-white mt-2">
+                    @{incomingRequest.sender.username} desafiou você para um duelo!
+                  </h3>
+                  <p className="text-xs text-dd-muted font-medium mt-1">
+                    Linguagem: <strong>{incomingRequest.language}</strong> • Oponente com{' '}
+                    {incomingRequest.sender.total_xp} XP
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-dd-bg border border-dd-border/60">
+                  <span className="text-[10px] font-bold text-dd-muted uppercase tracking-wider block">
+                    Tempo restante para responder:
+                  </span>
+                  <span className="text-3xl font-mono font-black text-amber-400">
+                    00:{requestTimeLeft.toString().padStart(2, '0')}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                  <button
+                    onClick={() => handleRespondRequest('ACCEPT')}
+                    disabled={respondingToRequest}
+                    className="py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-sm transition-all shadow-md active:scale-95 cursor-pointer"
+                  >
+                    Aceitar Duelo
+                  </button>
+
+                  <button
+                    onClick={() => handleRespondRequest('REJECT')}
+                    disabled={respondingToRequest}
+                    className="py-3 rounded-2xl bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 font-black text-sm transition-all active:scale-95 cursor-pointer"
+                  >
+                    Recusar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Quick Matchmaking Hero Banner (Duolingo 3D Style) */}
           <div className="p-4 sm:p-6 space-y-6">
