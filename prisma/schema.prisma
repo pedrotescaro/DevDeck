@@ -18,55 +18,258 @@ enum Language {
   CPP
 }
 
+enum UserRole {
+  USER
+  EVALUATOR
+  ADMIN
+  RECRUITER
+}
+
 enum DuelStatus {
   PENDING
   ACTIVE
   CLOSED
 }
 
-model User {
-  id          String   @id @default(uuid())
-  username    String   @unique
-  email       String   @unique
-  avatar_url  String?
-  avatar_config Json?
-  bio         String?
-  institution String?
-  github_username String?
-  discord_username String?
-  banner_url      String?
-  pronouns        String?
-  birthday        DateTime?
-  total_xp    Int      @default(0)
-  streak_days Int      @default(0)
-  last_active_at DateTime?
-  created_at  DateTime @default(now())
+enum DuelRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
 
-  trails              LanguageTrail[]
-  posts               Post[]
-  answers             Answer[]
-  quiz_attempts       QuizAttempt[]
-  badges              UserBadge[]
-  duels_as_challenger Duel[]         @relation("challenger")
-  duels_as_opponent   Duel[]         @relation("opponent")
-  duel_solutions      DuelSolution[]
-  duel_votes          DuelVote[]
-  post_votes          PostVote[]
-  answer_votes        AnswerVote[]
-  sent_messages       Message[]      @relation("sent_messages")
-  received_messages   Message[]      @relation("received_messages")
-  bookmarks           Bookmark[]
-  notifications       Notification[]
-  notifications_acted Notification[] @relation("NotificationActor")
-  reports             Report[]
-  followers           Follow[]       @relation("Followers")
-  following           Follow[]       @relation("Following")
-  reactions           Reaction[]
-  message_reactions   MessageReaction[]
-  guilds_owned        Guild[]         @relation("OwnedGuilds")
-  guild_memberships   GuildMember[]
+enum EvaluationType {
+  AUTOMATIC
+  AI_SUGGESTED
+  HUMAN_EVALUATED
+}
+
+enum EvaluatorStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum JobLevel {
+  ESTAGIO
+  JUNIOR
+  PLENO
+  SENIOR
+  ESPECIALISTA
+}
+
+enum JobModality {
+  REMOTE
+  HYBRID
+  ONSITE
+}
+
+enum JobContract {
+  CLT
+  PJ
+  ESTAGIO
+}
+
+enum JobStatus {
+  OPEN
+  CLOSED
+  DRAFT
+}
+
+enum ApplicationStatus {
+  APPLIED
+  IN_REVIEW
+  TECHNICAL_CHALLENGE
+  DUEL
+  EVALUATION
+  INTERVIEW
+  OFFER
+  REJECTED
+}
+
+enum RecruitmentStageType {
+  INSCRICAO
+  DESAFIO_TECNICO
+  DUELO_TECNICO
+  AVALIACAO
+  ENTREVISTA
+  CONTRATACAO
+}
+
+enum EventType {
+  HACKATHON
+  CHAMPIONSHIP
+  WORKSHOP
+  CHALLENGE
+}
+
+enum EventStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+}
+
+model User {
+  id                     String    @id @default(uuid())
+  username               String    @unique
+  email                  String    @unique
+  avatar_url             String?
+  avatar_config          Json?
+  bio                    String?
+  institution            String?
+  github_username        String?
+  discord_username       String?
+  banner_url             String?
+  pronouns               String?
+  birthday               DateTime?
+  total_xp               Int       @default(0)
+  streak_days            Int       @default(0)
+  role                   UserRole  @default(USER)
+  consecutive_rejections Int       @default(0)
+  duel_cooldown_until    DateTime?
+  last_active_at         DateTime?
+  created_at             DateTime  @default(now())
+
+  trails                 LanguageTrail[]
+  posts                  Post[]
+  answers                Answer[]
+  quiz_attempts          QuizAttempt[]
+  badges                 UserBadge[]
+  duels_as_challenger    Duel[]                 @relation("challenger")
+  duels_as_opponent      Duel[]                 @relation("opponent")
+  duel_solutions         DuelSolution[]
+  duel_votes             DuelVote[]
+  post_votes             PostVote[]
+  answer_votes           AnswerVote[]
+  sent_messages          Message[]              @relation("sent_messages")
+  received_messages      Message[]              @relation("received_messages")
+  bookmarks              Bookmark[]
+  notifications          Notification[]
+  notifications_acted    Notification[]         @relation("NotificationActor")
+  reports                Report[]
+  followers              Follow[]               @relation("Followers")
+  following              Follow[]               @relation("Following")
+  reactions              Reaction[]
+  message_reactions      MessageReaction[]
+  guilds_owned           Guild[]                @relation("OwnedGuilds")
+  guild_memberships      GuildMember[]
+  evaluator_profile      EvaluatorProfile?
+  evaluator_applications EvaluatorApplication[]
+  companies_owned        Company[]
+  job_applications       JobApplication[]
+  duel_evaluations       DuelEvaluation[]
+  events_created         Event[]
+  event_participants     EventParticipant[]
+  duel_requests_sent     DuelRequest[]          @relation("duel_requests_sent")
+  duel_requests_recv     DuelRequest[]          @relation("duel_requests_recv")
 
   @@index([total_xp(sort: Desc)])
+  @@index([role])
+}
+
+model EvaluatorApplication {
+  id             String          @id @default(uuid())
+  user_id        String
+  motivation     String
+  tech_stack     String[]
+  status         EvaluatorStatus @default(PENDING)
+  reviewed_by_id String?
+  reviewer_notes String?
+  created_at     DateTime        @default(now())
+  reviewed_at    DateTime?
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([status, created_at])
+}
+
+model EvaluatorProfile {
+  id                String   @id @default(uuid())
+  user_id           String   @unique
+  reputation        Int      @default(100)
+  evaluations_count Int      @default(0)
+  approved_at       DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model Company {
+  id          String   @id @default(uuid())
+  owner_id    String
+  name        String
+  slug        String   @unique
+  description String?
+  logo_url    String?
+  website     String?
+  location    String?
+  is_verified Boolean  @default(false)
+  created_at  DateTime @default(now())
+
+  owner  User    @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  jobs   Job[]
+  events Event[]
+
+  @@index([slug])
+}
+
+model Job {
+  id            String      @id @default(uuid())
+  company_id    String
+  title         String
+  description   String
+  level         JobLevel    @default(JUNIOR)
+  technologies  String[]
+  modality      JobModality @default(REMOTE)
+  location      String?
+  contract_type JobContract @default(CLT)
+  salary_min    Int?
+  salary_max    Int?
+  currency      String      @default("BRL")
+  requirements  String[]
+  benefits      String[]
+  status        JobStatus   @default(OPEN)
+  created_at    DateTime    @default(now())
+  expires_at    DateTime?
+
+  company      Company               @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  stages       JobRecruitmentStage[]
+  applications JobApplication[]
+
+  @@index([status, created_at])
+}
+
+model JobRecruitmentStage {
+  id           String               @id @default(uuid())
+  job_id       String
+  title        String
+  type         RecruitmentStageType @default(INSCRICAO)
+  order        Int                  @default(1)
+  challenge_id String?
+  description  String?
+
+  job          Job                  @relation(fields: [job_id], references: [id], onDelete: Cascade)
+  applications JobApplication[]
+
+  @@index([job_id, order])
+}
+
+model JobApplication {
+  id              String               @id @default(uuid())
+  job_id          String
+  user_id         String
+  stage_id        String?
+  status          ApplicationStatus    @default(APPLIED)
+  technical_score Int?
+  feedback        String?
+  created_at      DateTime             @default(now())
+  updated_at      DateTime             @updatedAt
+
+  job   Job                  @relation(fields: [job_id], references: [id], onDelete: Cascade)
+  user  User                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  stage JobRecruitmentStage? @relation(fields: [stage_id], references: [id], onDelete: SetNull)
+
+  @@unique([job_id, user_id])
+  @@index([job_id, status])
 }
 
 model LanguageTrail {
@@ -84,58 +287,58 @@ model LanguageTrail {
 }
 
 model Post {
-  id           String   @id @default(uuid())
+  id           String     @id @default(uuid())
   author_id    String
   title        String
   body         String
   language     Language?
   code_snippet String?
   image_url    String?
-  is_pinned    Boolean  @default(false)
-  created_at   DateTime @default(now())
-  view_count   Int      @default(0)
-  upvotes      Int      @default(0)
+  is_pinned    Boolean    @default(false)
+  created_at   DateTime   @default(now())
+  view_count   Int        @default(0)
+  upvotes      Int        @default(0)
 
-  author  User     @relation(fields: [author_id], references: [id], onDelete: Cascade)
-  answers Answer[]
-  quizzes Quiz[]
-  votes   PostVote[]
+  author    User       @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  answers   Answer[]
+  quizzes   Quiz[]
+  votes     PostVote[]
   bookmarks Bookmark[]
-  reports  Report[]
+  reports   Report[]
   reactions Reaction[]
 
   @@index([created_at(sort: Desc), id(sort: Desc)])
 }
 
 model Answer {
-  id           String   @id @default(uuid())
+  id           String       @id @default(uuid())
   post_id      String
   author_id    String
   parent_id    String?
   body         String
   code_snippet String?
-  is_accepted  Boolean  @default(false)
-  upvotes      Int      @default(0)
-  created_at   DateTime @default(now())
+  is_accepted  Boolean      @default(false)
+  upvotes      Int          @default(0)
+  created_at   DateTime     @default(now())
 
-  post    Post     @relation(fields: [post_id], references: [id], onDelete: Cascade)
-  author  User     @relation(fields: [author_id], references: [id], onDelete: Cascade)
-  parent  Answer?  @relation("AnswerReplies", fields: [parent_id], references: [id], onDelete: Cascade)
-  replies Answer[] @relation("AnswerReplies")
+  post    Post         @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  author  User         @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  parent  Answer?      @relation("AnswerReplies", fields: [parent_id], references: [id], onDelete: Cascade)
+  replies Answer[]     @relation("AnswerReplies")
   votes   AnswerVote[]
 
   @@index([parent_id])
 }
 
 model Quiz {
-  id            String   @id @default(uuid())
+  id            String        @id @default(uuid())
   post_id       String?
   question      String
   options       Json
   correct_index Int
-  is_daily      Boolean  @default(false)
-  scheduled_for DateTime? @unique
-  created_at    DateTime @default(now())
+  is_daily      Boolean       @default(false)
+  scheduled_for DateTime?     @unique
+  created_at    DateTime      @default(now())
 
   post     Post?         @relation(fields: [post_id], references: [id], onDelete: Cascade)
   attempts QuizAttempt[]
@@ -159,20 +362,40 @@ model QuizAttempt {
   @@unique([user_id, quiz_id])
 }
 
-model Duel {
-  id            String     @id @default(uuid())
-  challenger_id String
-  opponent_id   String?
-  problem_title String
-  problem_body  String
-  language      Language
-  status        DuelStatus @default(PENDING)
-  created_at    DateTime   @default(now())
+model DuelRequest {
+  id          String            @id @default(uuid())
+  sender_id   String
+  receiver_id String
+  language    Language          @default(TS)
+  status      DuelRequestStatus @default(PENDING)
+  expires_at  DateTime
+  created_at  DateTime          @default(now())
 
-  challenger User           @relation("challenger", fields: [challenger_id], references: [id], onDelete: Cascade)
-  opponent   User?          @relation("opponent", fields: [opponent_id], references: [id], onDelete: SetNull)
-  solutions  DuelSolution[]
-  votes      DuelVote[]
+  sender   User @relation("duel_requests_sent", fields: [sender_id], references: [id], onDelete: Cascade)
+  receiver User @relation("duel_requests_recv", fields: [receiver_id], references: [id], onDelete: Cascade)
+
+  @@index([receiver_id, status])
+}
+
+model Duel {
+  id                 String           @id @default(uuid())
+  challenger_id      String
+  opponent_id        String?
+  problem_title      String
+  problem_body       String
+  language           Language
+  status             DuelStatus       @default(PENDING)
+  time_limit_seconds Int              @default(900)
+  started_at         DateTime?
+  finished_at        DateTime?
+  winner_id          String?
+  created_at         DateTime         @default(now())
+
+  challenger  User             @relation("challenger", fields: [challenger_id], references: [id], onDelete: Cascade)
+  opponent    User?            @relation("opponent", fields: [opponent_id], references: [id], onDelete: SetNull)
+  solutions   DuelSolution[]
+  votes       DuelVote[]
+  evaluations DuelEvaluation[]
 }
 
 model DuelSolution {
@@ -199,6 +422,64 @@ model DuelVote {
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([duel_id, user_id])
+}
+
+model DuelEvaluation {
+  id             String         @id @default(uuid())
+  duel_id        String
+  evaluator_id   String?
+  type           EvaluationType @default(AUTOMATIC)
+  score_player1  Int            @default(0)
+  score_player2  Int            @default(0)
+  ai_analysis    Json?
+  human_feedback String?
+  strengths      String[]
+  improvements   String[]
+  created_at     DateTime       @default(now())
+
+  duel      Duel  @relation(fields: [duel_id], references: [id], onDelete: Cascade)
+  evaluator User? @relation(fields: [evaluator_id], references: [id], onDelete: SetNull)
+
+  @@index([duel_id])
+}
+
+model Event {
+  id               String             @id @default(uuid())
+  creator_id       String
+  company_id       String?
+  title            String
+  slug             String             @unique
+  description      String
+  type             EventType          @default(CHALLENGE)
+  status           EventStatus        @default(UPCOMING)
+  banner_url       String?
+  min_level        Int                @default(1)
+  max_participants Int?
+  xp_reward        Int                @default(250)
+  start_date       DateTime
+  end_date         DateTime
+  created_at       DateTime           @default(now())
+
+  creator      User               @relation(fields: [creator_id], references: [id], onDelete: Cascade)
+  company      Company?           @relation(fields: [company_id], references: [id], onDelete: SetNull)
+  participants EventParticipant[]
+
+  @@index([status, start_date])
+}
+
+model EventParticipant {
+  id        String   @id @default(uuid())
+  event_id  String
+  user_id   String
+  score     Int      @default(0)
+  rank      Int?
+  joined_at DateTime @default(now())
+
+  event Event @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([event_id, user_id])
+  @@index([event_id, score(sort: Desc)])
 }
 
 model Badge {
@@ -251,13 +532,13 @@ model AnswerVote {
 }
 
 model Message {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   sender_id   String
   receiver_id String
   content     String
   image_url   String?
-  is_edited   Boolean  @default(false)
-  created_at  DateTime @default(now())
+  is_edited   Boolean   @default(false)
+  created_at  DateTime  @default(now())
   updated_at  DateTime?
 
   sender    User              @relation("sent_messages", fields: [sender_id], references: [id], onDelete: Cascade)
@@ -312,6 +593,14 @@ enum NotificationType {
   LEVEL_UP
   DUEL_CHALLENGE
   DUEL_RESULT
+  DUEL_REQUEST
+  DUEL_ACCEPTED
+  DUEL_REJECTED
+  EVALUATION_COMPLETED
+  JOB_APPLICATION_UPDATE
+  EVENT_START
+  EVALUATOR_APPROVED
+  EVALUATOR_REJECTED
 }
 
 model Notification {
