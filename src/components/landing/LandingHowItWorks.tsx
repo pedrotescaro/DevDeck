@@ -33,19 +33,18 @@ export default function LandingHowItWorks() {
               className="lp-font-display text-6xl md:text-7xl lg:text-8xl leading-[0.9] uppercase"
               style={{ color: 'var(--lp-fg)' }}
             >
-              Três coisas acontecem com
+              Três formas de evoluir com
               <br />
-              <span className="lp-text-stroke">cada post</span> que você escreve.
+              <span className="lp-text-stroke">prática real</span> em comunidade.
             </h2>
           </div>
           <div className="lg:col-span-5 lg:col-start-8 flex flex-col justify-end">
             <p className="text-base leading-relaxed" style={{ color: 'var(--lp-fg-dim)' }}>
-              Esta é uma sequência fixa — não três pilares, não três valores.{' '}
+              A plataforma conecta colaboração, prática e reconhecimento.{' '}
               <strong style={{ color: 'var(--lp-fg)' }}>
-                Poste primeiro, depois ganhe XP, depois faça o quiz.
+                Publique problemas, ajude outros devs e valide conhecimento em quizzes curados.
               </strong>{' '}
-              Todos os outros recursos no Stacklyst dependem deste ciclo. Passe o mouse nos cards
-              para revelar os detalhes.
+              Passe o mouse nos cards para conhecer cada parte do ciclo.
             </p>
           </div>
         </motion.div>
@@ -81,8 +80,8 @@ export default function LandingHowItWorks() {
                   </h3>
                   <p className="text-sm leading-relaxed mb-6" style={{ color: 'var(--lp-fg-dim)' }}>
                     Não é um tutorial. Não é um palpite. O problema exato onde você travou, com o
-                    código que realmente está quebrado. Tags sugeridas automaticamente a partir do
-                    seu snippet.
+                    código que realmente está quebrado. Escolha a linguagem certa para chegar aos
+                    desenvolvedores que podem ajudar.
                   </p>
                 </div>
                 <div
@@ -133,22 +132,21 @@ export default function LandingHowItWorks() {
                     </span>
                   </div>
                   <h4 className="lp-font-display text-2xl mb-4 uppercase text-[var(--lp-fg)]">
-                    Análise de Tags por IA
+                    Distribuição por Linguagem
                   </h4>
                   <p className="text-xs leading-relaxed text-[var(--lp-fg-dim)]">
-                    Nossa engine lê o seu bloco de código em tempo real e extrai a árvore sintática
-                    abstrata (AST) para sugerir as tags exatas e segmentar a pergunta para os
-                    desenvolvedores certos.
+                    A linguagem e o contexto informados no post organizam o feed e tornam a busca
+                    mais precisa, sem depender de processamento generativo em cada publicação.
                   </p>
                 </div>
                 <div
                   className="rounded p-3 lp-font-mono text-[9.5px] space-y-1"
                   style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid var(--lp-border)' }}
                 >
-                  <div className="text-[var(--lp-blue)]">[ast] Analisando snippet React...</div>
-                  <div className="text-[var(--lp-gold)]">[ast] Hook detectado: useEffect</div>
+                  <div className="text-[var(--lp-blue)]">[feed] Linguagem: TypeScript</div>
+                  <div className="text-[var(--lp-gold)]">[feed] Contexto: React hooks</div>
                   <div className="text-[var(--lp-string)]">
-                    [ast] Indexando tags: [react, hooks]
+                    [feed] Publicação disponível para a comunidade
                   </div>
                   <div className="text-[var(--lp-muted)]">
                     [sys] Aguardando respostas aceitas...
@@ -300,12 +298,11 @@ export default function LandingHowItWorks() {
                     className="lp-font-display text-3xl mb-3 uppercase"
                     style={{ color: 'var(--lp-fg)' }}
                   >
-                    IA cria um quiz.
+                    Resolva o quiz diário.
                   </h3>
                   <p className="text-sm leading-relaxed mb-6" style={{ color: 'var(--lp-fg-dim)' }}>
-                    Conceitos extraídos, distratores gerados a partir de erros comuns. Outro
-                    desenvolvedor evolui com a sua discussão. Você ganha crédito quando eles
-                    aprendem.
+                    Questões revisadas ajudam a fixar conceitos sem transformar cada postagem em uma
+                    chamada externa. Acerte, ganhe XP e acompanhe sua evolução.
                   </p>
                 </div>
                 <div
@@ -356,23 +353,24 @@ export default function LandingHowItWorks() {
                     </span>
                   </div>
                   <h4 className="lp-font-display text-2xl mb-4 uppercase text-[var(--lp-fg)]">
-                    IA Generativa Ativa
+                    Biblioteca Curada
                   </h4>
                   <p className="text-xs leading-relaxed text-[var(--lp-fg-dim)]">
-                    Nossa IA não substitui o programador; ela desafia a comunidade. Os tópicos
-                    discutidos na resposta aceita viram perguntas dinâmicas e testes de fixação para
-                    outros membros.
+                    O quiz diário vem de uma biblioteca de questões técnicas mantida pela
+                    plataforma, com alternativas e respostas determinísticas.
                   </p>
                 </div>
                 <div
                   className="rounded p-3 lp-font-mono text-[9.5px] space-y-1"
                   style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid var(--lp-border)' }}
                 >
-                  <div className="text-[var(--lp-blue)]">[gpt] Lendo discussão aceita...</div>
-                  <div className="text-[var(--lp-gold)]">
-                    [gpt] Synthesizing O(N) distractors...
+                  <div className="text-[var(--lp-blue)]">
+                    [quiz] Selecionando questão revisada...
                   </div>
-                  <div className="text-[var(--lp-string)]">[gpt] Quiz publicado na arena!</div>
+                  <div className="text-[var(--lp-gold)]">
+                    [quiz] Validando quatro alternativas...
+                  </div>
+                  <div className="text-[var(--lp-string)]">[quiz] Desafio diário publicado!</div>
                   <div className="text-[var(--lp-muted)]">
                     [sys] Atribuindo XP aos respondentes.
                   </div>

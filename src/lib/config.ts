@@ -105,6 +105,14 @@ export const WANDBOX_RUN_TIMEOUT_MS = 10000;
 export const RATE_LIMIT_REGISTER = { limit: 5, window: '1 h' as const };
 export const RATE_LIMIT_CODE_RUN = { limit: 30, window: '1 m' as const };
 export const RATE_LIMIT_POST_CREATE = { limit: 10, window: '1 h' as const };
+export const RATE_LIMIT_AI_CHAT = { limit: 12, window: '1 h' as const };
+export const RATE_LIMIT_AI_REPOSITORY = { limit: 3, window: '1 h' as const };
+export const RATE_LIMIT_AI_GLOBAL = { limit: 200, window: '1 h' as const };
+export const RATE_LIMIT_AI_REPOSITORY_GLOBAL = { limit: 30, window: '1 h' as const };
+
+/** Maximum conversation context forwarded to an AI provider per request. */
+export const AI_CHAT_HISTORY_MESSAGES = 8;
+export const AI_CHAT_MESSAGE_CHARACTERS = 4_000;
 
 /* ── UI / Display ────────────────────────────────────────────── */
 

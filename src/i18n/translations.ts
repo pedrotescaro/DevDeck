@@ -55,7 +55,7 @@ export interface Translations {
         label: string;
         title: string;
         description: string;
-        aiGenerated: string;
+        sourceLabel: string;
         question: string;
         optionA: string;
         optionB: string;
@@ -232,19 +232,19 @@ export const translations: Record<Language, Translations> = {
           label: 'Fluxo completo',
           title: 'De um problema real ao XP verificado',
           description:
-            'Cada post inicia uma jornada clara — discussão, quiz contextual e progresso registrado no seu perfil.',
+            'Publique um problema, colabore na discussão e pratique com o quiz diário curado.',
           node1: 'Post real',
           node1Val: 'React + cache',
-          node2: 'Quiz de IA',
+          node2: 'Quiz diário',
           node2Val: '4 opções',
           node3: 'XP Verificado',
           node3Val: '+45 XP',
         },
         quizCard: {
-          label: 'Quiz adaptativo',
-          title: 'IA que testa o contexto',
-          description: 'As perguntas nascem do código publicado, nunca de exercícios genéricos.',
-          aiGenerated: 'Gerado por IA',
+          label: 'Quiz curado',
+          title: 'Prática técnica diária',
+          description: 'Questões revisadas testam fundamentos sem depender de geração por post.',
+          sourceLabel: 'Da biblioteca',
           question: 'Qual estratégia evita uma nova requisição enquanto os dados forem válidos?',
           optionA: 'Cache TTL',
           optionB: 'Nova requisição',
@@ -424,19 +424,19 @@ export const translations: Record<Language, Translations> = {
           label: 'Complete flow',
           title: 'From a real problem to verified XP',
           description:
-            'Every post starts a clear journey — discussion, contextual quiz, and progress recorded on your profile.',
+            'Publish a problem, collaborate in the discussion, and practice with the curated daily quiz.',
           node1: 'Real post',
           node1Val: 'React + cache',
-          node2: 'AI quiz',
+          node2: 'Daily quiz',
           node2Val: '4 choices',
           node3: 'Verified XP',
           node3Val: '+45 XP',
         },
         quizCard: {
-          label: 'Adaptive quiz',
-          title: 'AI that tests context',
-          description: 'Questions come from the published code, never generic exercises.',
-          aiGenerated: 'AI-generated',
+          label: 'Curated quiz',
+          title: 'Daily technical practice',
+          description: 'Reviewed questions test fundamentals without per-post generation.',
+          sourceLabel: 'From the library',
           question: 'Which strategy avoids another request while the data is still valid?',
           optionA: 'TTL cache',
           optionB: 'New request',

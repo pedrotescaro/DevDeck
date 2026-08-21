@@ -477,7 +477,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
     },
   ];
 
-  // Item do nav inferior mobile (reutilizado antes/depois do ASYNC IA, que fica no meio)
+  // Item compartilhado da navegação inferior mobile.
   const renderMobileNavItem = (item: (typeof mobileNavItems)[number]) => {
     const Icon = item.icon;
 
@@ -920,27 +920,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
         </header>
 
         <nav className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-dd-border bg-dd-bg/90 px-3 pb-[max(0.625rem,env(safe-area-inset-bottom))] pt-2.5 backdrop-blur-md sm:px-6">
-          {mobileNavItems.slice(0, 2).map(renderMobileNavItem)}
-
-          {/* ASYNC IA — no meio da barra inferior */}
-          <Link
-            href="/async"
-            className={`flex flex-col items-center justify-center p-1.5 transition-colors duration-150 ${
-              pathname.startsWith('/async') || pathname.startsWith('/ducky')
-                ? 'text-dd-text font-black'
-                : 'text-dd-muted hover:text-dd-text'
-            }`}
-            aria-label="ASYNC IA"
-            aria-current={
-              pathname.startsWith('/async') || pathname.startsWith('/ducky') ? 'page' : undefined
-            }
-          >
-            <div className="relative flex items-center justify-center">
-              <AsyncLogo width={22} height={22} className="h-5.5 w-5.5 object-contain" />
-            </div>
-          </Link>
-
-          {mobileNavItems.slice(2).map(renderMobileNavItem)}
+          {mobileNavItems.map(renderMobileNavItem)}
 
           {/* O feed já possui um compositor próprio; mantém o atalho flutuante para a raiz. */}
           {activeUser && pathname === '/' && (
@@ -1144,7 +1124,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-blue-500 text-lg">✓</span>
-                <span>Acesso exclusivo à ASYNC IA para tirar dúvidas</span>
+                <span>Assistente ASYNC com uso controlado para dúvidas pontuais</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-blue-500 text-lg">✓</span>

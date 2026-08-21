@@ -43,7 +43,7 @@ export function ScreenshotCarousel() {
       title: 'Duelos de Performance',
       url: 'stacklyst.com/duels',
       description:
-        'Batalhas de código. Desafie colegas e submeta a melhor implementação de algoritmos sob avaliação da IA.',
+        'Batalhas de código com desafios estruturados e testes objetivos. Resolva, compare resultados e evolua no ranking.',
     },
     {
       name: 'leaderboard',

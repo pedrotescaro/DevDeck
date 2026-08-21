@@ -3,8 +3,13 @@ import { logger } from '@/lib/logger';
 import { XpService } from './xp.service';
 import { findTrailQuestionById } from '@/lib/trailsData';
 import { NotificationService } from './notification.service';
-import { generateQuizAI, STACKLYST_QUIZ_PROMPT, type AIQuizResponse } from '@/lib/ai';
 import { FALLBACK_QUIZZES, XP_QUIZ_CORRECT } from '@/lib/config';
+
+type QuizContent = {
+  question: string;
+  options: string[];
+  correct_index: number;
+};
 
 export const QuizService = {
   async generateDaily(scheduledFor: Date) {
@@ -21,54 +26,36 @@ export const QuizService = {
       return existing;
     }
 
-    let quizData: AIQuizResponse | null = null;
-    let source: 'ai' | 'library' | 'null' = 'null';
+    let quizData: QuizContent | null = null;
+    let source: 'library' | 'built-in' = 'library';
 
-    // 2. Try AI Geração
-    try {
-      const systemPrompt = STACKLYST_QUIZ_PROMPT;
-      const userPrompt = `Gere um quiz de múltipla escolha sobre tecnologia de software, adequado para desenvolvedores de nível intermediário. O quiz deve ser sobre um dos temas: linguagens de programação, arquitetura de software, algoritmos, boas práticas, ferramentas de desenvolvimento ou paradigmas de programação. Retorne APENAS JSON válido, sem markdown, sem explicações extras. Schema: { "question": string, "options": [string, string, string, string], "correct_index": number (0-3), "explanation": string, "tags": [string] }`;
-
-      quizData = await generateQuizAI(systemPrompt, userPrompt);
-      if (quizData) {
-        source = 'ai';
-      }
-    } catch (err) {
-      logger.error('AI quiz generation completely failed', { error: String(err) });
-    }
-
-    // 3. Fallback to QuizLibrary
-    if (!quizData) {
-      const libraryCount = await prisma.quizLibrary.count();
-      if (libraryCount > 0) {
-        const randomIndex = Math.floor(Math.random() * libraryCount);
-        const fallbackItem = await prisma.quizLibrary.findMany({
-          skip: randomIndex,
-          take: 1,
-        });
-
-        if (fallbackItem.length > 0) {
-          const item = fallbackItem[0];
-          quizData = {
-            question: item.question,
-            options: item.options as string[],
-            correct_index: item.correct_index,
-            explanation: `Questão importada da biblioteca de fallback. Tags: ${item.tags.join(', ')}`,
-            tags: item.tags,
-          };
-          source = 'library';
-        }
-      }
-    }
-
-    if (!quizData) {
-      logger.error('Quiz library is empty and OpenAI failed. No quiz generated.', {
-        scheduledFor: todayStr.toISOString(),
+    // Daily quizzes come from curated content instead of a paid AI request.
+    const libraryCount = await prisma.quizLibrary.count();
+    if (libraryCount > 0) {
+      const randomIndex = Math.floor(Math.random() * libraryCount);
+      const libraryItems = await prisma.quizLibrary.findMany({
+        skip: randomIndex,
+        take: 1,
       });
-      return null;
+
+      if (libraryItems.length > 0) {
+        const item = libraryItems[0];
+        quizData = {
+          question: item.question,
+          options: item.options as string[],
+          correct_index: item.correct_index,
+        };
+      }
     }
 
-    // 4. Create the quiz
+    // Keep the daily experience available even before the curated library is seeded.
+    if (!quizData) {
+      const builtInQuizzes = Object.values(FALLBACK_QUIZZES);
+      const dayIndex = Math.floor(todayStr.getTime() / 86_400_000);
+      quizData = builtInQuizzes[Math.abs(dayIndex) % builtInQuizzes.length];
+      source = 'built-in';
+    }
+
     const createdQuiz = await prisma.quiz.create({
       data: {
         question: quizData.question,
@@ -188,66 +175,4 @@ export const QuizService = {
       xpResult,
     };
   },
-
-  async generateForPost(
-    postId: string,
-    language: string,
-    title: string,
-    body: string,
-    code?: string
-  ) {
-    let quizCreated = false;
-
-    try {
-      const systemPrompt = `${STACKLYST_QUIZ_PROMPT}\n\nGere o quiz com base exclusivamente na postagem enviada.`;
-      const userPrompt = `Gere um quiz em formato JSON bruto.
-Linguagem: ${language}
-Título: ${title}
-Conteúdo: ${body}
-Código: ${code || ''}
-
-Formato do JSON esperado:
-{
-  "question": "Pergunta do quiz",
-  "options": ["Opção A", "Opção B", "Opção C", "Opção D"],
-  "correct_index": 0
-}`;
-
-      const quizData = await generateQuizAI(systemPrompt, userPrompt);
-      if (quizData) {
-        await prisma.quiz.create({
-          data: {
-            post_id: postId,
-            question: quizData.question,
-            options: quizData.options,
-            correct_index: quizData.correct_index,
-          },
-        });
-        quizCreated = true;
-      }
-    } catch (aiError) {
-      logger.error('AI Post Quiz generation failed, falling back', {
-        error: String(aiError),
-      });
-    }
-
-    if (!quizCreated) {
-      const fallback = FALLBACK_QUIZZES[language] || {
-        question: `Com base na postagem sobre ${language}, qual seria o comportamento esperado?`,
-        options: ['Comportamento A', 'Comportamento B', 'Comportamento C', 'Comportamento D'],
-        correct_index: 0,
-      };
-
-      await prisma.quiz.create({
-        data: {
-          post_id: postId,
-          question: fallback.question,
-          options: fallback.options,
-          correct_index: fallback.correct_index,
-        },
-      });
-    }
-  },
 };
-
-// Removed fetchOpenAIQuiz as it is superseded by generateQuizAI

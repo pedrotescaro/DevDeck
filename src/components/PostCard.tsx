@@ -15,10 +15,8 @@ import {
   MoreHorizontal,
   Pencil,
   X,
-  Sparkles,
   Share2,
   Check,
-  Zap,
 } from 'lucide-react';
 import { LikeButton } from './motion/LikeButton';
 import { BookmarkButton } from './motion/BookmarkButton';
@@ -195,7 +193,7 @@ export function PostCard({
 
       if (!res.ok) {
         if (res.status === 401) {
-          window.location.href = '/login?reason=session_expired';
+          router.push('/login?reason=session_expired');
           return;
         }
         const errorData = await res.json().catch(() => null);
@@ -395,91 +393,6 @@ export function PostCard({
           {snippetMarkdown && !presentedPost.content.includes('```') && (
             <MarkdownRenderer content={snippetMarkdown} compact />
           )}
-
-          {/* Quiz challenge preview (Duolingo gamified style) */}
-          {post.quizzes &&
-            post.quizzes.length > 0 &&
-            (() => {
-              const hasCompleted = Boolean(
-                post.quizzes[0].attempts && post.quizzes[0].attempts.length > 0
-              );
-              return (
-                <div
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    router.push(`/post/${post.id}`);
-                  }}
-                  className={cn(
-                    'group/quiz mb-3 mt-3 flex cursor-pointer flex-col justify-between gap-3 rounded-2xl border-2 border-b-4 p-3 transition-all duration-200 sm:mb-3.5 sm:mt-3.5 sm:flex-row sm:items-center sm:gap-4 sm:p-4',
-                    hasCompleted
-                      ? 'border-emerald-500/40 bg-emerald-950/20 hover:border-emerald-400 hover:bg-emerald-950/30'
-                      : 'border-blue-500/40 bg-blue-950/20 hover:border-blue-400 hover:bg-blue-950/30'
-                  )}
-                >
-                  <div className="flex min-w-0 items-center gap-3">
-                    <div
-                      className={cn(
-                        'flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border-2 border-b-4 shadow-md transition-transform duration-200 group-hover/quiz:scale-105 sm:h-12 sm:w-12',
-                        hasCompleted
-                          ? 'border-emerald-600 bg-emerald-500 text-white'
-                          : 'border-blue-600 bg-blue-500 text-white'
-                      )}
-                    >
-                      {hasCompleted ? (
-                        <Check className="h-5 w-5 stroke-[3] sm:h-6 sm:w-6" />
-                      ) : (
-                        <Sparkles className="h-5 w-5 fill-white stroke-[2.5] sm:h-6 sm:w-6" />
-                      )}
-                    </div>
-                    <div className="text-left min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span
-                          className={cn(
-                            'text-[10px] font-black uppercase tracking-[0.12em] sm:tracking-widest',
-                            hasCompleted ? 'text-emerald-400' : 'text-blue-400'
-                          )}
-                        >
-                          {hasCompleted ? 'Desafio Concluído' : 'Quiz de Aprendizado'}
-                        </span>
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-[11px] font-black border-2 border-b-[3px] border-amber-500/40 bg-amber-500/15 text-amber-300">
-                          <Zap className="w-3.5 h-3.5 fill-amber-300 stroke-none" />
-                          +15 XP
-                        </span>
-                      </div>
-                      <h4 className="mt-0.5 text-xs font-black tracking-tight text-white sm:text-sm">
-                        {hasCompleted
-                          ? 'Você já completou este desafio!'
-                          : 'Teste seu conhecimento e ganhe XP!'}
-                      </h4>
-                    </div>
-                  </div>
-
-                  <Link
-                    href={`/post/${post.id}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className={cn(
-                      'inline-flex w-full shrink-0 items-center justify-center gap-2 self-stretch rounded-xl border-b-[4px] px-4 py-2.5 text-xs font-black uppercase tracking-wider text-white transition-all duration-150 active:translate-y-[4px] active:border-b-0 sm:w-auto sm:self-auto sm:px-5 cursor-pointer',
-                      hasCompleted
-                        ? 'border-emerald-700 bg-emerald-500 hover:bg-emerald-400 shadow-md shadow-emerald-500/20'
-                        : 'border-blue-700 bg-blue-500 hover:bg-blue-400 shadow-md shadow-blue-500/20'
-                    )}
-                  >
-                    {hasCompleted ? (
-                      <>
-                        <Check className="w-4 h-4 stroke-[3]" />
-                        <span>Ver Resultados</span>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4 fill-white" />
-                        <span>Resolver Quiz</span>
-                      </>
-                    )}
-                  </Link>
-                </div>
-              );
-            })()}
         </SensitiveContentGate>
 
         <PostLocation location={presentedPost.location} className="mb-3" />

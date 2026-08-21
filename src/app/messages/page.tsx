@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { AsyncLogo } from '@/components/AsyncLogo';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { EMOJI_CATEGORIES, insertAtCursor } from '@/lib/post-composer';
@@ -25,7 +24,6 @@ import {
   Copy,
   Info,
   Trash2,
-  Heart,
 } from 'lucide-react';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { getCurrentUser } from '@/lib/client/current-user';
@@ -130,7 +128,6 @@ export default function MessagesPage() {
   const [replyingToMessage, setReplyingToMessage] = useState<Message | null>(null);
   const [forwardingMessage, setForwardingMessage] = useState<Message | null>(null);
   const [infoMessage, setInfoMessage] = useState<Message | null>(null);
-  const [grokMessage, setGrokMessage] = useState<Message | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -1110,21 +1107,6 @@ export default function MessagesPage() {
                                       <button
                                         type="button"
                                         onClick={() => {
-                                          setGrokMessage(msg);
-                                          setActiveMenuMessageId(null);
-                                        }}
-                                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-dd-text hover:bg-dd-surface-hover/80 transition-colors text-left font-semibold cursor-pointer border-b border-dd-border/30 pb-2.5 mb-1"
-                                      >
-                                        <AsyncLogo
-                                          width={16}
-                                          height={16}
-                                          className="h-4 w-4 object-contain"
-                                        />
-                                        <span>Perguntar à ASYNC</span>
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => {
                                           setMessages((prev) =>
                                             prev.filter((m) => m.id !== msg.id)
                                           );
@@ -1694,78 +1676,6 @@ export default function MessagesPage() {
               className="mt-5 w-full bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-2 px-4 rounded-xl transition-colors cursor-pointer"
             >
               Fechar
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ASYNC AI Modal */}
-      {grokMessage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => setGrokMessage(null)}
-          />
-
-          <div className="relative w-full max-w-md bg-dd-surface border border-dd-border rounded-2xl p-5 shadow-2xl z-10 font-sans">
-            <div className="mb-4 flex items-center gap-3 rounded-xl border border-blue-500/15 bg-blue-500/[0.06] p-3 text-blue-400">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10">
-                <AsyncLogo width={28} height={28} className="h-7 w-7 object-contain" />
-              </div>
-              <div>
-                <h3 className="text-sm font-black text-dd-text">Análise da ASYNC IA</h3>
-                <p className="text-[9px] font-semibold text-dd-muted">
-                  Leitura inteligente da conversa
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-dd-bg/40 border border-dd-border/80 rounded-xl p-3.5 text-xs leading-relaxed space-y-3.5">
-              <div>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-blue-400 block mb-1">
-                  Mensagem analisada
-                </span>
-                <p className="text-dd-text font-semibold italic">
-                  &quot;{grokMessage.content.replace(/^⤷ Em resposta a @.+: "[\s\S]+"\n\n/, '')}
-                  &quot;
-                </p>
-              </div>
-
-              <div className="border-t border-dd-border/30 pt-3">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-dd-muted block mb-1">
-                  Sentimento / Tom
-                </span>
-                <p className="text-dd-text font-bold flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-ping" />
-                  Amigável e Colaborativo (98%)
-                </p>
-              </div>
-
-              <div>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-dd-muted block mb-1">
-                  Intenção do Desenvolvedor
-                </span>
-                <p className="text-dd-text font-semibold">
-                  O emissor quer fazer networking e colaboração técnica (pair programming).
-                </p>
-              </div>
-
-              <div>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-blue-400 block mb-1">
-                  Sugestão de Resposta
-                </span>
-                <p className="text-dd-text font-extrabold bg-blue-500/10 text-blue-400 p-2.5 rounded-lg border border-blue-500/25">
-                  &quot;Opa! Com certeza, bora marcar sim! Qual o melhor dia e horário para
-                  você?&quot;
-                </p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setGrokMessage(null)}
-              className="mt-5 w-full bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-2 px-4 rounded-xl transition-colors cursor-pointer"
-            >
-              Entendido
             </button>
           </div>
         </div>

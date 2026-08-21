@@ -45,7 +45,7 @@ Explore as especificações detalhadas do projeto e guias de infraestrutura:
     <td width="50%" valign="top">
       <h4>🎨 Design Twitter/X OLED Black & Electric Blue</h4>
       <ul>
-        <li>Interface super fluida com a identidade visual <b>Electric Blue (#0083fe)</b> e barra lateral completa (Página Inicial, Explorar, Trilhas, ASYNC IA, Notificações, Mensagens e Perfil).</li>
+        <li>Interface super fluida com a identidade visual <b>Electric Blue (#0083fe)</b> e navegação focada em Feed, Trilhas, Notificações, Mensagens e Perfil. O assistente ASYNC fica disponível como ferramenta opcional.</li>
         <li>Tema escuro nativo (OLED) para sessões de codificação noturnas saudáveis, configurável nas opções de Aparência.</li>
         <li>Visual mobile minimalista com bottom navigation bar.</li>
       </ul>
@@ -65,7 +65,7 @@ Explore as especificações detalhadas do projeto e guias de infraestrutura:
       <ul>
         <li>Trilhas de XP independentes para linguagens (TypeScript, Rust, Python, Go, C++, etc.).</li>
         <li>Contadores de ofensiva (Streaks) para incentivar a consistência diária.</li>
-        <li><b>Quiz Diário</b> gerado por inteligência artificial a partir de postagens populares.</li>
+        <li><b>Quiz Diário</b> selecionado de uma biblioteca de questões técnicas revisadas.</li>
       </ul>
     </td>
     <td width="50%" valign="top">

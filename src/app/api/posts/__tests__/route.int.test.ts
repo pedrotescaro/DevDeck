@@ -101,5 +101,6 @@ describe('POST /api/posts integration', () => {
     const json = await response.json();
     expect(json.post.id).toBe('post-123');
     expect(XpService.awardXP).toHaveBeenCalledWith('user-123', 'TS', 10);
+    expect(prisma.quiz.create).not.toHaveBeenCalled();
   });
 });

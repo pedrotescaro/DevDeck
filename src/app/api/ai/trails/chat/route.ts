@@ -1,11 +1,19 @@
 import { NextResponse } from 'next/server';
 import { apiHandler } from '@/lib/api-handler';
 import { generateChatAI, STACKLYST_TUTOR_PROMPT } from '@/lib/ai';
+import { requireAuth } from '@/lib/auth';
+import { rateLimit } from '@/lib/ratelimit';
+import {
+  AI_CHAT_HISTORY_MESSAGES,
+  AI_CHAT_MESSAGE_CHARACTERS,
+  RATE_LIMIT_AI_CHAT,
+  RATE_LIMIT_AI_GLOBAL,
+} from '@/lib/config';
 import { z } from 'zod';
 
 const historyMessageSchema = z.object({
   role: z.enum(['user', 'assistant']),
-  content: z.string().min(1).max(12_000),
+  content: z.string().min(1).max(AI_CHAT_MESSAGE_CHARACTERS),
 });
 
 const learnContextSchema = z.object({
@@ -42,39 +50,49 @@ const trailsChatSchema = z.discriminatedUnion('stage', [
     levelTitle: z.string().min(1).max(100),
     stage: z.literal('learn'),
     currentContext: learnContextSchema,
-    history: z.array(historyMessageSchema).min(1).max(30),
+    history: z.array(historyMessageSchema).min(1).max(AI_CHAT_HISTORY_MESSAGES),
   }),
   z.object({
     language: z.string().min(1).max(50),
     levelTitle: z.string().min(1).max(100),
     stage: z.enum(['practice', 'challenge']),
     currentContext: exerciseContextSchema,
-    history: z.array(historyMessageSchema).min(1).max(30),
+    history: z.array(historyMessageSchema).min(1).max(AI_CHAT_HISTORY_MESSAGES),
   }),
   z.object({
     language: z.string().min(1).max(50),
     levelTitle: z.string().min(1).max(100),
     stage: z.literal('checkpoint-review'),
     currentContext: checkpointReviewContextSchema,
-    history: z.array(historyMessageSchema).min(1).max(30),
+    history: z.array(historyMessageSchema).min(1).max(AI_CHAT_HISTORY_MESSAGES),
   }),
   z.object({
     language: z.string().min(1).max(50),
     levelTitle: z.string().min(1).max(100),
     stage: z.literal('checkpoint-challenge'),
     currentContext: checkpointChallengeContextSchema,
-    history: z.array(historyMessageSchema).min(1).max(30),
+    history: z.array(historyMessageSchema).min(1).max(AI_CHAT_HISTORY_MESSAGES),
   }),
   z.object({
     language: z.string().min(1).max(50),
     levelTitle: z.string().min(1).max(100),
     stage: z.literal('checkpoint-summary'),
     currentContext: checkpointSummaryContextSchema,
-    history: z.array(historyMessageSchema).min(1).max(30),
+    history: z.array(historyMessageSchema).min(1).max(AI_CHAT_HISTORY_MESSAGES),
   }),
 ]);
 
 export const POST = apiHandler(async (req) => {
+  const user = await requireAuth();
+  await rateLimit(`ai-assistant:${user.id}`, {
+    ...RATE_LIMIT_AI_CHAT,
+    endpoint: '/api/ai/trails/chat',
+  });
+  await rateLimit('ai-assistant:global', {
+    ...RATE_LIMIT_AI_GLOBAL,
+    endpoint: '/api/ai/trails/chat',
+  });
+
   const body: unknown = await req.json();
   const { language, levelTitle, stage, currentContext, history } = trailsChatSchema.parse(body);
 
@@ -138,7 +156,11 @@ Não entregue a solução completa imediatamente. Analise o raciocínio e o cód
 O usuário está no resumo do checkpoint da unidade ${currentContext.checkpointUnit}. Ajude a consolidar o aprendizado, revisar conceitos e planejar os próximos passos.`;
   }
 
-  const responseText = await generateChatAI(systemPrompt, history);
+  const boundedHistory = history.slice(-AI_CHAT_HISTORY_MESSAGES).map((message) => ({
+    ...message,
+    content: message.content.slice(0, AI_CHAT_MESSAGE_CHARACTERS),
+  }));
+  const responseText = await generateChatAI(systemPrompt, boundedHistory);
 
   if (!responseText) {
     return NextResponse.json({

@@ -6,6 +6,14 @@ import {
   type ChatContentPart,
 } from '@/lib/ai';
 import { logger } from '@/lib/logger';
+import { requireAuth } from '@/lib/auth';
+import { rateLimit } from '@/lib/ratelimit';
+import {
+  AI_CHAT_HISTORY_MESSAGES,
+  AI_CHAT_MESSAGE_CHARACTERS,
+  RATE_LIMIT_AI_CHAT,
+  RATE_LIMIT_AI_GLOBAL,
+} from '@/lib/config';
 import { z } from 'zod';
 
 const contentPartSchema = z.discriminatedUnion('type', [
@@ -37,6 +45,16 @@ function isAbortError(error: unknown): boolean {
 }
 
 export const POST = apiHandler(async (req) => {
+  const user = await requireAuth();
+  await rateLimit(`ai-assistant:${user.id}`, {
+    ...RATE_LIMIT_AI_CHAT,
+    endpoint: '/api/ai/ducky/chat',
+  });
+  await rateLimit('ai-assistant:global', {
+    ...RATE_LIMIT_AI_GLOBAL,
+    endpoint: '/api/ai/ducky/chat',
+  });
+
   const body = await req.json();
   const { language, history } = duckyChatSchema.parse(body);
 
@@ -55,10 +73,16 @@ Diretrizes de comportamento:
 
   // Mapear o histórico para os papéis aceitos ('user' / 'assistant'), preservando
   // conteúdo multimodal (texto + imagens).
-  const mappedHistory = history.map((h) => {
+  const mappedHistory = history.slice(-AI_CHAT_HISTORY_MESSAGES).map((h) => {
     const role = (h.role === 'user' ? 'user' : 'assistant') as 'user' | 'assistant';
     const content: string | ChatContentPart[] =
-      typeof h.content === 'string' ? h.content : (h.content as ChatContentPart[]);
+      typeof h.content === 'string'
+        ? h.content.slice(0, AI_CHAT_MESSAGE_CHARACTERS)
+        : (h.content.map((part) =>
+            part.type === 'text'
+              ? { ...part, text: part.text.slice(0, AI_CHAT_MESSAGE_CHARACTERS) }
+              : part
+          ) as ChatContentPart[]);
     return { role, content };
   });
 

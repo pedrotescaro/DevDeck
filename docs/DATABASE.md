@@ -49,7 +49,7 @@ erDiagram
 
 ### `QuizLibrary`
 
-- Library of pre-configured tech quizzes used as fallbacks for daily quiz generation.
+- Curated library of pre-configured tech quizzes used as the primary source for the daily quiz.
 - **Fields:** `id` (UUID), `question` (Text), `options` (JSON Array), `correct_index` (Int), `tags` (Text Array).
 
 ---

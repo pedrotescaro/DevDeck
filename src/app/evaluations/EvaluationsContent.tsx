@@ -1,18 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  Code,
-  Sparkles,
-  Award,
-  CheckCircle,
-  Clock,
-  Swords,
-  ChevronRight,
-  ShieldCheck,
-  AlertCircle,
-  FileCode,
-} from 'lucide-react';
+import { CheckCircle, Clock, ShieldCheck, FileCode } from 'lucide-react';
 import { Sidebar } from '@/components/Sidebar';
 
 interface DuelSolutionItem {
@@ -134,8 +123,8 @@ export function EvaluationsContent({ user }: { user: any }) {
               Central de Avaliação Técnica
             </h1>
             <p className="text-sm text-dd-muted font-medium mt-1">
-              Revise o código de participantes em duelos e processos seletivos. A IA atua como
-              assistente e você tem a decisão final.
+              Revise o código de participantes em duelos e processos seletivos com critérios
+              objetivos e decisão humana.
             </p>
           </div>
         </div>
@@ -237,19 +226,6 @@ export function EvaluationsContent({ user }: { user: any }) {
                     {p2Solution?.code || '// Nenhum código enviado ainda'}
                   </pre>
                 </div>
-              </div>
-
-              {/* AI Diagnostic Assist Card */}
-              <div className="p-5 rounded-2xl bg-purple-500/10 border border-purple-500/25 space-y-2">
-                <div className="flex items-center gap-2 text-purple-400 font-bold text-xs">
-                  <Sparkles className="w-4 h-4" />
-                  <span>Diagnóstico Assistido por IA</span>
-                </div>
-                <p className="text-xs text-dd-text/90 font-medium">
-                  <strong>Complexidade Estimada:</strong> Tempo O(N), Espaço O(1). Ambos os
-                  jogadores cobriram os casos básicos de teste. Jogador 1 utilizou métodos mais
-                  idiomáticos.
-                </p>
               </div>
 
               {/* Human Review Form */}

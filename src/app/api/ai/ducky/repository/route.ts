@@ -3,6 +3,13 @@ import { apiHandler } from '@/lib/api-handler';
 import { getPublicAIError, STACKLYST_CODE_REVIEW_PROMPT, streamChatAI } from '@/lib/ai';
 import { logger } from '@/lib/logger';
 import { gatherRepoAnalysisInput, parseRepoUrl, GitHubError, type RepoContext } from '@/lib/github';
+import { requireAuth } from '@/lib/auth';
+import { rateLimit } from '@/lib/ratelimit';
+import {
+  AI_CHAT_MESSAGE_CHARACTERS,
+  RATE_LIMIT_AI_REPOSITORY,
+  RATE_LIMIT_AI_REPOSITORY_GLOBAL,
+} from '@/lib/config';
 import { z } from 'zod';
 
 function isAbortError(error: unknown): boolean {
@@ -63,6 +70,16 @@ function buildRepoContextBlock(input: {
 }
 
 export const POST = apiHandler(async (req) => {
+  const user = await requireAuth();
+  await rateLimit(`ai-repository:${user.id}`, {
+    ...RATE_LIMIT_AI_REPOSITORY,
+    endpoint: '/api/ai/ducky/repository',
+  });
+  await rateLimit('ai-repository:global', {
+    ...RATE_LIMIT_AI_REPOSITORY_GLOBAL,
+    endpoint: '/api/ai/ducky/repository',
+  });
+
   const body = await req.json();
   const { url, language, history } = repoSchema.parse(body);
 
@@ -119,11 +136,11 @@ ${language ? `4. Quando relevante, adapte comentários à trilha ativa do usuár
       role: 'assistant',
       content: 'Contexto do repositório recebido e indexado. Pode perguntar!',
     });
-    for (const h of history) {
+    for (const h of history.slice(-6)) {
       if (!h.content || !h.content.trim()) continue;
       messages.push({
         role: h.role === 'user' ? 'user' : 'assistant',
-        content: h.content,
+        content: h.content.slice(0, AI_CHAT_MESSAGE_CHARACTERS),
       });
     }
   } else {

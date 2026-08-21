@@ -198,7 +198,7 @@ export function HeroMockup() {
               </pre>
             </div>
 
-            {/* AI Generated Quiz Widget */}
+            {/* Curated quiz widget */}
             <div className="border border-blue-500/20 bg-blue-500/[0.02] rounded-xl p-3.5 space-y-3 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-xl pointer-events-none" />
 
@@ -206,7 +206,7 @@ export function HeroMockup() {
                 <div className="flex items-center gap-1.5 text-blue-400">
                   <Sparkles className="w-3.5 h-3.5" />
                   <span className="text-[10px] font-bold uppercase tracking-wider">
-                    Quiz Gerado por IA
+                    Quiz da Comunidade
                   </span>
                 </div>
                 <span className="text-[9px] text-blue-400/80 font-bold bg-blue-500/10 px-1.5 py-0.5 rounded">

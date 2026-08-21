@@ -34,9 +34,9 @@ export function DuelDetailContent({ user, initialDuel }: DuelDetailContentProps)
   const [timeLeft, setTimeLeft] = useState<number>(300); // 5 minutos
   const [soundEnabled, setSoundEnabled] = useState(true);
 
-  // Match or associate a problem from presets, or parse AI-generated JSON
+  // Match a preset problem or parse a generated problem definition.
   const problem: DuelProblem = useMemo(() => {
-    // 1. Try to parse AI-generated problem from problem_body JSON
+    // 1. Try to parse a generated problem from problem_body JSON.
     const aiProblem = parseProblemFromJson(initialDuel.problem_body);
     if (aiProblem) return aiProblem;
 

@@ -13,7 +13,6 @@ import {
   Play,
   Flame,
   Wand2,
-  Bot,
   CheckCircle2,
   Loader2,
 } from 'lucide-react';
@@ -61,13 +60,15 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
   const [respondingToRequest, setRespondingToRequest] = useState(false);
   const [cooldownAlert, setCooldownAlert] = useState<string | null>(null);
 
-  // AI generation state
-  const [showAIConfig, setShowAIConfig] = useState(false);
-  const [aiDifficulty, setAIDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
-  const [aiTopic, setAITopic] = useState('');
+  // Procedural challenge generator state
+  const [showGeneratorConfig, setShowGeneratorConfig] = useState(false);
+  const [generatorDifficulty, setGeneratorDifficulty] = useState<'easy' | 'medium' | 'hard'>(
+    'medium'
+  );
+  const [generatorTopic, setGeneratorTopic] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedProblem, setGeneratedProblem] = useState<DuelProblem | null>(null);
-  const [aiError, setAIError] = useState<string | null>(null);
+  const [generatorError, setGeneratorError] = useState<string | null>(null);
 
   // Poll for incoming duel requests
   useEffect(() => {
@@ -88,7 +89,7 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
             setIncomingRequest(null);
           }
         }
-      } catch (err) {
+      } catch {
         // ignore
       }
     };
@@ -194,7 +195,7 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
     setCreating(true);
 
     try {
-      // If we have an AI-generated problem, store the full JSON in problem_body
+      // Generated problems carry the full executable definition in problem_body.
       const problemBody = generatedProblem ? JSON.stringify(generatedProblem) : duelBody;
 
       const res = await fetch('/api/duels', {
@@ -213,7 +214,7 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
         setDuelBody('');
         setGeneratedProblem(null);
         setShowDuelForm(false);
-        setShowAIConfig(false);
+        setShowGeneratorConfig(false);
         if (data.duel?.id) {
           router.push(`/duels/${data.duel.id}`);
           return;
@@ -227,9 +228,9 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
     }
   };
 
-  const handleGenerateAI = async () => {
+  const handleGenerateProblem = async () => {
     setIsGenerating(true);
-    setAIError(null);
+    setGeneratorError(null);
     setGeneratedProblem(null);
 
     try {
@@ -238,14 +239,14 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           language: duelLanguage,
-          difficulty: aiDifficulty,
-          topic: aiTopic.trim() || undefined,
+          difficulty: generatorDifficulty,
+          topic: generatorTopic.trim() || undefined,
         }),
       });
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setAIError(data.error || 'Erro ao gerar desafio. Tente novamente.');
+        setGeneratorError(data.error || 'Erro ao gerar desafio. Tente novamente.');
         return;
       }
 
@@ -256,8 +257,8 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
         setDuelBody(data.problem.description);
       }
     } catch (err) {
-      console.error('AI generation error:', err);
-      setAIError('Erro de conexão. Verifique sua internet e tente novamente.');
+      console.error('Challenge generation error:', err);
+      setGeneratorError('Erro de conexão. Verifique sua internet e tente novamente.');
     } finally {
       setIsGenerating(false);
     }
@@ -441,24 +442,24 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
                   <button
                     type="button"
                     onClick={() => {
-                      setShowAIConfig(!showAIConfig);
+                      setShowGeneratorConfig(!showGeneratorConfig);
                       setGeneratedProblem(null);
-                      setAIError(null);
+                      setGeneratorError(null);
                     }}
                     className={cn(
                       'dd-touch dd-focus-ring flex items-center gap-1.5 rounded-xl border-2 border-b-[3px] px-3 py-1.5 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer',
-                      showAIConfig
+                      showGeneratorConfig
                         ? 'border-amber-500 border-b-amber-700 bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
                         : 'border-amber-500/40 border-b-amber-600 bg-amber-500/15 text-amber-300 hover:bg-amber-500/25'
                     )}
                   >
                     <Wand2 className="w-3 h-3" />
-                    {showAIConfig ? 'Modo Manual' : 'Gerar com IA'}
+                    {showGeneratorConfig ? 'Modo Manual' : 'Gerador Automático'}
                   </button>
                 </div>
 
-                {/* AI Generation Config Panel */}
-                {showAIConfig ? (
+                {/* Procedural generation config panel */}
+                {showGeneratorConfig ? (
                   <div className="space-y-4">
                     {/* Language + Difficulty Row */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -492,10 +493,10 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
                             <button
                               key={d.key}
                               type="button"
-                              onClick={() => setAIDifficulty(d.key)}
+                              onClick={() => setGeneratorDifficulty(d.key)}
                               className={cn(
                                 'dd-touch flex-1 rounded-xl border-2 border-b-[3px] px-2 py-1.5 text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer',
-                                aiDifficulty === d.key
+                                generatorDifficulty === d.key
                                   ? d.color === 'emerald'
                                     ? 'border-emerald-500 border-b-emerald-700 bg-emerald-500 text-white shadow-md'
                                     : d.color === 'amber'
@@ -518,8 +519,8 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
                       </label>
                       <input
                         type="text"
-                        value={aiTopic}
-                        onChange={(e) => setAITopic(e.target.value)}
+                        value={generatorTopic}
+                        onChange={(e) => setGeneratorTopic(e.target.value)}
                         placeholder="Ex: Árvores binárias, Strings, Recursão, Matrizes..."
                         className="w-full text-xs rounded-xl border border-dd-border bg-dd-bg px-3.5 py-2.5 text-white placeholder-slate-600 focus:border-amber-500 focus:outline-none"
                       />
@@ -528,27 +529,27 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
                     {/* Generate Button */}
                     <button
                       type="button"
-                      onClick={handleGenerateAI}
+                      onClick={handleGenerateProblem}
                       disabled={isGenerating}
                       className="dd-touch dd-focus-ring w-full flex items-center justify-center gap-2.5 rounded-2xl border-2 border-b-4 border-amber-600 border-b-amber-800 bg-amber-500 hover:bg-amber-400 py-3.5 text-xs font-black uppercase tracking-wider text-slate-950 shadow-lg shadow-amber-500/20 transition-all hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2 cursor-pointer disabled:opacity-60"
                     >
                       {isGenerating ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin" />
-                          Gerando Desafio com IA...
+                          Montando Desafio...
                         </>
                       ) : (
                         <>
-                          <Bot className="w-4 h-4" />
-                          Gerar Desafio com IA
+                          <Wand2 className="w-4 h-4" />
+                          Montar Desafio
                         </>
                       )}
                     </button>
 
-                    {/* AI Error */}
-                    {aiError && (
+                    {/* Generator error */}
+                    {generatorError && (
                       <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs text-rose-300 font-semibold">
-                        {aiError}
+                        {generatorError}
                       </div>
                     )}
 
@@ -617,7 +618,7 @@ export function DuelsContent({ user, initialDuels }: DuelsContentProps) {
                         <div className="flex gap-2">
                           <button
                             type="button"
-                            onClick={handleGenerateAI}
+                            onClick={handleGenerateProblem}
                             disabled={isGenerating}
                             className="dd-touch dd-focus-ring flex-1 flex items-center justify-center gap-1.5 rounded-xl border-2 border-b-[3px] border-slate-600 border-b-slate-800 bg-slate-700 hover:bg-slate-600 px-4 py-2.5 text-xs font-black uppercase tracking-wider text-white transition-all cursor-pointer disabled:opacity-50"
                           >

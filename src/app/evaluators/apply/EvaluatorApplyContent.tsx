@@ -1,17 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  Award,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Sparkles,
-  ArrowRight,
-  ShieldCheck,
-  BookOpen,
-  Zap,
-} from 'lucide-react';
+import { CheckCircle, XCircle, Clock, ArrowRight, ShieldCheck, BookOpen, Zap } from 'lucide-react';
 import { Sidebar } from '@/components/Sidebar';
 
 interface EligibilityData {
@@ -29,7 +19,6 @@ interface EligibilityData {
 
 export function EvaluatorApplyContent({ user }: { user: any }) {
   const [eligibility, setEligibility] = useState<EligibilityData | null>(null);
-  const [loading, setLoading] = useState(true);
   const [motivation, setMotivation] = useState('');
   const [selectedTechs, setSelectedTechs] = useState<string[]>(['TypeScript', 'JavaScript']);
   const [submitting, setSubmitting] = useState(false);
@@ -54,7 +43,6 @@ export function EvaluatorApplyContent({ user }: { user: any }) {
   }, []);
 
   const loadEligibility = async () => {
-    setLoading(true);
     try {
       const res = await fetch('/api/evaluators/eligibility');
       if (res.ok) {
@@ -62,8 +50,6 @@ export function EvaluatorApplyContent({ user }: { user: any }) {
       }
     } catch (err) {
       console.error(err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -121,8 +107,8 @@ export function EvaluatorApplyContent({ user }: { user: any }) {
             Torne-se um Avaliador de Código
           </h1>
           <p className="text-sm text-dd-muted font-medium mt-1">
-            Ajude a comunidade avaliando soluções técnicas em duelos e processos seletivos. A IA
-            auxilia, mas a sua expertise garante a validação humana.
+            Ajude a comunidade avaliando soluções técnicas em duelos e processos seletivos. Sua
+            expertise e critérios objetivos garantem a validação humana.
           </p>
         </div>
 

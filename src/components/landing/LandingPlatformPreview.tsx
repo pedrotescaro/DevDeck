@@ -10,9 +10,9 @@ const SCREENSHOTS = [
     label: 'Feed de Dúvidas',
     icon: Home,
     src: '/screenshots/feed_dark.png',
-    title: 'Onde dúvidas reais viram quizzes',
+    title: 'Onde dúvidas reais encontram respostas',
     description:
-      'Um feed inteligente onde cada dúvida postada gera automaticamente um quiz por IA. Resolva problemas de outros desenvolvedores, acerte o quiz e acumule XP em tempo real.',
+      'Um feed técnico para publicar código, trocar soluções e reconhecer boas contribuições. Quizzes ficam em uma experiência curada e separada do fluxo de cada post.',
   },
   {
     id: 'trails',

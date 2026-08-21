@@ -27,7 +27,7 @@ Create your environment variables on Vercel. Ensure to supply:
 | `SUPABASE_SECRET_KEY`                  | Supabase server-only key (secure API access)       | `sb_secret_...`                                        |
 | `UPSTASH_REDIS_REST_URL`               | Upstash Redis REST endpoint for rate limiting      | `https://xxxx.upstash.io`                              |
 | `UPSTASH_REDIS_REST_TOKEN`             | Upstash Redis authorization token                  | `<redis_token>`                                        |
-| `OPENAI_API_KEY`                       | API Key for daily quiz generation                  | `sk-proj-xxxx`                                         |
+| `OPENAI_API_KEY`                       | Optional API key for the on-demand ASYNC assistant | `sk-proj-xxxx`                                         |
 | `CRON_SECRET`                          | Authorization header token for daily cron requests | `super-secret-guid`                                    |
 | `SEED_DEFAULT_PASSWORD`                | Fallback user password for database seeding        | `ChangeMe123!`                                         |
 
@@ -40,6 +40,10 @@ The runtime reads `DATABASE_URL` first, while Prisma CLI commands read
 mode (port 5432): serverless instances can exhaust its client limit. Use the
 transaction pooler on port 6543 and keep `DATABASE_POOL_MAX=1` unless capacity
 testing justifies a larger value.
+
+Configure Upstash in production to enforce the shared ASYNC usage ceiling across
+all serverless instances. Without it, the application falls back to an in-memory
+limiter that only protects each running instance.
 
 ---
 
@@ -75,9 +79,9 @@ npx prisma db seed
 
 ---
 
-## 4. Automating Daily Quiz Generation
+## 4. Automating the Curated Daily Quiz
 
-To generate a new tech quiz every day:
+To publish a new quiz from `QuizLibrary` every day without an AI request:
 
 1. The endpoint `/api/admin/quiz/generate-daily` processes daily generation requests.
 2. In production, configure a cron scheduler (such as Vercel Cron Jobs, GitHub Actions, or Upstash QStash) to send a POST request:

@@ -78,8 +78,8 @@ export default function LandingCTA({ initialUser }: LandingCTAProps) {
         </h2>
 
         <p className="lp-font-heading text-base md:text-lg text-[var(--lp-fg-dim)] max-w-xl mb-10 leading-relaxed">
-          Os quizzes diários de IA já estão rodando e o leaderboard reinicia em breve. Não fique
-          assistindo de fora.
+          O quiz diário, as trilhas e o leaderboard já estão rodando. Entre na comunidade e
+          transforme prática consistente em progresso visível.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-5 w-full sm:w-auto">

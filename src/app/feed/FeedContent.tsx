@@ -1049,11 +1049,6 @@ export function FeedContent({
     }
   }, [searchQuery]);
 
-  const filteredCommunityQuizPosts = useMemo(
-    () => posts.filter((post) => post.quizzes && post.quizzes.length > 0),
-    [posts]
-  );
-
   const handleReactionSelect = async (postId: string, reaction?: string | null) => {
     const hasUpvote = votes[postId]?.userVote === 'up';
 
@@ -1645,7 +1640,7 @@ export function FeedContent({
                   🧩 Stacklyst Quizzes
                 </h2>
                 <p className="text-dd-muted text-xs mt-1">
-                  Responda aos quizzes diários e da comunidade para ganhar bônus de +15 XP!
+                  Responda ao quiz diário curado para ganhar bônus de +15 XP.
                 </p>
               </div>
 
@@ -1688,76 +1683,6 @@ export function FeedContent({
                   />
                 </div>
               )}
-
-              {/* Quizzes da Comunidade */}
-              <div className="space-y-4">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-dd-muted px-1">
-                  Quizzes da Comunidade
-                </h3>
-
-                <div className="grid grid-cols-1 gap-6">
-                  {filteredCommunityQuizPosts.length === 0 ? (
-                    <EmptyState
-                      type="generic"
-                      className="rounded-xl border border-dd-border bg-dd-surface/10"
-                    />
-                  ) : (
-                    filteredCommunityQuizPosts.map((post) => {
-                      const quiz = post.quizzes[0];
-                      const attempt = quiz.attempts?.find((a: any) => a.user_id === initialUser.id);
-                      return (
-                        <div
-                          key={quiz.id}
-                          className="rounded-xl border border-dd-border bg-dd-surface p-5 backdrop-blur-sm space-y-4"
-                        >
-                          <div className="flex justify-between items-center border-b border-dd-border pb-3">
-                            <span className="text-[10px] text-dd-muted font-medium">
-                              Post por @{post.author.username}
-                            </span>
-                            {post.language && <LanguageTag language={post.language} size="sm" />}
-                          </div>
-                          <QuizWidget
-                            quiz={quiz}
-                            postId={post.id}
-                            attempted={!!attempt}
-                            userAnswer={attempt?.selected_index}
-                            onAttemptSuccess={(selectedIndex: number, isCorrect: boolean) => {
-                              setPosts((prev) =>
-                                prev.map((p) => {
-                                  if (p.quizzes && p.quizzes[0]?.id === quiz.id) {
-                                    const updatedAttempts = [
-                                      ...(p.quizzes[0].attempts || []),
-                                      {
-                                        user_id: initialUser.id,
-                                        quiz_id: quiz.id,
-                                        selected_index: selectedIndex,
-                                        is_correct: isCorrect,
-                                        xp_earned: isCorrect ? 15 : 0,
-                                      },
-                                    ];
-                                    const updatedQuizzes = [
-                                      {
-                                        ...p.quizzes[0],
-                                        attempts: updatedAttempts,
-                                      },
-                                    ];
-                                    return { ...p, quizzes: updatedQuizzes };
-                                  }
-                                  return p;
-                                })
-                              );
-                              refetchWeeklyActivity();
-                              if (isCorrect) {
-                                showXPToast(15, post.language || 'Global');
-                              }
-                            }}
-                          />
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
             </motion.div>
           )}
 

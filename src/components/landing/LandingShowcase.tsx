@@ -8,7 +8,6 @@ import {
   Bell,
   Bookmark,
   BookOpen,
-  BrainCircuit,
   Calendar,
   Check,
   CheckCircle2,
@@ -100,7 +99,7 @@ function FlowPreview() {
       value: t.showcase.howItWorks.flowCard.node1Val,
     },
     {
-      icon: BrainCircuit,
+      icon: BookOpen,
       label: t.showcase.howItWorks.flowCard.node2,
       value: t.showcase.howItWorks.flowCard.node2Val,
     },
@@ -146,9 +145,9 @@ function QuizPreview() {
     <div className="absolute inset-x-5 top-5 rounded-2xl border border-white/10 bg-black/30 p-5">
       <div className="mb-4 flex items-center justify-between">
         <span className="rounded-full bg-violet-400/10 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-violet-300">
-          {t.showcase.howItWorks.quizCard.aiGenerated}
+          {t.showcase.howItWorks.quizCard.sourceLabel}
         </span>
-        <BrainCircuit size={18} className="text-violet-300" />
+        <BookOpen size={18} className="text-violet-300" />
       </div>
       <p className="text-sm font-medium leading-6 text-slate-200">
         {t.showcase.howItWorks.quizCard.question}
@@ -313,7 +312,6 @@ function PlatformMockup() {
   const [userPosts, setUserPosts] = useState<Array<{ id: number; text: string; time: string }>>([]);
   const [codeOutput, setCodeOutput] = useState<string | null>(null);
   const [isRunningCode, setIsRunningCode] = useState(false);
-  const [showQuizResults, setShowQuizResults] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const sidebarNavItems = [
@@ -611,43 +609,6 @@ function PlatformMockup() {
                   </div>
                 )}
               </div>
-
-              {/* Interactive 3D Gamified Challenge Widget (Duolingo-style Green Card) */}
-              <div className="rounded-[24px] border-2 border-b-4 border-emerald-500/80 border-b-emerald-700 bg-emerald-950/20 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl shadow-emerald-500/10">
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="flex items-center justify-center size-12 rounded-2xl border-2 border-b-4 border-emerald-600 bg-emerald-500 text-white shrink-0 shadow-md">
-                    <Check size={24} className="stroke-[3.5]" />
-                  </div>
-                  <div className="text-left min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[11px] font-black uppercase tracking-wider text-emerald-400">
-                        DESAFIO CONCLUÍDO
-                      </span>
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-[10px] font-black border-2 border-b-[3px] border-amber-500/40 bg-amber-500/20 text-amber-300">
-                        <Zap size={12} className="fill-amber-300 stroke-none" />
-                        +15 XP
-                      </span>
-                    </div>
-                    <h5 className="font-black text-white text-sm sm:text-base mt-1">
-                      Você já completou este desafio!
-                    </h5>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowQuizResults(!showQuizResults)}
-                  className="px-5 py-2.5 rounded-xl border-2 border-b-4 border-emerald-600 border-b-emerald-800 bg-emerald-500 hover:bg-emerald-400 active:border-b-2 active:translate-y-0.5 text-white font-black text-xs uppercase tracking-wider transition-all self-start sm:self-auto cursor-pointer shadow-md shadow-emerald-500/20 flex items-center gap-1.5"
-                >
-                  <Check size={16} className="stroke-[3.5]" />
-                  <span>VER RESULTADOS</span>
-                </button>
-              </div>
-
-              {showQuizResults && (
-                <div className="rounded-2xl border-2 border-b-4 border-emerald-600 bg-emerald-500/15 p-4 text-xs text-emerald-200 font-bold flex items-center gap-2.5 animate-slide-up">
-                  <Sparkles size={18} className="text-emerald-400 shrink-0" />
-                  <span>✓ 100% dos testes passaram com sucesso! Solução executada em 18ms.</span>
-                </div>
-              )}
 
               {/* Action Bar */}
               <div className="flex items-center justify-between text-slate-500 text-xs pt-1 px-1">
@@ -1176,7 +1137,7 @@ export default function LandingShowcase({
             />
             <FeatureCard
               className="lg:col-span-2"
-              icon={BrainCircuit}
+              icon={BookOpen}
               label={t.showcase.howItWorks.quizCard.label}
               title={t.showcase.howItWorks.quizCard.title}
               description={t.showcase.howItWorks.quizCard.description}

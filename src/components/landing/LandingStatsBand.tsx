@@ -12,7 +12,7 @@ interface StatItem {
 const STATS: StatItem[] = [
   { value: 18420, label: 'Devs ativos na arena', color: 'var(--lp-fg)' },
   { value: 47200, label: 'Dúvidas resolvidas', color: 'var(--lp-accent)' },
-  { value: 124800, label: 'Quizzes gerados por IA', color: 'var(--lp-fg)' },
+  { value: 124800, label: 'Quizzes respondidos', color: 'var(--lp-fg)' },
   { value: 3120, label: 'Duelos de código lutados', color: 'var(--lp-fg)' },
 ];
 

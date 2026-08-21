@@ -4,12 +4,6 @@ import { CreatePostInput } from '@/lib/validators';
 import { encodeCursor, buildCursorWhere } from '@/lib/pagination';
 import { XpService } from './xp.service';
 import { logger } from '@/lib/logger';
-import { QuizService } from './quiz.service';
-
-function extractCodeFromBody(body: string): string | undefined {
-  const match = body.match(/```[^\n]*\n([\s\S]*?)```/);
-  return match?.[1]?.trim() || undefined;
-}
 
 export const PostService = {
   async create(userId: string, data: CreatePostInput) {
@@ -77,22 +71,6 @@ export const PostService = {
 
       return { post, xpResult };
     });
-
-    // 4. Generate Quiz (non-blocking outside transaction)
-    if (language) {
-      QuizService.generateForPost(
-        result.post.id,
-        language,
-        title,
-        body,
-        code || extractCodeFromBody(body)
-      ).catch((err) => {
-        logger.error('Failed to generate quiz for post (async)', {
-          postId: result.post.id,
-          error: String(err),
-        });
-      });
-    }
 
     return result;
   },
