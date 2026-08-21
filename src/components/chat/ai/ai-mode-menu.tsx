@@ -125,7 +125,7 @@ export function AiModeMenu({
         aria-label="Modelo e esforço do chat"
         title="Modelo e esforço do chat"
         className={cn(
-          'flex h-8 cursor-pointer select-none items-center gap-1.5 rounded-lg px-2.5 transition-colors disabled:cursor-not-allowed disabled:opacity-40',
+          'flex h-10 cursor-pointer select-none items-center gap-1 rounded-lg px-2 transition-colors disabled:cursor-not-allowed disabled:opacity-40 sm:h-8 sm:gap-1.5 sm:px-2.5',
           open ? 'bg-dd-surface text-dd-text' : 'text-dd-text hover:bg-dd-surface'
         )}
       >
@@ -137,7 +137,7 @@ export function AiModeMenu({
         )}
         <span className="text-xs font-bold text-dd-text">ASYNC</span>
         {/* Esforço em cinza, como na referência "5.5 Alto" */}
-        <span className="text-xs font-medium text-dd-muted">{effort}</span>
+        <span className="hidden text-xs font-medium text-dd-muted sm:inline">{effort}</span>
         <ChevronDown
           className={cn(
             'size-3 shrink-0 text-dd-muted transition-transform duration-200',
@@ -155,7 +155,7 @@ export function AiModeMenu({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduced ? undefined : { opacity: 0, y: 4, scale: 0.98 }}
             transition={{ duration: 0.16, ease: 'easeOut' }}
-            className="absolute bottom-full right-0 z-50 mb-2 w-64 origin-bottom-right overflow-hidden rounded-xl border border-dd-border/70 bg-dd-surface p-2 font-sans shadow-[0_12px_40px_rgba(0,0,0,0.4)]"
+            className="absolute bottom-full right-[-4.75rem] z-50 mb-2 max-h-[min(70dvh,26rem)] w-[min(16rem,calc(100vw-2rem))] origin-bottom-right overflow-y-auto rounded-xl border border-dd-border/70 bg-dd-surface p-2 font-sans shadow-[0_12px_40px_rgba(0,0,0,0.4)] sm:right-0"
           >
             {/* Modelo */}
             <div>

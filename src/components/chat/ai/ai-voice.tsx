@@ -254,7 +254,7 @@ export function AiVoice({ disabled, className, onTranscript }: AiVoiceProps) {
         aria-label={listening ? 'Parar gravação de voz' : 'Entrada de voz'}
         title={listening ? 'Parar gravação' : 'Entrada de voz'}
         className={cn(
-          'flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-dd-text transition-colors hover:bg-dd-surface disabled:cursor-not-allowed disabled:opacity-40',
+          'flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-lg text-dd-text transition-colors hover:bg-dd-surface disabled:cursor-not-allowed disabled:opacity-40 sm:size-8',
           listening && 'bg-dd-text/10 text-dd-text hover:bg-dd-text/10 hover:text-dd-text',
           className
         )}

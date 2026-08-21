@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { motion, useReducedMotion } from 'motion/react';
 import { FileCode, Image as ImageIcon, RotateCw } from 'lucide-react';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
-import { AsyncLogo } from '@/components/AsyncLogo';
 import { cn } from '@/lib/utils';
 import type { ChatMessage as ChatMessageType } from './types';
 import { ChatMessageActions } from './chat-message-actions';
@@ -16,20 +15,6 @@ export interface MessageActionsRef {
   regenerate: (text: string) => void;
   edit: (text: string) => void;
   retry: (id: string) => void;
-}
-
-/** Small brand avatar used for AI messages and the loading row. */
-export function AiAvatar({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn(
-        'flex size-7 shrink-0 select-none items-center justify-center overflow-hidden rounded-lg border border-dd-border/60 bg-dd-surface',
-        className
-      )}
-    >
-      <AsyncLogo width={18} height={18} className="h-4 w-4 object-contain" />
-    </div>
-  );
 }
 
 /** Github mark (not exported by the installed lucide-react version). */
@@ -66,7 +51,7 @@ function ChatMessageInner({ message, actionsRef }: ChatMessageViewProps) {
       className={cn('group w-full', !isDucky && 'flex flex-col items-end')}
     >
       {isDucky ? (
-        <div className="w-full min-w-0">
+        <div className="w-full min-w-0 overflow-hidden break-words">
           {/* Badge do repositório (contexto funcional, sem o cabeçalho da IA) */}
           {message.repo && !message.isStreaming && (
             <a
@@ -83,7 +68,7 @@ function ChatMessageInner({ message, actionsRef }: ChatMessageViewProps) {
             </a>
           )}
 
-          <div className="max-w-full text-sm leading-relaxed text-dd-text">
+          <div className="max-w-full min-w-0 break-words text-sm leading-relaxed text-dd-text sm:text-[15px]">
             <MarkdownRenderer content={message.text} />
             {message.isStreaming && (
               <span
@@ -117,7 +102,7 @@ function ChatMessageInner({ message, actionsRef }: ChatMessageViewProps) {
       ) : (
         <>
           {message.attachments && message.attachments.length > 0 && (
-            <div className="mb-1.5 flex max-w-[85%] flex-wrap justify-end gap-1.5">
+            <div className="mb-1.5 flex max-w-[92%] flex-wrap justify-end gap-1.5 sm:max-w-[85%]">
               {message.attachments.map((a, idx) => (
                 <div
                   key={idx}
@@ -144,7 +129,7 @@ function ChatMessageInner({ message, actionsRef }: ChatMessageViewProps) {
             </div>
           )}
 
-          <div className="max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-br-md border border-dd-border/50 bg-dd-surface/80 px-4 py-2.5 text-sm leading-relaxed text-dd-text sm:max-w-[75%]">
+          <div className="max-w-[92%] whitespace-pre-wrap break-words rounded-2xl rounded-br-md border border-dd-border/50 bg-dd-surface/80 px-3 py-2.5 text-sm leading-relaxed text-dd-text sm:max-w-[75%] sm:px-4">
             {message.text}
           </div>
 

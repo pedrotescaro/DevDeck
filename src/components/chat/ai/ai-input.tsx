@@ -95,7 +95,7 @@ export function AiInput({
   };
 
   return (
-    <div className="relative rounded-2xl border border-dd-border/60 transition-all duration-200 focus-within:border-dd-text/40 focus-within:ring-1 focus-within:ring-dd-text/15">
+    <div className="relative min-w-0 rounded-xl border border-dd-border/60 transition-all duration-200 focus-within:border-dd-text/40 focus-within:ring-1 focus-within:ring-dd-text/15 sm:rounded-2xl">
       {/* Attachment chips preview */}
       <AnimatePresence initial={false}>
         {attachments.length > 0 && (
@@ -147,11 +147,11 @@ export function AiInput({
         placeholder={placeholder}
         aria-label={placeholder}
         style={{ minHeight, maxHeight }}
-        className="w-full resize-none overflow-y-auto border-0 bg-transparent px-3.5 pb-1 pt-3.5 text-sm leading-relaxed text-dd-text outline-none ring-0 placeholder:text-dd-muted focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full resize-none overflow-y-auto border-0 bg-transparent px-3 pb-1 pt-3 text-base leading-relaxed text-dd-text outline-none ring-0 placeholder:text-dd-muted focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 sm:px-3.5 sm:pt-3.5 sm:text-sm"
       />
 
       {/* Bottom row */}
-      <div className="flex select-none items-center justify-between gap-2 px-2.5 pb-2.5 pt-1">
+      <div className="flex min-w-0 select-none items-center justify-between gap-1 px-1.5 pb-1.5 pt-1 sm:gap-2 sm:px-2.5 sm:pb-2.5">
         {/* Left: "+" Adicionar (arquivos + config) + busca separada */}
         <div className="flex min-w-0 items-center gap-0.5">
           <AiAddMenu
@@ -170,7 +170,7 @@ export function AiInput({
               aria-pressed={searchEnabled}
               title={searchEnabled ? 'Busca na web ativa' : 'Buscar na web'}
               className={cn(
-                'flex h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg px-2 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40',
+                'flex h-10 min-w-10 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 sm:h-8 sm:min-w-0',
                 searchEnabled
                   ? 'bg-dd-text/10 text-dd-text hover:bg-dd-text/15'
                   : 'text-dd-muted hover:bg-dd-surface hover:text-dd-text'
@@ -184,7 +184,7 @@ export function AiInput({
                     animate={{ width: 'auto', opacity: 1 }}
                     exit={{ width: 0, opacity: 0 }}
                     transition={{ duration: 0.16, ease: 'easeOut' }}
-                    className="overflow-hidden whitespace-nowrap"
+                    className="hidden overflow-hidden whitespace-nowrap sm:inline"
                   >
                     Buscar
                   </motion.span>
@@ -226,7 +226,7 @@ export function AiInput({
               onClick={onStop}
               aria-label="Parar geração"
               title="Parar"
-              className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-dd-surface text-dd-text transition-colors hover:bg-dd-border"
+              className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-dd-surface text-dd-text transition-colors hover:bg-dd-border sm:size-8"
             >
               <Square className="size-4 fill-current" />
             </button>
@@ -238,7 +238,7 @@ export function AiInput({
               aria-label="Enviar mensagem"
               title="Enviar (Enter)"
               className={cn(
-                'flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-xl transition-all duration-200 disabled:cursor-not-allowed',
+                'flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-xl transition-all duration-200 disabled:cursor-not-allowed sm:size-8',
                 canSend
                   ? 'bg-dd-text text-dd-bg shadow-sm hover:bg-dd-text/90'
                   : 'bg-dd-surface text-dd-muted disabled:opacity-60'
