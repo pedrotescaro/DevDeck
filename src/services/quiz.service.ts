@@ -3,7 +3,7 @@ import { logger } from '@/lib/logger';
 import { XpService } from './xp.service';
 import { findTrailQuestionById } from '@/lib/trailsData';
 import { NotificationService } from './notification.service';
-import { generateQuizAI, AIQuizResponse } from '@/lib/ai';
+import { generateQuizAI, STACKLYST_QUIZ_PROMPT, type AIQuizResponse } from '@/lib/ai';
 import { FALLBACK_QUIZZES, XP_QUIZ_CORRECT } from '@/lib/config';
 
 export const QuizService = {
@@ -26,7 +26,7 @@ export const QuizService = {
 
     // 2. Try AI Geração
     try {
-      const systemPrompt = 'Você é um assistente técnico especialista em programação.';
+      const systemPrompt = STACKLYST_QUIZ_PROMPT;
       const userPrompt = `Gere um quiz de múltipla escolha sobre tecnologia de software, adequado para desenvolvedores de nível intermediário. O quiz deve ser sobre um dos temas: linguagens de programação, arquitetura de software, algoritmos, boas práticas, ferramentas de desenvolvimento ou paradigmas de programação. Retorne APENAS JSON válido, sem markdown, sem explicações extras. Schema: { "question": string, "options": [string, string, string, string], "correct_index": number (0-3), "explanation": string, "tags": [string] }`;
 
       quizData = await generateQuizAI(systemPrompt, userPrompt);
@@ -199,8 +199,7 @@ export const QuizService = {
     let quizCreated = false;
 
     try {
-      const systemPrompt =
-        'Você é um assistente técnico especialista em programação. Gere um quiz de múltipla escolha com exatamente 4 opções baseada na postagem enviada.';
+      const systemPrompt = `${STACKLYST_QUIZ_PROMPT}\n\nGere o quiz com base exclusivamente na postagem enviada.`;
       const userPrompt = `Gere um quiz em formato JSON bruto.
 Linguagem: ${language}
 Título: ${title}

@@ -1,25 +1,27 @@
 import { NextResponse } from 'next/server';
 import { apiHandler } from '@/lib/api-handler';
-import { streamChatAI } from '@/lib/ai';
+import { getPublicAIError, STACKLYST_CODE_REVIEW_PROMPT, streamChatAI } from '@/lib/ai';
 import { logger } from '@/lib/logger';
 import { gatherRepoAnalysisInput, parseRepoUrl, GitHubError, type RepoContext } from '@/lib/github';
 import { z } from 'zod';
 
 function isAbortError(error: unknown): boolean {
   if (error instanceof DOMException) return error.name === 'AbortError';
+  if (error instanceof Error && 'code' in error) return error.code === 'ABORTED';
   return (error as { name?: string } | null)?.name === 'AbortError';
 }
 
 const repoSchema = z.object({
-  url: z.string().min(1),
-  language: z.string().default(''),
+  url: z.string().min(1).max(2_000),
+  language: z.string().max(50).default(''),
   history: z
     .array(
       z.object({
         role: z.enum(['user', 'model', 'assistant', 'ducky']),
-        content: z.string(),
+        content: z.string().max(12_000),
       })
     )
+    .max(30)
     .optional()
     .default([]),
 });
@@ -89,7 +91,9 @@ export const POST = apiHandler(async (req) => {
   const { repo } = input;
 
   // 2. System prompt do ASYNC atuando como analista de repositórios.
-  const systemPrompt = `Você é a ASYNC, a copiloto de programação oficial do Stacklyst, agora atuando como analista de repositórios do GitHub.
+  const systemPrompt = `${STACKLYST_CODE_REVIEW_PROMPT}
+
+Você é a ASYNC, agora atuando como analista de repositórios do GitHub.
 Analise o repositório fornecido pelo usuário e produza insights técnicos claros e acionáveis.
 
 Diretrizes:
@@ -179,8 +183,8 @@ Seja conciso e específico. Se faltar informação (ex: sem README), diga o que 
           error: String(err),
           stack: (err as Error)?.stack,
         });
-        const errMsg = err instanceof Error ? err.message : String(err);
-        send({ error: `Tive um problema ao processar a análise do repositório: ${errMsg}` });
+        const publicError = getPublicAIError(err);
+        send({ error: publicError.message, code: publicError.code });
       } finally {
         try {
           controller.close();
