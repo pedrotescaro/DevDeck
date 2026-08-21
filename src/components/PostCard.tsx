@@ -320,17 +320,17 @@ export function PostCard({
   const { text: relativeTime, isRelative } = useHydrationSafeRelativeTime(post.created_at);
 
   return (
-    <div onClick={handleCardClick} className="block group cursor-pointer">
+    <div onClick={handleCardClick} className="block min-w-0 group cursor-pointer">
       <article
         className={cn(
-          'transition-colors relative',
+          'relative min-w-0 transition-colors',
           flat
-            ? 'bg-transparent border-b border-dd-border/50 rounded-none p-4 sm:p-5 hover:bg-dd-surface/20'
+            ? 'rounded-none border-b border-dd-border/50 bg-transparent p-3 sm:p-4 lg:p-5 hover:bg-dd-surface/20'
             : 'bg-dd-card border border-dd-border rounded-xl p-5 hover:border-blue-500/30'
         )}
       >
         {/* Header */}
-        <div className="flex items-center gap-3 mb-3">
+        <div className="mb-2.5 flex items-center gap-2 sm:mb-3 sm:gap-3">
           <Link
             href={`/profile/${post.author.username}`}
             onClick={(e) => e.stopPropagation()}
@@ -411,32 +411,32 @@ export function PostCard({
                     router.push(`/post/${post.id}`);
                   }}
                   className={cn(
-                    'mt-3.5 mb-3.5 p-4 rounded-2xl border-2 border-b-4 transition-all duration-200 group/quiz cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4',
+                    'group/quiz mb-3 mt-3 flex cursor-pointer flex-col justify-between gap-3 rounded-2xl border-2 border-b-4 p-3 transition-all duration-200 sm:mb-3.5 sm:mt-3.5 sm:flex-row sm:items-center sm:gap-4 sm:p-4',
                     hasCompleted
                       ? 'border-emerald-500/40 bg-emerald-950/20 hover:border-emerald-400 hover:bg-emerald-950/30'
                       : 'border-blue-500/40 bg-blue-950/20 hover:border-blue-400 hover:bg-blue-950/30'
                   )}
                 >
-                  <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="flex min-w-0 items-center gap-3">
                     <div
                       className={cn(
-                        'w-12 h-12 rounded-2xl border-2 border-b-4 flex items-center justify-center shrink-0 shadow-md group-hover/quiz:scale-105 transition-transform duration-200',
+                        'flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border-2 border-b-4 shadow-md transition-transform duration-200 group-hover/quiz:scale-105 sm:h-12 sm:w-12',
                         hasCompleted
                           ? 'border-emerald-600 bg-emerald-500 text-white'
                           : 'border-blue-600 bg-blue-500 text-white'
                       )}
                     >
                       {hasCompleted ? (
-                        <Check className="w-6 h-6 stroke-[3]" />
+                        <Check className="h-5 w-5 stroke-[3] sm:h-6 sm:w-6" />
                       ) : (
-                        <Sparkles className="w-6 h-6 fill-white stroke-[2.5]" />
+                        <Sparkles className="h-5 w-5 fill-white stroke-[2.5] sm:h-6 sm:w-6" />
                       )}
                     </div>
                     <div className="text-left min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span
                           className={cn(
-                            'text-[10px] font-black uppercase tracking-widest',
+                            'text-[10px] font-black uppercase tracking-[0.12em] sm:tracking-widest',
                             hasCompleted ? 'text-emerald-400' : 'text-blue-400'
                           )}
                         >
@@ -447,7 +447,7 @@ export function PostCard({
                           +15 XP
                         </span>
                       </div>
-                      <h4 className="text-sm font-black text-white tracking-tight mt-0.5">
+                      <h4 className="mt-0.5 text-xs font-black tracking-tight text-white sm:text-sm">
                         {hasCompleted
                           ? 'Você já completou este desafio!'
                           : 'Teste seu conhecimento e ganhe XP!'}
@@ -459,7 +459,7 @@ export function PostCard({
                     href={`/post/${post.id}`}
                     onClick={(e) => e.stopPropagation()}
                     className={cn(
-                      'inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider text-white transition-all duration-150 shrink-0 self-start sm:self-auto cursor-pointer border-b-[4px] active:border-b-0 active:translate-y-[4px]',
+                      'inline-flex w-full shrink-0 items-center justify-center gap-2 self-stretch rounded-xl border-b-[4px] px-4 py-2.5 text-xs font-black uppercase tracking-wider text-white transition-all duration-150 active:translate-y-[4px] active:border-b-0 sm:w-auto sm:self-auto sm:px-5 cursor-pointer',
                       hasCompleted
                         ? 'border-emerald-700 bg-emerald-500 hover:bg-emerald-400 shadow-md shadow-emerald-500/20'
                         : 'border-blue-700 bg-blue-500 hover:bg-blue-400 shadow-md shadow-blue-500/20'

@@ -154,7 +154,7 @@ export function PostComposerExtras({
           </button>
 
           {openPanel === 'reply' && (
-            <div className="absolute left-0 top-full mt-1.5 z-[100] w-72 rounded-2xl border border-dd-border/80 bg-dd-surface/95 backdrop-blur-md p-2 shadow-2xl animate-slide-up">
+            <div className="fixed inset-x-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-[100] max-h-[min(60dvh,22rem)] overflow-y-auto rounded-2xl border border-dd-border/80 bg-dd-surface/95 p-2 shadow-2xl backdrop-blur-md animate-slide-up sm:absolute sm:inset-auto sm:left-0 sm:top-full sm:mt-1.5 sm:w-72 sm:max-h-none">
               {REPLY_AUDIENCE_OPTIONS.map((option) => (
                 <button
                   key={option.value}
@@ -208,7 +208,7 @@ export function PostComposerExtras({
         </button>
 
         {openPanel === 'emoji' && (
-          <div className="absolute left-0 bottom-full mb-2 z-[100] w-72 rounded-xl border border-dd-border/80 bg-dd-surface/95 backdrop-blur-md p-3 shadow-2xl animate-slide-up">
+          <div className="fixed inset-x-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-[100] max-h-[min(60dvh,22rem)] overflow-y-auto rounded-xl border border-dd-border/80 bg-dd-surface/95 p-3 shadow-2xl backdrop-blur-md animate-slide-up sm:absolute sm:inset-auto sm:left-0 sm:bottom-full sm:mb-2 sm:w-72 sm:max-h-none">
             <p className="text-[10px] font-bold uppercase tracking-wider text-dd-muted mb-2">
               Emojis
             </p>
@@ -250,7 +250,7 @@ export function PostComposerExtras({
         </button>
 
         {openPanel === 'schedule' && (
-          <div className="absolute left-0 bottom-full mb-2 z-[100] w-64 rounded-xl border border-dd-border/80 bg-dd-surface/95 backdrop-blur-md p-3 shadow-2xl animate-slide-up space-y-3">
+          <div className="fixed inset-x-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-[100] max-h-[min(60dvh,22rem)] overflow-y-auto rounded-xl border border-dd-border/80 bg-dd-surface/95 p-3 shadow-2xl backdrop-blur-md animate-slide-up space-y-3 sm:absolute sm:inset-auto sm:left-0 sm:bottom-full sm:mb-2 sm:w-64 sm:max-h-none">
             <p className="text-xs font-bold text-dd-text">Agendar publicação</p>
             <input
               type="datetime-local"
@@ -296,7 +296,7 @@ export function PostComposerExtras({
         </button>
 
         {openPanel === 'location' && (
-          <div className="absolute left-0 bottom-full mb-2 z-[100] w-64 rounded-xl border border-dd-border/80 bg-dd-surface/95 backdrop-blur-md p-3 shadow-2xl animate-slide-up space-y-3">
+          <div className="fixed inset-x-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-[100] max-h-[min(60dvh,22rem)] overflow-y-auto rounded-xl border border-dd-border/80 bg-dd-surface/95 p-3 shadow-2xl backdrop-blur-md animate-slide-up space-y-3 sm:absolute sm:inset-auto sm:left-0 sm:bottom-full sm:mb-2 sm:w-64 sm:max-h-none">
             <p className="text-xs font-bold text-dd-text">Localização</p>
             <input
               type="text"
