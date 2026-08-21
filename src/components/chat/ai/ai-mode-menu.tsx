@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   ArrowDown,
   ArrowUp,
@@ -34,6 +35,14 @@ interface AiModeMenuProps {
   disabled?: boolean;
 }
 
+interface MenuPosition {
+  top: number;
+  left: number;
+  width: number;
+  maxHeight: number;
+  opensUpward: boolean;
+}
+
 /** Modos do modelo — o modo padrão é exibido como "Normal". */
 const MODE_OPTIONS: Array<{ value: ChatMode; label: string; icon: typeof Zap }> = [
   { value: 'Rápido', label: 'Normal', icon: Zap },
@@ -63,14 +72,22 @@ export function AiModeMenu({
 }: AiModeMenuProps) {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<'modelo' | 'esforço' | 'velocidade' | null>(null);
+  const [menuPosition, setMenuPosition] = useState<MenuPosition | null>(null);
   const reduced = useReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   // Fecha ao clicar fora ou pressionar Escape.
   useEffect(() => {
     if (!open) return;
     const handlePointerDown = (e: PointerEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(target) &&
+        !menuRef.current?.contains(target)
+      ) {
         setOpen(false);
       }
     };
@@ -84,6 +101,67 @@ export function AiModeMenu({
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [open]);
+
+  const updateMenuPosition = useCallback(() => {
+    const trigger = triggerRef.current;
+    const menu = menuRef.current;
+    if (!trigger || !menu) return;
+
+    const viewportPadding = 12;
+    const triggerGap = 8;
+    const maxMenuHeight = 416;
+    const triggerRect = trigger.getBoundingClientRect();
+    const menuHeight = Math.min(menu.scrollHeight, maxMenuHeight);
+    const availableAbove = Math.max(triggerRect.top - triggerGap - viewportPadding, 0);
+    const availableBelow = Math.max(
+      window.innerHeight - triggerRect.bottom - triggerGap - viewportPadding,
+      0
+    );
+    const opensUpward = availableAbove >= menuHeight || availableAbove > availableBelow;
+    const maxHeight = Math.min(maxMenuHeight, opensUpward ? availableAbove : availableBelow);
+    const renderedHeight = Math.min(menu.scrollHeight, maxHeight);
+    const width = Math.min(256, window.innerWidth - viewportPadding * 2);
+    const left = Math.min(
+      Math.max(triggerRect.right - width, viewportPadding),
+      window.innerWidth - viewportPadding - width
+    );
+    const top = opensUpward
+      ? Math.max(triggerRect.top - triggerGap - renderedHeight, viewportPadding)
+      : Math.min(triggerRect.bottom + triggerGap, window.innerHeight - viewportPadding);
+
+    setMenuPosition((current) => {
+      const next = { top, left, width, maxHeight, opensUpward };
+      if (
+        current?.top === next.top &&
+        current.left === next.left &&
+        current.width === next.width &&
+        current.maxHeight === next.maxHeight &&
+        current.opensUpward === next.opensUpward
+      ) {
+        return current;
+      }
+      return next;
+    });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+
+    updateMenuPosition();
+    const animationFrame = window.requestAnimationFrame(updateMenuPosition);
+    const resizeObserver = new ResizeObserver(updateMenuPosition);
+    if (triggerRef.current) resizeObserver.observe(triggerRef.current);
+    if (menuRef.current) resizeObserver.observe(menuRef.current);
+    window.addEventListener('resize', updateMenuPosition);
+    window.addEventListener('scroll', updateMenuPosition, true);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateMenuPosition);
+      window.removeEventListener('scroll', updateMenuPosition, true);
+    };
+  }, [expanded, open, updateMenuPosition]);
 
   const selectMode = (next: ChatMode) => {
     onModeChange(next);
@@ -117,6 +195,7 @@ export function AiModeMenu({
   return (
     <div ref={containerRef} className="relative shrink-0">
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
         disabled={disabled}
@@ -146,214 +225,240 @@ export function AiModeMenu({
         />
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            role="menu"
-            aria-label="Modelo e esforço"
-            initial={reduced ? false : { opacity: 0, y: 4, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={reduced ? undefined : { opacity: 0, y: 4, scale: 0.98 }}
-            transition={{ duration: 0.16, ease: 'easeOut' }}
-            className="absolute bottom-full right-[-4.75rem] z-50 mb-2 max-h-[min(70dvh,26rem)] w-[min(16rem,calc(100vw-2rem))] origin-bottom-right overflow-y-auto rounded-xl border border-dd-border/70 bg-dd-surface p-2 font-sans shadow-[0_12px_40px_rgba(0,0,0,0.4)] sm:right-0"
-          >
-            {/* Modelo */}
-            <div>
-              <button
-                type="button"
-                onClick={() => setExpanded(expanded === 'modelo' ? null : 'modelo')}
-                aria-expanded={expanded === 'modelo'}
-                className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-left text-xs font-medium text-dd-text transition-colors hover:bg-dd-bg/50"
-              >
-                <span>Modelo</span>
-                <span className="ml-auto text-dd-muted">{modeLabel}</span>
-                <ChevronRight
-                  className={cn(
-                    'size-3.5 shrink-0 text-dd-muted transition-transform duration-200',
-                    expanded === 'modelo' && 'rotate-90'
-                  )}
-                />
-              </button>
-              <AnimatePresence initial={false}>
-                {expanded === 'modelo' && (
-                  <motion.div
-                    initial={reduced ? false : { height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={reduced ? undefined : { height: 0, opacity: 0 }}
-                    transition={{ duration: 0.16, ease: 'easeOut' }}
-                    className="overflow-hidden"
-                  >
-                    <div className="flex flex-col gap-0.5 pb-1.5">
-                      {MODE_OPTIONS.map((opt) => {
-                        const Icon = opt.icon;
-                        const active = mode === opt.value;
-                        return (
-                          <button
-                            key={opt.value}
-                            type="button"
-                            role="menuitemradio"
-                            aria-checked={active}
-                            onClick={() => selectMode(opt.value)}
-                            className={cn(
-                              'flex w-full cursor-pointer items-center gap-2.5 rounded-lg pl-9 pr-3 py-2 text-left text-xs font-medium transition-colors',
-                              active
-                                ? 'text-dd-text'
-                                : 'text-dd-muted hover:bg-dd-bg/50 hover:text-dd-text'
-                            )}
-                          >
-                            <Icon
-                              className={cn(
-                                'size-3.5 shrink-0',
-                                active ? 'text-dd-text' : 'text-dd-muted'
-                              )}
-                            />
-                            <span className="flex-1 truncate">{opt.label}</span>
-                            {active && <Check className="size-3.5 shrink-0 text-dd-text" />}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </motion.div>
+      {typeof document !== 'undefined' &&
+        createPortal(
+          <AnimatePresence>
+            {open && (
+              <motion.div
+                ref={menuRef}
+                role="menu"
+                aria-label="Modelo e esforço"
+                initial={
+                  reduced
+                    ? false
+                    : { opacity: 0, y: menuPosition?.opensUpward ? 4 : -4, scale: 0.98 }
+                }
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={
+                  reduced
+                    ? undefined
+                    : { opacity: 0, y: menuPosition?.opensUpward ? 4 : -4, scale: 0.98 }
+                }
+                transition={{ duration: 0.16, ease: 'easeOut' }}
+                style={
+                  menuPosition
+                    ? {
+                        top: menuPosition.top,
+                        left: menuPosition.left,
+                        width: menuPosition.width,
+                        maxHeight: menuPosition.maxHeight,
+                      }
+                    : { visibility: 'hidden' }
+                }
+                className={cn(
+                  'fixed z-[100] overflow-y-auto rounded-xl border border-dd-border/70 bg-dd-surface p-2 font-sans shadow-[0_12px_40px_rgba(0,0,0,0.4)]',
+                  menuPosition?.opensUpward ? 'origin-bottom-right' : 'origin-top-right'
                 )}
-              </AnimatePresence>
-            </div>
-
-            {/* Esforço */}
-            <div>
-              <button
-                type="button"
-                onClick={() => setExpanded(expanded === 'esforço' ? null : 'esforço')}
-                aria-expanded={expanded === 'esforço'}
-                className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-left text-xs font-medium text-dd-text transition-colors hover:bg-dd-bg/50"
               >
-                <span>Esforço</span>
-                <span className="ml-auto text-dd-muted">{effort}</span>
-                <ChevronRight
-                  className={cn(
-                    'size-3.5 shrink-0 text-dd-muted transition-transform duration-200',
-                    expanded === 'esforço' && 'rotate-90'
-                  )}
-                />
-              </button>
-              <AnimatePresence initial={false}>
-                {expanded === 'esforço' && (
-                  <motion.div
-                    initial={reduced ? false : { height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={reduced ? undefined : { height: 0, opacity: 0 }}
-                    transition={{ duration: 0.16, ease: 'easeOut' }}
-                    className="overflow-hidden"
+                {/* Modelo */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setExpanded(expanded === 'modelo' ? null : 'modelo')}
+                    aria-expanded={expanded === 'modelo'}
+                    className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-left text-xs font-medium text-dd-text transition-colors hover:bg-dd-bg/50"
                   >
-                    <div className="flex flex-col gap-0.5 pb-1.5">
-                      {EFFORT_OPTIONS.map((opt) => {
-                        const Icon = opt.icon;
-                        const active = effort === opt.value;
-                        return (
-                          <button
-                            key={opt.value}
-                            type="button"
-                            role="menuitemradio"
-                            aria-checked={active}
-                            onClick={() => selectEffort(opt.value)}
-                            className={cn(
-                              'flex w-full cursor-pointer items-center gap-2.5 rounded-lg pl-9 pr-3 py-2 text-left text-xs font-medium transition-colors',
-                              active
-                                ? 'text-dd-text'
-                                : 'text-dd-muted hover:bg-dd-bg/50 hover:text-dd-text'
-                            )}
-                          >
-                            <Icon
-                              className={cn(
-                                'size-3.5 shrink-0',
-                                active ? 'text-dd-text' : 'text-dd-muted'
-                              )}
-                            />
-                            <span className="flex-1 truncate">{opt.label}</span>
-                            {active && <Check className="size-3.5 shrink-0 text-dd-text" />}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                    <span>Modelo</span>
+                    <span className="ml-auto text-dd-muted">{modeLabel}</span>
+                    <ChevronRight
+                      className={cn(
+                        'size-3.5 shrink-0 text-dd-muted transition-transform duration-200',
+                        expanded === 'modelo' && 'rotate-90'
+                      )}
+                    />
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {expanded === 'modelo' && (
+                      <motion.div
+                        initial={reduced ? false : { height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={reduced ? undefined : { height: 0, opacity: 0 }}
+                        transition={{ duration: 0.16, ease: 'easeOut' }}
+                        className="overflow-hidden"
+                      >
+                        <div className="flex flex-col gap-0.5 pb-1.5">
+                          {MODE_OPTIONS.map((opt) => {
+                            const Icon = opt.icon;
+                            const active = mode === opt.value;
+                            return (
+                              <button
+                                key={opt.value}
+                                type="button"
+                                role="menuitemradio"
+                                aria-checked={active}
+                                onClick={() => selectMode(opt.value)}
+                                className={cn(
+                                  'flex w-full cursor-pointer items-center gap-2.5 rounded-lg pl-9 pr-3 py-2 text-left text-xs font-medium transition-colors',
+                                  active
+                                    ? 'text-dd-text'
+                                    : 'text-dd-muted hover:bg-dd-bg/50 hover:text-dd-text'
+                                )}
+                              >
+                                <Icon
+                                  className={cn(
+                                    'size-3.5 shrink-0',
+                                    active ? 'text-dd-text' : 'text-dd-muted'
+                                  )}
+                                />
+                                <span className="flex-1 truncate">{opt.label}</span>
+                                {active && <Check className="size-3.5 shrink-0 text-dd-text" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
 
-            {/* Velocidade */}
-            <div>
-              <button
-                type="button"
-                onClick={() => setExpanded(expanded === 'velocidade' ? null : 'velocidade')}
-                aria-expanded={expanded === 'velocidade'}
-                className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-left text-xs font-medium text-dd-text transition-colors hover:bg-dd-bg/50"
-              >
-                <span>Velocidade</span>
-                <span className="ml-auto text-dd-muted">{speed}</span>
-                <ChevronRight
-                  className={cn(
-                    'size-3.5 shrink-0 text-dd-muted transition-transform duration-200',
-                    expanded === 'velocidade' && 'rotate-90'
-                  )}
-                />
-              </button>
-              <AnimatePresence initial={false}>
-                {expanded === 'velocidade' && (
-                  <motion.div
-                    initial={reduced ? false : { height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={reduced ? undefined : { height: 0, opacity: 0 }}
-                    transition={{ duration: 0.16, ease: 'easeOut' }}
-                    className="overflow-hidden"
+                {/* Esforço */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setExpanded(expanded === 'esforço' ? null : 'esforço')}
+                    aria-expanded={expanded === 'esforço'}
+                    className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-left text-xs font-medium text-dd-text transition-colors hover:bg-dd-bg/50"
                   >
-                    <div className="flex flex-col gap-0.5 pb-1.5">
-                      {SPEED_OPTIONS.map((opt) => {
-                        const Icon = opt.icon;
-                        const active = speed === opt.value;
-                        return (
-                          <button
-                            key={opt.value}
-                            type="button"
-                            role="menuitemradio"
-                            aria-checked={active}
-                            onClick={() => selectSpeed(opt.value)}
-                            className={cn(
-                              'flex w-full cursor-pointer items-center gap-2.5 rounded-lg pl-9 pr-3 py-2 text-left text-xs font-medium transition-colors',
-                              active
-                                ? 'text-dd-text'
-                                : 'text-dd-muted hover:bg-dd-bg/50 hover:text-dd-text'
-                            )}
-                          >
-                            <Icon
-                              className={cn(
-                                'size-3.5 shrink-0',
-                                active ? 'text-dd-text' : 'text-dd-muted'
-                              )}
-                            />
-                            <span className="flex-1 truncate">{opt.label}</span>
-                            {active && <Check className="size-3.5 shrink-0 text-dd-text" />}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                    <span>Esforço</span>
+                    <span className="ml-auto text-dd-muted">{effort}</span>
+                    <ChevronRight
+                      className={cn(
+                        'size-3.5 shrink-0 text-dd-muted transition-transform duration-200',
+                        expanded === 'esforço' && 'rotate-90'
+                      )}
+                    />
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {expanded === 'esforço' && (
+                      <motion.div
+                        initial={reduced ? false : { height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={reduced ? undefined : { height: 0, opacity: 0 }}
+                        transition={{ duration: 0.16, ease: 'easeOut' }}
+                        className="overflow-hidden"
+                      >
+                        <div className="flex flex-col gap-0.5 pb-1.5">
+                          {EFFORT_OPTIONS.map((opt) => {
+                            const Icon = opt.icon;
+                            const active = effort === opt.value;
+                            return (
+                              <button
+                                key={opt.value}
+                                type="button"
+                                role="menuitemradio"
+                                aria-checked={active}
+                                onClick={() => selectEffort(opt.value)}
+                                className={cn(
+                                  'flex w-full cursor-pointer items-center gap-2.5 rounded-lg pl-9 pr-3 py-2 text-left text-xs font-medium transition-colors',
+                                  active
+                                    ? 'text-dd-text'
+                                    : 'text-dd-muted hover:bg-dd-bg/50 hover:text-dd-text'
+                                )}
+                              >
+                                <Icon
+                                  className={cn(
+                                    'size-3.5 shrink-0',
+                                    active ? 'text-dd-text' : 'text-dd-muted'
+                                  )}
+                                />
+                                <span className="flex-1 truncate">{opt.label}</span>
+                                {active && <Check className="size-3.5 shrink-0 text-dd-text" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
 
-            <div className="my-1.5 h-px bg-dd-border/60" />
+                {/* Velocidade */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setExpanded(expanded === 'velocidade' ? null : 'velocidade')}
+                    aria-expanded={expanded === 'velocidade'}
+                    className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-left text-xs font-medium text-dd-text transition-colors hover:bg-dd-bg/50"
+                  >
+                    <span>Velocidade</span>
+                    <span className="ml-auto text-dd-muted">{speed}</span>
+                    <ChevronRight
+                      className={cn(
+                        'size-3.5 shrink-0 text-dd-muted transition-transform duration-200',
+                        expanded === 'velocidade' && 'rotate-90'
+                      )}
+                    />
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {expanded === 'velocidade' && (
+                      <motion.div
+                        initial={reduced ? false : { height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={reduced ? undefined : { height: 0, opacity: 0 }}
+                        transition={{ duration: 0.16, ease: 'easeOut' }}
+                        className="overflow-hidden"
+                      >
+                        <div className="flex flex-col gap-0.5 pb-1.5">
+                          {SPEED_OPTIONS.map((opt) => {
+                            const Icon = opt.icon;
+                            const active = speed === opt.value;
+                            return (
+                              <button
+                                key={opt.value}
+                                type="button"
+                                role="menuitemradio"
+                                aria-checked={active}
+                                onClick={() => selectSpeed(opt.value)}
+                                className={cn(
+                                  'flex w-full cursor-pointer items-center gap-2.5 rounded-lg pl-9 pr-3 py-2 text-left text-xs font-medium transition-colors',
+                                  active
+                                    ? 'text-dd-text'
+                                    : 'text-dd-muted hover:bg-dd-bg/50 hover:text-dd-text'
+                                )}
+                              >
+                                <Icon
+                                  className={cn(
+                                    'size-3.5 shrink-0',
+                                    active ? 'text-dd-text' : 'text-dd-muted'
+                                  )}
+                                />
+                                <span className="flex-1 truncate">{opt.label}</span>
+                                {active && <Check className="size-3.5 shrink-0 text-dd-text" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
 
-            {/* Redefinir para o padrão — ícone de refresh à direita, como na referência */}
-            <button
-              type="button"
-              onClick={resetDefaults}
-              className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-left text-xs font-medium text-dd-muted transition-colors hover:bg-dd-bg/50 hover:text-dd-text"
-            >
-              <span className="flex-1">Redefinir para o padrão</span>
-              <RotateCcw className="size-3.5 shrink-0" />
-            </button>
-          </motion.div>
+                <div className="my-1.5 h-px bg-dd-border/60" />
+
+                {/* Redefinir para o padrão — ícone de refresh à direita, como na referência */}
+                <button
+                  type="button"
+                  onClick={resetDefaults}
+                  className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-left text-xs font-medium text-dd-muted transition-colors hover:bg-dd-bg/50 hover:text-dd-text"
+                >
+                  <span className="flex-1">Redefinir para o padrão</span>
+                  <RotateCcw className="size-3.5 shrink-0" />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>
     </div>
   );
 }

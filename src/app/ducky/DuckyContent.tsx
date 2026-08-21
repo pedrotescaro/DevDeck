@@ -1401,14 +1401,11 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                         transition={{ duration: 0.16, ease: 'easeOut' }}
                         className="mt-3 flex w-full flex-col items-start gap-0.5"
                       >
-                        {activeSuggestionIds.map((id, idx) => {
+                        {activeSuggestionIds.map((id) => {
                           const item = SUGGESTION_POOL.find((s) => s.id === id);
                           if (!item) return null;
                           const Icon = item.icon;
                           const isRepo = id === 'repo';
-                          // A primeira recomendação fica selecionada por padrão (como na
-                          // referência): bloco destacado, texto branco e × visível.
-                          const isSelected = idx === 0;
                           return (
                             <motion.div
                               key={id}
@@ -1424,11 +1421,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                                     ? setMode('Repositório')
                                     : handleSuggestionClick(item.label)
                                 }
-                                className={`flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-medium transition-colors ${
-                                  isSelected
-                                    ? 'bg-dd-surface text-dd-text'
-                                    : 'text-dd-muted group-hover:bg-dd-surface group-hover:text-dd-text'
-                                }`}
+                                className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-medium text-dd-muted transition-colors hover:bg-dd-surface hover:text-dd-text focus-visible:bg-dd-surface focus-visible:text-dd-text focus-visible:outline-none"
                               >
                                 <Icon className="h-3.5 w-3.5 shrink-0 text-dd-text" />
                                 <span className="truncate pr-5">{item.label}</span>
@@ -1441,11 +1434,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                                 }}
                                 aria-label={`Remover sugestão ${item.label}`}
                                 title="Remover sugestão"
-                                className={`absolute right-1.5 top-1/2 flex size-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md transition-opacity hover:bg-dd-border/60 hover:text-dd-text ${
-                                  isSelected
-                                    ? 'opacity-100'
-                                    : 'text-dd-muted md:opacity-0 md:group-hover:opacity-100'
-                                }`}
+                                className="absolute right-1.5 top-1/2 flex size-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md text-dd-muted transition-opacity hover:bg-dd-border/60 hover:text-dd-text focus-visible:opacity-100 focus-visible:outline-none md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
                               >
                                 <X className="size-3.5" />
                               </button>
