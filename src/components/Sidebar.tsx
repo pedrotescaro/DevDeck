@@ -24,6 +24,7 @@ import {
   Calendar,
   Code2,
   ShieldAlert,
+  SquarePen,
 } from 'lucide-react';
 import { PostComposerExtras } from '@/components/PostComposerExtras';
 import type { NotionEditorRef } from '@/components/MarkdownEditor';
@@ -377,6 +378,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
     icon: any;
     active?: boolean;
     badge?: 'dot';
+    isAsync?: boolean;
   }> = [
     {
       label: 'Página Inicial',
@@ -416,6 +418,13 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
       active: pathname.startsWith('/messages'),
     },
     {
+      label: 'Async',
+      href: '/async',
+      icon: AsyncLogo,
+      isAsync: true,
+      active: pathname.startsWith('/async') || pathname.startsWith('/ducky'),
+    },
+    {
       label: 'Itens salvos',
       href: '/bookmarks',
       icon: Bookmark,
@@ -432,8 +441,6 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
   const moreMenuIsActive = [
     '/jobs',
     '/recruiter',
-    '/async',
-    '/ducky',
     // '/guilds',
     '/events',
     '/evaluations',
@@ -516,30 +523,34 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
       {/* DESKTOP SIDEBAR (Twitter-like) */}
       {/* ========================================== */}
       <aside
-        className={`hidden h-screen w-60 shrink-0 select-none flex-col justify-between bg-dd-bg p-3 xl:p-4 md:sticky md:top-0 md:flex xl:w-[250px] 2xl:w-[265px] z-40 overflow-visible ${
+        className={`z-40 hidden h-screen h-dvh min-h-0 w-[76px] shrink-0 select-none flex-col overflow-visible bg-dd-bg p-2 md:sticky md:top-0 md:flex xl:w-[250px] xl:p-4 2xl:w-[265px] ${
           showDivider ? 'border-r border-dd-border' : ''
         }`}
       >
-        <div className="space-y-2 xl:space-y-3">
+        <div className="flex min-h-0 flex-1 flex-col">
           {/* Logo */}
-          <Link href="/feed" className="group flex w-fit items-center gap-2.5 px-3 py-1">
+          <Link
+            href="/feed"
+            className="group flex w-full shrink-0 items-center justify-center px-2 py-1 xl:w-fit xl:justify-start xl:gap-2.5 xl:px-3"
+            aria-label="Stacklyst"
+          >
             <ThemeLogo
               alt="Stacklyst Logo"
               width={28}
               height={28}
               className="object-contain group-hover:scale-105 transition-transform duration-300"
             />
-            <span className="text-dd-text dark:text-white font-black text-xl tracking-tight">
+            <span className="hidden text-dd-text dark:text-white font-black text-xl tracking-tight xl:inline">
               Stacklyst
             </span>
           </Link>
 
           {/* Navigation Links */}
-          <nav className="flex flex-col gap-0.5">
+          <nav className="mt-2 flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto overscroll-contain pr-1 scrollbar-none xl:mt-3">
             {navItems.map((item) => {
               const Icon = item.icon;
 
-              const linkClasses = `group flex w-full cursor-pointer items-center gap-4 rounded-full px-4 py-2.5 text-left text-[15px] ${
+              const linkClasses = `group flex w-full cursor-pointer items-center justify-center rounded-full px-2 py-3 text-left text-[15px] xl:justify-start xl:gap-4 xl:px-4 xl:py-2.5 ${
                 item.active
                   ? 'font-black text-dd-text dark:text-white'
                   : 'font-bold text-dd-text dark:text-white'
@@ -547,7 +558,9 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
 
               const iconEl = (
                 <div className="relative flex items-center justify-center w-6 h-6 shrink-0">
-                  {item.label === 'Notificações' ? (
+                  {item.isAsync ? (
+                    <AsyncLogo width={24} height={24} className="h-6 w-6 object-contain" />
+                  ) : item.label === 'Notificações' ? (
                     <NotificationBellIcon unreadCount={unreadCount} active={item.active} />
                   ) : (
                     <Icon
@@ -563,7 +576,9 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
               const contentEl = (
                 <>
                   {iconEl}
-                  <span className="truncate text-dd-text dark:text-white">{item.label}</span>
+                  <span className="hidden truncate text-dd-text dark:text-white xl:inline">
+                    {item.label}
+                  </span>
                 </>
               );
 
@@ -572,100 +587,85 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
                   key={item.label}
                   href={item.href}
                   className={linkClasses}
+                  aria-label={item.label}
                   aria-current={item.active ? 'page' : undefined}
                 >
                   {contentEl}
                 </Link>
               );
             })}
+          </nav>
 
-            {/* "Mais" dropdown button */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => {
-                  setDropdownOpen(false);
-                  setMoreMenuOpen((open) => !open);
-                }}
-                aria-expanded={moreMenuOpen}
-                aria-haspopup="menu"
-                className={`flex w-full cursor-pointer items-center gap-4 rounded-full px-4 py-2.5 text-left text-[15px] ${
-                  moreMenuIsActive
-                    ? 'font-black text-dd-text dark:text-white'
-                    : 'font-bold text-dd-text dark:text-white'
-                } transition-colors duration-150 hover:bg-black/[0.06] dark:hover:bg-white/10 group`}
-              >
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center">
-                  <MoreHorizontal className="h-6 w-6 text-dd-text dark:text-white stroke-[2.2] transition-transform duration-150 group-hover:scale-105" />
-                </div>
-                <span className="text-dd-text dark:text-white">Mais</span>
-              </button>
+          {/* "Mais" dropdown button */}
+          <div className="relative shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setDropdownOpen(false);
+                setMoreMenuOpen((open) => !open);
+              }}
+              aria-expanded={moreMenuOpen}
+              aria-haspopup="menu"
+              className={`flex w-full cursor-pointer items-center justify-center rounded-full px-2 py-3 text-left text-[15px] xl:justify-start xl:gap-4 xl:px-4 xl:py-2.5 ${
+                moreMenuIsActive
+                  ? 'font-black text-dd-text dark:text-white'
+                  : 'font-bold text-dd-text dark:text-white'
+              } transition-colors duration-150 hover:bg-black/[0.06] dark:hover:bg-white/10 group`}
+              aria-label="Mais"
+            >
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center">
+                <MoreHorizontal className="h-6 w-6 text-dd-text dark:text-white stroke-[2.2] transition-transform duration-150 group-hover:scale-105" />
+              </div>
+              <span className="hidden text-dd-text dark:text-white xl:inline">Mais</span>
+            </button>
 
-              {moreMenuOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-40 cursor-default"
+            {moreMenuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40 cursor-default"
+                  onClick={() => setMoreMenuOpen(false)}
+                />
+                <div
+                  role="menu"
+                  className="absolute bottom-full left-0 z-50 mb-2 w-[290px] max-w-[calc(100vw-2rem)] origin-bottom-left overflow-y-auto max-h-[75vh] rounded-2xl border border-dd-border/70 bg-dd-surface p-2 font-sans shadow-[0_12px_40px_rgba(0,0,0,0.5)] animate-slide-up"
+                >
+                  <Link
+                    href="/jobs"
+                    role="menuitem"
+                    className="flex items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
                     onClick={() => setMoreMenuOpen(false)}
-                  />
-                  <div
-                    role="menu"
-                    className="absolute bottom-full left-0 z-50 mb-2 w-[290px] max-w-[calc(100vw-2rem)] origin-bottom-left overflow-y-auto max-h-[75vh] rounded-2xl border border-dd-border/70 bg-dd-surface p-2 font-sans shadow-[0_12px_40px_rgba(0,0,0,0.5)] animate-slide-up"
                   >
-                    <Link
-                      href="/jobs"
-                      role="menuitem"
-                      className="flex items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
-                      onClick={() => setMoreMenuOpen(false)}
-                    >
-                      <Briefcase className="h-5.5 w-5.5 shrink-0 text-white" />
-                      <span>Vagas & Recrutamento</span>
-                    </Link>
-                    <Link
-                      href="/events"
-                      role="menuitem"
-                      className="flex items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
-                      onClick={() => setMoreMenuOpen(false)}
-                    >
-                      <Calendar className="h-5.5 w-5.5 shrink-0 text-white" />
-                      <span>Eventos & Hackathons</span>
-                    </Link>
-                    <Link
-                      href="/evaluations"
-                      role="menuitem"
-                      className="flex items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
-                      onClick={() => setMoreMenuOpen(false)}
-                    >
-                      <Code2 className="h-5.5 w-5.5 shrink-0 text-white" />
-                      <span>Avaliação de Código</span>
-                    </Link>
-                    <Link
-                      href="/admin"
-                      role="menuitem"
-                      className="flex items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
-                      onClick={() => setMoreMenuOpen(false)}
-                    >
-                      <ShieldAlert className="h-5.5 w-5.5 shrink-0 text-white" />
-                      <span>Painel Administrativo</span>
-                    </Link>
-                    <Link
-                      href="/async"
-                      role="menuitem"
-                      aria-current={
-                        pathname.startsWith('/async') || pathname.startsWith('/ducky')
-                          ? 'page'
-                          : undefined
-                      }
-                      className="flex items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
-                      onClick={() => setMoreMenuOpen(false)}
-                    >
-                      <AsyncLogo
-                        width={22}
-                        height={22}
-                        className="h-5.5 w-5.5 shrink-0 object-contain"
-                      />
-                      <span>ASYNC IA</span>
-                    </Link>
-                    {/* <Link
+                    <Briefcase className="h-5.5 w-5.5 shrink-0 text-white" />
+                    <span>Vagas & Recrutamento</span>
+                  </Link>
+                  <Link
+                    href="/events"
+                    role="menuitem"
+                    className="flex items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                    onClick={() => setMoreMenuOpen(false)}
+                  >
+                    <Calendar className="h-5.5 w-5.5 shrink-0 text-white" />
+                    <span>Eventos & Hackathons</span>
+                  </Link>
+                  <Link
+                    href="/evaluations"
+                    role="menuitem"
+                    className="flex items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                    onClick={() => setMoreMenuOpen(false)}
+                  >
+                    <Code2 className="h-5.5 w-5.5 shrink-0 text-white" />
+                    <span>Avaliação de Código</span>
+                  </Link>
+                  <Link
+                    href="/admin"
+                    role="menuitem"
+                    className="flex items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                    onClick={() => setMoreMenuOpen(false)}
+                  >
+                    <ShieldAlert className="h-5.5 w-5.5 shrink-0 text-white" />
+                    <span>Painel Administrativo</span>
+                  </Link>
+                  {/* <Link
                       href="/guilds"
                       role="menuitem"
                       className="flex items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
@@ -674,35 +674,36 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
                       <Users className="h-5.5 w-5.5 shrink-0 text-white" />
                       <span>Comunidades</span>
                     </Link> */}
-                    <Link
-                      href="/settings"
-                      role="menuitem"
-                      className="flex items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
-                      onClick={() => setMoreMenuOpen(false)}
-                    >
-                      <SettingsIcon className="h-5.5 w-5.5 shrink-0 text-white" />
-                      <span>Configurações</span>
-                    </Link>
-                  </div>
-                </>
-              )}
-            </div>
-          </nav>
+                  <Link
+                    href="/settings"
+                    role="menuitem"
+                    className="flex items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-extrabold leading-none text-white transition-colors hover:bg-dd-bg/60 focus-visible:bg-dd-bg/60 focus-visible:outline-none"
+                    onClick={() => setMoreMenuOpen(false)}
+                  >
+                    <SettingsIcon className="h-5.5 w-5.5 shrink-0 text-white" />
+                    <span>Configurações</span>
+                  </Link>
+                </div>
+              </>
+            )}
+          </div>
 
           {/* Post action button */}
           {activeUser && (
             <button
               onClick={() => setModalOpen(true)}
-              className="mt-3 flex w-full cursor-pointer items-center justify-center rounded-full bg-[#0f1419] py-3 px-5 text-center text-[16px] font-bold text-white shadow-md transition-all duration-150 hover:bg-[#0f1419]/90 active:scale-[0.98] dark:bg-white dark:text-black dark:hover:bg-white/90"
+              className="mt-3 flex h-12 w-12 self-center cursor-pointer items-center justify-center rounded-full bg-[#0f1419] p-0 text-center text-[16px] font-bold text-white shadow-md transition-all duration-150 hover:bg-[#0f1419]/90 active:scale-[0.98] dark:bg-white dark:text-black dark:hover:bg-white/90 xl:h-auto xl:w-full xl:px-5 xl:py-3"
+              aria-label="Criar publicação"
             >
-              <span>Postar</span>
+              <SquarePen className="h-6 w-6 xl:hidden" />
+              <span className="hidden xl:inline">Postar</span>
             </button>
           )}
         </div>
 
         {/* User profile dropdown widget */}
         {activeUser && (
-          <div className="relative mt-auto pt-3">
+          <div className="relative mt-2 shrink-0 pt-2 xl:mt-3 xl:pt-3">
             <button
               type="button"
               onClick={() => {
@@ -711,7 +712,8 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
               }}
               aria-expanded={dropdownOpen}
               aria-haspopup="menu"
-              className="group flex w-full min-w-0 cursor-pointer items-center gap-3 rounded-full p-2.5 text-left transition-colors duration-150 hover:bg-black/[0.06] focus-visible:bg-black/[0.06] focus-visible:outline-none dark:hover:bg-white/10 dark:focus-visible:bg-white/10"
+              className="group mx-auto flex w-fit min-w-0 cursor-pointer items-center justify-center rounded-full p-1.5 text-left transition-colors duration-150 hover:bg-black/[0.06] focus-visible:bg-black/[0.06] focus-visible:outline-none dark:hover:bg-white/10 dark:focus-visible:bg-white/10 xl:w-full xl:justify-start xl:gap-3 xl:p-2.5"
+              aria-label="Abrir menu do perfil"
             >
               <AuthorAvatar
                 username={activeUser.username}
@@ -720,7 +722,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
                 size="md"
                 className="!h-10 !w-10 shrink-0"
               />
-              <div className="min-w-0 flex-1 font-sans">
+              <div className="hidden min-w-0 flex-1 font-sans xl:block">
                 <div className="flex min-w-0 items-center justify-between gap-1.5">
                   <p className="min-w-0 truncate text-[15px] font-bold leading-tight text-dd-text dark:text-white">
                     {activeUser.name ||
@@ -735,7 +737,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
                   </p>
                 </div>
               </div>
-              <MoreHorizontal className="h-5 w-5 shrink-0 text-dd-text dark:text-white" />
+              <MoreHorizontal className="hidden h-5 w-5 shrink-0 text-dd-text dark:text-white xl:block" />
             </button>
 
             {dropdownOpen && (
@@ -790,7 +792,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
       {/* ========================================== */}
       <div className="md:hidden flex flex-col w-full">
         {/* Top Header */}
-        <header className="sticky top-0 z-40 w-full border-b border-dd-border bg-dd-bg/80 backdrop-blur-md px-4 py-3 flex items-center justify-between">
+        <header className="sticky top-0 z-40 flex w-full items-center justify-between border-b border-dd-border bg-dd-bg/80 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md">
           <Link href="/feed" className="flex items-center gap-2 group">
             <ThemeLogo alt="Stacklyst Logo" width={24} height={24} className="object-contain" />
             <span className="text-dd-text font-extrabold text-base tracking-tight">Stacklyst</span>
@@ -917,7 +919,7 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
           </div>
         </header>
 
-        <nav className="fixed bottom-0 left-0 right-0 z-40 bg-dd-bg/90 backdrop-blur-md border-t border-dd-border px-6 py-2.5 flex items-center justify-around">
+        <nav className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-dd-border bg-dd-bg/90 px-3 pb-[max(0.625rem,env(safe-area-inset-bottom))] pt-2.5 backdrop-blur-md sm:px-6">
           {mobileNavItems.slice(0, 2).map(renderMobileNavItem)}
 
           {/* ASYNC IA — no meio da barra inferior */}
@@ -940,8 +942,8 @@ export function Sidebar({ user, showDivider = true }: SidebarProps) {
 
           {mobileNavItems.slice(2).map(renderMobileNavItem)}
 
-          {/* Floating post trigger — apenas na página de feed */}
-          {activeUser && (pathname === '/feed' || pathname === '/') && (
+          {/* O feed já possui um compositor próprio; mantém o atalho flutuante para a raiz. */}
+          {activeUser && pathname === '/' && (
             <button
               onClick={() => setModalOpen(true)}
               className="absolute -top-14 right-4 bg-blue-500 text-white rounded-full p-3.5 shadow-lg shadow-blue-500/25 active:scale-95 transition-all w-12 h-12 flex items-center justify-center cursor-pointer"

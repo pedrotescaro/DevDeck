@@ -35,7 +35,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' blob: data: https://images.unsplash.com https://api.dicebear.com https://avatars.githubusercontent.com https://lh3.googleusercontent.com https://cdn.discordapp.com https://images-ext-1.discordapp.net https://assets.aceternity.com",
       "font-src 'self' data: https://fonts.gstatic.com",
-      "connect-src 'self' ws: wss: https://*.supabase.co https://api.github.com https://wandbox.org https://generativelanguage.googleapis.com https://api.groq.com https://api.openai.com http://localhost:11434",
+      "connect-src 'self' ws: wss: https://*.supabase.co https://api.github.com https://wandbox.org",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -47,7 +47,9 @@ const securityHeaders = [
 const ALLOWED_ORIGINS = [process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'];
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
+  // Vercel manages output tracing through its adapter. Keep the standalone
+  // server bundle for local, Docker, and other self-hosted deployments.
+  output: process.env.VERCEL ? undefined : 'standalone',
   experimental: {
     // Mantem segmentos dinamicos recentes no cache do router. Isso torna voltas
     // e alternancias entre as areas principais instantaneas sem cachear respostas

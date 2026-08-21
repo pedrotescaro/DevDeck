@@ -25,7 +25,7 @@ function ActionButton({
       onClick={onClick}
       title={title}
       aria-label={title}
-      className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-dd-muted transition-colors hover:bg-dd-surface hover:text-dd-text"
+      className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-md text-dd-muted transition-colors hover:bg-dd-surface hover:text-dd-text sm:size-7"
     >
       {children}
     </button>

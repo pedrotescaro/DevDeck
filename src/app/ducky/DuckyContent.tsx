@@ -32,7 +32,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { AiInput } from '@/components/chat/ai/ai-input';
 import { AiTextLoading } from '@/components/chat/ai/ai-text-loading';
 import { AiStateLoading } from '@/components/chat/ai/ai-state-loading';
-import { AiAvatar, ChatMessageView, type MessageActionsRef } from '@/components/chat/chat-message';
+import { ChatMessageView, type MessageActionsRef } from '@/components/chat/chat-message';
 import { ChatScrollButton } from '@/components/chat/chat-scroll-button';
 import type {
   AttachedFile,
@@ -991,11 +991,10 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
       initial={reduced ? false : { opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
-      className="flex w-full items-start gap-3"
+      className="w-full"
       aria-live="polite"
     >
-      <AiAvatar />
-      <div className="min-w-0 flex-1 pt-1">
+      <div className="min-w-0 pt-1">
         {mode === 'Repositório' ? (
           <AiStateLoading steps={REPO_LOADING_STEPS} />
         ) : mode === 'Deep Debug' ? (
@@ -1211,7 +1210,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
             animate={{ width: 'auto', opacity: 1 }}
             exit={reduced ? undefined : { width: 0, opacity: 0 }}
             transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
-            className="hidden shrink-0 overflow-hidden md:block"
+            className="hidden shrink-0 overflow-visible md:block"
             aria-hidden={isFullscreen}
           >
             <Sidebar user={user} />
@@ -1247,13 +1246,13 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
         )}
 
         {/* Top Header */}
-        <header className="relative z-20 flex select-none items-center justify-between border-b border-dd-border/60 bg-dd-bg/30 px-4 py-3 backdrop-blur-md transition-colors duration-200 sm:px-6">
+        <header className="relative z-20 flex min-h-14 select-none items-center justify-between border-b border-dd-border/60 bg-dd-bg/30 px-2 py-2 backdrop-blur-md transition-colors duration-200 sm:px-6 sm:py-3">
           {/* Top Left */}
-          <div className="flex min-w-0 items-center gap-3">
+          <div className="flex min-w-0 items-center gap-1 sm:gap-3">
             {isFullscreen ? (
               <button
                 onClick={() => setIsFullscreen(false)}
-                className="animate-in cursor-pointer rounded-full p-2 text-dd-muted transition-all fade-in duration-300 hover:bg-dd-surface hover:text-dd-text"
+                className="animate-in flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-dd-muted transition-all fade-in duration-300 hover:bg-dd-surface hover:text-dd-text sm:size-9"
                 title="Mostrar barra lateral (Sair do modo expandido)"
                 aria-label="Mostrar barra lateral"
               >
@@ -1262,14 +1261,14 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
             ) : (
               <button
                 onClick={() => setIsFullscreen(true)}
-                className="animate-in cursor-pointer rounded-full p-2 text-dd-muted transition-all fade-in duration-300 hover:bg-dd-surface hover:text-dd-text"
+                className="animate-in flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-dd-muted transition-all fade-in duration-300 hover:bg-dd-surface hover:text-dd-text sm:size-9"
                 title="Modo Foco (Ocultar barra lateral)"
                 aria-label="Modo Foco"
               >
                 <SidebarClose className="h-4.5 w-4.5" />
               </button>
             )}
-            <div className="flex items-center gap-2.5">
+            <div className="flex min-w-0 items-center gap-2.5">
               <AsyncLogo width={24} height={24} className="h-6 w-6 object-contain" />
               <span className="hidden text-xl leading-none tracking-[0.16em] text-dd-text sm:block">
                 ASYNC
@@ -1280,11 +1279,11 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                 href={activeRepo.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 rounded-lg border border-dd-border bg-dd-surface px-3 py-1.5 text-[10px] font-bold text-dd-muted transition-all hover:border-dd-text/40 hover:text-dd-text"
+                className="hidden min-w-0 items-center gap-1.5 rounded-lg border border-dd-border bg-dd-surface px-3 py-1.5 text-[10px] font-bold text-dd-muted transition-all hover:border-dd-text/40 hover:text-dd-text sm:flex"
                 title={activeRepo.url}
               >
                 <Github className="h-3.5 w-3.5 text-dd-text" />
-                <span className="max-w-[180px] truncate">
+                <span className="max-w-[120px] truncate lg:max-w-[180px]">
                   {activeRepo.owner}/{activeRepo.name}
                 </span>
                 <ExternalLink className="h-3 w-3 opacity-60" />
@@ -1293,10 +1292,10 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
           </div>
 
           {/* Top Right */}
-          <div className="flex items-center gap-1 sm:gap-2.5">
+          <div className="flex shrink-0 items-center gap-0.5 sm:gap-2.5">
             <button
               onClick={handleNewChat}
-              className="flex cursor-pointer items-center gap-1 px-2 py-1.5 text-xs font-bold text-dd-text transition-colors hover:underline sm:px-3"
+              className="flex size-10 shrink-0 cursor-pointer items-center justify-center gap-1 rounded-full text-xs font-bold text-dd-text transition-colors hover:bg-dd-surface sm:h-9 sm:w-auto sm:rounded-none sm:px-3 sm:hover:bg-transparent sm:hover:underline"
               title="Iniciar nova conversa"
             >
               <Plus className="h-3.5 w-3.5" />
@@ -1305,7 +1304,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
             <button
               onClick={() => setIsHistoryOpen(true)}
-              className="flex cursor-pointer items-center gap-1.5 border-0 bg-transparent px-2 py-1.5 text-xs font-medium text-dd-muted transition-colors hover:text-dd-text sm:px-3"
+              className="flex size-10 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 bg-transparent text-xs font-medium text-dd-muted transition-colors hover:bg-dd-surface hover:text-dd-text sm:h-9 sm:w-auto sm:rounded-none sm:px-3 sm:hover:bg-transparent"
               title="Ver histórico de conversas"
             >
               <History className="h-3.5 w-3.5" />
@@ -1314,7 +1313,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
             <button
               onClick={() => setIsPrivate(!isPrivate)}
-              className={`flex cursor-pointer items-center gap-1.5 border-0 bg-transparent px-2 py-1.5 text-xs font-bold uppercase transition-all sm:px-3 ${
+              className={`flex size-10 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-full border-0 bg-transparent text-xs font-bold uppercase transition-all hover:bg-dd-surface sm:h-9 sm:w-auto sm:rounded-none sm:px-3 sm:hover:bg-transparent ${
                 isPrivate ? 'text-dd-purple' : 'text-dd-muted hover:text-dd-text'
               }`}
               title={isPrivate ? 'Histórico pausado (Modo Privado)' : 'Ativar Modo Privado'}
@@ -1328,8 +1327,8 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
 
         {messages.length === 0 ? (
           /* ── Welcome / empty state ── */
-          <div className="relative z-10 flex min-h-0 flex-grow flex-col overflow-y-auto">
-            <div className="mx-auto flex w-full max-w-2xl flex-grow flex-col items-center justify-center gap-6 px-4 pb-28 pt-10 sm:px-6">
+          <div className="relative z-10 flex min-h-0 flex-grow flex-col overflow-y-auto overscroll-contain">
+            <div className="mx-auto flex w-full max-w-2xl flex-grow flex-col items-center justify-start gap-4 px-3 pb-[calc(5rem+env(safe-area-inset-bottom))] pt-6 sm:justify-center sm:gap-6 sm:px-6 sm:pb-28 sm:pt-10">
               <div className="flex flex-col items-center gap-3 text-center">
                 <div className="flex select-none flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3">
                   <AsyncLogo
@@ -1337,7 +1336,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
                     height={40}
                     className="h-9 w-9 object-contain sm:h-11 sm:w-11"
                   />
-                  <h1 className="whitespace-nowrap text-lg font-bold tracking-tight text-dd-text sm:text-3xl">
+                  <h1 className="text-balance text-xl font-bold leading-tight tracking-tight text-dd-text sm:text-3xl">
                     O que você está desenvolvendo?
                   </h1>
                 </div>
@@ -1467,10 +1466,10 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
               <div
                 ref={chatScrollRef}
                 onScroll={handleScroll}
-                className="flex-grow overflow-y-auto scrollbar-ducky"
+                className="flex-grow overflow-y-auto overscroll-contain scrollbar-ducky"
               >
-                <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6">
-                  <div className="flex flex-col gap-6 pb-8 sm:gap-7">
+                <div className="mx-auto w-full max-w-3xl px-3 py-4 sm:px-6 sm:py-6">
+                  <div className="flex flex-col gap-5 pb-6 sm:gap-7 sm:pb-8">
                     {isPrivate && (
                       <div className="flex items-center gap-2.5 rounded-xl border border-dd-purple/10 bg-dd-purple/5 p-3.5 text-xs text-dd-purple select-none">
                         <ShieldAlert className="h-4 w-4 shrink-0" />
@@ -1498,11 +1497,11 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
             {/* Composer fixo — sem linha divisória nem fundo próprio, o fundo do
                 chat (com as partículas) aparece por trás em toda a área.
                 No mobile, pb-24 afasta o input da barra de navegação inferior. */}
-            <div className="relative z-20 shrink-0 px-4 pb-24 pt-3 sm:px-6 md:pb-4">
+            <div className="relative z-20 shrink-0 px-3 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-2 sm:px-6 sm:pt-3 md:pb-[max(1rem,env(safe-area-inset-bottom))]">
               <div className="mx-auto w-full max-w-3xl">
                 {renderComposer()}
 
-                <div className="mt-2.5 flex select-none items-center justify-center gap-1.5 text-center text-[9px] text-dd-muted">
+                <div className="mt-2.5 hidden select-none items-center justify-center gap-1.5 text-center text-[9px] text-dd-muted sm:flex">
                   <Sparkles className="h-3 w-3 text-dd-text" />
                   <span>
                     ASYNC Premium — Tire dúvidas ilimitadas e ative análise de repositórios do
@@ -1542,7 +1541,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
         }`}
       >
         {/* Drawer Header */}
-        <div className="flex shrink-0 select-none items-center gap-4 border-b border-dd-border/60 px-4 pb-3 pt-5">
+        <div className="flex shrink-0 select-none items-center gap-4 border-b border-dd-border/60 px-4 pb-3 pt-[max(1.25rem,env(safe-area-inset-top))]">
           <button
             onClick={() => setIsHistoryOpen(false)}
             className="cursor-pointer rounded-full p-1.5 text-dd-muted transition-colors hover:bg-dd-surface hover:text-dd-text"
@@ -1606,7 +1605,7 @@ export function DuckyContent({ user, activeLanguage }: DuckyContentProps) {
         </div>
 
         {/* Scrollable Contents */}
-        <div className="flex-grow overflow-y-auto scrollbar-ducky p-4">
+        <div className="flex-grow overflow-y-auto p-4 pb-[max(1rem,env(safe-area-inset-bottom))] scrollbar-ducky">
           {historyActiveTab === 'images' ? renderImagesTab() : renderChatsTab()}
         </div>
       </div>

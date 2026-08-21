@@ -71,7 +71,7 @@ export function AiAddMenu({
         aria-label="Adicionar arquivos ou configurações"
         title="Adicionar"
         className={cn(
-          'flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-40',
+          'flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-40 sm:size-8',
           open ? 'bg-dd-surface text-dd-text' : 'text-dd-text hover:bg-dd-surface'
         )}
       >
@@ -87,7 +87,7 @@ export function AiAddMenu({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduced ? undefined : { opacity: 0, y: 4, scale: 0.98 }}
             transition={{ duration: 0.16, ease: 'easeOut' }}
-            className="absolute bottom-full left-0 z-50 mb-2 w-72 origin-bottom-left overflow-y-auto rounded-xl border border-dd-border/70 bg-dd-surface p-2 font-sans shadow-[0_12px_40px_rgba(0,0,0,0.4)]"
+            className="absolute bottom-full left-0 z-50 mb-2 max-h-[min(70dvh,26rem)] w-[min(18rem,calc(100vw-2rem))] origin-bottom-left overflow-y-auto rounded-xl border border-dd-border/70 bg-dd-surface p-2 font-sans shadow-[0_12px_40px_rgba(0,0,0,0.4)]"
           >
             <p className="select-none px-3 pb-1.5 pt-1 text-[10px] font-bold uppercase tracking-wider text-dd-muted">
               Adicionar

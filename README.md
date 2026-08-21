@@ -166,11 +166,102 @@ npx prisma db seed
 
 #### 4. Executar o Servidor Local
 
+Antes de iniciar o Next.js, configure a ASYNC local conforme a seção abaixo.
+
 ```bash
 npm run dev
 ```
 
 Abra seu navegador em [http://localhost:3000](http://localhost:3000).
+
+---
+
+## 🧠 ASYNC local (Ollama + Qwen3 8B)
+
+O frontend conversa somente com as API Routes do Stacklyst. O fluxo local é:
+
+```text
+Navegador → /api/ai/* → AI Service → Ollama → async → qwen3:8b
+```
+
+Instale o [Ollama](https://ollama.com/) e, em um terminal, baixe o modelo base e crie o modelo lógico do projeto:
+
+```bash
+ollama pull qwen3:8b
+ollama create async -f Modelfile
+```
+
+Os mesmos comandos estão disponíveis como scripts:
+
+```bash
+npm run ai:pull
+npm run ai:create
+```
+
+Inicie o servidor do Ollama em um terminal separado. Em instalações desktop ele pode já estar ativo em segundo plano:
+
+```bash
+ollama serve
+```
+
+Teste o modelo diretamente antes de iniciar a aplicação:
+
+```bash
+ollama run async
+```
+
+Configure `.env.local`:
+
+```env
+AI_PROVIDER="ollama"
+STACKLYST_AI_URL="http://127.0.0.1:11434"
+STACKLYST_AI_MODEL="async"
+STACKLYST_AI_TIMEOUT_MS="60000"
+STACKLYST_AI_REASONING="none"
+GROQ_API_KEY=""
+```
+
+`STACKLYST_AI_REASONING="none"` reduz o tempo até a resposta no Qwen3. Use `low`, `medium` ou `high` apenas quando precisar de raciocínio mais profundo, pois esses modos aumentam a latência.
+
+Para evitar que o modelo seja descarregado após cinco minutos de inatividade, configure `OLLAMA_KEEP_ALIVE=30m` no ambiente do processo do Ollama. Isso mantém o modelo em RAM e reduz a latência das próximas conversas, ao custo de reservar memória por mais tempo.
+
+Depois execute:
+
+```bash
+npm run dev
+```
+
+Para validar a rota genérica pelo backend do Stacklyst:
+
+```bash
+curl -X POST http://localhost:3000/api/ai/chat \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"Explique closures em JavaScript"}]}'
+```
+
+Para voltar temporariamente à Groq, não altere o frontend; configure somente:
+
+```env
+AI_PROVIDER="groq"
+GROQ_API_KEY="sua-chave-server-only"
+```
+
+Em produção, especialmente na Vercel, `127.0.0.1` aponta para a própria instância da aplicação e não para seu computador. Hospede o Ollama em um servidor de inferência separado e defina exclusivamente no ambiente de produção, por exemplo:
+
+```env
+AI_PROVIDER="ollama"
+STACKLYST_AI_URL="https://ai.stacklyst.com"
+STACKLYST_AI_MODEL="async"
+```
+
+Não exponha o Ollama do computador de desenvolvimento à internet. `STACKLYST_AI_URL`, modelos, prompts e chaves são configurações server-only e nunca devem usar o prefixo `NEXT_PUBLIC_`.
+
+### Requisitos locais
+
+- O download e a criação inicial exigem espaço para o Qwen3 8B e acesso à internet.
+- A velocidade e o consumo de memória dependem do hardware e da aceleração disponível.
+- O chat e a análise de repositório preservam streaming; respostas estruturadas de quiz e desafio são validadas antes do uso.
+- Se a IA falhar, quizzes e duelos mantêm os fallbacks já existentes no projeto.
 
 ---
 
@@ -213,8 +304,8 @@ O seed cria três desenvolvedores com diferentes níveis de XP e trilhas de tecn
 > [!IMPORTANT]
 > Defina `SEED_DEFAULT_PASSWORD` no seu `.env.local` **antes** de rodar `npx prisma db seed`.
 
-| Nome       | E-mail               | Especialidade Principal |
-| :--------- | :------------------- | :---------------------- |
+| Nome       | E-mail                 | Especialidade Principal |
+| :--------- | :--------------------- | :---------------------- |
 | **Pedro**  | `pedro@stacklyst.dev`  | TypeScript & JavaScript |
 | **Ana**    | `ana@stacklyst.dev`    | Python & Django         |
 | **Carlos** | `carlos@stacklyst.dev` | Rust & C++              |

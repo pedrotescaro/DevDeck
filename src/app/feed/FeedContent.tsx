@@ -1229,7 +1229,7 @@ export function FeedContent({
       />
       {/* XP Toast Notification */}
       {toastXp && (
-        <div className="fixed top-20 right-6 z-50 animate-slide-in-right rounded-xl border border-emerald-500/30 bg-dd-surface/90 backdrop-blur-xl p-4 shadow-2xl flex items-center gap-3">
+        <div className="fixed left-3 right-3 top-[calc(3.75rem+env(safe-area-inset-top))] z-50 flex animate-slide-in-right items-center gap-3 rounded-xl border border-emerald-500/30 bg-dd-surface/90 p-4 shadow-2xl backdrop-blur-xl sm:left-auto sm:right-6 sm:top-20 sm:w-auto">
           <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-extrabold text-base ring-1 ring-emerald-500/30">
             +{toastXp.amount}
           </div>
@@ -1240,7 +1240,7 @@ export function FeedContent({
         </div>
       )}
       {firstPostToastVisible && (
-        <div className="fixed left-1/2 top-24 z-50 -translate-x-1/2 rounded-full bg-dd-accent px-4 py-2 text-xs font-black text-white shadow-xl shadow-blue-500/25 dd-soft-bounce">
+        <div className="fixed left-1/2 top-[calc(4.5rem+env(safe-area-inset-top))] z-50 max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded-full bg-dd-accent px-4 py-2 text-center text-xs font-black text-white shadow-xl shadow-blue-500/25 dd-soft-bounce sm:top-24">
           +50 XP - Primeira postagem! Bem-vindo ao Stacklyst.
         </div>
       )}
@@ -1253,7 +1253,7 @@ export function FeedContent({
         {/* ========================================================================= */}
         <main
           data-testid="primary-column"
-          className="flex min-h-screen w-full min-w-0 max-w-[720px] xl:max-w-[820px] 2xl:max-w-[920px] flex-grow flex-col bg-dd-bg pb-24 md:pb-8 border-r border-dd-border/60"
+          className="flex min-h-screen w-full min-w-0 max-w-[720px] flex-grow flex-col border-r border-dd-border/60 bg-dd-bg pb-[calc(6rem+env(safe-area-inset-bottom))] xl:max-w-[820px] 2xl:max-w-[920px] md:pb-8"
         >
           {/* Seletor de Abas Feed / Quizzes */}
           <div className="sticky top-0 z-30 bg-dd-bg/95 backdrop-blur-md flex border-b border-dd-border/60 select-none">
@@ -1375,16 +1375,16 @@ export function FeedContent({
               <div
                 ref={composerContainerRef}
                 onClick={() => setComposeFocused(true)}
-                className="relative z-20 border-b border-dd-border/60 bg-transparent px-4 pt-3.5 pb-2.5 transition-[border-color,box-shadow] duration-200 focus-within:border-blue-500/40"
+                className="relative z-20 border-b border-dd-border/60 bg-transparent px-3 pb-2 pt-3 transition-[border-color,box-shadow] duration-200 focus-within:border-blue-500/40 sm:px-4 sm:pb-2.5 sm:pt-3.5"
               >
-                <form onSubmit={handleCreatePost} className="flex gap-3">
+                <form onSubmit={handleCreatePost} className="flex gap-2 sm:gap-3">
                   <div className="shrink-0 pt-0.5">
                     <AuthorAvatar
                       username={initialUser.username}
                       avatar_url={initialUser.avatar_url}
                       avatar_config={initialUser.avatar_config}
                       size="md"
-                      className="!h-10 !w-10"
+                      className="!h-9 !w-9 sm:!h-10 sm:!w-10"
                     />
                   </div>
 
@@ -1408,6 +1408,7 @@ export function FeedContent({
                             : '1.75rem'
                         }
                         placeholder="O que você está construindo hoje?"
+                        className="feed-composer-editor"
                       />
                       {(composeFocused || postBody.trim().length > 0) && (
                         <div className="absolute bottom-0 right-0">
@@ -1495,7 +1496,7 @@ export function FeedContent({
 
                     <div
                       className={cn(
-                        'flex flex-wrap items-center justify-between gap-2',
+                        'flex flex-wrap items-center gap-x-2 gap-y-1',
                         composeFocused ||
                           Boolean(postBody.trim()) ||
                           Boolean(quotePost) ||
@@ -1507,7 +1508,7 @@ export function FeedContent({
                           : 'pt-2'
                       )}
                     >
-                      <div className="flex items-center gap-1 text-blue-500">
+                      <div className="flex min-w-0 items-center gap-1 text-blue-500">
                         <div>
                           <input
                             type="file"
@@ -1549,7 +1550,7 @@ export function FeedContent({
                         />
                       </div>
 
-                      <div className="flex items-center gap-3">
+                      <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
                         {uploadingImage && (
                           <span className="text-[10px] text-dd-muted animate-pulse font-semibold">
                             Enviando imagem...
@@ -1561,6 +1562,7 @@ export function FeedContent({
                           }
                           state={publishState}
                           xpReward={xpReward}
+                          className="px-3 text-xs sm:px-4 sm:text-sm"
                         />
                       </div>
                     </div>

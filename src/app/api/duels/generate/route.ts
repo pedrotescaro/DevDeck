@@ -4,6 +4,13 @@ import { logger } from '@/lib/logger';
 import type { DuelProblem } from '@/lib/duel-problems';
 import { parseProblemFromJson } from '@/lib/duel-problems';
 import { generateProceduralDuelProblem } from '@/lib/duel-challenge-generator';
+import {
+  ai,
+  STACKLYST_CHALLENGE_PROMPT,
+  STACKLYST_DUEL_PROMPT,
+  withStacklystBasePrompt,
+} from '@/lib/ai';
+import { z } from 'zod';
 
 const SUPPORTED_LANGUAGES = ['TS', 'JS', 'PYTHON'] as const;
 type SupportedLang = (typeof SUPPORTED_LANGUAGES)[number];
@@ -19,6 +26,47 @@ const DIFFICULTY_MAP: Record<string, 'Fácil' | 'Médio' | 'Difícil'> = {
   medium: 'Médio',
   hard: 'Difícil',
 };
+
+const generatedDuelProblemSchema = z
+  .object({
+    id: z
+      .string()
+      .min(1)
+      .max(100)
+      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+    title: z.string().min(3).max(200),
+    difficulty: z.enum(['Fácil', 'Médio', 'Difícil']),
+    description: z.string().min(20).max(5_000),
+    functionName: z.string().min(1).max(100),
+    starters: z
+      .object({
+        TS: z.string().min(1).max(10_000),
+        JS: z.string().min(1).max(10_000),
+        PYTHON: z.string().min(1).max(10_000),
+      })
+      .strict(),
+    testCases: z
+      .array(
+        z
+          .object({
+            id: z.string().min(1).max(50),
+            description: z.string().min(1).max(500),
+            inputDisplay: z.string().max(1_000),
+            expectedDisplay: z.string().max(1_000),
+            testExpression: z
+              .object({
+                TS: z.string().min(1).max(2_000),
+                JS: z.string().min(1).max(2_000),
+                PYTHON: z.string().min(1).max(2_000),
+              })
+              .strict(),
+          })
+          .strict()
+      )
+      .min(3)
+      .max(5),
+  })
+  .strict();
 
 function buildSystemPrompt(language: SupportedLang, difficulty: string, topic?: string): string {
   const langLabel = LANGUAGE_LABELS[language];
@@ -167,33 +215,30 @@ export async function POST(req: NextRequest) {
 }
 
 // ---------------------------------------------------------------------------
-// AI call — reuses the same provider detection as generateQuizAI but returns
-// the raw parsed JSON instead of validating against the quiz schema.
+// AI call through the provider-agnostic service. The generated object is
+// validated before it can reach the duel engine.
 // ---------------------------------------------------------------------------
 async function generateAIDuelProblem(
   systemPrompt: string,
   userPrompt: string
-): Promise<any | null> {
-  // We call generateQuizAI's underlying providers directly.
-  // Since generateQuizAI validates against AIQuizResponseSchema, we need a
-  // custom version that just returns raw JSON.
-  const { generateChatAI } = await import('@/lib/ai');
-
+): Promise<z.infer<typeof generatedDuelProblemSchema> | null> {
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
-      const raw = await generateChatAI(systemPrompt, [{ role: 'user', content: userPrompt }]);
-
-      if (!raw) continue;
-
-      // Strip potential markdown fences
-      const cleaned = raw
-        .replace(/^```json\s*/i, '')
-        .replace(/^```\s*/i, '')
-        .replace(/\s*```$/i, '')
-        .trim();
-
-      const parsed = JSON.parse(cleaned);
-      return parsed;
+      return await ai.chatStructured(
+        {
+          messages: [
+            {
+              role: 'system',
+              content: withStacklystBasePrompt(
+                `${STACKLYST_CHALLENGE_PROMPT}\n\n${STACKLYST_DUEL_PROMPT}\n\n${systemPrompt}`
+              ),
+            },
+            { role: 'user', content: userPrompt },
+          ],
+          temperature: 0.3,
+        },
+        generatedDuelProblemSchema
+      );
     } catch (err) {
       logger.warn(`AI duel problem generation attempt ${attempt} failed`, {
         error: String(err),

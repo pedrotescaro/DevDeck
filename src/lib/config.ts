@@ -16,18 +16,6 @@ export const WANDBOX_API_URL =
 
 export const GITHUB_API_URL = process.env.GITHUB_API_URL || 'https://api.github.com';
 
-/* ── AI Provider Defaults ─────────────────────────────────────── */
-
-export const AI_MODEL_DEFAULTS: Record<string, string> = {
-  gemini: 'gemini-1.5-flash',
-  groq: 'llama-3.3-70b-versatile',
-  openai: 'gpt-4o-mini',
-  ollama: 'qwen2.5-coder',
-};
-
-export const OLLAMA_BASE_URL = process.env.OLLAMA_API_BASE_URL || 'http://localhost:11434';
-export const OPENAI_BASE_URL = process.env.OPENAI_API_BASE_URL || 'https://api.openai.com/v1';
-
 /* ── XP & Leveling ───────────────────────────────────────────── */
 
 export const XP_LEVEL_THRESHOLDS = [

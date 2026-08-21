@@ -1,29 +1,38 @@
 import { apiHandler } from '@/lib/api-handler';
-import { streamChatAI, type ChatContentPart } from '@/lib/ai';
+import {
+  getPublicAIError,
+  STACKLYST_TUTOR_PROMPT,
+  streamChatAI,
+  type ChatContentPart,
+} from '@/lib/ai';
 import { logger } from '@/lib/logger';
 import { z } from 'zod';
 
 const contentPartSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('text'), text: z.string() }),
+  z.object({ type: z.literal('text'), text: z.string().max(12_000) }),
   z.object({
     type: z.literal('image'),
-    mimeType: z.string(),
-    data: z.string(),
+    mimeType: z.string().max(100),
+    data: z.string().max(8_000_000),
   }),
 ]);
 
 const duckyChatSchema = z.object({
-  language: z.string(),
-  history: z.array(
-    z.object({
-      role: z.enum(['user', 'model', 'assistant', 'ducky']),
-      content: z.union([z.string(), z.array(contentPartSchema)]),
-    })
-  ),
+  language: z.string().min(1).max(50),
+  history: z
+    .array(
+      z.object({
+        role: z.enum(['user', 'model', 'assistant', 'ducky']),
+        content: z.union([z.string().max(12_000), z.array(contentPartSchema).max(10)]),
+      })
+    )
+    .min(1)
+    .max(30),
 });
 
 function isAbortError(error: unknown): boolean {
   if (error instanceof DOMException) return error.name === 'AbortError';
+  if (error instanceof Error && 'code' in error) return error.code === 'ABORTED';
   return (error as { name?: string } | null)?.name === 'AbortError';
 }
 
@@ -31,7 +40,9 @@ export const POST = apiHandler(async (req) => {
   const body = await req.json();
   const { language, history } = duckyChatSchema.parse(body);
 
-  const systemPrompt = `Você é a ASYNC, a copiloto de programação oficial do Stacklyst.
+  const systemPrompt = `${STACKLYST_TUTOR_PROMPT}
+
+Você é a ASYNC, a copiloto de programação oficial do Stacklyst.
 Seu papel é ajudar o desenvolvedor a estruturar pensamentos, depurar código com bugs e consolidar conceitos com precisão técnica.
 
 Diretrizes de comportamento:
@@ -83,8 +94,8 @@ Diretrizes de comportamento:
           error: String(err),
           stack: (err as Error)?.stack,
         });
-        const errMsg = err instanceof Error ? err.message : String(err);
-        send({ error: `Tive um problema ao me conectar com os servidores de IA: ${errMsg}` });
+        const publicError = getPublicAIError(err);
+        send({ error: publicError.message, code: publicError.code });
       } finally {
         try {
           controller.close();

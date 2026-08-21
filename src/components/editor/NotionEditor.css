@@ -23,6 +23,20 @@
   line-height: 1.5;
 }
 
+.feed-composer-editor .notion-editor-content,
+.feed-composer-editor .notion-editor-content p.is-editor-empty::before,
+.feed-composer-editor .notion-editor-content p.is-empty::before {
+  font-size: 1rem;
+}
+
+@media (min-width: 640px) {
+  .feed-composer-editor .notion-editor-content,
+  .feed-composer-editor .notion-editor-content p.is-editor-empty::before,
+  .feed-composer-editor .notion-editor-content p.is-empty::before {
+    font-size: 1.05rem;
+  }
+}
+
 .notion-editor-content p {
   margin: 0.15rem 0;
 }
