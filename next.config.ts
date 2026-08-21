@@ -47,7 +47,9 @@ const securityHeaders = [
 const ALLOWED_ORIGINS = [process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'];
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
+  // Vercel manages output tracing through its adapter. Keep the standalone
+  // server bundle for local, Docker, and other self-hosted deployments.
+  output: process.env.VERCEL ? undefined : 'standalone',
   experimental: {
     // Mantem segmentos dinamicos recentes no cache do router. Isso torna voltas
     // e alternancias entre as areas principais instantaneas sem cachear respostas
