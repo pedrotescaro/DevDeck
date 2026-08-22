@@ -18,6 +18,59 @@ enum Language {
   CPP
 }
 
+enum KnowledgeNodeType {
+  FOUNDATION
+  LANGUAGE
+  CONCEPT
+  FRAMEWORK
+  LIBRARY
+  TOOL
+  DATABASE
+  ARCHITECTURE
+  PROJECT
+  CHALLENGE
+}
+
+enum KnowledgeRelation {
+  REQUIRED
+  RECOMMENDED
+  RELATED
+  BUILDS_ON
+  COMBINES
+}
+
+enum KnowledgeProgressStatus {
+  NOT_STARTED
+  AVAILABLE
+  RECOMMENDED
+  IN_PROGRESS
+  COMPLETED
+  MASTERED
+}
+
+enum AssistanceMode {
+  GUIDED
+  STANDARD
+  HARD
+  NO_ASSIST
+}
+
+enum ExerciseSubmissionStatus {
+  PASSED
+  FAILED
+  ERROR
+}
+
+enum LearningEventType {
+  HINT_OPENED
+  DOCUMENTATION_OPENED
+  EXERCISE_RUN
+  EXERCISE_SUBMIT
+  TEST_FAILED
+  TEST_PASSED
+  EXERCISE_COMPLETED
+}
+
 enum UserRole {
   USER
   EVALUATOR
@@ -162,6 +215,10 @@ model User {
   event_participants     EventParticipant[]
   duel_requests_sent     DuelRequest[]          @relation("duel_requests_sent")
   duel_requests_recv     DuelRequest[]          @relation("duel_requests_recv")
+  node_progress          UserNodeProgress[]
+  exercise_runs          ExerciseRun[]
+  exercise_submissions   ExerciseSubmission[]
+  learning_events        LearningEvent[]
 
   @@index([total_xp(sort: Desc)])
   @@index([role])
@@ -247,22 +304,22 @@ model JobRecruitmentStage {
   challenge_id String?
   description  String?
 
-  job          Job                  @relation(fields: [job_id], references: [id], onDelete: Cascade)
+  job          Job              @relation(fields: [job_id], references: [id], onDelete: Cascade)
   applications JobApplication[]
 
   @@index([job_id, order])
 }
 
 model JobApplication {
-  id              String               @id @default(uuid())
+  id              String            @id @default(uuid())
   job_id          String
   user_id         String
   stage_id        String?
-  status          ApplicationStatus    @default(APPLIED)
+  status          ApplicationStatus @default(APPLIED)
   technical_score Int?
   feedback        String?
-  created_at      DateTime             @default(now())
-  updated_at      DateTime             @updatedAt
+  created_at      DateTime          @default(now())
+  updated_at      DateTime          @updatedAt
 
   job   Job                  @relation(fields: [job_id], references: [id], onDelete: Cascade)
   user  User                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -286,18 +343,230 @@ model LanguageTrail {
   @@unique([user_id, language])
 }
 
+model KnowledgeNode {
+  id                String            @id @default(uuid())
+  slug              String            @unique
+  title             String
+  description       String
+  type              KnowledgeNodeType
+  category          String
+  language          Language?
+  difficulty        Int
+  xp_reward         Int
+  estimated_minutes Int?
+  position_x        Int
+  position_y        Int
+  is_published      Boolean           @default(false)
+  created_at        DateTime          @default(now()) @db.Timestamptz(3)
+  updated_at        DateTime          @updatedAt @db.Timestamptz(3)
+
+  outgoing_edges KnowledgeEdge[]    @relation("KnowledgeEdgeSource")
+  incoming_edges KnowledgeEdge[]    @relation("KnowledgeEdgeTarget")
+  path_nodes     LearningPathNode[]
+  exercises      Exercise[]
+  user_progress  UserNodeProgress[]
+
+  @@index([is_published, category])
+  @@index([language])
+  @@map("knowledge_nodes")
+}
+
+model KnowledgeEdge {
+  id             String            @id @default(uuid())
+  source_node_id String
+  target_node_id String
+  relation       KnowledgeRelation
+  created_at     DateTime          @default(now()) @db.Timestamptz(3)
+
+  source_node KnowledgeNode @relation("KnowledgeEdgeSource", fields: [source_node_id], references: [id], onDelete: Cascade)
+  target_node KnowledgeNode @relation("KnowledgeEdgeTarget", fields: [target_node_id], references: [id], onDelete: Cascade)
+
+  @@unique([source_node_id, target_node_id, relation])
+  @@index([source_node_id])
+  @@index([target_node_id])
+  @@map("knowledge_edges")
+}
+
+model LearningPath {
+  id                String   @id @default(uuid())
+  slug              String   @unique
+  title             String
+  description       String
+  accent_color      String
+  estimated_minutes Int?
+  is_featured       Boolean  @default(false)
+  is_published      Boolean  @default(false)
+  created_at        DateTime @default(now()) @db.Timestamptz(3)
+  updated_at        DateTime @updatedAt @db.Timestamptz(3)
+
+  nodes LearningPathNode[]
+
+  @@index([is_published, is_featured])
+  @@map("learning_paths")
+}
+
+model LearningPathNode {
+  id                String @id @default(uuid())
+  learning_path_id  String
+  knowledge_node_id String
+  position          Int
+
+  learning_path  LearningPath  @relation(fields: [learning_path_id], references: [id], onDelete: Cascade)
+  knowledge_node KnowledgeNode @relation(fields: [knowledge_node_id], references: [id], onDelete: Cascade)
+
+  @@unique([learning_path_id, knowledge_node_id])
+  @@unique([learning_path_id, position])
+  @@index([knowledge_node_id])
+  @@map("learning_path_nodes")
+}
+
+model Exercise {
+  id                String   @id @default(uuid())
+  slug              String   @unique
+  knowledge_node_id String
+  title             String
+  summary           String
+  problem           String
+  objective         String
+  language          Language
+  difficulty        Int
+  base_xp           Int
+  estimated_minutes Int?
+  starter_code      String
+  function_name     String
+  constraints       String[]
+  hints             String[]
+  documentation_url String?
+  examples          Json     @default("[]")
+  is_published      Boolean  @default(false)
+  created_at        DateTime @default(now()) @db.Timestamptz(3)
+  updated_at        DateTime @updatedAt @db.Timestamptz(3)
+
+  knowledge_node KnowledgeNode        @relation(fields: [knowledge_node_id], references: [id], onDelete: Cascade)
+  test_cases     ExerciseTestCase[]
+  runs           ExerciseRun[]
+  submissions    ExerciseSubmission[]
+  events         LearningEvent[]
+
+  @@index([knowledge_node_id, is_published])
+  @@index([language, difficulty])
+  @@map("exercises")
+}
+
+model ExerciseTestCase {
+  id              String  @id @default(uuid())
+  exercise_id     String
+  label           String
+  input           Json?
+  invocation_code String?
+  expected_output Json
+  is_hidden       Boolean @default(false)
+  position        Int
+
+  exercise Exercise @relation(fields: [exercise_id], references: [id], onDelete: Cascade)
+
+  @@unique([exercise_id, position])
+  @@index([exercise_id, is_hidden])
+  @@map("exercise_test_cases")
+}
+
+model UserNodeProgress {
+  id                  String                  @id @default(uuid())
+  user_id             String
+  knowledge_node_id   String
+  status              KnowledgeProgressStatus @default(NOT_STARTED)
+  mastery             Int                     @default(0)
+  completed_exercises Int                     @default(0)
+  started_at          DateTime?               @db.Timestamptz(3)
+  completed_at        DateTime?               @db.Timestamptz(3)
+  last_activity_at    DateTime                @default(now()) @db.Timestamptz(3)
+  created_at          DateTime                @default(now()) @db.Timestamptz(3)
+  updated_at          DateTime                @updatedAt @db.Timestamptz(3)
+
+  user           User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  knowledge_node KnowledgeNode @relation(fields: [knowledge_node_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, knowledge_node_id])
+  @@index([user_id, status])
+  @@index([knowledge_node_id])
+  @@map("user_node_progress")
+}
+
+model ExerciseRun {
+  id              String         @id @default(uuid())
+  exercise_id     String
+  user_id         String
+  assistance_mode AssistanceMode
+  code            String
+  passed_tests    Int
+  total_tests     Int
+  output          String?
+  error_message   String?
+  execution_ms    Int?
+  created_at      DateTime       @default(now()) @db.Timestamptz(3)
+
+  exercise Exercise @relation(fields: [exercise_id], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, exercise_id, created_at(sort: Desc)])
+  @@index([exercise_id])
+  @@map("exercise_runs")
+}
+
+model ExerciseSubmission {
+  id               String                   @id @default(uuid())
+  exercise_id      String
+  user_id          String
+  assistance_mode  AssistanceMode
+  status           ExerciseSubmissionStatus
+  code             String
+  passed_public    Int
+  total_public     Int
+  passed_hidden    Int
+  total_hidden     Int
+  xp_earned        Int                      @default(0)
+  first_completion Boolean                  @default(false)
+  error_message    String?
+  execution_ms     Int?
+  created_at       DateTime                 @default(now()) @db.Timestamptz(3)
+
+  exercise Exercise @relation(fields: [exercise_id], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, exercise_id, created_at(sort: Desc)])
+  @@index([exercise_id, status])
+  @@map("exercise_submissions")
+}
+
+model LearningEvent {
+  id              String            @id @default(uuid())
+  user_id         String
+  exercise_id     String?
+  event_type      LearningEventType
+  assistance_mode AssistanceMode?
+  metadata        Json              @default("{}")
+  created_at      DateTime          @default(now()) @db.Timestamptz(3)
+
+  user     User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  exercise Exercise? @relation(fields: [exercise_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, event_type, created_at(sort: Desc)])
+  @@index([exercise_id])
+  @@map("learning_events")
+}
+
 model Post {
-  id           String     @id @default(uuid())
+  id           String    @id @default(uuid())
   author_id    String
   title        String
   body         String
   language     Language?
   code_snippet String?
   image_url    String?
-  is_pinned    Boolean    @default(false)
-  created_at   DateTime   @default(now())
-  view_count   Int        @default(0)
-  upvotes      Int        @default(0)
+  is_pinned    Boolean   @default(false)
+  created_at   DateTime  @default(now())
+  view_count   Int       @default(0)
+  upvotes      Int       @default(0)
 
   author    User       @relation(fields: [author_id], references: [id], onDelete: Cascade)
   answers   Answer[]
@@ -311,15 +580,15 @@ model Post {
 }
 
 model Answer {
-  id           String       @id @default(uuid())
+  id           String   @id @default(uuid())
   post_id      String
   author_id    String
   parent_id    String?
   body         String
   code_snippet String?
-  is_accepted  Boolean      @default(false)
-  upvotes      Int          @default(0)
-  created_at   DateTime     @default(now())
+  is_accepted  Boolean  @default(false)
+  upvotes      Int      @default(0)
+  created_at   DateTime @default(now())
 
   post    Post         @relation(fields: [post_id], references: [id], onDelete: Cascade)
   author  User         @relation(fields: [author_id], references: [id], onDelete: Cascade)
@@ -331,14 +600,14 @@ model Answer {
 }
 
 model Quiz {
-  id            String        @id @default(uuid())
+  id            String    @id @default(uuid())
   post_id       String?
   question      String
   options       Json
   correct_index Int
-  is_daily      Boolean       @default(false)
-  scheduled_for DateTime?     @unique
-  created_at    DateTime      @default(now())
+  is_daily      Boolean   @default(false)
+  scheduled_for DateTime? @unique
+  created_at    DateTime  @default(now())
 
   post     Post?         @relation(fields: [post_id], references: [id], onDelete: Cascade)
   attempts QuizAttempt[]
@@ -378,18 +647,18 @@ model DuelRequest {
 }
 
 model Duel {
-  id                 String           @id @default(uuid())
+  id                 String     @id @default(uuid())
   challenger_id      String
   opponent_id        String?
   problem_title      String
   problem_body       String
   language           Language
-  status             DuelStatus       @default(PENDING)
-  time_limit_seconds Int              @default(900)
+  status             DuelStatus @default(PENDING)
+  time_limit_seconds Int        @default(900)
   started_at         DateTime?
   finished_at        DateTime?
   winner_id          String?
-  created_at         DateTime         @default(now())
+  created_at         DateTime   @default(now())
 
   challenger  User             @relation("challenger", fields: [challenger_id], references: [id], onDelete: Cascade)
   opponent    User?            @relation("opponent", fields: [opponent_id], references: [id], onDelete: SetNull)
@@ -444,21 +713,21 @@ model DuelEvaluation {
 }
 
 model Event {
-  id               String             @id @default(uuid())
+  id               String      @id @default(uuid())
   creator_id       String
   company_id       String?
   title            String
-  slug             String             @unique
+  slug             String      @unique
   description      String
-  type             EventType          @default(CHALLENGE)
-  status           EventStatus        @default(UPCOMING)
+  type             EventType   @default(CHALLENGE)
+  status           EventStatus @default(UPCOMING)
   banner_url       String?
-  min_level        Int                @default(1)
+  min_level        Int         @default(1)
   max_participants Int?
-  xp_reward        Int                @default(250)
+  xp_reward        Int         @default(250)
   start_date       DateTime
   end_date         DateTime
-  created_at       DateTime           @default(now())
+  created_at       DateTime    @default(now())
 
   creator      User               @relation(fields: [creator_id], references: [id], onDelete: Cascade)
   company      Company?           @relation(fields: [company_id], references: [id], onDelete: SetNull)
@@ -509,7 +778,7 @@ model PostVote {
   id         String   @id @default(uuid())
   post_id    String
   user_id    String
-  value      Int      // 1 for upvote, -1 for downvote
+  value      Int // 1 for upvote, -1 for downvote
   created_at DateTime @default(now())
 
   post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
@@ -522,7 +791,7 @@ model AnswerVote {
   id         String   @id @default(uuid())
   answer_id  String
   user_id    String
-  value      Int      // 1 for upvote, -1 for downvote
+  value      Int // 1 for upvote, -1 for downvote
   created_at DateTime @default(now())
 
   answer Answer @relation(fields: [answer_id], references: [id], onDelete: Cascade)
@@ -614,6 +883,7 @@ model Notification {
   createdAt    DateTime         @default(now())
   user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   actor        User?            @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+
   @@index([userId, createdAt(sort: Desc)])
 }
 
@@ -637,6 +907,7 @@ model Follow {
   createdAt   DateTime @default(now())
   follower    User     @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
   following   User     @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+
   @@id([followerId, followingId])
   @@index([followerId])
   @@index([followingId])
@@ -646,7 +917,7 @@ model Reaction {
   id         String   @id @default(uuid())
   post_id    String
   user_id    String
-  type       String   // FIRE/HEART/LAUGH/CLAP/BULB
+  type       String // FIRE/HEART/LAUGH/CLAP/BULB
   created_at DateTime @default(now())
 
   post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
