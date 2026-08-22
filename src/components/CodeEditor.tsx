@@ -18,6 +18,7 @@ interface CodeEditorProps {
   language?: string;
   height?: string;
   readOnly?: boolean;
+  autocompletion?: boolean;
 }
 
 export function CodeEditor({
@@ -26,6 +27,7 @@ export function CodeEditor({
   language = 'JS',
   height = '300px',
   readOnly = false,
+  autocompletion = false,
 }: CodeEditorProps) {
   return (
     <CodeEditorInner
@@ -34,6 +36,7 @@ export function CodeEditor({
       language={language}
       height={height}
       readOnly={readOnly}
+      autocompletion={autocompletion}
     />
   );
 }
@@ -45,6 +48,7 @@ function CodeEditorInner({
   language = 'JS',
   height = '300px',
   readOnly = false,
+  autocompletion = false,
 }: CodeEditorProps) {
   const [extensions, setExtensions] = useState<import('@codemirror/state').Extension[]>([]);
   const [darkTheme, setDarkTheme] = useState<import('@codemirror/state').Extension | null>(null);
@@ -112,7 +116,7 @@ function CodeEditorInner({
         foldGutter: false,
         highlightActiveLine: !readOnly,
         highlightSelectionMatches: true,
-        autocompletion: false,
+        autocompletion: autocompletion && !readOnly,
       }}
       className="rounded-lg overflow-hidden border border-dd-border"
       style={{
