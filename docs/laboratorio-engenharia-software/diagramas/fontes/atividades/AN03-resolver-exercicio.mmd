@@ -1,0 +1,40 @@
+flowchart TD
+    subgraph usuario ["Usuário"]
+        escolher["Escolher exercício"]
+        interagir["Informar solução"]
+        corrigir["Revisar solução"]
+        verResultado["Consultar resultado"]
+    end
+
+    subgraph sistema ["Stacklyst"]
+        carregar["Carregar interação"]
+        validarEntrada{"Entrada válida?"}
+        avaliar["Avaliar resposta"]
+        correta{"Solução correta?"}
+        feedback["Exibir feedback"]
+        persistir["Registrar tentativa"]
+        premiar["Atualizar XP e progresso"]
+        falha(["Informar falha técnica"])
+    end
+
+    subgraph executor ["Executor de código"]
+        compilar["Executar código"]
+        retornar["Retornar testes"]
+        disponivel{"Serviço disponível?"}
+    end
+
+    escolher --> carregar --> interagir --> validarEntrada
+    validarEntrada -->|"Não"| feedback --> corrigir --> interagir
+    validarEntrada -->|"Sim"| avaliar
+    avaliar -.->|"Se houver código"| disponivel
+    disponivel -->|"Não"| falha
+    disponivel -->|"Sim"| compilar --> retornar --> correta
+    avaliar -->|"Outros tipos"| correta
+    correta -->|"Não"| feedback
+    correta -->|"Sim"| persistir --> premiar --> verResultado
+
+    style usuario fill:#C2E5FF,stroke:#3DADFF
+    style sistema fill:#DCCCFF,stroke:#874FFF
+    style executor fill:#FFECBD,stroke:#FFC943
+    style falha fill:#FFCDC2,stroke:#FF7556
+    style premiar fill:#CDF4D3,stroke:#66D575

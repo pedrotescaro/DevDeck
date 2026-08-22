@@ -1,0 +1,53 @@
+flowchart TD
+    subgraph desafiante ["Desafiante"]
+        solicitar["Solicitar duelo"]
+        aceitarResultado["Consultar resultado"]
+        enviarA["Enviar solução"]
+    end
+
+    subgraph plataforma ["Stacklyst"]
+        checar{"Pode duelar?"}
+        buscar["Buscar oponente"]
+        encontrou{"Oponente encontrado?"}
+        convidar["Enviar convite"]
+        resposta{"Convite aceito?"}
+        penalizar["Registrar rejeição"]
+        criar["Criar desafio"]
+        receber["Receber soluções"]
+        decidir{"Avaliação humana?"}
+        automatico["Executar avaliação automática"]
+        fechar["Fechar duelo"]
+        indisponivel(["Informar indisponibilidade"])
+    end
+
+    subgraph oponente ["Oponente"]
+        analisar["Analisar convite"]
+        responder["Aceitar ou rejeitar"]
+        enviarB["Enviar solução"]
+    end
+
+    subgraph avaliador ["Avaliador"]
+        receberFila["Receber pendência"]
+        revisar["Revisar soluções"]
+        registrar["Registrar parecer"]
+    end
+
+    solicitar --> checar
+    checar -->|"Não"| indisponivel
+    checar -->|"Sim"| buscar --> encontrou
+    encontrou -->|"Não"| indisponivel
+    encontrou -->|"Sim"| convidar --> analisar --> responder --> resposta
+    resposta -->|"Não"| penalizar --> indisponivel
+    resposta -->|"Sim"| criar
+    criar --> enviarA & enviarB
+    enviarA & enviarB --> receber --> decidir
+    decidir -->|"Não"| automatico --> fechar
+    decidir -->|"Sim"| receberFila --> revisar --> registrar --> fechar
+    fechar --> aceitarResultado
+
+    style desafiante fill:#C2E5FF,stroke:#3DADFF
+    style plataforma fill:#DCCCFF,stroke:#874FFF
+    style oponente fill:#C6FAF6,stroke:#5AD8CC
+    style avaliador fill:#FFECBD,stroke:#FFC943
+    style indisponivel fill:#FFCDC2,stroke:#FF7556
+    style fechar fill:#CDF4D3,stroke:#66D575

@@ -1,0 +1,38 @@
+flowchart TD
+    subgraph empresa ["Empresa ou Recrutador"]
+        cadastrar["Cadastrar empresa"]
+        redigir["Redigir oportunidade"]
+        publicar["Solicitar publicação"]
+        acompanhar["Acompanhar candidaturas"]
+        atualizar["Atualizar processo"]
+    end
+
+    subgraph plataforma ["Stacklyst"]
+        validarEmpresa{"Cadastro autorizado?"}
+        validarVaga{"Vaga válida?"}
+        disponibilizar["Disponibilizar vaga"]
+        registrar["Registrar candidatura"]
+        fornecer["Exibir dados permitidos"]
+        notificar["Notificar candidato"]
+        rejeitar(["Solicitar correção"])
+    end
+
+    subgraph usuario ["Usuário"]
+        consultar["Consultar vagas"]
+        analisar["Analisar oportunidade"]
+        candidatar["Enviar candidatura"]
+        verStatus["Consultar situação"]
+    end
+
+    cadastrar --> validarEmpresa
+    validarEmpresa -->|"Não"| rejeitar
+    validarEmpresa -->|"Sim"| redigir --> publicar --> validarVaga
+    validarVaga -->|"Não"| rejeitar --> redigir
+    validarVaga -->|"Sim"| disponibilizar --> consultar --> analisar --> candidatar
+    candidatar --> registrar --> fornecer --> acompanhar --> atualizar --> notificar --> verStatus
+
+    style empresa fill:#C2E5FF,stroke:#3DADFF
+    style plataforma fill:#DCCCFF,stroke:#874FFF
+    style usuario fill:#C6FAF6,stroke:#5AD8CC
+    style rejeitar fill:#FFCDC2,stroke:#FF7556
+    style disponibilizar fill:#CDF4D3,stroke:#66D575

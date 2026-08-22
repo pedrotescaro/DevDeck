@@ -1,0 +1,41 @@
+flowchart TD
+    subgraph administrador ["Administrador"]
+        acessar["Acessar painel"]
+        escolher["Selecionar área"]
+        analisar["Analisar dados"]
+        decidir["Definir ação"]
+        confirmar["Confirmar alteração"]
+    end
+
+    subgraph plataforma ["Stacklyst"]
+        autorizar{"Permissão válida?"}
+        carregar["Carregar informações"]
+        validar{"Ação consistente?"}
+        executar["Executar operação"]
+        auditar["Registrar auditoria"]
+        notificar["Notificar envolvidos"]
+        negar(["Negar acesso"])
+        erro(["Informar inconsistência"])
+    end
+
+    subgraph dominios ["Áreas administradas"]
+        usuarios["Usuários e permissões"]
+        moderacao["Denúncias e conteúdo"]
+        avaliadores["Candidaturas de avaliador"]
+        eventos["Eventos e configurações"]
+    end
+
+    acessar --> autorizar
+    autorizar -->|"Não"| negar
+    autorizar -->|"Sim"| carregar --> escolher
+    escolher --> usuarios & moderacao & avaliadores & eventos
+    usuarios & moderacao & avaliadores & eventos --> analisar --> decidir --> confirmar --> validar
+    validar -->|"Não"| erro --> escolher
+    validar -->|"Sim"| executar --> auditar --> notificar
+
+    style administrador fill:#C2E5FF,stroke:#3DADFF
+    style plataforma fill:#DCCCFF,stroke:#874FFF
+    style dominios fill:#FFECBD,stroke:#FFC943
+    style negar fill:#FFCDC2,stroke:#FF7556
+    style erro fill:#FFCDC2,stroke:#FF7556
+    style auditar fill:#CDF4D3,stroke:#66D575

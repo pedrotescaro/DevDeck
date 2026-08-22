@@ -1,0 +1,45 @@
+{
+  "project": "Stacklyst",
+  "date": "[ANOTAÇÃO — DATA A DEFINIR]",
+  "original_templates": [
+    {
+      "path": "C:\\Users\\PEDRO\\Downloads\\1. Documento Visão (1).doc",
+      "sha256": "2B40CAF2B00798CCEF6F566421227722FF45450E2CCC958636F824CEA3F37B77",
+      "preserved": true
+    },
+    {
+      "path": "C:\\Users\\PEDRO\\Downloads\\2. Atividades do Negócio (1).doc",
+      "sha256": "AB688565E69195A9228352FE4180D5CCC9CCAF252AA8CB446187551DBEE4F0D4",
+      "preserved": true
+    },
+    {
+      "path": "C:\\Users\\PEDRO\\Downloads\\3. Requisitos do Sistema (1).doc",
+      "sha256": "08069B4FC25C62409DF14A32574BD3C75E688F45D06DE2ADB329B1572FEC43A4",
+      "preserved": true
+    },
+    {
+      "path": "C:\\Users\\PEDRO\\Downloads\\4. Casos de Uso (1).doc",
+      "sha256": "E90791327906AE68DCA979F3A7506D83A85CC0EA41E5E3622C2738EB69065BE4",
+      "preserved": true
+    }
+  ],
+  "deliverables": [
+    {
+      "path": "docs\\laboratorio-engenharia-software\\entregaveis\\01-documento-de-visao-stacklyst.docx",
+      "sha256": "5CCBD8257F2D04ED55037D75C5D6D2F5430481B1735A1C192682257F2773A9A9"
+    },
+    {
+      "path": "docs\\laboratorio-engenharia-software\\entregaveis\\02-atividades-do-negocio-stacklyst.docx",
+      "sha256": "7A423BBD008795F38ED09F10D9F60CF7B924A6875391267899E9AE9A929F84A3"
+    },
+    {
+      "path": "docs\\laboratorio-engenharia-software\\entregaveis\\03-requisitos-do-sistema-stacklyst.docx",
+      "sha256": "6A8AE8A8E92F549CB8C52FC1C7F29521F04A76B23A7A225A5D53671DEEA9C6DE"
+    },
+    {
+      "path": "docs\\laboratorio-engenharia-software\\entregaveis\\04-casos-de-uso-stacklyst.docx",
+      "sha256": "4BBE63A2A140A6DAF488457B5FAA6F9C929064C3B7B76574E7224FCA671C9BBD"
+    }
+  ],
+  "figjam": "https://www.figma.com/board/kCKbpkIxJiQHmcprLH3Tfd"
+}

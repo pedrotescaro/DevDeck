@@ -1,0 +1,41 @@
+flowchart TD
+    subgraph autor ["Autor"]
+        redigir["Redigir publicação"]
+        enviar["Enviar publicação"]
+        acompanhar["Acompanhar interações"]
+    end
+
+    subgraph plataforma ["Stacklyst"]
+        validar{"Conteúdo válido?"}
+        publicar["Publicar no feed"]
+        distribuir["Exibir à comunidade"]
+        registrar["Registrar interação"]
+        notificar["Gerar notificação"]
+        denunciado{"Conteúdo denunciado?"}
+        encaminhar["Encaminhar denúncia"]
+        rejeitar(["Solicitar correção"])
+    end
+
+    subgraph comunidade ["Comunidade"]
+        visualizar["Visualizar publicação"]
+        interagir["Reagir ou responder"]
+        denunciar["Denunciar conteúdo"]
+    end
+
+    subgraph moderacao ["Administrador"]
+        analisar["Analisar denúncia"]
+        decidir["Aplicar decisão"]
+    end
+
+    redigir --> enviar --> validar
+    validar -->|"Não"| rejeitar --> redigir
+    validar -->|"Sim"| publicar --> distribuir --> visualizar
+    visualizar --> interagir --> registrar --> notificar --> acompanhar
+    visualizar -.-> denunciar --> denunciado
+    denunciado -->|"Sim"| encaminhar --> analisar --> decidir
+
+    style autor fill:#C2E5FF,stroke:#3DADFF
+    style plataforma fill:#DCCCFF,stroke:#874FFF
+    style comunidade fill:#C6FAF6,stroke:#5AD8CC
+    style moderacao fill:#FFECBD,stroke:#FFC943
+    style rejeitar fill:#FFCDC2,stroke:#FF7556

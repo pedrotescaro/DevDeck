@@ -1,0 +1,29 @@
+flowchart TD
+    subgraph usuario ["Usuário"]
+        selecionar["Selecionar trilha"]
+        estudar["Estudar lição"]
+        resolver["Resolver exercício"]
+        continuar["Continuar percurso"]
+    end
+
+    subgraph sistema ["Stacklyst"]
+        exibir["Exibir trilha"]
+        abrir["Abrir lição"]
+        validar{"Resposta correta?"}
+        feedback["Fornecer feedback"]
+        atualizar["Atualizar progresso"]
+        concluir{"Última lição?"}
+        liberar["Liberar próxima lição"]
+        finalizar(["Registrar conclusão"])
+    end
+
+    selecionar --> exibir --> abrir --> estudar --> resolver --> validar
+    validar -->|"Não"| feedback --> resolver
+    validar -->|"Sim"| atualizar --> concluir
+    concluir -->|"Não"| liberar --> continuar --> abrir
+    concluir -->|"Sim"| finalizar
+
+    style usuario fill:#C2E5FF,stroke:#3DADFF
+    style sistema fill:#DCCCFF,stroke:#874FFF
+    style finalizar fill:#CDF4D3,stroke:#66D575
+    style feedback fill:#FFECBD,stroke:#FFC943

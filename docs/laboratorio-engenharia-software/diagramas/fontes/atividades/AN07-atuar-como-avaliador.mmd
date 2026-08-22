@@ -1,0 +1,42 @@
+flowchart TD
+    subgraph candidato ["Candidato"]
+        solicitar["Solicitar função"]
+        informar["Informar motivação"]
+        receberDecisao["Receber decisão"]
+    end
+
+    subgraph plataforma ["Stacklyst"]
+        elegivel{"Critério atendido?"}
+        registrar["Registrar candidatura"]
+        habilitar["Atribuir função"]
+        listar["Listar avaliações"]
+        salvar["Registrar avaliação"]
+        fechar["Fechar desafio"]
+        negar(["Informar inelegibilidade"])
+    end
+
+    subgraph administrador ["Administrador"]
+        analisar["Analisar candidatura"]
+        aprovar{"Candidatura aprovada?"}
+        justificar["Registrar decisão"]
+    end
+
+    subgraph avaliador ["Avaliador"]
+        selecionar["Selecionar pendência"]
+        revisar["Revisar soluções"]
+        emitir["Emitir parecer"]
+    end
+
+    solicitar --> elegivel
+    elegivel -->|"Não"| negar
+    elegivel -->|"Sim"| informar --> registrar --> analisar --> aprovar
+    aprovar -->|"Não"| justificar --> receberDecisao
+    aprovar -->|"Sim"| habilitar --> receberDecisao
+    habilitar --> listar --> selecionar --> revisar --> emitir --> salvar --> fechar
+
+    style candidato fill:#C2E5FF,stroke:#3DADFF
+    style plataforma fill:#DCCCFF,stroke:#874FFF
+    style administrador fill:#FFECBD,stroke:#FFC943
+    style avaliador fill:#C6FAF6,stroke:#5AD8CC
+    style negar fill:#FFCDC2,stroke:#FF7556
+    style fechar fill:#CDF4D3,stroke:#66D575

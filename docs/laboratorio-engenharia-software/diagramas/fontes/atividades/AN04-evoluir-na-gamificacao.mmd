@@ -1,0 +1,30 @@
+flowchart TD
+    subgraph usuario ["Usuário"]
+        realizar["Concluir atividade"]
+        consultar["Consultar evolução"]
+        receber["Receber conquista"]
+    end
+
+    subgraph plataforma ["Stacklyst"]
+        validar{"Atividade elegível?"}
+        duplicada{"Já pontuada?"}
+        conceder["Conceder XP"]
+        calcular["Calcular nível"]
+        ofensiva["Atualizar sequência"]
+        conquista{"Critério atingido?"}
+        ranking["Atualizar ranking"]
+        ignorar(["Manter pontuação"])
+    end
+
+    realizar --> validar
+    validar -->|"Não"| ignorar --> consultar
+    validar -->|"Sim"| duplicada
+    duplicada -->|"Sim"| ignorar
+    duplicada -->|"Não"| conceder --> calcular --> ofensiva --> conquista
+    conquista -->|"Não"| ranking --> consultar
+    conquista -->|"Sim"| receber --> ranking
+
+    style usuario fill:#C2E5FF,stroke:#3DADFF
+    style plataforma fill:#DCCCFF,stroke:#874FFF
+    style conceder fill:#CDF4D3,stroke:#66D575
+    style ignorar fill:#D9D9D9,stroke:#B3B3B3
