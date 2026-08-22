@@ -21,6 +21,7 @@ ROOT = REPO / "docs" / "laboratorio-engenharia-software"
 OUTPUT = ROOT / "entregaveis"
 DIAGRAMS = ROOT / "diagramas"
 SCREENSHOTS = REPO / "public" / "screenshots"
+CURRENT_PROTOTYPES = ROOT / "prototipos" / "atuais"
 WORK = Path(r"C:\Users\PEDRO\AppData\Local\Temp\codex-stacklyst-docs-20260821")
 
 TEMPLATES = {
@@ -998,13 +999,13 @@ USE_CASES = [
         "Campos válidos persistidos e perfil público atualizado.", "Bio, avatar, banner, pronomes e demais campos suportados.", "Perfil atualizado ou erros de validação.",
         ["O usuário acessa o próprio perfil ou as configurações.", "O Stacklyst exibe os dados editáveis e a visualização atual.", "O usuário altera campos e confirma.", "O sistema valida propriedade, formato e limites e persiste os dados.", "O Stacklyst recarrega o perfil e confirma a atualização."],
         ["A1 — Usuário sem permissão: o sistema nega alteração em perfil alheio.", "A2 — Campo inválido: o sistema preserva dados anteriores.", "A3 — Upload indisponível: o sistema mantém a imagem anterior."],
-        "profile_light.png"),
+        "uc003-uc007-perfil-progresso-atual.png"),
     make_uc("UC004", "Iniciar trilha", "Condução", "Usuário / Estudante / Desenvolvedor", "Stacklyst",
         "Selecionar uma trilha e iniciar ou retomar o percurso.", "Usuário autenticado; trilha disponível.",
         "Preferência registrada e lição elegível apresentada.", "Linguagem/trilha e etapa selecionada.", "Mapa atualizado e acesso à próxima lição.",
         ["O usuário abre Trilhas e consulta as opções.", "O Stacklyst carrega progresso, níveis e bloqueios.", "O usuário seleciona a trilha desejada.", "O sistema registra a preferência e determina a etapa elegível.", "O Stacklyst abre a lição ou apresenta o próximo passo."],
         ["A1 — Trilha indisponível: o sistema impede o início e informa o motivo.", "A2 — Pré-requisito não cumprido: o sistema mantém a etapa bloqueada.", "A3 — Progresso não carregado: o sistema não sobrescreve dados existentes."],
-        "trails_light.png"),
+        "uc004-trilhas-atual.png"),
     make_uc("UC005", "Acessar lição", "Condução", "Usuário / Estudante / Desenvolvedor", "Stacklyst; Serviço de IA opcional",
         "Exibir conteúdo e etapas interativas de uma lição.", "Usuário autenticado; lição existente e elegível.",
         "Sessão de lição iniciada; exercícios podem ser realizados.", "Identificador da lição.", "Conteúdo, etapas e progresso da sessão.",
@@ -1022,19 +1023,19 @@ USE_CASES = [
         "Nenhuma alteração obrigatória; visão consolidada exibida.", "Usuário, período e trilha opcionais.", "Indicadores e histórico permitido.",
         ["O usuário abre perfil, trilha ou visão de atividade.", "O Stacklyst identifica o titular e as permissões de visualização.", "O sistema consulta XP, trilhas, sequência, tentativas e badges.", "Os dados são consolidados sem expor campos privados.", "O Stacklyst apresenta evolução atual e próximos marcos."],
         ["A1 — Perfil privado ou dado não permitido: o sistema oculta o campo.", "A2 — Histórico indisponível: o sistema mostra o último estado confirmado.", "A3 — Período sem atividade: o sistema retorna estado vazio claro."],
-        "profile_light.png"),
+        "uc003-uc007-perfil-progresso-atual.png"),
     make_uc("UC008", "Participar de duelo", "Condução", "Usuário / Estudante / Desenvolvedor", "Oponente; Avaliador; Executor de código",
         "Executar um desafio competitivo entre dois usuários.", "Participantes autenticados, convite aceito e sem cooldown.",
         "Duelo fechado, não concluído ou encaminhado para avaliação.", "Linguagem, convite e soluções.", "Estado, resultado, feedback e notificações.",
         ["O desafiante inicia duelo direto ou busca automática.", "Após aceite, o Stacklyst cria problema e prazo do duelo.", "Os dois participantes analisam o desafio e enviam uma solução.", "O sistema recebe as soluções e executa/encaminha a avaliação definida.", "O Stacklyst fecha o duelo e apresenta o resultado aos participantes."],
         ["A1 — Nenhum adversário: o sistema informa indisponibilidade.", "A2 — Usuário rejeita ou convite expira: o duelo não é criado e a regra de rejeição é aplicada.", "A3 — Desafio expira: [ANOTAÇÃO — REGRA PRECISA SER DEFINIDA] para resultado/retorno.", "A4 — Avaliação humana necessária: o sistema encaminha à fila sem decidir somente por IA."],
-        "duels_light.png"),
+        "uc008-uc009-duelos-atual.png"),
     make_uc("UC009", "Realizar matchmaking", "Condução", "Usuário / Estudante / Desenvolvedor", "Stacklyst",
         "Localizar oponente compatível para duelo automático.", "Usuário autenticado e apto a duelar.",
         "Oponente selecionado e convite enviado, ou busca encerrada sem candidato.", "Usuário, XP e linguagem.", "Oponente ou indisponibilidade.",
         ["O usuário solicita busca automática.", "O Stacklyst verifica cooldown e calcula a divisão atual.", "O sistema procura candidato na mesma divisão.", "Sem candidato, amplia a faixa conforme baseline e aplica fallback configurado.", "Ao localizar candidato, o Stacklyst cria e envia o convite."],
         ["A1 — Usuário em cooldown: a busca é recusada com tempo restante.", "A2 — Nenhum candidato: o sistema orienta nova tentativa.", "A3 — Candidato torna-se indisponível: o sistema não cria duelo inválido."],
-        "duels_light.png"),
+        "uc008-uc009-duelos-atual.png"),
     make_uc("UC010", "Avaliar desafio", "Análise", "Avaliador ou Administrador autorizado", "Serviço de IA auxiliar; Executor de código",
         "Determinar resultado de desafio com modalidade de avaliação adequada.", "Duelo com soluções e ator autorizado quando houver decisão humana.",
         "Avaliação registrada e duelo apto a ser fechado.", "Soluções, testes, votos, pontuações e feedback.", "Parecer, vencedor e justificativas.",
@@ -1045,25 +1046,25 @@ USE_CASES = [
         "Exibir classificação global ou por linguagem.", "Dados de XP disponíveis.", "Ranking exibido sem alterar pontuação.", "Filtro de linguagem opcional.", "Posição, usuário, XP, nível e divisão quando aplicável.",
         ["O usuário abre o ranking.", "O Stacklyst recebe o filtro global ou por linguagem.", "O sistema consulta os maiores valores de XP no escopo.", "A posição e o nível exibido são calculados.", "O Stacklyst apresenta a classificação e a posição disponível."],
         ["A1 — Filtro inválido: o sistema usa opção válida ou informa erro.", "A2 — Ranking vazio: o sistema exibe estado sem participantes.", "A3 — Empate: [ANOTAÇÃO — REGRA PRECISA SER DEFINIDA]."],
-        "leaderboard_light.png"),
+        "uc011-ranking-atual.png"),
     make_uc("UC012", "Utilizar assistência da IA", "Condução", "Usuário / Estudante / Desenvolvedor", "Serviço de IA",
         "Receber orientação educacional auxiliar sobre dúvida ou contexto permitido.", "Funcionalidade disponível e limites não excedidos.",
         "Sugestão exibida ou fallback acionado; nenhuma decisão humana é substituída.", "Mensagens, dúvida e contexto autorizado.", "Resposta auxiliar ou erro controlado.",
         ["O usuário abre o assistente e informa uma dúvida.", "O Stacklyst valida tamanho, conteúdo e quota.", "O sistema monta contexto limitado e chama o provedor configurado.", "O provedor retorna resposta e o Stacklyst valida o resultado.", "O sistema apresenta a orientação como sugestão para revisão do usuário."],
         ["A1 — IA indisponível: o sistema informa a falha e preserva o restante da plataforma.", "A2 — Limite excedido: o sistema informa quando o usuário pode tentar novamente.", "A3 — Resposta inadequada: o sistema deve permitir denúncia e não aplicá-la automaticamente."],
-        "async_light.png"),
+        "uc012-assistencia-acesso-atual.png"),
     make_uc("UC013", "Criar publicação", "Condução", "Usuário / Estudante / Desenvolvedor", "Stacklyst",
         "Publicar dúvida, conteúdo ou código no feed.", "Usuário autenticado e dentro do limite de publicação.",
         "Publicação persistida e exibida no feed.", "Título, corpo, linguagem, código e imagem opcional.", "Publicação criada ou erros de validação.",
         ["O usuário abre o compositor do feed.", "O usuário informa o conteúdo e confirma a publicação.", "O Stacklyst valida autenticação, tamanho, formato e limite.", "O sistema persiste a publicação e seus metadados.", "O feed é atualizado e a publicação fica disponível para interação."],
         ["A1 — Conteúdo inválido ou vazio: o sistema solicita correção.", "A2 — Limite excedido: o sistema recusa temporariamente.", "A3 — Upload falha: o usuário pode corrigir ou publicar sem a mídia, se permitido."],
-        "feed_light.png"),
+        "uc013-uc014-feed-atual.png"),
     make_uc("UC014", "Interagir com publicação", "Condução", "Usuário / Estudante / Desenvolvedor", "Autor da publicação; Stacklyst",
         "Reagir, votar, responder, salvar ou denunciar uma publicação.", "Usuário autenticado; publicação existente.",
         "Interação registrada e contadores/notificações atualizados.", "Publicação, ação, reação ou resposta.", "Novo estado da interação e eventual notificação.",
         ["O usuário seleciona uma publicação no feed.", "O usuário escolhe a interação permitida e informa dados adicionais quando necessário.", "O Stacklyst valida alvo, sessão e duplicidade.", "O sistema registra ou alterna a interação e atualiza contadores.", "O autor recebe notificação quando a regra prevê."],
         ["A1 — Publicação removida: o sistema interrompe a ação.", "A2 — Ação duplicada: o sistema mantém unicidade ou alterna o estado.", "A3 — Conteúdo denunciado: o sistema cria item para moderação."],
-        "feed_light.png"),
+        "uc013-uc014-feed-atual.png"),
     make_uc("UC015", "Gerenciar evento", "Configuração", "Administrador; Empresa / Recrutador", "Stacklyst",
         "Criar e administrar evento ou desafio comunitário autorizado.", "Ator autenticado com papel ADMIN ou RECRUITER.",
         "Evento criado/atualizado com regras e período válidos.", "Título, descrição, tipo, datas, nível, capacidade e recompensa.", "Evento e status.",
@@ -1146,8 +1147,13 @@ TRACEABILITY = [
 
 
 def prototype_for(document: Document, prototype: str, use_case_id: str) -> None:
-    if prototype.endswith(".png") and (SCREENSHOTS / prototype).exists():
-        add_figure(document, SCREENSHOTS / prototype, f"Protótipo de interface relacionado ao {use_case_id} — captura existente no repositório.", 6.2, 4.4)
+    current_prototype = CURRENT_PROTOTYPES / prototype
+    legacy_prototype = SCREENSHOTS / prototype
+    if prototype.endswith(".png") and current_prototype.exists():
+        caption = f"Protótipo de interface relacionado ao {use_case_id} — captura atual da plataforma autenticada em 22/08/2026."
+        add_figure(document, current_prototype, caption, 6.2, 4.4)
+    elif prototype.endswith(".png") and legacy_prototype.exists():
+        add_figure(document, legacy_prototype, f"Protótipo de interface relacionado ao {use_case_id} — captura existente no repositório.", 6.2, 4.4)
     else:
         add_note(document, "[INSERIR PROTÓTIPO DA TELA CORRESPONDENTE]", prototype, "blue", spacing=False)
 

@@ -9,6 +9,12 @@ Este diretório reúne a documentação produzida para a disciplina de Laborató
 - `entregaveis/03-requisitos-do-sistema-stacklyst.docx`
 - `entregaveis/04-casos-de-uso-stacklyst.docx`
 
+## Capturas atuais dos casos de uso
+
+As capturas antigas do documento de casos de uso foram substituídas em 22/08/2026 por imagens das rotas internas autenticadas do localhost atual: perfil, trilhas, duelos, ranking, assistência Async e feed. As capturas foram realizadas sem publicar conteúdo, iniciar duelos ou alterar o progresso da conta utilizada para validação.
+
+Os arquivos-fonte estão em `prototipos/atuais/`. A captura autenticada pode ser reproduzida com `tools/capture_authenticated_use_case_screenshots.cjs`, usando a credencial somente por variável de ambiente, e a atualização que preserva a estrutura existente do Word pode ser reproduzida com `tools/refresh_use_case_screenshots.py`.
+
 Os documentos incluem sumário automático, cabeçalho, rodapé, numeração de páginas, tabelas formatadas, anotações de decisão e evidências de implementação. A autoria, a data acadêmica, os integrantes, o orçamento e as métricas não informadas continuam explicitamente pendentes.
 
 ## Diagramas
