@@ -85,6 +85,10 @@ export const JUDGE0_API_URL =
   process.env.JUDGE0_API_URL || 'https://ce.judge0.com/submissions?base64_encoded=false&wait=true';
 
 export const JUDGE0_LANGUAGES: Record<string, number> = {
+  javascript: 102,
+  js: 102,
+  typescript: 101,
+  ts: 101,
   python: 71,
   kotlin: 78,
   swift: 83,

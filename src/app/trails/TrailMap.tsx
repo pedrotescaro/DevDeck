@@ -1,556 +1,264 @@
 'use client';
 
-import { Fragment, useMemo, useState } from 'react';
-import Image from 'next/image';
-import { Check, FastForward, Lock, Sparkles, Star, Trophy, X } from 'lucide-react';
-import type { TrailLevel } from '@/lib/trailsData';
-import { getSectionTheme } from './trailTheme';
-
-/** Topo do primeiro nó de nível de cada unidade (abaixo da linha divisória). */
-const FIRST_LEVEL_TOP = 96;
-/** Espaçamento vertical entre os nós de nível. */
-const LEVEL_SPACING = 240;
-/** Distância do último nível até o checkpoint. */
-const CHECKPOINT_GAP = 160;
-/** Altura do botão do checkpoint. */
-const CHECKPOINT_BTN_H = 78;
-/** Respiro abaixo do checkpoint até a próxima unidade. */
-const UNIT_BOTTOM_PAD = 170;
-
-/** Converte um hex (#rgb ou #rrggbb) em HSL. */
-function hexToHsl(hex: string): { h: number; s: number; l: number } {
-  const clean = hex.replace('#', '');
-  const full =
-    clean.length === 3
-      ? clean
-          .split('')
-          .map((c) => c + c)
-          .join('')
-      : clean;
-  const num = parseInt(full, 16);
-  const r = ((num >> 16) & 255) / 255;
-  const g = ((num >> 8) & 255) / 255;
-  const b = (num & 255) / 255;
-
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const l = (max + min) / 2;
-  let h = 0;
-  let s = 0;
-
-  if (max !== min) {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    switch (max) {
-      case r:
-        h = (g - b) / d + (g < b ? 6 : 0);
-        break;
-      case g:
-        h = (b - r) / d + 2;
-        break;
-      default:
-        h = (r - g) / d + 4;
-    }
-    h /= 6;
-  }
-
-  return { h: h * 360, s, l };
-}
-
-/**
- * Filtro CSS que tinge o PNG azul do baú com a cor do tema da seção,
- * preservando o sombreamento (hue-rotate + saturate + brightness).
- */
-function chestTintFilter(targetHex: string): string {
-  // Azul original do baú (blue-500 #3b82f6)
-  const source = hexToHsl('#3b82f6');
-  const target = hexToHsl(targetHex);
-
-  const hue = target.h - source.h;
-  const sat = source.s > 0 ? target.s / source.s : 1;
-  const light = source.l > 0 ? target.l / source.l : 1;
-
-  return `hue-rotate(${hue.toFixed(1)}deg) saturate(${sat.toFixed(3)}) brightness(${light.toFixed(3)})`;
-}
+import type { LucideIcon } from 'lucide-react';
+import {
+  Braces,
+  Check,
+  Circle,
+  Code2,
+  Database,
+  GitBranch,
+  Layers3,
+  LockKeyhole,
+  Network,
+  Route,
+  ShieldCheck,
+  Sparkles,
+  Wrench,
+} from 'lucide-react';
+import { cn } from '@/lib/cn';
+import type {
+  KnowledgeMapEdge,
+  KnowledgeMapNode,
+  KnowledgeNodeType,
+  KnowledgeProgressStatus,
+  KnowledgeRelation,
+} from '@/lib/learning/types';
 
 interface TrailMapProps {
-  activeLanguage: string;
-  allLevels: TrailLevel[];
-  attempts: Record<string, boolean>;
-  isLevelUnlocked: (levelIndex: number) => boolean;
-  onLevelClick: (level: TrailLevel, unlocked: boolean) => void;
-  onCheckpointClick: (sectionNumber: number) => void;
+  nodes: KnowledgeMapNode[];
+  edges: KnowledgeMapEdge[];
+  selectedNodeId: string;
+  activePathNodeIds: string[];
+  onSelectNode: (nodeId: string) => void;
 }
 
-interface UnitBlock {
-  unitNumber: number;
-  levels: TrailLevel[];
-  theme: ReturnType<typeof getSectionTheme>;
-  height: number;
-  checkpointTop: number;
+const NODE_WIDTH = 176;
+const NODE_HEIGHT = 104;
+const GRAPH_PADDING = 72;
+
+const TYPE_ICON: Record<KnowledgeNodeType, LucideIcon> = {
+  FOUNDATION: Layers3,
+  LANGUAGE: Braces,
+  CONCEPT: Code2,
+  FRAMEWORK: Network,
+  LIBRARY: Layers3,
+  TOOL: Wrench,
+  DATABASE: Database,
+  ARCHITECTURE: GitBranch,
+  PROJECT: Route,
+  CHALLENGE: ShieldCheck,
+};
+
+const STATUS_LABEL: Record<KnowledgeProgressStatus, string> = {
+  NOT_STARTED: 'Requisito pendente',
+  AVAILABLE: 'Disponível',
+  RECOMMENDED: 'Recomendado',
+  IN_PROGRESS: 'Em andamento',
+  COMPLETED: 'Concluído',
+  MASTERED: 'Dominado',
+};
+
+const RELATION_STYLE: Record<KnowledgeRelation, { stroke: string; dash?: string }> = {
+  REQUIRED: { stroke: '#64748b' },
+  RECOMMENDED: { stroke: '#60a5fa', dash: '7 7' },
+  RELATED: { stroke: '#94a3b8', dash: '3 8' },
+  BUILDS_ON: { stroke: '#8b5cf6' },
+  COMBINES: { stroke: '#14b8a6' },
+};
+
+function StatusIcon({ status }: { status: KnowledgeProgressStatus }) {
+  if (status === 'MASTERED') return <Sparkles className="h-4 w-4" aria-hidden="true" />;
+  if (status === 'COMPLETED') return <Check className="h-4 w-4" aria-hidden="true" />;
+  if (status === 'NOT_STARTED') {
+    return <LockKeyhole className="h-4 w-4" aria-hidden="true" />;
+  }
+  return <Circle className="h-3.5 w-3.5 fill-current" aria-hidden="true" />;
 }
 
-function LessonStars({
-  level,
-  attempts,
+function getNodeClasses(status: KnowledgeProgressStatus, selected: boolean) {
+  return cn(
+    'dd-focus-ring group absolute flex flex-col rounded-2xl border bg-dd-card p-3 text-left shadow-sm transition duration-200',
+    'hover:-translate-y-0.5 hover:shadow-lg motion-reduce:hover:translate-y-0',
+    status === 'NOT_STARTED' && 'border-dd-border text-dd-muted opacity-80',
+    status === 'AVAILABLE' && 'border-dd-border hover:border-blue-400/70',
+    status === 'RECOMMENDED' &&
+      'border-blue-500/70 bg-blue-500/[0.06] shadow-[0_0_0_1px_rgba(59,130,246,0.08)]',
+    status === 'IN_PROGRESS' && 'border-amber-500/70 bg-amber-500/[0.06]',
+    status === 'COMPLETED' && 'border-emerald-500/60 bg-emerald-500/[0.05]',
+    status === 'MASTERED' && 'border-violet-500/70 bg-violet-500/[0.07]',
+    selected && 'ring-2 ring-blue-500 ring-offset-2 ring-offset-dd-bg'
+  );
+}
+
+function KnowledgeNodeCard({
+  node,
+  selected,
+  onSelect,
+  className,
+  style,
 }: {
-  level?: TrailLevel;
-  attempts: Record<string, boolean>;
+  node: KnowledgeMapNode;
+  selected: boolean;
+  onSelect: () => void;
+  className?: string;
+  style?: React.CSSProperties;
 }) {
-  const count = level ? Math.min(3, Math.max(1, level.questions.length)) : 3;
+  const Icon = TYPE_ICON[node.type];
 
   return (
-    <div
-      aria-label="Progresso da unidade"
-      className="mb-1.5 flex h-6 items-end justify-center gap-1"
+    <button
+      type="button"
+      data-testid={`knowledge-node-${node.slug}`}
+      aria-label={`${node.title}. ${STATUS_LABEL[node.status]}`}
+      aria-pressed={selected}
+      onClick={onSelect}
+      className={cn(getNodeClasses(node.status, selected), className)}
+      style={style}
     >
-      {Array.from({ length: count }).map((_, index) => {
-        const earned = level ? attempts[level.questions[index]?.id] === true : false;
-        const middle = index === 1;
+      <div className="flex items-start justify-between gap-2">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+          <Icon className="h-4.5 w-4.5" aria-hidden="true" />
+        </span>
+        <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.1em] text-dd-muted">
+          <StatusIcon status={node.status} />
+          {STATUS_LABEL[node.status]}
+        </span>
+      </div>
 
-        return (
-          <Star
-            key={index}
-            aria-hidden="true"
-            className={`${
-              middle ? 'h-5 w-5 -translate-y-1' : 'h-4 w-4'
-            } ${earned ? 'fill-[#ffc800] text-[#ffc800]' : 'fill-[#4b5563] text-[#4b5563]'}`}
-          />
-        );
-      })}
-    </div>
+      <span className="mt-2 line-clamp-2 text-sm font-black leading-tight text-dd-text">
+        {node.title}
+      </span>
+      <span className="mt-auto flex items-center justify-between pt-2 text-[10px] font-semibold text-dd-muted">
+        <span>{node.category}</span>
+        <span aria-label={`Dificuldade ${node.difficulty} de 5`}>{node.difficulty}/5</span>
+      </span>
+    </button>
   );
 }
 
 export function TrailMap({
-  activeLanguage,
-  allLevels,
-  attempts,
-  isLevelUnlocked,
-  onLevelClick,
-  onCheckpointClick,
+  nodes,
+  edges,
+  selectedNodeId,
+  activePathNodeIds,
+  onSelectNode,
 }: TrailMapProps) {
-  const [rewardModal, setRewardModal] = useState<{
-    open: boolean;
-    title: string;
-    description: string;
-    xp: number;
-    unlocked: boolean;
-    theme: ReturnType<typeof getSectionTheme>;
-  }>({
-    open: false,
-    title: '',
-    description: '',
-    xp: 0,
-    unlocked: false,
-    theme: getSectionTheme(1),
-  });
-
-  // Agrupa TODAS as unidades por seção, em ordem crescente — o mapa empilha
-  // cada unidade descendo a página (estilo Duolingo), cada uma com sua linha
-  // divisória, nós, robôs, baú e checkpoint.
-  const units = useMemo<UnitBlock[]>(() => {
-    const groups = new Map<number, TrailLevel[]>();
-    for (const level of allLevels) {
-      const list = groups.get(level.unitNumber) ?? [];
-      list.push(level);
-      groups.set(level.unitNumber, list);
-    }
-
-    return [...groups.entries()]
-      .sort((a, b) => a[0] - b[0])
-      .map(([unitNumber, unitLevels]) => {
-        const levelCount = unitLevels.length;
-        const checkpointTop =
-          FIRST_LEVEL_TOP + Math.max(0, levelCount - 1) * LEVEL_SPACING + CHECKPOINT_GAP;
-        const height = checkpointTop + CHECKPOINT_BTN_H + UNIT_BOTTOM_PAD;
-        return {
-          unitNumber,
-          levels: unitLevels,
-          theme: getSectionTheme(unitNumber),
-          height,
-          checkpointTop,
-        };
-      });
-  }, [allLevels]);
-
-  const globalIndex = (level: TrailLevel) =>
-    allLevels.findIndex((candidate) => candidate.levelNumber === level.levelNumber);
-
-  const isLevelAccessible = (level: TrailLevel) => {
-    const idx = globalIndex(level);
-    const completed = level.questions.every((q) => attempts[q.id] === true);
-    return isLevelUnlocked(idx) || completed;
-  };
-
-  const handleOpenChestReward = (
-    xpAmount: number,
-    unlocked: boolean,
-    unitTheme: ReturnType<typeof getSectionTheme>
-  ) => {
-    if (unlocked) {
-      setRewardModal({
-        open: true,
-        title: 'Baú de Recompensa Resgatado!',
-        description:
-          'Parabéns pelo seu progresso! Você abriu o baú da trilha e garantiu um bônus especial de aprendizado.',
-        xp: xpAmount,
-        unlocked: true,
-        theme: unitTheme,
-      });
-    } else {
-      setRewardModal({
-        open: true,
-        title: 'Baú Bloqueado',
-        description:
-          'Complete as lições anteriores da trilha para desbloquear e abrir este baú de bônus!',
-        xp: xpAmount,
-        unlocked: false,
-        theme: unitTheme,
-      });
-    }
-  };
-
-  const firstUnitNumber = units[0]?.unitNumber;
+  const nodesById = new Map(nodes.map((node) => [node.id, node]));
+  const pathNodeIds = new Set(activePathNodeIds);
+  const width = Math.max(960, ...nodes.map((node) => node.position.x + NODE_WIDTH + GRAPH_PADDING));
+  const height = Math.max(
+    700,
+    ...nodes.map((node) => node.position.y + NODE_HEIGHT + GRAPH_PADDING)
+  );
 
   return (
-    <div data-testid="trail-map" className="relative mx-auto w-full max-w-[680px] px-2 sm:px-4">
-      {units.map((unit) => {
-        const { unitNumber, theme, levels, height, checkpointTop } = unit;
-        const levelCount = levels.length;
-        const checkpointId = `${activeLanguage.toLowerCase()}-u${unitNumber}-checkpoint`;
-        const checkpointCompleted = attempts[checkpointId] === true;
-        const lastLevel = levels[levelCount - 1];
-        const lastLevelTop = checkpointTop - CHECKPOINT_GAP;
-        const lastLevelAccessible = lastLevel ? isLevelAccessible(lastLevel) : false;
-        const secondLevel = levels[1];
-        const chestUnlocked = Boolean(
-          secondLevel && secondLevel.questions.every((q) => attempts[q.id] === true)
-        );
-        const chestTop = Math.min(FIRST_LEVEL_TOP + LEVEL_SPACING + 60, checkpointTop - 140);
+    <section aria-labelledby="knowledge-map-title">
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-500">
+            Exploração livre
+          </p>
+          <h2 id="knowledge-map-title" className="mt-1 text-xl font-black text-dd-text">
+            Mapa de Conhecimento
+          </h2>
+        </div>
+        <div className="flex flex-wrap gap-3 text-[11px] font-semibold text-dd-muted">
+          <span className="flex items-center gap-1.5">
+            <span className="h-0.5 w-6 bg-slate-500" /> Obrigatório
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-6 border-t-2 border-dashed border-blue-400" /> Recomendado
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-0.5 w-6 bg-violet-500" /> Aprofunda
+          </span>
+        </div>
+      </div>
 
-        return (
-          <div
-            key={unitNumber}
-            id={`trail-section-${unitNumber}`}
-            className="relative"
-            style={{ height }}
+      <div className="space-y-3 md:hidden" data-testid="knowledge-map-mobile-list">
+        {nodes.map((node) => (
+          <KnowledgeNodeCard
+            key={node.id}
+            node={node}
+            selected={selectedNodeId === node.id}
+            onSelect={() => onSelectNode(node.id)}
+            className="relative min-h-[112px] w-full"
+          />
+        ))}
+      </div>
+
+      <div className="hidden overflow-x-auto rounded-3xl border border-dd-border bg-dd-surface/50 md:block">
+        <div
+          className="relative bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.07),transparent_58%)]"
+          style={{ width, height }}
+          data-testid="knowledge-map-graph"
+        >
+          <svg
+            className="pointer-events-none absolute inset-0 h-full w-full"
+            viewBox={`0 0 ${width} ${height}`}
+            role="img"
+            aria-label="Conexões entre conhecimentos"
           >
-            {/* Linha divisória com o texto da unidade */}
-            <div className="pointer-events-none absolute left-0 right-0 top-0 z-[1] flex items-center gap-3">
-              <span aria-hidden="true" className="h-px flex-1 bg-dd-border" />
-              <span className="shrink-0 text-[10px] font-black uppercase tracking-[0.14em] text-dd-text sm:text-xs">
-                {levels[0]?.unitTitle}
-              </span>
-              <span aria-hidden="true" className="h-px flex-1 bg-dd-border" />
-            </div>
+            <defs>
+              <marker
+                id="knowledge-arrow"
+                viewBox="0 0 10 10"
+                refX="8"
+                refY="5"
+                markerWidth="5"
+                markerHeight="5"
+                orient="auto-start-reverse"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke" />
+              </marker>
+            </defs>
+            {edges.map((edge) => {
+              const source = nodesById.get(edge.sourceNodeId);
+              const target = nodesById.get(edge.targetNodeId);
+              if (!source || !target) return null;
 
-            {/* Robot Mascot 1 (Top Right) */}
-            <div
-              data-testid="trail-robot"
-              className="pointer-events-none absolute right-[4%] top-[40px] z-[3] hidden h-[140px] w-[135px] sm:block"
-            >
-              <Image
-                src="/assets/trails/blue-devdeck-robot.png"
-                alt="Robô mascote digitando"
-                fill
-                sizes="135px"
-                className="object-contain drop-shadow-md"
-                priority={unitNumber === firstUnitNumber}
-              />
-            </div>
-
-            {/* Robot Mascot 2 (Middle Left - Gaming/Typing pose) */}
-            <div
-              data-testid="trail-robot-gaming"
-              className="pointer-events-none absolute left-[4%] top-[42%] z-[3] hidden h-[135px] w-[135px] sm:block"
-            >
-              <Image
-                src="/assets/trails/blue-devdeck-robot-gaming.png"
-                alt="Robô mascote com headset"
-                fill
-                sizes="135px"
-                className="object-contain drop-shadow-md"
-              />
-            </div>
-
-            {/* Nós de nível + passos */}
-            {levels.map((level, i) => {
-              const top = FIRST_LEVEL_TOP + i * LEVEL_SPACING;
-              const isFirstTrailLevel = unitNumber === firstUnitNumber && i === 0;
-              const accessible = isLevelAccessible(level);
-              const completed = level.questions.every((q) => attempts[q.id] === true);
-              const started = level.questions.some((q) =>
-                Object.prototype.hasOwnProperty.call(attempts, q.id)
-              );
-              const nextLevel = levels[i + 1];
-              const nextAccessible = nextLevel ? isLevelAccessible(nextLevel) : false;
-              const leftSide = i % 2 === 0;
+              const relationStyle = RELATION_STYLE[edge.relation];
+              const highlighted =
+                pathNodeIds.has(edge.sourceNodeId) && pathNodeIds.has(edge.targetNodeId);
+              const startX = source.position.x + NODE_WIDTH;
+              const startY = source.position.y + NODE_HEIGHT / 2;
+              const endX = target.position.x;
+              const endY = target.position.y + NODE_HEIGHT / 2;
+              const curve = Math.max(36, Math.abs(endX - startX) * 0.42);
 
               return (
-                <Fragment key={level.levelNumber}>
-                  {/* Nó de nível */}
-                  <div
-                    id={`trail-level-${level.levelNumber}`}
-                    className="absolute z-10 flex -translate-x-1/2 flex-col items-center text-center"
-                    style={{ left: '50%', top }}
-                  >
-                    {/* Popup "PULAR PRA CÁ" no primeiro nó ainda não iniciado */}
-                    {i === 0 && !started && (
-                      <div
-                        className="pointer-events-none absolute -top-9 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-lg border border-dd-border bg-dd-surface px-2.5 py-1.5 text-[10px] font-bold leading-none shadow-md"
-                        style={{ color: theme.primaryHex }}
-                      >
-                        PULAR PRA CÁ?
-                        <span
-                          aria-hidden="true"
-                          className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-b border-r border-dd-border bg-dd-surface"
-                        />
-                      </div>
-                    )}
-                    <LessonStars level={level} attempts={attempts} />
-                    <button
-                      type="button"
-                      disabled={!accessible}
-                      onClick={() => onLevelClick(level, accessible)}
-                      aria-label={`Seção ${unitNumber}, unidade ${i + 1}: ${level.title}`}
-                      className={`group dd-focus-ring relative flex h-[76px] w-[76px] items-center justify-center rounded-[22px] shadow-md transition-all duration-150 enabled:cursor-pointer enabled:hover:-translate-y-0.5 enabled:active:translate-y-[4px] ${
-                        accessible
-                          ? theme.nodeButtonClass
-                          : 'border-b-[6px] border-[#202b33] bg-[#37464f] text-[#77858d]'
-                      }`}
-                    >
-                      {i === 0 && isFirstTrailLevel ? (
-                        started ? (
-                          <Check className="h-7 w-7" strokeWidth={3.2} />
-                        ) : (
-                          <FastForward className="h-7 w-7" fill="currentColor" strokeWidth={0} />
-                        )
-                      ) : completed ? (
-                        <Check className="h-7 w-7" strokeWidth={3.2} />
-                      ) : !accessible ? (
-                        <Lock className="h-6 w-6" strokeWidth={2.6} />
-                      ) : (
-                        <span className="font-mono text-base font-black tracking-tight text-white">
-                          {`{${i + 1}}`}
-                        </span>
-                      )}
-                    </button>
-                  </div>
-
-                  {/* Passos decorativos até o próximo nível */}
-                  {nextLevel && (
-                    <>
-                      {/* O baú é um nó do caminho: ocupa o 1º espaço de passo após a 2ª unidade */}
-                      {levelCount >= 3 && i === 1 ? (
-                        <div
-                          className="absolute z-10 flex -translate-x-1/2 items-center justify-center"
-                          style={{ left: leftSide ? '28%' : '72%', top: top + 95 }}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => handleOpenChestReward(150, chestUnlocked, theme)}
-                            aria-label="Baú da trilha"
-                            className="dd-focus-ring group relative flex h-[80px] w-[80px] cursor-pointer items-center justify-center transition-transform duration-150 hover:-translate-y-1 active:scale-95"
-                          >
-                            <Image
-                              src={
-                                chestUnlocked
-                                  ? '/assets/trails/trail-chest-open.png'
-                                  : '/assets/trails/trail-chest.png'
-                              }
-                              alt="Baú da trilha"
-                              width={78}
-                              height={78}
-                              className="relative z-10 h-[78px] w-[78px] object-contain transition-transform group-hover:scale-105"
-                              style={{ filter: chestTintFilter(theme.primaryHex) }}
-                            />
-                          </button>
-                        </div>
-                      ) : (
-                        <div
-                          className="absolute z-10 flex -translate-x-1/2 items-center justify-center"
-                          style={{ left: leftSide ? '28%' : '72%', top: top + 95 }}
-                        >
-                          <button
-                            type="button"
-                            disabled={!nextAccessible}
-                            onClick={() => onLevelClick(nextLevel, nextAccessible)}
-                            aria-label={`Passo ${i + 1} de ${nextLevel.title}`}
-                            className={`flex h-[56px] w-[56px] items-center justify-center rounded-full shadow-md transition-all ${
-                              nextAccessible
-                                ? `cursor-pointer hover:-translate-y-0.5 active:translate-y-[3px] ${theme.stepButtonClass}`
-                                : 'border-b-[5px] border-[#202b33] bg-[#37464f] text-[#77858d]'
-                            }`}
-                          >
-                            {nextAccessible ? (
-                              <Check className="h-6.5 w-6.5" strokeWidth={3.5} />
-                            ) : (
-                              <Lock className="h-5 w-5" strokeWidth={2.6} />
-                            )}
-                          </button>
-                        </div>
-                      )}
-                      <div
-                        className="absolute z-10 flex -translate-x-1/2 items-center justify-center"
-                        style={{ left: leftSide ? '72%' : '28%', top: top + 165 }}
-                      >
-                        <button
-                          type="button"
-                          disabled={!nextAccessible}
-                          onClick={() => onLevelClick(nextLevel, nextAccessible)}
-                          aria-label={`Passo ${i + 2} de ${nextLevel.title}`}
-                          className={`flex h-[56px] w-[56px] items-center justify-center rounded-full shadow-md transition-all ${
-                            nextAccessible
-                              ? `cursor-pointer hover:-translate-y-0.5 active:translate-y-[3px] ${theme.stepButtonClass}`
-                              : 'border-b-[5px] border-[#202b33] bg-[#37464f] text-[#77858d]'
-                          }`}
-                        >
-                          {nextAccessible ? (
-                            <Check className="h-6.5 w-6.5" strokeWidth={3.5} />
-                          ) : (
-                            <Lock className="h-5 w-5" strokeWidth={2.6} />
-                          )}
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </Fragment>
+                <path
+                  key={edge.id}
+                  data-relation={edge.relation}
+                  d={`M ${startX} ${startY} C ${startX + curve} ${startY}, ${endX - curve} ${endY}, ${endX} ${endY}`}
+                  fill="none"
+                  stroke={highlighted ? relationStyle.stroke : '#64748b'}
+                  strokeWidth={highlighted ? 3 : 1.5}
+                  strokeDasharray={relationStyle.dash}
+                  opacity={highlighted ? 0.92 : 0.32}
+                  markerEnd="url(#knowledge-arrow)"
+                />
               );
             })}
+          </svg>
 
-            {/* Baú (fallback para unidades com menos de 3 níveis — sem sobrepor nenhum nó) */}
-            {levelCount < 3 && (
-              <div
-                className="absolute z-10 flex -translate-x-1/2 items-center justify-center"
-                style={{ left: '74%', top: chestTop }}
-              >
-                <button
-                  type="button"
-                  onClick={() => handleOpenChestReward(150, chestUnlocked, theme)}
-                  aria-label="Baú da trilha"
-                  className="dd-focus-ring group relative flex h-[80px] w-[80px] cursor-pointer items-center justify-center transition-transform duration-150 hover:-translate-y-1 active:scale-95"
-                >
-                  <Image
-                    src={
-                      chestUnlocked
-                        ? '/assets/trails/trail-chest-open.png'
-                        : '/assets/trails/trail-chest.png'
-                    }
-                    alt="Baú da trilha"
-                    width={78}
-                    height={78}
-                    className="relative z-10 h-[78px] w-[78px] object-contain transition-transform group-hover:scale-105"
-                    style={{ filter: chestTintFilter(theme.primaryHex) }}
-                  />
-                </button>
-              </div>
-            )}
-
-            {/* Passo circular depois do penúltimo nó (entre o último nível e o checkpoint) */}
-            {levelCount > 1 && lastLevel && (
-              <div
-                className="absolute z-10 flex -translate-x-1/2 items-center justify-center"
-                style={{ left: (levelCount - 1) % 2 === 0 ? '28%' : '72%', top: lastLevelTop + 95 }}
-              >
-                <button
-                  type="button"
-                  disabled={!lastLevelAccessible}
-                  onClick={() => onLevelClick(lastLevel, lastLevelAccessible)}
-                  aria-label={`Passo final de ${lastLevel.title}`}
-                  className={`flex h-[56px] w-[56px] items-center justify-center rounded-full shadow-md transition-all ${
-                    lastLevelAccessible
-                      ? `cursor-pointer hover:-translate-y-0.5 active:translate-y-[3px] ${theme.stepButtonClass}`
-                      : 'border-b-[5px] border-[#202b33] bg-[#37464f] text-[#77858d]'
-                  }`}
-                >
-                  {lastLevelAccessible ? (
-                    <Check className="h-6.5 w-6.5" strokeWidth={3.5} />
-                  ) : (
-                    <Lock className="h-5 w-5" strokeWidth={2.6} />
-                  )}
-                </button>
-              </div>
-            )}
-
-            {/* Checkpoint da unidade */}
-            <div
-              className="absolute z-10 flex -translate-x-1/2 flex-col items-center text-center"
-              style={{ left: '50%', top: checkpointTop }}
-            >
-              <LessonStars level={lastLevel} attempts={attempts} />
-              <button
-                type="button"
-                onClick={() => onCheckpointClick(unitNumber)}
-                aria-label={`Checkpoint da seção ${unitNumber}`}
-                className={`dd-focus-ring relative flex h-[78px] w-[78px] cursor-pointer items-center justify-center rounded-[22px] shadow-md transition-all duration-150 hover:-translate-y-0.5 active:translate-y-[4px] ${
-                  checkpointCompleted
-                    ? theme.checkpointButtonClass
-                    : 'border-b-[6px] border-[#202b33] bg-[#37464f] text-[#77858d]'
-                }`}
-              >
-                <Trophy className="h-8 w-8" strokeWidth={2.4} />
-              </button>
-              <p className="mt-2 text-xs font-black uppercase tracking-wide text-dd-text">
-                Desafio
-              </p>
-              <p className="mt-0.5 text-[11px] font-bold text-dd-muted">Checkpoint de Código</p>
-            </div>
-          </div>
-        );
-      })}
-
-      {/* REWARD MODAL */}
-      {rewardModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="relative w-full max-w-sm rounded-3xl border border-dd-border bg-dd-surface p-6 text-center shadow-2xl">
-            <button
-              type="button"
-              onClick={() => setRewardModal((prev) => ({ ...prev, open: false }))}
-              aria-label="Fechar modal de recompensa"
-              className="absolute right-4 top-4 rounded-full p-1 text-dd-muted hover:bg-dd-border/40 hover:text-dd-text transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
-
-            <div
-              className="mx-auto mb-4 flex h-20 w-20 items-center justify-center"
-              style={{ filter: chestTintFilter(rewardModal.theme.primaryHex) }}
-            >
-              <Image
-                src={
-                  rewardModal.unlocked
-                    ? '/assets/trails/trail-chest-open.png'
-                    : '/assets/trails/trail-chest.png'
-                }
-                alt="Baú de Recompensa"
-                width={80}
-                height={80}
-                className="h-20 w-20 object-contain drop-shadow-xl animate-bounce"
-              />
-            </div>
-
-            <h3 className="text-lg font-black text-dd-text">{rewardModal.title}</h3>
-            <p className="mt-2 text-xs font-semibold text-dd-muted leading-relaxed">
-              {rewardModal.description}
-            </p>
-
-            {rewardModal.unlocked && (
-              <div className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-yellow-400/15 border border-yellow-400/30 px-4 py-2 text-sm font-black text-yellow-400">
-                <Sparkles className="h-4 w-4" />+{rewardModal.xp} XP Bônus
-              </div>
-            )}
-
-            <button
-              type="button"
-              onClick={() => setRewardModal((prev) => ({ ...prev, open: false }))}
-              className={`mt-6 w-full cursor-pointer rounded-xl py-3 text-xs font-black uppercase tracking-wide text-white transition-all hover:brightness-110 active:translate-y-1 active:border-b-0 ${rewardModal.theme.nodeButtonClass}`}
-            >
-              {rewardModal.unlocked ? 'Pegar Recompensa' : 'Entendido'}
-            </button>
-          </div>
+          {nodes.map((node) => (
+            <KnowledgeNodeCard
+              key={node.id}
+              node={node}
+              selected={selectedNodeId === node.id}
+              onSelect={() => onSelectNode(node.id)}
+              style={{
+                left: node.position.x,
+                top: node.position.y,
+                width: NODE_WIDTH,
+                minHeight: NODE_HEIGHT,
+              }}
+            />
+          ))}
         </div>
-      )}
-    </div>
+      </div>
+    </section>
   );
 }
